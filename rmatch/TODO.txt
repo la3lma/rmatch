@@ -3,6 +3,8 @@ o Do everything in http://maven.apache.org/guides/mini/guide-central-repository-
   that is necessary to get released through maven central, then decide that it isn't worth it
   and instead set up a microrepo at github, at least for now.
 
+o Or perhaps use sonatype's stuff. https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-1a.TermsofServiceRepository%3ACentralRepositoryTermsofServiceforSubmitters
+
 o Tag a release.
 
 o Write a minimal set of documentation for that release.
