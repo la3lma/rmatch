@@ -1,6 +1,7 @@
 
 o Do everything in http://maven.apache.org/guides/mini/guide-central-repository-upload.html 
-  that is necessary to get released through maven central.
+  that is necessary to get released through maven central, then decide that it isn't worth it
+  and instead set up a microrepo at github, at least for now.
 
 o Tag a release.
 
