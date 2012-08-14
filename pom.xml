@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>no.rmz</groupId>
+  <artifactId>regexpfilter</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <packaging>pom</packaging>
+
+  <name>Umbrella project for the regex matcher subprojects</name>
+
+  <description>Payment</description>
+  <organization>
+    <name>Rmz</name>
+    <url>http://www.rmz.no/</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <id>rmz</id>
+      <name>Bjørn Remseth</name>
+      <email>rmz@rmz.no</email>
+    </developer>
+  </developers>
+
+  <properties>
+    <junit.version>4.10</junit.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <netbeans.hint.deploy.server>Tomcat70</netbeans.hint.deploy.server>
+  </properties>
+
+  <modules>
+    <module>rmatch</module>
+    <module>rmatch-tester</module>
+  </modules>
+  <scm>
+    <connection>scm:git:git@github.com:comoyo/payment.git</connection>
+    <url>scm:git:git@github.com:la3lma/regexpfilter.git</url>
+    <developerConnection>scm:git:git@github.com:comoyo/payment.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
+
+
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>no.rmz</groupId>
+        <artifactId>rmatch</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>no.rmz</groupId>
+        <artifactId>rmatch-tester</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+</project>

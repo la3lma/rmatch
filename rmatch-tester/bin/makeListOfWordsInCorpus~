@@ -1,0 +1,2 @@
+#!/bin/sh
+awk '{for (i = 1; i <= NF; i++) printf("%s\n", $i)}' < corpus/wuthr10.txt |  sed "s/'/ /g"  | sed 's/[["#,.*+_()!?=<>@%~;:]//g' | sort | uniq > corpus/words-in-wuthering-heigths.txt

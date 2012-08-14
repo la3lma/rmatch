@@ -1,0 +1,6 @@
+# TODO
+#  o Plot title and legend for left axis (megabytes)
+#  o Add second plot for time in millis with legend on right edge.
+#  o Automate the generation of the plots so that the build process can generate them
+#    during ordinary builds, using pdf (preferably) to be included in LaTeX.
+# something like this http://gnuplot.sourceforge.net/demo/multiaxis.html
