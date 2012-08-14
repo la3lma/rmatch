@@ -1,0 +1,8 @@
+
+o Do everything in http://maven.apache.org/guides/mini/guide-central-repository-upload.html 
+  that is necessary to get released through maven central.
+
+o Tag a release.
+
+o Write a minimal set of documentation for that release.
+
