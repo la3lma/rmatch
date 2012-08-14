@@ -29,6 +29,18 @@
     </license>
   </licenses>
 
+
+  <distributionManagement>
+    <repository>
+      <id>repo</id>
+      <url>https://github.com/la3lma/rmatch/tree/master/rmatch/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshot-repo</id>
+      <url>https://github.com/la3lma/rmatch/tree/master/rmatch/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <dependencies>
 
     <dependency>
