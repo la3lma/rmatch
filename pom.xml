@@ -8,7 +8,7 @@
 
   <packaging>pom</packaging>
 
-  <name>Umbrella project for the regex matcher subprojects</name>
+  <name>Umbrella project for the regex matcher subprojects.</name>
 
   <description>Payment</description>
   <organization>
