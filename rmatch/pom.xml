@@ -4,7 +4,7 @@
 
   <groupId>no.rmz</groupId>
   <artifactId>rmatch</artifactId>
-  <version>1.5-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>rmatch</name>
@@ -36,15 +36,23 @@
     <version>7</version>
   </parent>
 
-
   <distributionManagement>
+
+<!--
+    <repository>
+      <id>nexus-releases</id>
+      <name>Nexus Release Repository</name>
+      <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+-->
     <repository>
       <id>repo</id>
-      <url>https://github.com/la3lma/rmatch/tree/master/rmatch/releases</url>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
+
     <snapshotRepository>
       <id>snapshot-repo</id>
-      <url>https://github.com/la3lma/rmatch/tree/master/rmatch/snapshots</url>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
 
