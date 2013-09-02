@@ -200,7 +200,7 @@ public class SequenceLoaderTest {
     /**
      * The maximum amount of memory permitted used.
      */
-    private static final int MAX_MEMORY_TO_USE_IN_MB = 30;
+    private static final int MAX_MEMORY_TO_USE_IN_MB = 300;
 
     /**
      * Check with only a very few regexps.
@@ -244,7 +244,8 @@ public class SequenceLoaderTest {
         assertTrue(result.getNoOfMatches()
                 == NO_OF_OBSERVED_MATCHES_IN_SOME_REGEXP_TEST);
         assertTrue(result.getDuration() < MAX_TIME_TO_USE_IN_MILLIS);
-        assertTrue(result.getMaxNoOfMbsUsed() < MAX_MEMORY_TO_USE_IN_MB);
+        final long maxNoOfMbsUsed = result.getMaxNoOfMbsUsed();
+        assertTrue( maxNoOfMbsUsed < MAX_MEMORY_TO_USE_IN_MB);
 
         CSVAppender.append(
                 MEASUREMENT_RESULTS_FROM_SOME_WORDS_TESTS,
@@ -256,7 +257,7 @@ public class SequenceLoaderTest {
     /**
      * Test with a regexp for just about every word occuring in
      * the corpus.
-     * 
+     *
      * @throws RegexpParserExecption when syntax errors occur.
      */
     @Ignore
