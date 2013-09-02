@@ -8,7 +8,7 @@
 SHELLHOME=$(dirname "$0")
 TESTHOME=$(dirname "$SHELLHOME")
 
-VERSION_UNDER_TEST="1.0"
+VERSION_UNDER_TEST="1.1-SNAPSHOT"
 
 # Find the jarfile to use
 JARFILENAME=rmatch-tester-$VERSION_UNDER_TEST.jar
