@@ -83,6 +83,16 @@ public final class MatchSetImpl implements MatchSet {
         currentNode = startNode;
         start = startIndex;
         id = MY_COUNTER.inc();
+
+        // XXX This line represents the most egregious
+        //     bug in the whole regexp package, since it
+        //     incurs a cost in both runtime and used memory
+        //     directlyu proportional to the number of
+        //     expressions (n)the matcher matches for.  For a
+        //     text that is m characters long, this  in turns
+        //     adds a factor O(n*m) to the resource use of the
+        //     algorithm.  Clearly not logarithmic in the number
+        //     of expressions, and thus a showstopper.
         addMatches(startNode);
     }
 
