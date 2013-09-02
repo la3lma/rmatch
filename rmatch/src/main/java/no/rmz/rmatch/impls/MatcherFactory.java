@@ -26,7 +26,7 @@ import no.rmz.rmatch.interfaces.RegexpFactory;
 
 /**
  * A factory instance that will generate matcher instances that
- * are optimized for the  urrent execution environment.  It's 
+ * are optimized for the  urrent execution environment.  It's
  * all heuristic, but it it ment to represent the best guess, based
  * on the available empirical data as to what willl give the
  * best performance.
@@ -56,7 +56,7 @@ public class MatcherFactory {
 
         final int noOfPartitions;
         if (AVAILABLE_PROCESSORS > 2) {
-            noOfPartitions = AVAILABLE_PROCESSORS / 2;
+            noOfPartitions = AVAILABLE_PROCESSORS ;
         } else {
             noOfPartitions = 1;
         }

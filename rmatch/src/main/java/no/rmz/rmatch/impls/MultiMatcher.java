@@ -49,7 +49,7 @@ public final class MultiMatcher implements Matcher {
      * Pending a good algorithm for determining the number of matchers to use
      * for various hardware configurations, we resort to a constant.
      */
-    public static final int DEFAULT_NO_OF_MATCHERS_FOR_8_CORE_i7_CPU = 4;
+    public static final int DEFAULT_NO_OF_MATCHERS_FOR_8_CORE_i7_CPU = 8;
     /**
      * An array of matchers that are used when matching.
      */
