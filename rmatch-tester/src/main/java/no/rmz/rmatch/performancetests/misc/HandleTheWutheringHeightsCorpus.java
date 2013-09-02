@@ -1,22 +1,18 @@
-package no.rmz.rmatch.performancetests;
+package no.rmz.rmatch.performancetests.misc;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import no.rmz.rmatch.performancetests.utils.FileInhaler;
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
+import no.rmz.rmatch.performancetests.utils.CSVAppender;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
-import no.rmz.rmatch.impls.MultiMatcher;
-import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.RegexpFactory;
-import no.rmz.rmatch.mockedcompiler.CharSequenceCompiler;
-import no.rmz.rmatch.mockedcompiler.MockerCompiler;
 import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.Counters;
+
+import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A test scenario that will match a bunch of regular expressions
@@ -44,29 +40,23 @@ public final class HandleTheWutheringHeightsCorpus {
     }
 
 
+    @Deprecated // Use the method in Benchmark... instead.
     /**
      * Set up the test by inhaling the corpus, enabling the
      * regexpss and running the match.
      * @param filename the location of the corpus.
+     * @throws RegexpParserException when something goes wrong.
      */
-    public static void testACorpus(final String filename) throws RegexpParserException {
-
-        /**
-         * The mocked compilation results.
-         */
-        final HashMap<Regexp, NDFANode> compilationResults =
-                new HashMap<Regexp, NDFANode>();
-
-   
-      
+    public static void testACorpus(final String filename)
+            throws RegexpParserException {
 
 
         final Matcher m = MatcherFactory.newMatcher();
-                
+
         final long timeAtStart = System.currentTimeMillis();
-        
-        LOG.info("Doing the thing for " + filename);
-        
+
+        LOG.log(Level.INFO, "Doing the thing for {0}", filename);
+
         final FileInhaler fh = new FileInhaler(new File(filename));
         final CounterAction wordAction = new CounterAction();
         for (final String word : fh.inhaleAsListOfLines()) {
@@ -104,7 +94,7 @@ public final class HandleTheWutheringHeightsCorpus {
     }
 
 
-    
+
 
     /**
      * The main method.

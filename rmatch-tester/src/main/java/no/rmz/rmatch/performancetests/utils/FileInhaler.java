@@ -1,10 +1,10 @@
-package no.rmz.rmatch.performancetests;
+package no.rmz.rmatch.performancetests.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import no.rmz.rmatch.utils.StringBuffer;
+
 
 /**
  * Inhale a file into some content.
@@ -28,7 +28,7 @@ public final class FileInhaler {
      * Inhale the file into a string.
      * @return the content of the file as a string.
      */
-    public StringBuffer inhaleAsStringBuffer() {
+    public StringSourceBuffer inhaleAsStringBuffer() {
         synchronized (file) {
             if (!file.exists()) {
                 throw new IllegalStateException("Couldn't find file " + file);
@@ -62,7 +62,7 @@ public final class FileInhaler {
                     throw new RuntimeException(ex);
                 }
             }
-            return new StringBuffer(sbuilder.toString());
+            return new StringSourceBuffer(sbuilder.toString());
         }
     }
 

@@ -1,4 +1,4 @@
-package no.rmz.rmatch.performancetests;
+package no.rmz.rmatch.performancetests.utils;
 
 /**
  * Used by the FileInhaler. For each line that is read, a collector instance is

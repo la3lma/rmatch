@@ -87,5 +87,4 @@ public final class CorpusTestResult {
     public long getMaxNoOfMbsUsed() {
         return maxNoOfMbsUsed;
     }
-
 }

@@ -1,5 +1,6 @@
 package no.rmz.rmatch.performancetests;
 
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 import java.util.logging.Logger;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
@@ -22,6 +23,8 @@ import static org.mockito.Matchers.any;
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -129,9 +132,8 @@ public class APlusLoader {
             sb.append(pattern);
         }
         final String bufferString = sb.toString();
-        final no.rmz.rmatch.utils.StringBuffer b =
-                new no.rmz.rmatch.utils
-                .StringBuffer(bufferString);
+        final StringSourceBuffer b =
+                new  StringSourceBuffer(bufferString);
         m.add(aPlusString, action);
 
         m.match(b);

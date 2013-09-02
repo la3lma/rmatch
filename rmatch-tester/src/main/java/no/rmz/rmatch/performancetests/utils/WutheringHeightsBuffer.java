@@ -1,8 +1,9 @@
-package no.rmz.rmatch.performancetests;
+package no.rmz.rmatch.performancetests.utils;
 
-import no.rmz.rmatch.utils.StringBuffer;
-import java.io.File;
 import no.rmz.rmatch.interfaces.Buffer;
+
+import java.io.File;
+
 
 /**
  * A buffer implementation that delivers the full txt from Emily Bronte's novel
@@ -11,7 +12,7 @@ import no.rmz.rmatch.interfaces.Buffer;
 public final class WutheringHeightsBuffer implements Buffer, Cloneable {
 
     /**
-     * The location in the local filesystem, relative to the regexpfilter
+     * The location in the local filesystem, relative to the rmatch
      * project, where the Wuthering Heights text is stored.
      */
     private static final String LOCATION_OF_WUTHERING_HEIGHTS =
@@ -20,15 +21,22 @@ public final class WutheringHeightsBuffer implements Buffer, Cloneable {
      * A StringBuffer instance that holds the entire text from Emily Brontes
      * Wuthering Heights.
      */
-    private final StringBuffer sb;
+    private final StringSourceBuffer sb;
 
     /**
      * Create a new buffer and inhale the content from the file
      * corpus/wuthr10.txt.
      */
     public WutheringHeightsBuffer() {
+        this(LOCATION_OF_WUTHERING_HEIGHTS);
+    }
+
+   /**
+     * Create a new buffer and inhale the content from some file.
+     */
+    public WutheringHeightsBuffer(final String filename) {
         final FileInhaler fileReader =
-                new FileInhaler(new File(LOCATION_OF_WUTHERING_HEIGHTS));
+                new FileInhaler(new File(filename));
         sb = fileReader.inhaleAsStringBuffer();
     }
 

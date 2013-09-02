@@ -1,7 +1,9 @@
 package no.rmz.rmatch.performancetests;
 
 
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 /**

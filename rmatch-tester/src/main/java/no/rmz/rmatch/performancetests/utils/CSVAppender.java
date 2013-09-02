@@ -1,4 +1,4 @@
-package no.rmz.rmatch.performancetests;
+package no.rmz.rmatch.performancetests.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
