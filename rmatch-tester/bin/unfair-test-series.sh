@@ -30,6 +30,7 @@ fi
 DATETIME=$(date "+%Y-%m-%d-%H:%M:%S")
 LOGFILE="${LOGDIR}/logfile-${DATETIME}.csv"
 
+
 # Making sure that we can assume that an empty
 # logfile exists before we start the test run
 if [ -f "$LOGFILE" ] ; then
@@ -44,7 +45,7 @@ fi
 # to each test.
 
 STARTINDEX=1
-STEPSIZE=800
+STEPSIZE=300
 NO_OF_REGEXPS=$(wc -l "$WORDS" | awk '{print $1}')
 
 function secondsSinceEpoch {
@@ -69,9 +70,6 @@ while [  "$currentNoOfRegexps"  -le "$NO_OF_REGEXPS" ] ; do
 
    unfairDuration=$(runTest TestJavaRegexpUnfairly             $currentNoOfRegexps)
    rmatchDuration=$(runTest BenchmarkTheWutheringHeightsCorpus $currentNoOfRegexps)
-#  rmatchDuration=$(runTest MultiJavaRegexpMatchDetector        $currentNoOfRegexps)
-
-
 
    ((runIdx = runIdx + 1))
    echo "   Duration of run $runIdx with $currentnoOfRegexps was unfair=$unfairDuration seconds, rmatch=$rmatchDuration"
@@ -79,3 +77,18 @@ while [  "$currentNoOfRegexps"  -le "$NO_OF_REGEXPS" ] ; do
    ((currentNoOfRegexps = $currentNoOfRegexps + $STEPSIZE))
 done
 
+# Finally make a nice plot of the results.
+PLOTDIR=plots
+
+if [ ! -d "$PLOTDIR" ] ; then 
+   mkdir -p "$PLOTDIR"
+fi
+
+
+PLOTFILE="${PLOTDIR}/results-${DATETIME}.ps"
+echo "Logging gnuplot visualization of test run results in plotfile ${PLOTFILE}"
+if [ -f "${PLOTFILE}" ] ; then 
+    rm "${PLOTFILE}"
+fi
+
+gnuplot -e "logfile='${LOGFILE}'; set terminal postscript" bin/plot-graph.gp > "${PLOTFILE}"

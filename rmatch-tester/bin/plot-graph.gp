@@ -4,12 +4,13 @@
 unset grid
 set xlabel "No of regexps"
 
-logfile="logs/logfile-2013-09-02-13:51:53.csv"
+# logfile="logs/logfile-2013-09-02-13:51:53.csv"
 
 set key left box
 
-clear
-set multiplot layout 3 , 2
+set multiplot layout 3 , 2 title sprintf("Results from %s", logfile)
+
+
 # This works fine
 
 set title "Time to process 'Wuthering Heights'"
