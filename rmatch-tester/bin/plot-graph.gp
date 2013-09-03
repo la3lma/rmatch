@@ -1,12 +1,14 @@
-# set terminal png size 1200,800
-# set output "load.png"
-
 unset grid
 set xlabel "No of regexps"
 
 # logfile="logs/logfile-2013-09-02-13:51:53.csv"
 
 set key left box
+
+# Set the size of the text used on the x and y axis
+set xtics font "Times-Roman, 10" 
+set ytics font "Times-Roman, 10" 
+
 
 set multiplot layout 3 , 2 title sprintf("Results from %s", logfile)
 

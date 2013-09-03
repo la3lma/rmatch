@@ -63,6 +63,23 @@ function runTest {
   echo "$duration"
 }
 
+
+function plotResults {
+    PLOTDIR=plots
+    
+    if [ ! -d "$PLOTDIR" ] ; then 
+	mkdir -p "$PLOTDIR"
+    fi
+     
+    PLOTFILE="${PLOTDIR}/results-${DATETIME}.ps"
+    echo "Logging gnuplot visualization of test run results in plotfile ${PLOTFILE}"
+    if [ -f "${PLOTFILE}" ] ; then 
+	rm "${PLOTFILE}"
+    fi
+    
+    gnuplot -e "logfile='${LOGFILE}'; set terminal postscript landscape color" bin/plot-graph.gp > "${PLOTFILE}"
+}
+
 currentNoOfRegexps=$STARTINDEX
 runIdx=1
 while [  "$currentNoOfRegexps"  -le "$NO_OF_REGEXPS" ] ; do
@@ -75,20 +92,11 @@ while [  "$currentNoOfRegexps"  -le "$NO_OF_REGEXPS" ] ; do
    echo "   Duration of run $runIdx with $currentnoOfRegexps was unfair=$unfairDuration seconds, rmatch=$rmatchDuration"
    echo "$currentNoOfRegexps, $rmatchDuration, $unfairDuration" >> "$LOGFILE"
    ((currentNoOfRegexps = $currentNoOfRegexps + $STEPSIZE))
+
+   # We do this incrementally so that we can observe how a test is
+   # going even if it isn't done.  Also, we want partial results
+   # even if the test fails some ways into the testrun.
+   plotResults
 done
 
-# Finally make a nice plot of the results.
-PLOTDIR=plots
 
-if [ ! -d "$PLOTDIR" ] ; then 
-   mkdir -p "$PLOTDIR"
-fi
-
-
-PLOTFILE="${PLOTDIR}/results-${DATETIME}.ps"
-echo "Logging gnuplot visualization of test run results in plotfile ${PLOTFILE}"
-if [ -f "${PLOTFILE}" ] ; then 
-    rm "${PLOTFILE}"
-fi
-
-gnuplot -e "logfile='${LOGFILE}'; set terminal postscript" bin/plot-graph.gp > "${PLOTFILE}"
