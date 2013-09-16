@@ -88,9 +88,9 @@ public final class MatchSetImpl implements MatchSet {
         //     bug in the whole regexp package, since it
         //     incurs a cost in both runtime and used memory
         //     directlyu proportional to the number of
-        //     expressions (n)the matcher matches for.  For a
-        //     text that is m characters long, this  in turns
-        //     adds a factor O(n*m) to the resource use of the
+        //     expressions (m) the matcher matches for.  For a
+        //     text that is l characters long, this  in turns
+        //     adds a factor O(l*m) to the resource use of the
         //     algorithm.  Clearly not logarithmic in the number
         //     of expressions, and thus a showstopper.
         addMatches(startNode);
@@ -106,7 +106,6 @@ public final class MatchSetImpl implements MatchSet {
         assert (startNode != null);
 
         for (final Regexp r : currentNode.getRegexps()) {
-
             matches.add(startNode.newMatch(this, r));
         }
 
