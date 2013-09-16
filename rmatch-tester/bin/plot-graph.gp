@@ -10,7 +10,7 @@ set xtics font "Times-Roman, 10"
 set ytics font "Times-Roman, 10" 
 
 
-set multiplot layout 3 , 2 title sprintf("Results from %s", logfile)
+# set multiplot layout 3 , 2 title sprintf("Results from %s", logfile)
 
 
 # This works fine
@@ -20,7 +20,10 @@ set ylabel "Seconds"
 plot logfile using 1:2 index 0 title "rmatch" with lines, \
      logfile using 1:3 index 0 title "java regexp" with lines
 
+clear
 plot logfile using 1:2 index 0 title "rmatch" with lines
+
+clear
 plot logfile using 1:3 index 0 title "java regexp" with lines
 
 
@@ -28,11 +31,14 @@ plot logfile using 1:3 index 0 title "java regexp" with lines
 set title "Time spent per regexp."
 set ylabel "Milliseconds"
 
+clear
 plot  logfile using 1:(1000*$2/$1) index 0 title "rmatch" with lines, \
       logfile using 1:(1000*$3/$1) index 0 title "java regexp" with lines
 
+clear
 plot  logfile using 1:(1000*$2/$1) index 0 title "rmatch" with lines
+clear
 plot  logfile using 1:(1000*$3/$1) index 0 title "java regexp" with lines
 
 
-unset multiplot
+#unset multiplot
