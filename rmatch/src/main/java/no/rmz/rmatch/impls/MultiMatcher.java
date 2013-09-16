@@ -45,11 +45,7 @@ public final class MultiMatcher implements Matcher {
      * ambitions.
      */
     private static final int MAX_NO_OF_MATCHERS = 10000;
-    /**
-     * Pending a good algorithm for determining the number of matchers to use
-     * for various hardware configurations, we resort to a constant.
-     */
-    public static final int DEFAULT_NO_OF_MATCHERS_FOR_8_CORE_i7_CPU = 8;
+
     /**
      * An array of matchers that are used when matching.
      */
@@ -91,11 +87,9 @@ public final class MultiMatcher implements Matcher {
      *
      * @return the number of partitions to use
      */
-    @Deprecated
     private static int divineOptimalNumberOfMatchers() {
-        // XXX TBD, but initial experimentation indicates that
-        //     for an 8 core i7, the number is 4.
-        return DEFAULT_NO_OF_MATCHERS_FOR_8_CORE_i7_CPU;
+       final int cores = Runtime.getRuntime().availableProcessors();
+       return cores;
     }
 
     /**
@@ -198,6 +192,10 @@ public final class MultiMatcher implements Matcher {
 
     @Override
     public NodeStorage getNodeStorage() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // XXX This is wrong, since it only returns a subset of the
+        //     nodes the multimatcher is using, but it's better than
+        //     nothing if the objective is just to get a big graph to
+        //     show someone.
+        return matchers[0].getNodeStorage();
     }
 }

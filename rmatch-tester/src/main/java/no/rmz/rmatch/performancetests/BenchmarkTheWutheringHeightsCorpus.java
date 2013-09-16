@@ -3,6 +3,8 @@ package no.rmz.rmatch.performancetests;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
+import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.performancetests.utils.GraphDumper;
 
 /**
  * A test scenario that will match a bunch of regular expressions against the
@@ -29,13 +31,21 @@ public final class BenchmarkTheWutheringHeightsCorpus {
 
         final String[] argx;
         if (argv == null || argv.length == 0) {
-            argx = new String[] {"10000"};
+            argx = new String[] {"200"};
         } else {
             argx = argv;
         }
 
         System.out.println("BenchmarkTheWutheringHeightsCorpus, argx = " + argx);
-        MatcherBenchmarker.testMatcher(MatcherFactory.newMatcher(), argx);
+        final Matcher m = MatcherFactory.newMatcher();
+        MatcherBenchmarker.testMatcher(m, argx);
+
+        // This should normally not be done, since it's slow.  Haven't bothered
+        // to add a switch for it yet.
+        // GraphDumper.dump(
+        //          "benchmarkTheWutheringHeightsCorpus",
+        //         m.getNodeStorage());
+
         System.out.println("Done running BenchmarkTheWutheringHeightsCorpus");
         System.exit(0);
     }
