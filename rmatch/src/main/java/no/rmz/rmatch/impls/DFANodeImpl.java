@@ -51,30 +51,6 @@ public final class DFANodeImpl implements DFANode {
             Counters.newCounter("Known DFA Edges");
 
 
-    public final static class DFAEdge {
-
-        private final static DFAEdge NULLEDGE = new DFAEdge(null);
-
-        public final static DFAEdge newEdge(final DFANode target) {
-            if (target == null) {
-                return NULLEDGE;
-            } else {
-                return new DFAEdge(target);
-            }
-        }
-
-        final DFANode target;
-
-        private DFAEdge(final DFANode target) {
-            this.target = target;
-        }
-
-        public DFANode getTarget() {
-            return target;
-        }
-    }
-
-
     /**
      * The set of regular expression this node represents.
      */
