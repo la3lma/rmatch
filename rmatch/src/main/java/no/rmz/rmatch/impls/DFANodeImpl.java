@@ -42,6 +42,8 @@ public final class DFANodeImpl implements DFANode {
      * generate unique IDs for the nodes (put in the "id" variable).
      */
     private static Counter DFA_NODE_COUNTER = Counters.newCounter("DFANodeImpl");
+
+    
     /**
      * A counter for known edges going to other DFAs.
      */
