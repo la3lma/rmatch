@@ -115,7 +115,7 @@ public final class MatchSetImpl implements MatchSet {
         // This was necessary to nail the bug caused by the natural
         // comparison for matches not being by id. Don't want to
         // see that again so I'm keeping the assertion.
-        // assert (matches.size() == currentNode.getRegexps().size());
+        assert (matches.size() == currentNode.getRegexps().size());
     }
 
     @Override
@@ -276,7 +276,9 @@ public final class MatchSetImpl implements MatchSet {
         }
     }
 
-    private void progressMatches(final RunnableMatchesHolder runnableMatches, final int currentPos) {
+    private void progressMatches(
+            final RunnableMatchesHolder runnableMatches,
+            final int currentPos) {
         // got a current  node, so we'll se what we can do to progress
         // the matches we've got.
         for (final Match m : matches) {
