@@ -16,13 +16,9 @@
 
 package no.rmz.rmatch.utils;
 
-import no.rmz.rmatch.utils.Counters;
-import no.rmz.rmatch.utils.Counter;
 import java.util.logging.Logger;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.utils.Counter;
-import no.rmz.rmatch.utils.Counters;
 
 /**
  * Simple utility action used to count the number of something.
