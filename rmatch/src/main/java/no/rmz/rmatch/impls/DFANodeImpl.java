@@ -37,6 +37,32 @@ import no.rmz.rmatch.utils.Counters;
  */
 public final class DFANodeImpl implements DFANode {
 
+
+    public final static class DFAEdge {
+
+        private final static DFAEdge NULLEDGE = new DFAEdge(null);
+
+        public final static DFAEdge newEdge(final DFANode target) {
+            if (target == null) {
+                return NULLEDGE;
+            } else {
+                return new DFAEdge(target);
+            }
+        }
+
+
+        final DFANode target;
+
+        private DFAEdge(final DFANode target) {
+            this.target = target;
+        }
+
+        public DFANode getTarget() {
+            return target;
+        }
+    }
+
+
     /**
      * The set of regular expression this node represents.
      */
@@ -46,7 +72,7 @@ public final class DFANodeImpl implements DFANode {
      * going out of this node, but these are the nodes that has been encountered
      * so far during matching.
      */
-    private Map<Character, DFANode> nextMap = new HashMap<Character, DFANode>();
+    private Map<Character, DFAEdge> nextMap = new HashMap<Character, DFAEdge>();
     /**
      * A map, corresponding to the nextMap, stating if the entry for a
      * particular character is valid or not.
@@ -130,7 +156,15 @@ public final class DFANodeImpl implements DFANode {
      * @return the map of nodes going out of this DFA node.
      */
     public Map<Character, DFANode> getNextMap() {
-        return nextMap;
+
+        final Map<Character, DFANode> result = new HashMap<Character, DFANode>();
+        for (final Map.Entry<Character, DFAEdge> entry: nextMap.entrySet() ) {
+            if (entry.getValue().getTarget() != null) {
+                result.put(entry.getKey(), entry.getValue().getTarget());
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -161,7 +195,9 @@ public final class DFANodeImpl implements DFANode {
     @Override
     public void addLink(final Character c, final DFANode n) {
         synchronized (monitor) {
-            nextMap.put(c, n);
+            nextMap.put(c,  DFAEdge.newEdge(n));
+            KNOWN_DFA_EDGES_COUNTER.inc();
+            known.put(c, Boolean.TRUE);  // XXX Not necessary, use nullity of target edge instead!
         }
     }
 
@@ -199,20 +235,28 @@ public final class DFANodeImpl implements DFANode {
             if (!known.containsKey(ch)) {
                 final SortedSet<NDFANode> nodes = getNextThroughBasis(ch);
 
+                final DFANode dfaNode;
                 if (!nodes.isEmpty()) {
-                    final DFANode dfaNode = ns.getDFANode(nodes);
-                    nextMap.put(ch, dfaNode);
+                    dfaNode = ns.getDFANode(nodes);
+                } else {
+                    dfaNode = null;  // XXX Unhygienic null!!
                 }
 
+                addLink(ch, dfaNode);
+                /*
+                nextMap.put(ch,  DFAEdge.newEdge(dfaNode));
+
+                // XXX These shouldn't be necessary
                 KNOWN_DFA_EDGES_COUNTER.inc();
                 known.put(ch, Boolean.TRUE);
+                */
             }
 
             // Now, either this will return a node, or a null, and in
             // any case that is what we know is the node
             // we'll get to by following
             // the ch.
-            return nextMap.get(ch);
+            return nextMap.get(ch).getTarget();
         }
     }
 

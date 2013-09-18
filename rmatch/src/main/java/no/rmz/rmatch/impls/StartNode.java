@@ -75,6 +75,8 @@ public final class StartNode extends AbstractNDFANode {
      * @return a new DFA node.
      */
     public DFANode getNextDFA(final Character ch, final NodeStorage ns) {
+        checkNotNull(ch, "Can't get a DFA for null characters");
+        checkNotNull(ns, "NodeStorage can't be null");
 
         synchronized (topDfaMonitor) {
             if (topDFA == null) {
