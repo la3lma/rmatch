@@ -91,10 +91,11 @@ public final class StartNode extends AbstractNDFANode {
         final DFANode result;
         if (!nextSet.isEmpty()) {
             result = ns.getDFANode(nextSet);
-            topDFA.addLink(ch, result);
         } else {
             result = null;
         }
+
+        topDFA.addLink(ch, result);
 
         return result;
     }
