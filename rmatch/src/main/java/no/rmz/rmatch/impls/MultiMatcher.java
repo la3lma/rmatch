@@ -30,6 +30,9 @@ import no.rmz.rmatch.interfaces.NDFACompiler;
 import no.rmz.rmatch.interfaces.NodeStorage;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+
 /**
  * A multithreaded matcher. It will keep an array of matchers, into which it
  * will partition the regular expressions. Addition/Removal goes to one of the
@@ -112,8 +115,17 @@ public final class MultiMatcher implements Matcher {
         checkArgument(noOfMatchers < MAX_NO_OF_MATCHERS,
                 "No of partitions must be less than 100K");
         this.noOfMatchers = noOfMatchers;
+        final AtomicInteger threadId = new AtomicInteger(0);
+        final ThreadFactory threadFactory = new ThreadFactory() {
 
-        executorService = Executors.newFixedThreadPool(noOfMatchers);
+            @Override
+            public Thread newThread(Runnable r) {
+                return new Thread(r, "MultiMatcher thread " + threadId.addAndGet(1));
+            }
+        };
+
+        executorService =
+                Executors.newFixedThreadPool(noOfMatchers, threadFactory);
 
         /**
          * Set up a set of partition into which we can pour regexps.
