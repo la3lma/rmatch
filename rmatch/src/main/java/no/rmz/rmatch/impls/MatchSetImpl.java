@@ -1,19 +1,18 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
-
 package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.interfaces.MatchSet;
@@ -29,6 +28,9 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
 
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * A an implementation of the MatchSet interface. A MatchSet keeps a set of
  * matches which starts from the same location in the input. The MatchSet will
@@ -42,8 +44,7 @@ public final class MatchSetImpl implements MatchSet {
     /**
      * The set of matches being pursued through this MatchSetImpl.
      */
-    private Set<Match> matches =
-            new ConcurrentSkipListSet<Match>(Match.COMPARE_BY_OBJECT_ID);
+    private Set<Match> matches;
     /**
      * The current determinstic node that is used when pushing the matches
      * further.
@@ -78,6 +79,8 @@ public final class MatchSetImpl implements MatchSet {
     public MatchSetImpl(
             final int startIndex,
             final DFANode startNode) {
+        this.matches = Collections.newSetFromMap(
+                new ConcurrentHashMap<Match, Boolean>());
         checkNotNull(startNode, "Startnode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");
         currentNode = startNode;
@@ -112,8 +115,7 @@ public final class MatchSetImpl implements MatchSet {
         // This was necessary to nail the bug caused by the natural
         // comparison for matches not being by id. Don't want to
         // see that again so I'm keeping the assertion.
-        assert (matches.size() == currentNode.getRegexps().size());
-
+        // assert (matches.size() == currentNode.getRegexps().size());
     }
 
     @Override
@@ -134,9 +136,8 @@ public final class MatchSetImpl implements MatchSet {
      * @param ns A NodeStorage used to find new nodes.
      * @param currentChar The currenc character.
      * @param currentPos The current position.
-     * @param runnableMatches a container for runnable matches. Matches will
-     *        be put here if they can be run, possibly, pending domination
-     *        stuff.
+     * @param runnableMatches a container for runnable matches. Matches will be
+     * put here if they can be run, possibly, pending domination stuff.
      */
     @Override
     public void progress(
@@ -163,81 +164,16 @@ public final class MatchSetImpl implements MatchSet {
         final DFAEdge currentEdge = currentNode.getNext(currentChar, ns);
 
         if (currentEdge.leadsNowhere()) {
-
             currentNode = null; // XXX Bad smell!
-
-            // Found no edges going out of the current node, so we have
-            // to stop pursuing the matches we've already got.
-            // This actually marks the MatchSetImpl instance for
-            // destruction, but we won't do anything more about that fact
-            // from within this loop.
-
-            for (final Match m : matches) {
-                m.setInactive();
-                if (m.isFinal()) {
-                    commitMatch(m, runnableMatches);
-                    if (!m.isAbandoned()) {
-                        m.abandon();
-                    }
-                }
-                removeMatch(m);
-            }
+            deactivateMatches(runnableMatches);
             return;
-        }
-
-        // Get the next node.
-        currentNode = checkNotNull(currentEdge.getTarget());
-
-        // Check if there are any regexps for which matches must fail
-        // for this node, and then fail them.
-        if (currentNode.failsSomeRegexps()) {
-            for (final Match m : matches) {
-                if (currentNode.isFailingFor(m.getRegexp())) {
-                    m.abandon();
-                    matches.remove(m);
-                }
-            }
-        }
-
-        // got a current  node, so we'll se what we can do to progress
-        // the matches we've got.
-        for (final Match m : matches) {
-
-            // Get the regexp associated with the
-            // match we're currently processing.
-            final Regexp regexp = m.getRegexp();
-            final boolean isActive = currentNode.isActiveFor(regexp);
-
-            m.setActive(isActive);
-
-            // If this node is active for the current regexp,
-            // that means that we don't have to abandon
-            if (!isActive) {
-
-                // Ok, we can't continue this match, perhaps it's already
-                // final, and in that case we should commit what we've got
-                // before abandoning it.
-                if (m.isFinal()) {
-                    commitMatch(m, runnableMatches);
-                }
-
-                if (!m.isAbandoned()) {
-                    m.abandon();
-                }
-
-                removeMatch(m);
-            } else {
-
-                // Mmkay, this is an active match and we have somewhere
-                // to progress to, so we're advancing the end position of
-                // the match by one.
-                m.setEnd(currentPos);
-
-                final boolean isFinal = currentNode.isTerminalFor(regexp);
-                // If we're also in a final position for this match, note that
-                // fact so that we can trigger actions for this match.
-                m.setFinal(isFinal);
-            }
+        } else {
+            // Get the next node.
+            currentNode = checkNotNull(currentEdge.getTarget());
+            // Abandon what must be abandoned
+            abandonFailingRegexps();
+            // Progress the rest.
+            progressMatches(runnableMatches, currentPos);
         }
     }
 
@@ -306,5 +242,80 @@ public final class MatchSetImpl implements MatchSet {
     @Override
     public long getId() {
         return id;
+    }
+
+    private void deactivateMatches(final RunnableMatchesHolder runnableMatches) {
+        // Found no edges going out of the current node, so we have
+        // to stop pursuing the matches we've already got.
+        // This actually marks the MatchSetImpl instance for
+        // destruction, but we won't do anything more about that fact
+        // from within this loop.
+
+        for (final Match m : matches) {
+            m.setInactive();
+            if (m.isFinal()) {
+                commitMatch(m, runnableMatches);
+                if (!m.isAbandoned()) {
+                    m.abandon();
+                }
+            }
+            removeMatch(m);
+        }
+    }
+
+    private void abandonFailingRegexps() {
+        // Check if there are any regexps for which matches must fail
+        // for this node, and then fail them.
+        if (currentNode.failsSomeRegexps()) {
+            for (final Match m : matches) {
+                if (currentNode.isFailingFor(m.getRegexp())) {
+                    m.abandon();
+                    matches.remove(m);
+                }
+            }
+        }
+    }
+
+    private void progressMatches(final RunnableMatchesHolder runnableMatches, final int currentPos) {
+        // got a current  node, so we'll se what we can do to progress
+        // the matches we've got.
+        for (final Match m : matches) {
+
+            // Get the regexp associated with the
+            // match we're currently processing.
+            final Regexp regexp = m.getRegexp();
+            final boolean isActive = currentNode.isActiveFor(regexp);
+
+            m.setActive(isActive);
+
+            // If this node is active for the current regexp,
+            // that means that we don't have to abandon
+            if (!isActive) {
+
+                // Ok, we can't continue this match, perhaps it's already
+                // final, and in that case we should commit what we've got
+                // before abandoning it.
+                if (m.isFinal()) {
+                    commitMatch(m, runnableMatches);
+                }
+
+                if (!m.isAbandoned()) {
+                    m.abandon();
+                }
+
+                removeMatch(m);
+            } else {
+
+                // Mmkay, this is an active match and we have somewhere
+                // to progress to, so we're advancing the end position of
+                // the match by one.
+                m.setEnd(currentPos);
+
+                final boolean isFinal = currentNode.isTerminalFor(regexp);
+                // If we're also in a final position for this match, note that
+                // fact so that we can trigger actions for this match.
+                m.setFinal(isFinal);
+            }
+        }
     }
 }
