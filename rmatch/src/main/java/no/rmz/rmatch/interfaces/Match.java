@@ -127,20 +127,11 @@ public interface Match {
     /**
      * A comparator that compares matches based on their unique identifier.
      */
-    Comparator<Match> COMPARE_BY_OBJECT_ID =
+    final static Comparator<Match> COMPARE_BY_OBJECT_ID =
             new Comparator<Match>() {
                 @Override
                 public int compare(final Match t, final Match t1) {
-                    // return Long.signum(t.getId() - t1.getId());
-                    final long l1 = t.getId();
-                    final long l2 = t1.getId();
-                    if (l1 < l2) {
-                        return -1;
-                    } else if (l2 < l1) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
+                    return Long.signum(t.getId() - t1.getId());
                 }
             };
     /**
