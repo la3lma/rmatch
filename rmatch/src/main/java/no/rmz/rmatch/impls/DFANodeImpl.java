@@ -37,6 +37,18 @@ import no.rmz.rmatch.utils.Counters;
  */
 public final class DFANodeImpl implements DFANode {
 
+    /**
+     * Counter used to figure out both how many DFA nodes are allocated, and to
+     * generate unique IDs for the nodes (put in the "id" variable).
+     */
+    private static Counter DFA_NODE_COUNTER = Counters.newCounter("DFANodeImpl");
+    /**
+     * A counter for known edges going to other DFAs.
+     */
+    private static final Counter KNOWN_DFA_EDGES_COUNTER =
+            Counters.newCounter("Known DFA Edges");
+
+
 
     public final static class DFAEdge {
 
@@ -86,15 +98,14 @@ public final class DFANodeImpl implements DFANode {
      * fail.
      */
     private Set<Regexp> isFailingSet = new HashSet<Regexp>();
-    /**
-     * Counter used to figure out both how many DFA nodes are allocated, and to
-     * generate unique IDs for the nodes (put in the "id" variable).
-     */
-    private static Counter counter = Counters.newCounter("DFANodeImpl");
+
+
     /**
      * An unique (per VM) id for this DFANode.
      */
     private final long id;
+
+
 
     /**
      * Create a new DFA based representing a set of NDFA nodes.
@@ -105,7 +116,7 @@ public final class DFANodeImpl implements DFANode {
     public DFANodeImpl(final Set<NDFANode> ndfanodeset) {
         basis.addAll(ndfanodeset);
         initialize(basis);
-        id = counter.inc();
+        id = DFA_NODE_COUNTER.inc();
     }
 
     /**
@@ -223,11 +234,6 @@ public final class DFANodeImpl implements DFANode {
             return result;
         }
     }
-    /**
-     * A counter for known edges going to other DFAs.
-     */
-    private static final Counter KNOWN_DFA_EDGES_COUNTER =
-            Counters.newCounter("Known DFA Edges");
 
     @Override
     public DFANode getNext(final Character ch, final NodeStorage ns) {
@@ -239,7 +245,7 @@ public final class DFANodeImpl implements DFANode {
                 if (!nodes.isEmpty()) {
                     dfaNode = ns.getDFANode(nodes);
                 } else {
-                    dfaNode = null;  // XXX Unhygienic null!!
+                    dfaNode = null;
                 }
 
                 addLink(ch, dfaNode);
