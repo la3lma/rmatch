@@ -162,12 +162,11 @@ public final class MatchSetImpl implements MatchSet {
         // care of all the circumstances
         final DFAEdge currentEdge = currentNode.getNext(currentChar, ns);
 
-
         if (currentEdge.leadsNowhere()) {
 
             currentNode = null; // XXX Bad smell!
 
-            // Found no nodes going out of the current node, so we have
+            // Found no edges going out of the current node, so we have
             // to stop pursuing the matches we've already got.
             // This actually marks the MatchSetImpl instance for
             // destruction, but we won't do anything more about that fact
@@ -187,10 +186,10 @@ public final class MatchSetImpl implements MatchSet {
         }
 
         // Get the next node.
-        currentNode = currentEdge.getTarget();
-        
+        currentNode = checkNotNull(currentEdge.getTarget());
+
         // Check if there are any regexps for which matches must fail
-        // for this node, and fail them.
+        // for this node, and then fail them.
         if (currentNode.failsSomeRegexps()) {
             for (final Match m : matches) {
                 if (currentNode.isFailingFor(m.getRegexp())) {
