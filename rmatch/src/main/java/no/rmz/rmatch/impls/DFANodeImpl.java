@@ -50,7 +50,6 @@ public final class DFANodeImpl implements DFANode {
             }
         }
 
-
         final DFANode target;
 
         private DFAEdge(final DFANode target) {
@@ -73,11 +72,7 @@ public final class DFANodeImpl implements DFANode {
      * so far during matching.
      */
     private Map<Character, DFAEdge> nextMap = new HashMap<Character, DFAEdge>();
-    /**
-     * A map, corresponding to the nextMap, stating if the entry for a
-     * particular character is valid or not.
-     */
-    private Map<Character, Boolean> known = new HashMap<Character, Boolean>();
+
     /**
      * The set of NDFANodes that this DFA node is representing.
      */
@@ -192,12 +187,17 @@ public final class DFANodeImpl implements DFANode {
         return regexps;
     }
 
-    @Override
-    public void addLink(final Character c, final DFANode n) {
+    private boolean isKnown(final Character ch) {
         synchronized (monitor) {
-            nextMap.put(c,  DFAEdge.newEdge(n));
+            return nextMap.containsKey(ch);
+        }
+    }
+
+    @Override
+    public void addLink(final Character ch, final DFANode n) {
+        synchronized (monitor) {
+            nextMap.put(ch,  DFAEdge.newEdge(n));
             KNOWN_DFA_EDGES_COUNTER.inc();
-            known.put(c, Boolean.TRUE);  // XXX Not necessary, use nullity of target edge instead!
         }
     }
 
@@ -232,7 +232,7 @@ public final class DFANodeImpl implements DFANode {
     @Override
     public DFANode getNext(final Character ch, final NodeStorage ns) {
         synchronized (monitor) {
-            if (!known.containsKey(ch)) {
+            if (!isKnown(ch)) {
                 final SortedSet<NDFANode> nodes = getNextThroughBasis(ch);
 
                 final DFANode dfaNode;
@@ -243,13 +243,6 @@ public final class DFANodeImpl implements DFANode {
                 }
 
                 addLink(ch, dfaNode);
-                /*
-                nextMap.put(ch,  DFAEdge.newEdge(dfaNode));
-
-                // XXX These shouldn't be necessary
-                KNOWN_DFA_EDGES_COUNTER.inc();
-                known.put(ch, Boolean.TRUE);
-                */
             }
 
             // Now, either this will return a node, or a null, and in
