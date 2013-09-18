@@ -213,7 +213,7 @@ public final class DFANodeImpl implements DFANode {
     }
 
     @Override
-    public DFANode getNext(final Character ch, final NodeStorage ns) {
+    public DFAEdge getNext(final Character ch, final NodeStorage ns) {
         synchronized (monitor) {
             if (!isKnown(ch)) {
                 final SortedSet<NDFANode> nodes = getNextThroughBasis(ch);
@@ -232,7 +232,7 @@ public final class DFANodeImpl implements DFANode {
             // any case that is what we know is the node
             // we'll get to by following
             // the ch.
-            return nextMap.get(ch).getTarget();
+            return nextMap.get(ch);
         }
     }
 

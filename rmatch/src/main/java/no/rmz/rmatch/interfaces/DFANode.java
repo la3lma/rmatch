@@ -16,6 +16,7 @@
 
 package no.rmz.rmatch.interfaces;
 
+import no.rmz.rmatch.impls.DFAEdge;
 import java.util.Set;
 
 /**
@@ -39,13 +40,13 @@ public interface DFANode extends Node {
     void addRegexp(final Regexp r);
 
     /**
-     * Get the DFAnode we can reach from here through a character.
+     * Get the an edge going out of this node through a character.
      *
      * @param ch A character.
      * @param ns NodeStorage A node storage instance used to get new DFA nodes.
      * @return Return a determinstic node.
      */
-    DFANode getNext(final Character ch, final NodeStorage ns);
+    DFAEdge getNext(final Character ch, final NodeStorage ns);
 
     /**
      * Get the set of regexps that are associated with the present node.

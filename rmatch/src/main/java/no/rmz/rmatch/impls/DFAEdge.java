@@ -22,7 +22,7 @@ import no.rmz.rmatch.interfaces.*;
  * nowhere.
  */
 public final class DFAEdge {
-    
+
     private static final DFAEdge NULLEDGE = new DFAEdge(null);
 
     public static final DFAEdge newEdge(final DFANode target) {
@@ -32,6 +32,7 @@ public final class DFAEdge {
             return new DFAEdge(target);
         }
     }
+    
     final DFANode target;
 
     private DFAEdge(final DFANode target) {

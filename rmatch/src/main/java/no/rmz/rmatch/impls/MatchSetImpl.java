@@ -160,10 +160,13 @@ public final class MatchSetImpl implements MatchSet {
 
         // This nested if/for/if statement takes
         // care of all the circumstances
+        final DFAEdge currentEdge = currentNode.getNext(currentChar, ns);
 
-        currentNode = currentNode.getNext(currentChar, ns);
 
-        if (currentNode == null) {
+        if (currentEdge.leadsNowhere()) {
+
+            currentNode = null; // XXX Bad smell!
+
             // Found no nodes going out of the current node, so we have
             // to stop pursuing the matches we've already got.
             // This actually marks the MatchSetImpl instance for
@@ -183,6 +186,9 @@ public final class MatchSetImpl implements MatchSet {
             return;
         }
 
+        // Get the next node.
+        currentNode = currentEdge.getTarget();
+        
         // Check if there are any regexps for which matches must fail
         // for this node, and fail them.
         if (currentNode.failsSomeRegexps()) {

@@ -82,7 +82,7 @@ public final class StartNode extends AbstractNDFANode {
             if (topDFA == null) {
                 topDFA = new DFANodeImpl(Collections.EMPTY_SET);
             } else if (topDFA.hasLinkFor(ch)) {
-                return topDFA.getNext(ch, ns);
+                return topDFA.getNext(ch, ns).getTarget();
             }
         }
 
