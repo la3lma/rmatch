@@ -43,13 +43,12 @@ public final class DFANodeImpl implements DFANode {
      */
     private static Counter DFA_NODE_COUNTER = Counters.newCounter("DFANodeImpl");
 
-    
+
     /**
      * A counter for known edges going to other DFAs.
      */
     private static final Counter KNOWN_DFA_EDGES_COUNTER =
             Counters.newCounter("Known DFA Edges");
-
 
 
     public final static class DFAEdge {
