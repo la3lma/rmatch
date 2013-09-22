@@ -45,7 +45,7 @@ fi
 # to each test.
 
 STARTINDEX=1
-STEPSIZE=100
+STEPSIZE=800
 NO_OF_REGEXPS=$(wc -l "$WORDS" | awk '{print $1}')
 
 function secondsSinceEpoch {

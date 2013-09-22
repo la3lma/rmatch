@@ -4,7 +4,6 @@ import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.performancetests.utils.GraphDumper;
 
 /**
  * A test scenario that will match a bunch of regular expressions against the
@@ -31,7 +30,7 @@ public final class BenchmarkTheWutheringHeightsCorpus {
 
         final String[] argx;
         if (argv == null || argv.length == 0) {
-            argx = new String[] {"3000"};
+            argx = new String[] {"9000"};
         } else {
             argx = argv;
         }

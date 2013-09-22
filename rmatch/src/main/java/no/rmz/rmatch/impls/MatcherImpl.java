@@ -98,9 +98,12 @@ public final class MatcherImpl implements Matcher {
 
     @Override
     public void match(final Buffer b) {
-        synchronized (me) {
+
+        // XXX This is a hotspot wrt locking.  Is it
+        //     even necessary?
+   //       synchronized (me) {
             me.match(b);
-        }
+   //     }
     }
 
     @Override
