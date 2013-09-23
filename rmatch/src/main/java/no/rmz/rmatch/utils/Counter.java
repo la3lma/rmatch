@@ -19,6 +19,8 @@ package no.rmz.rmatch.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.concurrent.atomic.*;
+
 /**
  * A counter that will give integer values starting from zero.
  */
@@ -36,7 +38,7 @@ public final class Counter {
     /**
      * The current value of the counter.
      */
-    private long value = 0;
+    private AtomicLong value = new AtomicLong(0);
     /**
      * A monitor used to regulate access to the counter.
      */
@@ -59,10 +61,7 @@ public final class Counter {
      * @return the new value.
      */
     public long inc() {
-        synchronized (monitor) {
-            value += 1;
-            return value;
-        }
+        return value.addAndGet(1);
     }
 
     /**
@@ -71,13 +70,15 @@ public final class Counter {
      * @return the new value.
      */
     public long dec() {
+        // XXX This use of the monitor is bogus given the way we
+        //     have implemented inc without synchronization(which we do
+        //     to avoid lock contention).
         synchronized (monitor) {
             if (!canBeDecremented) {
                 throw new IllegalStateException(
                         "Can't decrement a counter that can't be decremented");
             }
-            value -= 1;
-            return value;
+            return value.decrementAndGet();
         }
     }
 
@@ -93,7 +94,7 @@ public final class Counter {
     @Override
     public String toString() {
         synchronized (monitor) {
-            return "#'" + name + "'=" + value;
+            return "#'" + name + "'=" + value.get();
         }
     }
 }
