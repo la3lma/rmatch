@@ -34,6 +34,13 @@ import no.rmz.rmatch.interfaces.RegexpFactory;
 public class MatcherFactory {
 
     /**
+     * Overbooking factor, to try facilitate better utilization
+     * of available processors.
+     */
+
+    private final static int OVERBOOKING = 5;
+
+    /**
      * A management bean that we use to probe the execution environment.
      */
     private static final OperatingSystemMXBean OS_MBEAN
@@ -42,7 +49,7 @@ public class MatcherFactory {
     /**
      * The number of processors available to us.
      */
-    private static final int AVAILABLE_PROCESSORS
+    private static final int no_of_available_processors
             = OS_MBEAN.getAvailableProcessors();
 
 
@@ -54,12 +61,8 @@ public class MatcherFactory {
      */
     public final static Matcher newMatcher() {
 
-        final int noOfPartitions;
-        if (AVAILABLE_PROCESSORS > 2) {
-            noOfPartitions = AVAILABLE_PROCESSORS ;
-        } else {
-            noOfPartitions = 1;
-        }
+        final int noOfPartitions = no_of_available_processors * OVERBOOKING;
+
 
         return new MultiMatcher(
                 noOfPartitions,
