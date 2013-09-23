@@ -45,7 +45,7 @@ fi
 # to each test.
 
 STARTINDEX=1
-STEPSIZE=800
+STEPSIZE=100
 NO_OF_REGEXPS=$(wc -l "$WORDS" | awk '{print $1}')
 
 function secondsSinceEpoch {
@@ -82,6 +82,14 @@ function plotResults {
 
 currentNoOfRegexps=$STARTINDEX
 runIdx=1
+
+# We postulate that the first "run" is for zero regexps, and that it
+# basically takes no time.  This isn't true, but it makes for nicer plots
+echo "$currentNoOfRegexps, 0, 0" >> "$LOGFILE"
+runIdx=2
+((currentNoOfRegexps = $currentNoOfRegexps + $STEPSIZE))
+
+
 while [  "$currentNoOfRegexps"  -le "$NO_OF_REGEXPS" ] ; do
    echo "Running tests for $currentNoOfRegexps regexps"
 
