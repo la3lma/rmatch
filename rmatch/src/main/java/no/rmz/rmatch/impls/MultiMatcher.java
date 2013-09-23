@@ -113,7 +113,7 @@ public final class MultiMatcher implements Matcher {
         this.regexpFactory = checkNotNull(regexpFactory);
         checkArgument(noOfMatchers >= 1, "No of partitions must be positive");
         checkArgument(noOfMatchers < MAX_NO_OF_MATCHERS,
-                "No of partitions must be less than 100K");
+                "No of partitions must be less than " +  MAX_NO_OF_MATCHERS);
         this.noOfMatchers = noOfMatchers;
         final AtomicInteger threadId = new AtomicInteger(0);
         final ThreadFactory threadFactory = new ThreadFactory() {
@@ -180,7 +180,6 @@ public final class MultiMatcher implements Matcher {
                 public void run() {
                     matcher.match(b.clone());
                     counter.countDown();
-
                 }
             };
 
