@@ -1,9 +1,9 @@
 package no.rmz.rmatch.performancetests;
 
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
-import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 
 import java.util.Collection;
 import java.util.HashMap;

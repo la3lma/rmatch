@@ -200,7 +200,7 @@ public class SequenceLoaderTest {
      * The maximum permitted time to use when running through
      * the wuthering height corpus for two regexps.
      */
-    private static final int MAX_TIME_TO_USE_IN_MILLIS = 5000;
+    private static final int MAX_TIME_TO_USE_IN_MILLIS = 15000;
 
     /**
      * The maximum amount of memory permitted used.

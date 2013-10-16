@@ -60,37 +60,47 @@ public final class CounterAction implements Action {
 
     @Override
     public void performMatch(final Buffer b, final int start, final int end) {
+        final int currentCounter;
+        final boolean doLog;
+        final long now;
+
+        // Critical region. Figure out what to do.
         synchronized (monitor) {
             counter += 1;
-
-
-            if (verbose && (counter % tickInterval) == 0) {
-
-                // Collecting a report from the known counters
-                final StringBuilder sb = new StringBuilder("");
-                for (final Counter c : Counters.getCounters()) {
-                    sb.append("  ").append(c.toString()).append(", ");
-                }
-
-                // Making a report for the current counter,
-                // plus all the counters.
-                long now = System.currentTimeMillis();
-                long duration = now - lastTick;
-                double speed = (double) duration / (double) tickInterval;
-
-
-                LOG.info("Match counter == " + counter
-                        + ", duration = " + duration
-                        + ", speed = " + speed + " millis/tick"
-                        + ", start/end = " + start + "/" + end
-                        + ", match string = '" + b.getString(start, end + 1)
-                        + "' " + sb.toString());
+            currentCounter = counter;
+            doLog = verbose && (currentCounter % tickInterval) == 0;
+            if (doLog) {
+                now = System.currentTimeMillis();
                 lastTick = now;
-
-
+            } else {
+                now = -1;
             }
         }
+
+        // Then, if we must, do it.
+        if (doLog) {
+
+            // Collecting a report from the known counters
+            final StringBuilder sb = new StringBuilder("");
+            for (final Counter c : Counters.getCounters()) {
+                sb.append("  ").append(c.toString()).append(", ");
+            }
+
+            // Making a report for the current counter,
+            // plus all the counters.
+            long duration = now - lastTick;
+            double speed = (double) duration / (double) tickInterval;
+
+            LOG.info("Match counter == " + currentCounter
+                    + ", duration = " + duration
+                    + ", speed = " + speed + " millis/tick"
+                    + ", start/end = " + start + "/" + end
+                    + ", match string = '" + b.getString(start, end + 1)
+                    + "' " + sb.toString());
+            lastTick = now;
+        }
     }
+
 
     /**
      * Return the number of matches that has been performed on this action.
