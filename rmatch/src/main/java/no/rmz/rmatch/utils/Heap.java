@@ -33,9 +33,6 @@ public final class Heap<T> {
      * We use a TreeMap to represent the heap.
      */
     private final PriorityQueue<T> tm;
-    // XX When this works, replace with PriorityBlockingQueue and remove
-    //    synchronization.
-
 
 
    /**
@@ -101,7 +98,7 @@ public final class Heap<T> {
     @Override
     public String toString() {
         synchronized (tm) {
-            return "SimulatedHeap{" + "tm=" + tm + '}';
+            return "Heap{" + "tm=" + tm + '}';
         }
     }
 
