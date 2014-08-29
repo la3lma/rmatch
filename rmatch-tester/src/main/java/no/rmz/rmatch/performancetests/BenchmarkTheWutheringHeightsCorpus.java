@@ -11,6 +11,8 @@ import no.rmz.rmatch.interfaces.*;
  */
 public final class BenchmarkTheWutheringHeightsCorpus {
 
+    private final static String DEFAULT_CORPUS_SIZE = "9000";
+    
     /**
      * No public constructor in an utility class.
      */
@@ -30,7 +32,7 @@ public final class BenchmarkTheWutheringHeightsCorpus {
 
         final String[] argx;
         if (argv == null || argv.length == 0) {
-            argx = new String[] {"9000"};
+            argx = new String[] { DEFAULT_CORPUS_SIZE };
         } else {
             argx = argv;
         }

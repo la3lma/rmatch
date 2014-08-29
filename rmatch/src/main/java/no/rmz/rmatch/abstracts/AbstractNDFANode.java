@@ -20,9 +20,7 @@ import java.util.*;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.utils.Counter;
-import no.rmz.rmatch.utils.Counters;
-import no.rmz.rmatch.utils.LifoSet;
+import no.rmz.rmatch.utils.*;
 
 /**
  * An abstract implementation of the NDANode interface. In fact, this
@@ -172,7 +170,8 @@ public abstract class AbstractNDFANode implements NDFANode {
 
             // Meanwhile we'll have a set of unexplored nodes that we'll have to
             // explore before we're done.
-            final LifoSet<NDFANode> unexploredNodes = new LifoSet<NDFANode>();
+            final LifoSet<NDFANode> unexploredNodes;
+            unexploredNodes = new ListSetLifoSetImpl<NDFANode>();
 
             // The set of unexplored nodes start witht the current node.
             unexploredNodes.add(this);

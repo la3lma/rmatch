@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.*;
 
 /**
  * Representation of a parsed regular expression.
@@ -280,25 +281,37 @@ public final class RegexpImpl implements Regexp {
         }
     }
 
-    /**
-     * A nice little prime.
-     */
-    private static final int SMALLISH_PRIME = 5;
+    // Computing hash values is a hotspot, so we
+    // memoize the hash value, hoping that will make
+    // the spot less costly.
 
-    /**
-     * A nice two digit prime.
-     */
-    private static final int BIGISH_PRIME = 89;
+    private final static int NULL_HASH_VALUE = -1;
+
+    private final AtomicInteger myHashValue =
+            new AtomicInteger(NULL_HASH_VALUE);
+
 
     @Override
-    public int hashCode() {  // XXX This looks stupid, probably is stupid.
+    public int hashCode() {
+        final int presentHashValue  =  myHashValue.get() ;
+
+        if (presentHashValue == NULL_HASH_VALUE) {
+            final int newHashValue = computeHashValue();
+            myHashValue.compareAndSet(NULL_HASH_VALUE, newHashValue);
+            return newHashValue;
+        } else {
+            return presentHashValue;
+        }
+    }
+
+    private int computeHashValue() {
         final int hashFromString;
         if (this.rexpString != null) {
             hashFromString = this.rexpString.hashCode();
         } else {
             hashFromString = 0;
         }
-        return SMALLISH_PRIME * BIGISH_PRIME + hashFromString;
+        return hashFromString;
     }
 
     @Override

@@ -38,7 +38,7 @@ public interface RegexpFactory {
      * The default regexp factory that is used in production. It works by making
      * a RegexpImpl instance.
      */
-    RegexpFactory DEFAULT_REGEXP_FACTORY = new RegexpFactory() {
+    public RegexpFactory DEFAULT_REGEXP_FACTORY = new RegexpFactory() {
         @Override
         public Regexp newRegexp(final String regexpString) {
             checkNotNull(regexpString, "regexpString can't be null");

@@ -17,20 +17,23 @@
 package no.rmz.rmatch.impls;
 
 import java.util.Comparator;
-import no.rmz.rmatch.utils.SimulatedHeap;
+
 import static org.junit.Assert.*;
+
+import no.rmz.rmatch.utils.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test our simulated heap.
  */
-public final class SimulatedHeapTest {
+public final class HeapTest {
 
     /**
      * The test article.
      */
-    private SimulatedHeap<Integer> h;
+    private Heap<Integer> h;
 
     /**
      * An array of integers, with the property that i[j] = j and
@@ -66,13 +69,13 @@ public final class SimulatedHeapTest {
      */
     @Before
     public void setUp() {
-        h = new SimulatedHeap<Integer>(CMP);
+        h = new Heap<Integer>(CMP);
 
         maxi = NO_OF_ITEMS_IN_TESTHEAP;
 
         i = new Integer[maxi];
         for (int j = 0; j < maxi; j++) {
-            i[j] = Integer.valueOf(j);
+            i[j] = j;
         }
     }
 

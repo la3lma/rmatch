@@ -18,10 +18,12 @@ package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+
 import java.util.Comparator;
 import java.util.logging.Logger;
+
 import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.utils.SimulatedHeap;
+import no.rmz.rmatch.utils.Heap;
 
 /**
  *
@@ -47,7 +49,7 @@ public final class DominationHeap {
     /**
      * A simulated heap of matches.
      */
-    private final SimulatedHeap<Match> heap;
+    private final Heap<Match> heap;
 
     /**
      * Create a new instance.
@@ -65,7 +67,7 @@ public final class DominationHeap {
      * heap.
      */
     public DominationHeap(final Comparator<Match> comparator) {
-        heap = new SimulatedHeap<Match>(comparator);
+        heap = new Heap<Match>(comparator);
     }
 
     /**

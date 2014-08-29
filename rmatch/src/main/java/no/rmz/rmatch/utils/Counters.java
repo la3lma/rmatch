@@ -16,7 +16,6 @@
 
 package no.rmz.rmatch.utils;
 
-import no.rmz.rmatch.utils.Counter;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,7 +35,7 @@ public final class Counters {
      * Get a new counter, uniquely named.
      *
      * @param name the name of the counter to create.
-     * @return THe newly crated counter.
+     * @return THe newly created counter.
      */
     public static Counter newCounter(final String name) {
         return INSTANCE.privateNewCounter(name);
@@ -52,7 +51,7 @@ public final class Counters {
     }
 
     /**
-     * Dump the counters to stdout.
+     * Dump the counters to standard output.
      */
     public static void dumpCounters() {
         INSTANCE.privatedumpCounters();
