@@ -170,7 +170,7 @@ public final class SurfaceRegexpParser {
                                 "Unterminated char set, missing ']'");
                     }
 
-                    if (nxt.charValue() == '^') {
+                    if (nxt == '^') {
                         arb.invertCharSet();
                         src.next();
                     }

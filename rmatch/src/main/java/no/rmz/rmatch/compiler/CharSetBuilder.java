@@ -18,10 +18,10 @@ package no.rmz.rmatch.compiler;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
+
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
@@ -35,12 +35,12 @@ public final class CharSetBuilder {
     /**
      * The set of characters that this builder will look for.
      */
-    private StringBuilder charSetStringBuilder = new StringBuilder();
+    private final StringBuilder charSetStringBuilder = new StringBuilder();
 
     /**
      * A collection of char-ranges that this matcher will look for.
      */
-    private Set<CharRange> charRanges = new TreeSet<CharRange>();
+    private final Set<CharRange> charRanges = new TreeSet<CharRange>();
 
     /**
      * True iff this CharSet should be treated as an "inverted" CharSet,
@@ -106,7 +106,7 @@ public final class CharSetBuilder {
         // and pass through to the intermediate node if matching
         // one of the chars.
         for (int i = str.length() - 1; i >= 0; i--) {
-            final Character myChar = Character.valueOf(str.charAt(i));
+            final Character myChar = str.charAt(i);
             final NDFANode node =
                     new CharNode(intermediateNode, myChar, regexp);
             arrival.addEpsilonEdge(node);
@@ -145,9 +145,6 @@ public final class CharSetBuilder {
      * @param endOfRange The last character in the range.
      */
     void addRange(final char startOfRange, final char endOfRange) {
-        charRanges.add(
-                new CharRange(
-                Character.valueOf(startOfRange),
-                Character.valueOf(endOfRange)));
+        charRanges.add(new CharRange(startOfRange, endOfRange));
     }
 }

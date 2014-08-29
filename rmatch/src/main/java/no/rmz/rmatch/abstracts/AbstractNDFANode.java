@@ -180,7 +180,6 @@ public abstract class AbstractNDFANode implements NDFANode {
 
             while (!unexploredNodes.isEmpty()) {
 
-
                 // Get the first NDFA node
                 final NDFANode current = unexploredNodes.pop();
                 visitedNodes.add(current);

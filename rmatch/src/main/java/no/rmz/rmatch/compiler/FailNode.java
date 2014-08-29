@@ -34,7 +34,6 @@ final class FailNode extends AbstractNDFANode {
      */
     public FailNode(final Regexp r) {
         super(r, false, true);
-        // XXX Time to make a builder?
     }
 
     @Override

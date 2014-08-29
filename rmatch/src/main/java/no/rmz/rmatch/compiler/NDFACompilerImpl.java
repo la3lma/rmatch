@@ -16,9 +16,6 @@
 
 package no.rmz.rmatch.compiler;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFACompiler;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
