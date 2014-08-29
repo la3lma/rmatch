@@ -1,8 +1,16 @@
 package no.rmz.rmatch.performancetests.utils;
 
+import static java.lang.Integer.parseInt;
+import static java.lang.Runtime.getRuntime;
+import static java.lang.System.currentTimeMillis;
+import static java.util.logging.Logger.getLogger;
+import static no.rmz.rmatch.performancetests.utils.CSVAppender.append;
+import static no.rmz.rmatch.utils.Counters.dumpCounters;
+
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
@@ -19,7 +27,7 @@ public final class MatcherBenchmarker {
      * Our wonderful log.
      */
     private static final Logger LOG =
-            Logger.getLogger(MatcherBenchmarker.class.getName());
+            getLogger(MatcherBenchmarker.class.getName());
 
     /**
      * Utility class.  No public constructor for you!
@@ -57,7 +65,7 @@ public final class MatcherBenchmarker {
             final Integer noOfRegexpsToAdd,
             final String regexpListLocation,
             final String logLocation) throws RegexpParserException {
-        final long timeAtStart = System.currentTimeMillis();
+        final long timeAtStart = currentTimeMillis();
         LOG.log(Level.INFO, "Doing the thing for {0}", regexpListLocation);
         LOG.log(Level.INFO, "noOfRegexpsToAdd {0}", noOfRegexpsToAdd);
         final FileInhaler fh = new FileInhaler(new File(regexpListLocation));
@@ -93,18 +101,18 @@ public final class MatcherBenchmarker {
         LOG.log(Level.INFO,
                 "Total no of ''word  matches in Wuthering Heights is {0}",
                 new Object[]{finalCount});
-        final long timeAtEnd = System.currentTimeMillis();
+        final long timeAtEnd = currentTimeMillis();
         final long duration = timeAtEnd - timeAtStart;
         LOG.info("Duration was : " + duration + " millis.");
-        final Runtime runtime = Runtime.getRuntime();
+        final Runtime runtime = getRuntime();
         final int mb = 1024 * 1024;
         final long usedMemoryInMb =
                 (runtime.totalMemory() - runtime.freeMemory()) / mb;
-        CSVAppender.append(logLocation, new long[]{
-            System.currentTimeMillis() / MILLISECONDS_IN_A_SECOND,
+        append(logLocation, new long[]{
+            currentTimeMillis() / MILLISECONDS_IN_A_SECOND,
             duration, usedMemoryInMb});
         LOG.log(Level.INFO, "Counter = " + finalCount);
-        Counters.dumpCounters();
+        dumpCounters();
     }
 
     public static void testMatcher(
@@ -115,7 +123,7 @@ public final class MatcherBenchmarker {
         final Integer noOfRegexps;
         if (argv.length != 0) {
             final String noOfRegexpsAsString = argv[0];
-            noOfRegexps = Integer.parseInt(noOfRegexpsAsString);
+            noOfRegexps = parseInt(noOfRegexpsAsString);
             System.out.println("Benchmarking wuthering heights for index "
                     + noOfRegexps);
         } else {

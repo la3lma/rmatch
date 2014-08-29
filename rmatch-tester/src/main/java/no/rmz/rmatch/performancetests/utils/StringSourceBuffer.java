@@ -17,6 +17,7 @@
 package no.rmz.rmatch.performancetests.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Character.valueOf;
 
 import no.rmz.rmatch.interfaces.Buffer;
 
@@ -97,7 +98,7 @@ public final class StringSourceBuffer implements Buffer, Cloneable {
     public Character getNext() {
         synchronized (monitor) {
             progress();
-            return Character.valueOf(currentChar);
+            return currentChar;
         }
     }
 

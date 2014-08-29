@@ -1,8 +1,10 @@
 package no.rmz.rmatch.performancetests;
 
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
+import static java.lang.System.exit;
+import static no.rmz.rmatch.impls.MatcherFactory.newMatcher;
+import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.testMatcher;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.*;
 
 /**
@@ -12,7 +14,7 @@ import no.rmz.rmatch.interfaces.*;
 public final class BenchmarkTheWutheringHeightsCorpus {
 
     private final static String DEFAULT_CORPUS_SIZE = "9000";
-    
+
     /**
      * No public constructor in an utility class.
      */
@@ -38,8 +40,8 @@ public final class BenchmarkTheWutheringHeightsCorpus {
         }
 
         System.out.println("BenchmarkTheWutheringHeightsCorpus, argx = " + argx);
-        final Matcher m = MatcherFactory.newMatcher();
-        MatcherBenchmarker.testMatcher(m, argx);
+        final Matcher m = newMatcher();
+        testMatcher(m, argx);
 
         // This should normally not be done, since it's slow.  Haven't bothered
         // to add a switch for it yet.
@@ -48,6 +50,6 @@ public final class BenchmarkTheWutheringHeightsCorpus {
         //         m.getNodeStorage());
 
         System.out.println("Done running BenchmarkTheWutheringHeightsCorpus");
-        System.exit(0);
+        exit(0);
     }
 }

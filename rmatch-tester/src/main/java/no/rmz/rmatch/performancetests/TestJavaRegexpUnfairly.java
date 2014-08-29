@@ -1,8 +1,13 @@
 package no.rmz.rmatch.performancetests;
 
+import static java.lang.System.exit;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.logging.Logger.getLogger;
+import static java.util.regex.Pattern.compile;
+import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.testMatcher;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 
 import java.util.Collection;
@@ -14,7 +19,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.*;
 import java.util.regex.Pattern;
 
@@ -33,7 +37,7 @@ import java.util.regex.Pattern;
 public class TestJavaRegexpUnfairly implements Matcher {
 
     private final static Logger LOG =
-            Logger.getLogger(TestJavaRegexpUnfairly.class.getName());
+            getLogger(TestJavaRegexpUnfairly.class.getName());
     /**
      * A map that for all the actions we are managing, keeps track of all the
      * regexps that are triggered by that particular action.
@@ -44,7 +48,7 @@ public class TestJavaRegexpUnfairly implements Matcher {
      * A collector of worker processes that should be used when running the
      * matches.
      */
-    private Collection<Callable<Object>> matchers = new LinkedList<>();
+    private final Collection<Callable<Object>> matchers = new LinkedList<>();
     /**
      * An executor service that will be used to run all the matchers. It should
      * have enough threads to never run out of cores that can do stuff.
@@ -54,11 +58,11 @@ public class TestJavaRegexpUnfairly implements Matcher {
      * A state parameter for the class. When in matching state it is illegal to
      * add more regexp/action pairs.
      */
-    private boolean matching = false;
+    private final boolean matching = false;
 
     public TestJavaRegexpUnfairly() {
         // Don't know what an optimal number is.
-        es = Executors.newFixedThreadPool(10);
+        es = newFixedThreadPool(10);
     }
 
     /**
@@ -71,7 +75,7 @@ public class TestJavaRegexpUnfairly implements Matcher {
 
             for (final String rexp : regexps) {
                 final Pattern pattern;
-                pattern = Pattern.compile(rexp);
+                pattern = compile(rexp);
 
                 // The "" is irrelevant, it could be anything.
                 // For real matches we use the reset method below
@@ -109,7 +113,7 @@ public class TestJavaRegexpUnfairly implements Matcher {
     private Set<String> getSetForAction(final Action action) {
         final Set<String> targetSet;
         if (!actionToRegexpMap.containsKey(action)) {
-            targetSet = new HashSet<String>();
+            targetSet = new HashSet<>();
             actionToRegexpMap.put(action, targetSet);
         } else {
             targetSet = actionToRegexpMap.get(action);
@@ -157,9 +161,9 @@ public class TestJavaRegexpUnfairly implements Matcher {
 
         final Buffer b = new WutheringHeightsBuffer("corpus/wuthr10.txt");
 
-        MatcherBenchmarker.testMatcher(b, matcher, argv);
+        testMatcher(b, matcher, argv);
 
         // Kill all threads and get out of here
-        System.exit(0);
+        exit(0);
     }
 }

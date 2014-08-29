@@ -1,20 +1,25 @@
 package no.rmz.rmatch.performancetests.misc;
 
+import static java.lang.System.exit;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.regex.Pattern.compile;
+import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.testMatcher;
+
 import no.rmz.rmatch.performancetests.utils.JavaRegexpTester;
 import no.rmz.rmatch.performancetests.utils.LineMatcher;
 import no.rmz.rmatch.performancetests.utils.MatchDetector;
 import no.rmz.rmatch.performancetests.utils.LineSource;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 
 public final class MultiJavaRegexpMatchDetector implements MatchDetector {
 
@@ -32,7 +37,7 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
 
     public MultiJavaRegexpMatchDetector(final LineSource linesource) {
         // Don't know what an optimal number is.
-        es = Executors.newFixedThreadPool(10);
+        es = newFixedThreadPool(10);
         this.linesource = linesource;
     }
 
@@ -53,7 +58,7 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
     @Override
     public void add(final String rexpString, final Action actionToRun) {
         final Pattern pattern;
-        pattern = Pattern.compile(rexpString);
+        pattern = compile(rexpString);
         final java.util.regex.Matcher rmatcher = pattern.matcher("");
        //  System.out.println("Making matcher for " + rexpString);
         final Callable<Object> callable = new Callable<Object>() {
@@ -93,7 +98,7 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
         } else {
             brgv = argv;
         }
-        MatcherBenchmarker.testMatcher(b, matcher, brgv);
-        System.exit(0);
+        testMatcher(b, matcher, brgv);
+        exit(0);
     }
 }

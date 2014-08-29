@@ -1,11 +1,12 @@
 package no.rmz.rmatch.performancetests.misc;
+import static java.util.logging.Logger.getLogger;
+import static no.rmz.rmatch.impls.MatcherFactory.newMatcher;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
-
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,7 +21,7 @@ public final  class HelloMatch {
      * Errors can occur, and when they do we log them.
      */
     private static final  Logger LOG =
-            Logger.getLogger(HelloMatch.class.getName());
+            getLogger(HelloMatch.class.getName());
 
     /**
      * This is a utility class so no constructor for you.
@@ -39,7 +40,7 @@ public final  class HelloMatch {
             final StringSourceBuffer sb = new StringSourceBuffer("hello world");
 
             // We get the matcher engine in the canonical way.
-            final Matcher       m = MatcherFactory.newMatcher();
+            final Matcher       m = newMatcher();
 
             // When a match is found, we will run this action which
             // will just print out the word.

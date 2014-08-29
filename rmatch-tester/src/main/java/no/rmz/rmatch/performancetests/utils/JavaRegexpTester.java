@@ -1,6 +1,5 @@
 package no.rmz.rmatch.performancetests.utils;
 
-import no.rmz.rmatch.performancetests.utils.LineMatcher;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import no.rmz.rmatch.interfaces.Action;

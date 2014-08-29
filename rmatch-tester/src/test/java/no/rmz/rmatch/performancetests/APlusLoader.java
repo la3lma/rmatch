@@ -1,7 +1,12 @@
 package no.rmz.rmatch.performancetests;
 
+import static java.lang.Character.valueOf;
+import static java.util.logging.Logger.getLogger;
+
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
+
 import java.util.logging.Logger;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
@@ -15,16 +20,22 @@ import no.rmz.rmatch.interfaces.RegexpFactory;
 import no.rmz.rmatch.interfaces.RegexpStorage;
 import no.rmz.rmatch.mockedcompiler.CharPlusNode;
 import no.rmz.rmatch.utils.CounterAction;
+
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import static org.mockito.Matchers.any;
+
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
+
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -42,7 +53,7 @@ public class APlusLoader {
      * Our Dear Logger.
      */
     private static final Logger LOG =
-            Logger.getLogger(APlusLoader.class.getName());
+            getLogger(APlusLoader.class.getName());
 
     /**
      * If we don't get at least fire matches, something is
@@ -90,7 +101,7 @@ public class APlusLoader {
         aPlusString = finalAPlus;
         regexp = new RegexpImpl(aPlusString);
         final NDFANode aplus =
-                new CharPlusNode(Character.valueOf('a'), regexp, true);
+                new CharPlusNode(valueOf('a'), regexp, true);
 
         when(compiler.compile((Regexp) any(),
                 (RegexpStorage) any())).thenReturn(aplus);

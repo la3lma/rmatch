@@ -1,5 +1,10 @@
 package no.rmz.rmatch.performancetests.misc;
 
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.logging.Logger.getLogger;
+import static java.util.regex.Pattern.compile;
+import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.testMatcher;
+
 import no.rmz.rmatch.performancetests.utils.MatchDetector;
 import no.rmz.rmatch.performancetests.utils.LineSource;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
@@ -16,18 +21,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.*;
 import java.util.regex.Pattern;
 
 import no.rmz.rmatch.performancetests.utils.JavaRegexpTester;
 import no.rmz.rmatch.performancetests.utils.LineMatcher;
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 
 public class LongJavaRegexpMatchDetector implements MatchDetector {
 
     private final static Logger LOG =
-            Logger.getLogger(LongJavaRegexpMatchDetector.class.getName());
+            getLogger(LongJavaRegexpMatchDetector.class.getName());
     /**
      * A map that for all the actions we are managing, keeps track of all the
      * regexps that are triggered by that particular action.
@@ -53,7 +56,7 @@ public class LongJavaRegexpMatchDetector implements MatchDetector {
 
     public LongJavaRegexpMatchDetector(final LineSource linesource) {
         // Don't know what an optimal number is.
-        es = Executors.newFixedThreadPool(10);
+        es = newFixedThreadPool(10);
         this.linesource = linesource;
     }
 
@@ -76,7 +79,7 @@ public class LongJavaRegexpMatchDetector implements MatchDetector {
             LOG.info("String  = " + rexpString);
 
             final Pattern pattern;
-            pattern = Pattern.compile(rexpString);
+            pattern = compile(rexpString);
             final java.util.regex.Matcher rmatcher = pattern.matcher("");
 
             final Callable<Object> callable = new Callable<Object>() {
@@ -116,7 +119,7 @@ public class LongJavaRegexpMatchDetector implements MatchDetector {
     private Set<String> getSetForAction(final Action action) {
         final Set<String> targetSet;
         if (!actionToRegexpMap.containsKey(action)) {
-            targetSet = new HashSet<String>();
+            targetSet = new HashSet<>();
             actionToRegexpMap.put(action, targetSet);
         } else {
             targetSet = actionToRegexpMap.get(action);
@@ -153,7 +156,7 @@ public class LongJavaRegexpMatchDetector implements MatchDetector {
         final JavaRegexpTester matcher = new JavaRegexpTester(lineMatcher);
 
         final Buffer b = new WutheringHeightsBuffer("corpus/wuth10-one-word-per-line.txt");
-        MatcherBenchmarker.testMatcher(b, matcher, argv);
+        testMatcher(b, matcher, argv);
         LOG.info("No of lines read was " + lineMatcher.getNoOfLines());
     }
 }

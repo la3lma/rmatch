@@ -1,10 +1,19 @@
 package no.rmz.rmatch.performancetests;
 
+import static java.lang.Runtime.getRuntime;
+import static java.lang.System.currentTimeMillis;
+import static java.util.logging.Logger.getLogger;
+import static no.rmz.rmatch.impls.MatcherFactory.newMatcher;
+import static no.rmz.rmatch.performancetests.utils.CSVAppender.append;
+import static no.rmz.rmatch.utils.Counters.dumpCounters;
+
 import no.rmz.rmatch.performancetests.utils.FileInhaler;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 import no.rmz.rmatch.performancetests.utils.CSVAppender;
+
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Action;
@@ -47,7 +56,7 @@ public class SequenceLoaderTest {
      * Our Dear Logger.
      */
     private static final Logger LOG =
-            Logger.getLogger(SequenceLoaderTest.class.getName());
+            getLogger(SequenceLoaderTest.class.getName());
 
     /**
      * The location where we can find a file containing
@@ -116,7 +125,7 @@ public class SequenceLoaderTest {
      */
     @Before
     public final void setUp() {
-        m = MatcherFactory.newMatcher();
+        m = newMatcher();
     }
 
     /**
@@ -188,7 +197,7 @@ public class SequenceLoaderTest {
                 + horseCounter.getCounter());
         assertTrue(finalCount > ARBITRARY_REASONABLE_LOWER_LIMIT_FOR_NO_OF_FINAL_COUNT);
 
-        Counters.dumpCounters();
+        dumpCounters();
     }
 
     /**
@@ -222,11 +231,11 @@ public class SequenceLoaderTest {
         System.out.println("Used this much memory: " + result.getMaxNoOfMbsUsed());
         assertTrue(result.getMaxNoOfMbsUsed() < MAX_MEMORY_TO_USE_IN_MB);
 
-        CSVAppender.append(
+        append(
                 THE_LOCATION_OF_TEST_RESULTS_FOR_VERY_FEW_WORDS,
-                new long[]{System.currentTimeMillis() / MILLIS_IN_SECOND,
+                new long[]{currentTimeMillis() / MILLIS_IN_SECOND,
                     result.getDuration(), result.getMaxNoOfMbsUsed()});
-        Counters.dumpCounters();
+        dumpCounters();
     }
 
     /**
@@ -252,9 +261,9 @@ public class SequenceLoaderTest {
         assertTrue(result.getDuration() < MAX_TIME_TO_USE_IN_MILLIS);
         assertTrue(result.getMaxNoOfMbsUsed() < MAX_MEMORY_TO_USE_IN_MB);
 
-        CSVAppender.append(
+        append(
                 MEASUREMENT_RESULTS_FROM_SOME_WORDS_TESTS,
-                new long[]{System.currentTimeMillis() / MILLIS_IN_SECOND,
+                new long[]{currentTimeMillis() / MILLIS_IN_SECOND,
                     result.getDuration(),
                     result.getMaxNoOfMbsUsed()});
     }
@@ -279,14 +288,14 @@ public class SequenceLoaderTest {
      */
     private CorpusTestResult testWithRegexpsFromFile(final String regexpFile)
             throws RegexpParserException {
-        final long timeAtStart = System.currentTimeMillis();
+        final long timeAtStart = currentTimeMillis();
         LOG.info("Checking matches in file " + regexpFile);
         final FileInhaler fh = new FileInhaler(new File(regexpFile));
         final CounterAction allWordsAction = new CounterAction();
         long noOfThingsToLookFor = 0;
 
         final SortedMap<String, CounterAction> wordCounters =
-                new TreeMap<String, CounterAction>();
+                new TreeMap<>();
 
 
         for (final String word : fh.inhaleAsListOfLines()) {
@@ -310,12 +319,12 @@ public class SequenceLoaderTest {
         LOG.log(Level.INFO,
                 "Total no of ''word''  matches in Wuthering Heights is {0}",
                 new Object[]{noOfMatches});
-        final long timeAtEnd = System.currentTimeMillis();
+        final long timeAtEnd = currentTimeMillis();
         final long duration = (timeAtEnd - timeAtStart);
         LOG.info("Duration was : " + duration + " millis.");
 
 
-        final Runtime runtime = Runtime.getRuntime();
+        final Runtime runtime = getRuntime();
         final int mb = 1024 * 1024;
 
         final long usedMemoryInMb =

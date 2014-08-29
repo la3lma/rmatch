@@ -1,14 +1,18 @@
 package no.rmz.rmatch.performancetests.misc;
 
+import static java.lang.Runtime.getRuntime;
+import static java.lang.System.currentTimeMillis;
+import static java.util.logging.Logger.getLogger;
+import static no.rmz.rmatch.impls.MatcherFactory.newMatcher;
+import static no.rmz.rmatch.performancetests.utils.CSVAppender.append;
+import static no.rmz.rmatch.utils.Counters.dumpCounters;
+
 import no.rmz.rmatch.performancetests.utils.FileInhaler;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
-import no.rmz.rmatch.performancetests.utils.CSVAppender;
 import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.CounterAction;
-import no.rmz.rmatch.utils.Counters;
 
 import java.io.File;
 import java.util.logging.Level;
@@ -24,7 +28,7 @@ public final class HandleTheWutheringHeightsCorpus {
      * Our wonderful log.
      */
     private static final Logger LOG =
-            Logger.getLogger(HandleTheWutheringHeightsCorpus.class.getName());
+            getLogger(HandleTheWutheringHeightsCorpus.class.getName());
 
     /**
      * We need to remember how many milliseconds there are in
@@ -51,9 +55,9 @@ public final class HandleTheWutheringHeightsCorpus {
             throws RegexpParserException {
 
 
-        final Matcher m = MatcherFactory.newMatcher();
+        final Matcher m = newMatcher();
 
-        final long timeAtStart = System.currentTimeMillis();
+        final long timeAtStart = currentTimeMillis();
 
         LOG.log(Level.INFO, "Doing the thing for {0}", filename);
 
@@ -75,22 +79,22 @@ public final class HandleTheWutheringHeightsCorpus {
         LOG.log(Level.INFO,
                 "Total no of ''word  matches in Wuthering Heights is {0}",
                 new Object[]{finalCount});
-        final long timeAtEnd = System.currentTimeMillis();
+        final long timeAtEnd = currentTimeMillis();
         final long duration = (timeAtEnd - timeAtStart);
         LOG.info("Duration was : " + duration + " millis.");
 
 
-        final Runtime runtime = Runtime.getRuntime();
+        final Runtime runtime = getRuntime();
         final int mb = 1024 * 1024;
 
         final long usedMemoryInMb =
                 ((runtime.totalMemory() - runtime.freeMemory()) / mb);
 
-        CSVAppender.append(
+        append(
                 "measurements/handle-the-wuthering-heights-corpus.csv",
-                new long[]{System.currentTimeMillis()
+                new long[]{currentTimeMillis()
                     / MILLISECONDS_IN_A_SECOND, duration, usedMemoryInMb});
-        Counters.dumpCounters();
+        dumpCounters();
     }
 
 
