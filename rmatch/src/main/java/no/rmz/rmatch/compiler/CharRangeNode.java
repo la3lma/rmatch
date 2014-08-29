@@ -17,6 +17,8 @@
 package no.rmz.rmatch.compiler;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
+
 import java.util.Collection;
 
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
@@ -94,7 +96,7 @@ public final class CharRangeNode extends AbstractNDFANode {
     public Collection<PrintableEdge> getEdgesToPrint() {
         final PrintableEdge printableEdge =
                 new PrintableEdge(
-                String.format("%c-%c", start, end),
+                format("%c-%c", start, end),
                 next);
         final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
         result.add(printableEdge);

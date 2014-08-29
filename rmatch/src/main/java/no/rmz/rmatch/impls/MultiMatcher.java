@@ -17,11 +17,16 @@
 package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.*;
+import static java.lang.Runtime.getRuntime;
+import static java.lang.reflect.Array.newInstance;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+
 import java.lang.reflect.Array;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
@@ -91,7 +96,7 @@ public final class MultiMatcher implements Matcher {
      * @return the number of partitions to use
      */
     private static int divineOptimalNumberOfMatchers() {
-       final int cores = Runtime.getRuntime().availableProcessors();
+       final int cores = getRuntime().availableProcessors();
        return cores;
     }
 
@@ -125,12 +130,12 @@ public final class MultiMatcher implements Matcher {
         };
 
         executorService =
-                Executors.newFixedThreadPool(noOfMatchers, threadFactory);
+                newFixedThreadPool(noOfMatchers, threadFactory);
 
         /**
          * Set up a set of partition into which we can pour regexps.
          */
-        matchers = (Matcher[]) Array.newInstance(
+        matchers = (Matcher[]) newInstance(
                 Matcher.class,
                 noOfMatchers);
         for (int i = 0; i < noOfMatchers; i++) {

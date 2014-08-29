@@ -17,6 +17,8 @@
 package no.rmz.rmatch.testutils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.logging.Logger.getLogger;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -24,6 +26,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
+
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.impls.DFANodeImpl;
 import no.rmz.rmatch.interfaces.DFANode;
@@ -41,7 +44,7 @@ public final class GraphDumper {
      * Our log.
      */
     private static final Logger LOG =
-            Logger.getLogger(GraphDumper.class.getName());
+            getLogger(GraphDumper.class.getName());
     /**
      * The filename that will be used for ndfa files.
      */
@@ -323,7 +326,7 @@ public final class GraphDumper {
                 out.printf("%s -> %s [label = \"%c\" ]; \n",
                         nodeName(source),
                         nodeName(entry.getValue()),
-                        entry.getKey().charValue());
+                        entry.getKey());
             }
         }
         out.println("}");

@@ -16,6 +16,8 @@
 
 package no.rmz.rmatch.mockedcompiler;
 
+import static java.lang.Character.valueOf;
+
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.compiler.CharNode;
@@ -42,7 +44,7 @@ public final class CharSequenceCompiler {
     public static NDFANode compile(final Regexp regexp, final String str) {
         NDFANode result = new TerminalNode(regexp);
         for (int i = str.length() - 1; i >= 0; i--) {
-            final Character myChar = Character.valueOf(str.charAt(i));
+            final Character myChar = str.charAt(i);
             result = new CharNode(result, myChar, regexp);
         }
 

@@ -16,6 +16,9 @@
 
 package no.rmz.rmatch.integrationtests;
 
+import static java.lang.Character.valueOf;
+import static no.rmz.rmatch.testutils.GraphDumper.dump;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
@@ -28,14 +31,20 @@ import no.rmz.rmatch.interfaces.RegexpFactory;
 import no.rmz.rmatch.interfaces.RegexpStorage;
 import no.rmz.rmatch.mockedcompiler.CharPlusNode;
 import no.rmz.rmatch.testutils.GraphDumper;
+
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import static org.mockito.Matchers.any;
+
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -86,7 +95,7 @@ public final class APlusTest {
         aplusString = finalaPlus;
         regexp = new RegexpImpl(aplusString);
         final NDFANode aPlusNode =
-                new CharPlusNode(Character.valueOf('a'), regexp, true);
+                new CharPlusNode(valueOf('a'), regexp, true);
 
         when(compiler.compile((Regexp) any(),
                 (RegexpStorage) any())).thenReturn(aPlusNode);
@@ -130,7 +139,7 @@ public final class APlusTest {
 
         m.match(b);
 
-        GraphDumper.dump("testMockedMatchLength1bTerminated",
+        dump("testMockedMatchLength1bTerminated",
                 m.getNodeStorage());
         // Starting out accepting any kind of match
         verify(action).performMatch(b, 0, 0);
@@ -147,7 +156,7 @@ public final class APlusTest {
         m.add(aplusString, action);
 
         m.match(b);
-        GraphDumper.dump("testMockedMatchLength1bTerminatedbPrefixed",
+        dump("testMockedMatchLength1bTerminatedbPrefixed",
                 m.getNodeStorage());
 
         verify(action).performMatch(b, 1, 1);
@@ -209,7 +218,7 @@ public final class APlusTest {
         m.add(aplusString, action);
 
         m.match(b);
-        GraphDumper.dump("testMockedTripleMatchLength7",
+        dump("testMockedTripleMatchLength7",
                 m.getNodeStorage());
 
 

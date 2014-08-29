@@ -17,6 +17,8 @@
 package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.*;
+import static no.rmz.rmatch.utils.Counters.newCounter;
+
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.MatchSet;
 import no.rmz.rmatch.interfaces.Regexp;
@@ -58,7 +60,7 @@ public final class MatchImpl implements Match {
      * A counter that is increased every time a new MatchImpl is generated. Used
      * for logging and benchmarking.
      */
-    private static Counter counter = Counters.newCounter("MatchImpl");
+    private static Counter counter = newCounter("MatchImpl");
 
     /**
      * Create a new Match implementation.

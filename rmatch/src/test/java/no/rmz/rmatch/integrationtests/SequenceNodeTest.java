@@ -15,6 +15,8 @@
  */
 package no.rmz.rmatch.integrationtests;
 
+import static no.rmz.rmatch.mockedcompiler.CharSequenceCompiler.compile;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
@@ -27,12 +29,16 @@ import no.rmz.rmatch.interfaces.RegexpFactory;
 import no.rmz.rmatch.interfaces.RegexpStorage;
 import no.rmz.rmatch.mockedcompiler.CharSequenceCompiler;
 import no.rmz.rmatch.testutils.GraphDumper;
+
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.*;
+
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -107,10 +113,10 @@ public class SequenceNodeTest {
         acRegexp = new RegexpImpl(AC_STRING);
 
         final NDFANode abNode =
-                CharSequenceCompiler.compile(abRegexp, AB_STRING);
+                compile(abRegexp, AB_STRING);
 
         final NDFANode acNode =
-                CharSequenceCompiler.compile(acRegexp, AC_STRING);
+                compile(acRegexp, AC_STRING);
 
         when(compiler.compile(eq(abRegexp),
                 (RegexpStorage) any())).thenReturn(abNode);

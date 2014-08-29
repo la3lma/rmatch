@@ -17,8 +17,11 @@
 
 package no.rmz.rmatch.impls;
 
+import static java.lang.management.ManagementFactory.getOperatingSystemMXBean;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.RegexpFactory;
@@ -44,7 +47,7 @@ public class MatcherFactory {
      * A management bean that we use to probe the execution environment.
      */
     private static final OperatingSystemMXBean OS_MBEAN
-            = ManagementFactory.getOperatingSystemMXBean();
+            = getOperatingSystemMXBean();
 
     /**
      * The number of processors available to us.

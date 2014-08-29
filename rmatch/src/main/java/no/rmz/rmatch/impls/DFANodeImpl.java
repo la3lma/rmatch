@@ -17,12 +17,16 @@
 package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.impls.DFAEdge.newEdge;
+import static no.rmz.rmatch.utils.Counters.newCounter;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.MatchSet;
@@ -41,14 +45,14 @@ public final class DFANodeImpl implements DFANode {
      * Counter used to figure out both how many DFA nodes are allocated, and to
      * generate unique IDs for the nodes (put in the "id" variable).
      */
-    private static Counter DFA_NODE_COUNTER = Counters.newCounter("DFANodeImpl");
+    private static Counter DFA_NODE_COUNTER = newCounter("DFANodeImpl");
 
 
     /**
      * A counter for known edges going to other DFAs.
      */
     private static final Counter KNOWN_DFA_EDGES_COUNTER =
-            Counters.newCounter("Known DFA Edges");
+            newCounter("Known DFA Edges");
 
 
     /**
@@ -184,7 +188,7 @@ public final class DFANodeImpl implements DFANode {
     @Override
     public void addLink(final Character ch, final DFANode n) {
         synchronized (monitor) {
-            nextMap.put(ch,  DFAEdge.newEdge(n));
+            nextMap.put(ch,  newEdge(n));
             KNOWN_DFA_EDGES_COUNTER.inc();
         }
     }

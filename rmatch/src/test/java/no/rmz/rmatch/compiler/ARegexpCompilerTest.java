@@ -16,6 +16,8 @@
 
 package no.rmz.rmatch.compiler;
 
+import static no.rmz.rmatch.testutils.GraphDumper.dump;
+
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.interfaces.Action;
@@ -27,13 +29,18 @@ import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 import no.rmz.rmatch.interfaces.RegexpStorage;
 import no.rmz.rmatch.testutils.GraphDumper;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import static org.mockito.Matchers.any;
+
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -179,7 +186,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("ARegexpCompilerTestAddString",
+        dump("ARegexpCompilerTestAddString",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 0);
     }
@@ -203,7 +210,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("testAddStringLength2",
+        dump("testAddStringLength2",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 1);
     }
@@ -227,7 +234,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("ARegexpCompilerTestSeparateAlternatives",
+        dump("ARegexpCompilerTestSeparateAlternatives",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 0);
     }
@@ -252,7 +259,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("testCharSet",
+        dump("testCharSet",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 0);
     }
@@ -278,7 +285,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("testInverseCharSet",
+        dump("testInverseCharSet",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 0);
     }
@@ -302,7 +309,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("testAddRangeToCharSet",
+        dump("testAddRangeToCharSet",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 0);
     }
@@ -324,7 +331,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("testAddAnyChar",
+        dump("testAddAnyChar",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 0);
     }
@@ -349,7 +356,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("testAddBeginningOfLine",
+        dump("testAddBeginningOfLine",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 0);
     }
@@ -374,7 +381,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("testAddendOfLine",
+        dump("testAddendOfLine",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 0);
     }
@@ -398,7 +405,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("testAddOptionalSingular",
+        dump("testAddOptionalSingular",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 0);
     }
@@ -423,7 +430,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("testAddOptionalZeroOrMulti",
+        dump("testAddOptionalZeroOrMulti",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 5);
     }
@@ -449,7 +456,7 @@ public class ARegexpCompilerTest {
                     }
                 });
 
-        GraphDumper.dump("testAddOptionalOnceOrMulti",
+        dump("testAddOptionalOnceOrMulti",
                 mb.getM().getNodeStorage());
         verify(action).performMatch(mb.getB(), 0, 5);
     }

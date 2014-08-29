@@ -20,11 +20,16 @@ import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.NodeStorage;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.newSetFromMap;
+import static no.rmz.rmatch.utils.Counters.newCounter;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
+
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
 
@@ -63,7 +68,7 @@ public final class MatchSetImpl implements MatchSet {
      * A counter for MatchSetImpls.
      */
     private static final Counter MY_COUNTER =
-            Counters.newCounter("MatchSetImpl");
+            newCounter("MatchSetImpl");
 
     @Override
     public int getStart() {
@@ -79,7 +84,7 @@ public final class MatchSetImpl implements MatchSet {
     public MatchSetImpl(
             final int startIndex,
             final DFANode startNode) {
-        this.matches = Collections.newSetFromMap(
+        this.matches = newSetFromMap(
                 new ConcurrentHashMap<Match, Boolean>());
         checkNotNull(startNode, "Startnode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");

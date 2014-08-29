@@ -16,6 +16,8 @@
 
 package no.rmz.rmatch.impls;
 
+import static java.lang.Integer.valueOf;
+
 import java.util.Comparator;
 
 import static org.junit.Assert.*;
@@ -135,7 +137,7 @@ public final class HeapTest {
 
         for (j = 0; j < maxi; j++) {
             Integer first = h.getFirst();
-            assertEquals(Integer.valueOf(j), first);
+            assertEquals(valueOf(j), first);
             h.remove(first);
         }
     }

@@ -18,6 +18,7 @@ package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.logging.Logger.getLogger;
 
 import java.util.Comparator;
 import java.util.logging.Logger;
@@ -45,7 +46,7 @@ public final class DominationHeap {
      * Our dear Log.
      */
     private static final Logger LOG =
-            Logger.getLogger(DominationHeap.class.getName());
+            getLogger(DominationHeap.class.getName());
     /**
      * A simulated heap of matches.
      */

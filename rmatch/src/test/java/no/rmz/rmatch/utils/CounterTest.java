@@ -15,11 +15,14 @@
  */
 package no.rmz.rmatch.utils;
 
+import static java.util.concurrent.Executors.newFixedThreadPool;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 import java.util.*;
@@ -62,7 +65,7 @@ public class CounterTest {
         final int noOfRunnables = noOfThreadsInPool;
         final int noOfIncrements = noOfRunnables * noOfIterationsInRunnable;
         final ExecutorService executors =
-                Executors.newFixedThreadPool(noOfThreadsInPool);
+                newFixedThreadPool(noOfThreadsInPool);
 
         final Collection<Callable<Object>> runnables = new ArrayList<Callable<Object>>();
 

@@ -16,23 +16,31 @@
 
 package no.rmz.rmatch.impls;
 
+import static no.rmz.rmatch.impls.MatchSetImpl.commitMatch;
+
 import no.rmz.rmatch.impls.DFANodeImpl;
 import no.rmz.rmatch.impls.RunnableMatchesHolder;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.impls.MatchImpl;
 import no.rmz.rmatch.impls.MatchSetImpl;
+
 import java.util.Collections;
 import java.util.Set;
+
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.MatchSet;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
+
 import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.*;
+
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -153,7 +161,7 @@ public class MatchImplTest {
     public final void testCommitDominatingOnFinalMatch() {
         match.setIsFinal();
         match.setInactive();
-        MatchSetImpl.commitMatch(match, mockRunnableMatches);
+        commitMatch(match, mockRunnableMatches);
         verify(mockRunnableMatches).add(match);
     }
 
@@ -168,7 +176,7 @@ public class MatchImplTest {
         when(regexpMocked.isDominating(semiMockedMatch)).thenReturn(false);
         when(regexpMocked.isStronglyDominated(semiMockedMatch))
                 .thenReturn(true);
-        MatchSetImpl.commitMatch(match, mockRunnableMatches);
+        commitMatch(match, mockRunnableMatches);
         verify(mockRunnableMatches, never()).add(semiMockedMatch);
 
     }
@@ -180,7 +188,7 @@ public class MatchImplTest {
     public final void testCommitNonDominatingOnFinalMatch() {
         semiMockedMatch.setIsFinal();
         semiMockedMatch.setInactive();
-        MatchSetImpl.commitMatch(semiMockedMatch, mockRunnableMatches);
+        commitMatch(semiMockedMatch, mockRunnableMatches);
         verify(mockRunnableMatches, never()).add(match);
         //  verify(rexp).abandon(match);
     }

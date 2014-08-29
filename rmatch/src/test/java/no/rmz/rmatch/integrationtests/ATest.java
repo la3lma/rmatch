@@ -16,6 +16,8 @@
 
 package no.rmz.rmatch.integrationtests;
 
+import static java.lang.Character.valueOf;
+
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.NDFACompiler;
@@ -28,14 +30,20 @@ import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.compiler.CharNode;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.compiler.TerminalNode;
+
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import static org.mockito.Matchers.any;
+
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -84,7 +92,7 @@ public final class ATest {
         regexp = new RegexpImpl(aString);
         final NDFANode aNode = new CharNode(
                 new TerminalNode(regexp),
-                Character.valueOf('a'), regexp);
+                valueOf('a'), regexp);
 
         when(compiler.compile((Regexp) any(),
                 (RegexpStorage) any())).thenReturn(aNode);

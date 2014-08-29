@@ -16,6 +16,8 @@
 
 package no.rmz.rmatch.interfaces;
 
+import static java.lang.Long.signum;
+
 import java.util.Comparator;
 
 /**
@@ -131,7 +133,7 @@ public interface Match {
             new Comparator<Match>() {
                 @Override
                 public int compare(final Match t, final Match t1) {
-                    return Long.signum(t.getId() - t1.getId());
+                    return signum(t.getId() - t1.getId());
                 }
             };
     /**

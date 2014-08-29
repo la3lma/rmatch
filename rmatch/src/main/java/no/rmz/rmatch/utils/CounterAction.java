@@ -16,7 +16,12 @@
 
 package no.rmz.rmatch.utils;
 
+import static java.lang.System.currentTimeMillis;
+import static java.util.logging.Logger.getLogger;
+import static no.rmz.rmatch.utils.Counters.getCounters;
+
 import java.util.logging.Logger;
+
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 
@@ -29,7 +34,7 @@ public final class CounterAction implements Action {
      * Our dear old Log.
      */
     private static final Logger LOG =
-            Logger.getLogger(CounterAction.class.getName());
+            getLogger(CounterAction.class.getName());
     /**
      * How long to wait between reports.
      */
@@ -56,7 +61,7 @@ public final class CounterAction implements Action {
      * Initialize the timestamp for the last tick to be the time of class
      * initialization.
      */
-    private long lastTick = System.currentTimeMillis();
+    private long lastTick = currentTimeMillis();
 
     @Override
     public void performMatch(final Buffer b, final int start, final int end) {
@@ -70,7 +75,7 @@ public final class CounterAction implements Action {
             currentCounter = counter;
             doLog = verbose && (currentCounter % tickInterval) == 0;
             if (doLog) {
-                now = System.currentTimeMillis();
+                now = currentTimeMillis();
                 lastTick = now;
             } else {
                 now = -1;
@@ -82,7 +87,7 @@ public final class CounterAction implements Action {
 
             // Collecting a report from the known counters
             final StringBuilder sb = new StringBuilder("");
-            for (final Counter c : Counters.getCounters()) {
+            for (final Counter c : getCounters()) {
                 sb.append("  ").append(c.toString()).append(", ");
             }
 

@@ -16,7 +16,10 @@
 
 package no.rmz.rmatch.abstracts;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.utils.Counters.newCounter;
+
 import java.util.*;
+
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
@@ -54,7 +57,7 @@ public abstract class AbstractNDFANode implements NDFANode {
      * many things, not just for instrumentation. It is also used to generate
      * graphviz graphs and uniquely identify NDFAs in various contexts.
      */
-    static final Counter COUNTER = Counters.newCounter("AbstractNDFANodes");
+    static final Counter COUNTER = newCounter("AbstractNDFANodes");
 
     static {
         COUNTER.setCannotBeDecremented();
@@ -144,7 +147,7 @@ public abstract class AbstractNDFANode implements NDFANode {
      * of this NDFA.
      */
     private static Counter cachedEdgesCounter =
-            Counters.newCounter("Cached edges going to an NDFA.");
+            newCounter("Cached edges going to an NDFA.");
 
     /**
      * Implement breadth first search through the set of nodes for NDFA nodes

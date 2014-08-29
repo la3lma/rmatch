@@ -16,17 +16,22 @@
 
 package no.rmz.rmatch.ordinaryuse;
 
+import static no.rmz.rmatch.testutils.GraphDumper.dump;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.testutils.GraphDumper;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.*;
+
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -87,7 +92,7 @@ public class OrdinaryUsageSmoketest {
 
         m.match(b);
 
-        GraphDumper.dump(
+        dump(
                 "fnord",
                 m.getNodeStorage());
 

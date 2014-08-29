@@ -16,12 +16,20 @@
 
 package no.rmz.rmatch.testutils;
 
+import static java.lang.Integer.valueOf;
+import static java.lang.Integer.valueOf;
+import static java.lang.Integer.valueOf;
+import static java.lang.Integer.valueOf;
+
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import no.rmz.rmatch.utils.SortedSetComparatorImpl;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -70,8 +78,8 @@ public final class ComparableSetTest {
      */
     @Test
     public  void testEqualIdenticalSingeltonSets() {
-        instance1.add(Integer.valueOf(1));
-        instance2.add(Integer.valueOf(1));
+        instance1.add(1);
+        instance2.add(1);
         assertEquals(0, cmp.compare(instance1, instance2));
     }
 
@@ -80,8 +88,8 @@ public final class ComparableSetTest {
      */
     @Test
     public  void testNonIdenticalSingeltonSets() {
-        instance1.add(Integer.valueOf(1));
-        instance2.add(Integer.valueOf(2));
+        instance1.add(1);
+        instance2.add(2);
         assertTrue(cmp.compare(instance1, instance2) < 0);
     }
 }

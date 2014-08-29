@@ -17,9 +17,12 @@
 package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Collections.newSetFromMap;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import no.rmz.rmatch.interfaces.Match;
 
 /**
@@ -31,7 +34,7 @@ public final class RunnableMatchesHolderImpl implements RunnableMatchesHolder {
      * The set we use.
      */
     private final Set<Match> matches =
-            Collections.newSetFromMap(new ConcurrentHashMap<Match, Boolean>());
+            newSetFromMap(new ConcurrentHashMap<Match, Boolean>());
     // XXX Use concurrent skip list instead?
 
     /**
