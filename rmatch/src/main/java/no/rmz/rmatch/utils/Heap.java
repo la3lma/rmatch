@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.concurrent.locks.*;
 
 /**
- * Simulating a heap using a TreeMap.
+ * A wrapper for PriorityQueue being used as a heap.
  *
  * @param <T> The type of the elements in the simulated heap.
  */

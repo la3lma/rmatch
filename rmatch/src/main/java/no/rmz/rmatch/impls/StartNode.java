@@ -113,7 +113,7 @@ public final class StartNode extends AbstractNDFANode {
      * Map of directly outgoing NDFANodes. XXX Never added to. Review and most
      * likely delete.
      */
-    private Map<Character, NDFANode> ndfaOutMap = new HashMap();
+    private final Map<Character, NDFANode> ndfaOutMap = new HashMap();
 
     @Override
     public NDFANode getNextNDFA(final Character ch) {

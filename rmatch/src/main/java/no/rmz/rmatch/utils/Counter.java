@@ -38,7 +38,7 @@ public final class Counter {
     /**
      * The current value of the counter.
      */
-    private AtomicLong value = new AtomicLong(0);
+    private final AtomicLong value = new AtomicLong(0);
     /**
      * A monitor used to regulate access to the counter.
      */
