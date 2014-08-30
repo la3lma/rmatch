@@ -1,0 +1,66 @@
+1, BenchmarkTheWutheringHeightsCorpus, argx = [Ljava.lang.String;@146ccf3e
+Benchmarking wuthering heights for index 1
+#'AbstractNDFANodes'=16
+#'Cached edges going to an NDFA.'=370
+#'DFANodeImpl'=7
+#'Known DFA Edges'=19
+#'MatchImpl'=27
+#'MatchSetImpl'=27
+Done running BenchmarkTheWutheringHeightsCorpus
+0, Benchmarking wuthering heights for index 1
+1
+801, BenchmarkTheWutheringHeightsCorpus, argx = [Ljava.lang.String;@7399f9eb
+Benchmarking wuthering heights for index 801
+#'AbstractNDFANodes'=10518
+#'Cached edges going to an NDFA.'=31666
+#'DFANodeImpl'=3545
+#'Known DFA Edges'=8107
+#'MatchImpl'=589685
+#'MatchSetImpl'=54904
+Done running BenchmarkTheWutheringHeightsCorpus
+2, Benchmarking wuthering heights for index 801
+1
+1601, BenchmarkTheWutheringHeightsCorpus, argx = [Ljava.lang.String;@7399f9eb
+Benchmarking wuthering heights for index 1601
+#'AbstractNDFANodes'=21809
+#'Cached edges going to an NDFA.'=87764
+#'DFANodeImpl'=6997
+#'Known DFA Edges'=18273
+#'MatchImpl'=23509117
+#'MatchSetImpl'=240588
+Done running BenchmarkTheWutheringHeightsCorpus
+7, Benchmarking wuthering heights for index 1601
+1
+2401, BenchmarkTheWutheringHeightsCorpus, argx = [Ljava.lang.String;@7399f9eb
+Benchmarking wuthering heights for index 2401
+#'AbstractNDFANodes'=33180
+#'Cached edges going to an NDFA.'=140040
+#'DFANodeImpl'=10111
+#'Known DFA Edges'=26383
+#'MatchImpl'=30710517
+#'MatchSetImpl'=286072
+Done running BenchmarkTheWutheringHeightsCorpus
+9, Benchmarking wuthering heights for index 2401
+1
+3201, BenchmarkTheWutheringHeightsCorpus, argx = [Ljava.lang.String;@146ccf3e
+Benchmarking wuthering heights for index 3201
+#'AbstractNDFANodes'=45390
+#'Cached edges going to an NDFA.'=203203
+#'DFANodeImpl'=13617
+#'Known DFA Edges'=34252
+#'MatchImpl'=44557442
+#'MatchSetImpl'=382224
+Done running BenchmarkTheWutheringHeightsCorpus
+11, Benchmarking wuthering heights for index 3201
+1
+4001, BenchmarkTheWutheringHeightsCorpus, argx = [Ljava.lang.String;@7399f9eb
+Benchmarking wuthering heights for index 4001
+#'AbstractNDFANodes'=57322
+#'Cached edges going to an NDFA.'=268644
+#'DFANodeImpl'=17295
+#'Known DFA Edges'=44593
+#'MatchImpl'=79221732
+#'MatchSetImpl'=681832
+Done running BenchmarkTheWutheringHeightsCorpus
+18, Benchmarking wuthering heights for index 4001
+2
