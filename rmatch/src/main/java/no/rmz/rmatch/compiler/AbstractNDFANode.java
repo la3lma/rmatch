@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package no.rmz.rmatch.abstracts;
+package no.rmz.rmatch.compiler;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static no.rmz.rmatch.utils.Counters.newCounter;
 

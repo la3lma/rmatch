@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;

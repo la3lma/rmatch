@@ -17,8 +17,8 @@
 package no.rmz.rmatch.compiler;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.Collection;
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
+
+import java.util.Collection;;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;

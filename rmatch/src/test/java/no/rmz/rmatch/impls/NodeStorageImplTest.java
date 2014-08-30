@@ -18,7 +18,7 @@ package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.impls.NodeStorageImpl;
 import java.util.*;
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
+import no.rmz.rmatch.compiler.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.NDFANode;

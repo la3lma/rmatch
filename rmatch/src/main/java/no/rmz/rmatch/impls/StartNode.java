@@ -19,13 +19,14 @@ package no.rmz.rmatch.impls;
 // XXX Don't mix: Either use some sort of NDFA with
 //     a charmap (and epsilons), or use something else. Don't mix!!!
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedSet;
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
+import java.util.SortedSet;;
 import no.rmz.rmatch.interfaces.DFANode;
+import no.rmz.rmatch.compiler.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.NodeStorage;
 import no.rmz.rmatch.interfaces.PrintableEdge;

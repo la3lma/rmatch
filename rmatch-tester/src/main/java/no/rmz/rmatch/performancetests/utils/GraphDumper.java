@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
+import no.rmz.rmatch.compiler.AbstractNDFANode;
 import no.rmz.rmatch.impls.DFANodeImpl;
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.NDFANode;

@@ -16,7 +16,7 @@
 
 package no.rmz.regepfilter.abstracts;
 
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
+import no.rmz.rmatch.compiler.AbstractNDFANode;
 import java.util.Collection;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
