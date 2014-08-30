@@ -136,7 +136,7 @@ public class TestJavaRegexpUnfairly implements Matcher {
 
     @Override
     public void remove(String r, Action a) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");  
     }
 
     @Override

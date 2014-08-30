@@ -27,13 +27,13 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
      * A collector of worker processes that should be used when running the
      * matches.
      */
-    private Collection<Callable<Object>> matchers = new LinkedList<>();
+    private final Collection<Callable<Object>> matchers = new LinkedList<>();
     /**
      * An executor service that will be used to run all the matchers. It should
      * have enough threads to never run out of cores that can do stuff.
      */
     private final ExecutorService es;
-    private LineSource linesource;
+    private final LineSource linesource;
 
     public MultiJavaRegexpMatchDetector(final LineSource linesource) {
         // Don't know what an optimal number is.
@@ -44,7 +44,6 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
     /**
      * Run all the matchers on an input line.
      *
-     * @param input
      */
     @Override
     public void detectMatchesForCurrentLine() {
