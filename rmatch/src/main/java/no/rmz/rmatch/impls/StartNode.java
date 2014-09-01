@@ -111,8 +111,8 @@ public final class StartNode extends AbstractNDFANode {
         addEpsilonEdge(n);
     }
     /**
-     * Map of directly outgoing NDFANodes. XXX Never added to. Review and most
-     * likely delete.
+     * Map of directly outgoing NDFANodes.
+     * XXX Never added to. Review and most  likely delete.
      */
     private final Map<Character, NDFANode> ndfaOutMap = new HashMap();
 
