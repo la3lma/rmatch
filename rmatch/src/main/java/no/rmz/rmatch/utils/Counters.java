@@ -68,13 +68,13 @@ public final class Counters {
     /**
      * A map mapping strings to countes.
      */
-    private final Map<String, Counter> counters =
-            new TreeMap<String, Counter>();
+    private final Map<String, Counter> counters;
 
     /**
      * Since this is an utility class we can't have public constructor.
      */
     private Counters() {
+        this.counters = new TreeMap<>();
     }
 
     /**
