@@ -19,7 +19,6 @@ package no.rmz.rmatch.impls;
 
 import static java.lang.management.ManagementFactory.getOperatingSystemMXBean;
 
-import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 
 import no.rmz.rmatch.compiler.NDFACompilerImpl;

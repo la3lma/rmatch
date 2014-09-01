@@ -63,7 +63,6 @@ public final class MatcherImpl implements Matcher {
     }
 
 
-
     /**
      * This is useful for testing when we sometimes want to
      * inject mocked compilers and regexp factories.

@@ -163,7 +163,8 @@ public final class SurfaceRegexpParser {
                 } else if (ch == '[') {
                     commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
                     arb.startCharSet();
-                    Character nxt = src.peek();
+                    final Character nxt;
+                    nxt = src.peek();
 
                     if (nxt == null) {
                         throw new RegexpParserException(
@@ -174,7 +175,6 @@ public final class SurfaceRegexpParser {
                         arb.invertCharSet();
                         src.next();
                     }
-
 
                     boolean parsingRange = false;
                     while (src.hasNext()) {
@@ -202,7 +202,6 @@ public final class SurfaceRegexpParser {
                         arb.addToCharSet(cs);
                         sb = new StringBuilder();
                     }
-
 
                     arb.endCharSet();
                 } else {

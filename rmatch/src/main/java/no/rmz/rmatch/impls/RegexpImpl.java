@@ -43,12 +43,12 @@ public final class RegexpImpl implements Regexp {
      * The set of actions associated with this regular expression. These actions
      * will be invoked when a match for the regular expression is detected.
      */
-    private final Set<Action> actions = new HashSet<Action>();
+    private final Set<Action> actions = new HashSet<>();
     /**
      * The set of nodes that are currently involved in matching expressions for
      * this regular expression.
      */
-    private final Set<Node> activeNodes = new HashSet<Node>();
+    private final Set<Node> activeNodes = new HashSet<>();
     /**
      * The set of nodes that permit successful termination of matches for this
      * regular expression.
@@ -62,8 +62,7 @@ public final class RegexpImpl implements Regexp {
      * implementation. It may in fact be much saner to put it into the MatchSet,
      * however, the MatchSet doesn't use it itself.
      */
-    private final Map<MatchSet, DominationHeap> heaps =
-            new HashMap<MatchSet, DominationHeap>();
+    private final Map<MatchSet, DominationHeap> heaps;
     /**
      * The starting node in the NDFA that represents this regular expression.
      */
@@ -75,6 +74,7 @@ public final class RegexpImpl implements Regexp {
      * @param rexpString a string representation of the regular expression.
      */
     public RegexpImpl(final String rexpString) {
+        this.heaps = new HashMap<>();
         checkNotNull(rexpString, "regexpString can't be null");
         this.rexpString = rexpString;
     }

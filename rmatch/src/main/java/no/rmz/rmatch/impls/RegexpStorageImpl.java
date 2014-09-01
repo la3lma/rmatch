@@ -40,7 +40,7 @@ public final class RegexpStorageImpl implements RegexpStorage {
      * instances representing those strings.
      *
      */
-    private final Map<String, Regexp> regexps = new HashMap<String, Regexp>();
+    private final Map<String, Regexp> regexps = new HashMap<>();
     /**
      * A NodeStorage instance that is used when creating new nondeterminstic
      * nodes.

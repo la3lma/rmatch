@@ -23,7 +23,6 @@ import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.MatchSet;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.utils.Counter;
-import no.rmz.rmatch.utils.Counters;
 
 /**
  * A representation of a match implementing the Match interface.

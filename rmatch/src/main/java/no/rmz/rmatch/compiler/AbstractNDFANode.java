@@ -35,7 +35,7 @@ public abstract class AbstractNDFANode implements NDFANode {
     /**
      * The set of epsilon-edges going out of this node.
      */
-    private final SortedSet<NDFANode> epsilonSet = new TreeSet<NDFANode>();
+    private final SortedSet<NDFANode> epsilonSet = new TreeSet<>();
     /**
      * The regular expression associated with this NDFA.
      */
