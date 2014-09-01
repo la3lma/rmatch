@@ -83,6 +83,7 @@ public final class CharRange implements Comparable<CharRange> {
         }
     }
 
+    // XXX Use the google hash thing instead of this cruft.
     @Override
     public int hashCode() {
         int hash = 3;
