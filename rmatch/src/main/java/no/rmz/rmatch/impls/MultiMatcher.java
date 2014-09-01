@@ -21,10 +21,8 @@ import static java.lang.Runtime.getRuntime;
 import static java.lang.reflect.Array.newInstance;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
-import java.lang.reflect.Array;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import no.rmz.rmatch.compiler.RegexpParserException;
