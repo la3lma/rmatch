@@ -53,12 +53,12 @@ public final class MatchSetImpl implements MatchSet {
     /**
      * The start position of all the matches associated with this MatchSetImpl.
      */
-    private int start;
+    private final int start;
     /**
      * An identifier uniquely identifying this MatchSetImpl among other
      * MatchSetImpl instances.
      */
-    private long id;
+    private final long id;
     /**
      * A counter for MatchSetImpls.
      */
@@ -166,7 +166,6 @@ public final class MatchSetImpl implements MatchSet {
         if (currentEdge.leadsNowhere()) {
             currentNode = null; // XXX Bad smell!
             deactivateMatches(runnableMatches);
-            return;
         } else {
             // Get the next node.
             currentNode = checkNotNull(currentEdge.getTarget());
@@ -223,7 +222,7 @@ public final class MatchSetImpl implements MatchSet {
     public void finalCommit(final RunnableMatchesHolder runnableMatches) {
         checkNotNull(runnableMatches, "Target can't be null");
 
-        final Set<Regexp> visitedRegexps = new HashSet<Regexp>();
+        final Set<Regexp> visitedRegexps = new HashSet<>();
 
         for (final Match m : matches) {
             // We can't commit what isn't final or is still active
