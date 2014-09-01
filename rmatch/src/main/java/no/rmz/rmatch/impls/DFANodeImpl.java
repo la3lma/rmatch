@@ -34,7 +34,6 @@ import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.NodeStorage;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.utils.Counter;
-import no.rmz.rmatch.utils.Counters;
 
 /**
  * An implementation of deterministic finite automata nodes DFA.
@@ -45,7 +44,7 @@ public final class DFANodeImpl implements DFANode {
      * Counter used to figure out both how many DFA nodes are allocated, and to
      * generate unique IDs for the nodes (put in the "id" variable).
      */
-    private static Counter DFA_NODE_COUNTER = newCounter("DFANodeImpl");
+    private static final Counter DFA_NODE_COUNTER = newCounter("DFANodeImpl");
 
 
     /**
@@ -58,18 +57,18 @@ public final class DFANodeImpl implements DFANode {
     /**
      * The set of regular expression this node represents.
      */
-    private Set<Regexp> regexps = new HashSet<Regexp>();
+    private final Set<Regexp> regexps = new HashSet<>();
     /**
      * A map of computed edges going out of this node. There may be more edges
      * going out of this node, but these are the nodes that has been encountered
      * so far during matching.
      */
-    private Map<Character, DFAEdge> nextMap = new HashMap<Character, DFAEdge>();
+    private final Map<Character, DFAEdge> nextMap = new HashMap<>();
 
     /**
      * The set of NDFANodes that this DFA node is representing.
      */
-    private SortedSet<NDFANode> basis = new TreeSet<NDFANode>();
+    private final SortedSet<NDFANode> basis = new TreeSet<>();
     /**
      * Monitor for synchronized access to methods.
      */
@@ -78,15 +77,12 @@ public final class DFANodeImpl implements DFANode {
      * The set of regular expressions for which this node will make a match
      * fail.
      */
-    private Set<Regexp> isFailingSet = new HashSet<Regexp>();
-
+    private final Set<Regexp> isFailingSet = new HashSet<>();
 
     /**
      * An unique (per VM) id for this DFANode.
      */
     private final long id;
-
-
 
     /**
      * Create a new DFA based representing a set of NDFA nodes.
@@ -144,7 +140,7 @@ public final class DFANodeImpl implements DFANode {
      */
     public Map<Character, DFANode> getNextMap() {
 
-        final Map<Character, DFANode> result = new HashMap<Character, DFANode>();
+        final Map<Character, DFANode> result = new HashMap<>();
         for (final Map.Entry<Character, DFAEdge> entry: nextMap.entrySet() ) {
             if (entry.getValue().getTarget() != null) {
                 result.put(entry.getKey(), entry.getValue().getTarget());
@@ -207,7 +203,7 @@ public final class DFANodeImpl implements DFANode {
      */
     private SortedSet<NDFANode> getNextThroughBasis(final Character ch) {
         synchronized (monitor) {
-            final SortedSet<NDFANode> result = new TreeSet<NDFANode>();
+            final SortedSet<NDFANode> result = new TreeSet<>();
             for (final NDFANode n : basis) {
                 final SortedSet<NDFANode> nextSet = n.getNextSet(ch);
                 result.addAll(nextSet);
