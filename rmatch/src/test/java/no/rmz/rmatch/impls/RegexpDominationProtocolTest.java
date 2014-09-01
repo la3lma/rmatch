@@ -16,15 +16,14 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.impls.DFANodeImpl;
-import no.rmz.rmatch.impls.RegexpImpl;
-import no.rmz.rmatch.impls.MatchImpl;
-import no.rmz.rmatch.impls.MatchSetImpl;
 import static com.google.common.base.Preconditions.*;
+
 import java.util.Collections;
-import java.util.logging.Logger;
+
 import no.rmz.rmatch.interfaces.Match;
+
 import org.junit.*;
+
 import static org.junit.Assert.*;
 
 /**
@@ -65,8 +64,7 @@ public final class RegexpDominationProtocolTest {
         final MatchSetImpl ms = new MatchSetImpl(1, sn);
         // The variable m isn't used, but since we makea new
         // match impl, it will indirectly affect the result of the test
-
-        new MatchImpl(ms, re); // Implicit registration!
+        final MatchImpl matchImpl = new MatchImpl(ms, re); // Implicit registration!
         assertTrue(re.hasMatches());  // Due to implicit registration
     }
 

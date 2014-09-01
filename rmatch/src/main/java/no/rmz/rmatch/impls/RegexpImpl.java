@@ -53,7 +53,7 @@ public final class RegexpImpl implements Regexp {
      * The set of nodes that permit successful termination of matches for this
      * regular expression.
      */
-    private final Set<Node> terminatingNodes = new HashSet<Node>();
+    private final Set<Node> terminatingNodes = new HashSet<>();
     /**
      * A map from MatchSets to Domination heaps, so that we can get a domination
      * heap that is used to represent the matches within a single match set.

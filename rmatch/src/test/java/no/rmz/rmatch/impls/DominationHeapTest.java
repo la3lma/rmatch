@@ -16,15 +16,19 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.impls.DominationHeap;
 import java.util.Comparator;
+
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.Regexp;
+
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import org.junit.Before;
+
 import static org.junit.Assert.*;
+
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.*;
 
 import org.mockito.runners.MockitoJUnitRunner;

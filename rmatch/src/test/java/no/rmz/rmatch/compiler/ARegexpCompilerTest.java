@@ -28,7 +28,6 @@ import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 import no.rmz.rmatch.interfaces.RegexpStorage;
-import no.rmz.rmatch.testutils.GraphDumper;
 
 import org.junit.Ignore;
 import org.junit.Test;

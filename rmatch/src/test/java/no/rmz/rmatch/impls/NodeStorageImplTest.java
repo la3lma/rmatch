@@ -16,8 +16,8 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.impls.NodeStorageImpl;
 import java.util.*;
+
 import no.rmz.rmatch.compiler.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.DFANode;
@@ -25,13 +25,18 @@ import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.utils.StringBuffer;
+
 import org.junit.After;
+
 import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.*;
+
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -198,8 +203,8 @@ public class NodeStorageImplTest {
         final NDFANode n3 = new LoopyNdfaNode(r3);
 
         // Setting up the fixture for this test.
-        final SortedSet<NDFANode> s12d1 = new TreeSet<NDFANode>();
-        final SortedSet<NDFANode> s12d2 = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> s12d1 = new TreeSet<>();
+        final SortedSet<NDFANode> s12d2 = new TreeSet<>();
 
         s12d1.add(n1);
         s12d1.add(n2);
@@ -207,8 +212,8 @@ public class NodeStorageImplTest {
         s12d2.add(n1);
         s12d2.add(n2);
 
-        final SortedSet<NDFANode> s13d1 = new TreeSet<NDFANode>();
-        final SortedSet<NDFANode> s13d2 = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> s13d1 = new TreeSet<>();
+        final SortedSet<NDFANode> s13d2 = new TreeSet<>();
 
         s13d1.add(n1);
         s13d1.add(n3);
@@ -216,8 +221,8 @@ public class NodeStorageImplTest {
         s13d2.add(n1);
         s13d2.add(n3);
 
-        final SortedSet<NDFANode> s23d1 = new TreeSet<NDFANode>();
-        final SortedSet<NDFANode> s23d2 = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> s23d1 = new TreeSet<>();
+        final SortedSet<NDFANode> s23d2 = new TreeSet<>();
 
         s23d1.add(n2);
         s23d1.add(n3);

@@ -21,10 +21,12 @@ import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Node;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.utils.StringBuffer;
+
 import org.junit.*;
+
 import static org.junit.Assert.*;
+
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;

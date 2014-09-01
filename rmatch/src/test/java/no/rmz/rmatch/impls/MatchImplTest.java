@@ -18,12 +18,6 @@ package no.rmz.rmatch.impls;
 
 import static no.rmz.rmatch.impls.MatchSetImpl.commitMatch;
 
-import no.rmz.rmatch.impls.DFANodeImpl;
-import no.rmz.rmatch.impls.RunnableMatchesHolder;
-import no.rmz.rmatch.impls.RegexpImpl;
-import no.rmz.rmatch.impls.MatchImpl;
-import no.rmz.rmatch.impls.MatchSetImpl;
-
 import java.util.Collections;
 import java.util.Set;
 
@@ -244,6 +238,4 @@ public class MatchImplTest {
         final Regexp result = match.getRegexp();
         assertEquals(regexpReal, result);
     }
-    
-    
 }

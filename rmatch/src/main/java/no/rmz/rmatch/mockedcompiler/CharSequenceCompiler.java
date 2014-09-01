@@ -16,8 +16,6 @@
 
 package no.rmz.rmatch.mockedcompiler;
 
-import static java.lang.Character.valueOf;
-
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.compiler.CharNode;

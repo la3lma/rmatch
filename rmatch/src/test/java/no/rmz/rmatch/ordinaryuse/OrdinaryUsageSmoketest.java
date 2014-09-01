@@ -23,7 +23,6 @@ import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.testutils.GraphDumper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -80,6 +79,7 @@ public class OrdinaryUsageSmoketest {
 
     /**
      * Test matching the two regexps concurrently.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public final void testUseOfOrdinaryMatcherImpl() throws RegexpParserException {

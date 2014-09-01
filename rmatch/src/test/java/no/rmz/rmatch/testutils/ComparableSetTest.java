@@ -16,11 +16,6 @@
 
 package no.rmz.rmatch.testutils;
 
-import static java.lang.Integer.valueOf;
-import static java.lang.Integer.valueOf;
-import static java.lang.Integer.valueOf;
-import static java.lang.Integer.valueOf;
-
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -59,9 +54,9 @@ public final class ComparableSetTest {
      */
     @Before
     public  void setUp() {
-        instance1 = new TreeSet<Integer>();
-        instance2 = new TreeSet<Integer>();
-        cmp = new SortedSetComparatorImpl<Integer>();
+        instance1 = new TreeSet<>();
+        instance2 = new TreeSet<>();
+        cmp = new SortedSetComparatorImpl<>();
     }
 
     /**

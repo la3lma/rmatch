@@ -17,20 +17,24 @@ package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.impls.RegexpStorageImpl;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.RegexpStorage;
 import no.rmz.rmatch.interfaces.NDFACompiler;
 import no.rmz.rmatch.interfaces.NodeStorage;
+
 import java.util.*;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 
 import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.*;
+
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -105,6 +109,7 @@ public final class RegexpStorageTest {
 
     /**
      * Adding and removing regexps.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testAddRemoveRegexp() throws RegexpParserException {

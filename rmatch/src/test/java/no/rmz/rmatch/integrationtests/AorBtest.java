@@ -116,6 +116,7 @@ public final class AorBtest {
     /**
      * This is kind of a tripwire test. It was written since no actions were run
      * i testMockedMatch.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
@@ -127,6 +128,7 @@ public final class AorBtest {
 
     /**
      * Look for match in first alternative.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testFirstAlternative() throws RegexpParserException {
@@ -144,6 +146,7 @@ public final class AorBtest {
 
     /**
      * Look for match in second alternative.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testSecondAlternative() throws RegexpParserException {
@@ -161,6 +164,7 @@ public final class AorBtest {
     /**
      * Look for match of first alternative sandwiched between two
      * nonmatching characters.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testMatchForFirstInSandwichedPositon() throws RegexpParserException {
@@ -178,6 +182,7 @@ public final class AorBtest {
     /**
      * Look for match of second alternative sandwiched between to nonmatching
      * characters.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testMatchForSecondInSandwichedPositon() throws RegexpParserException {

@@ -1,0 +1,6 @@
+PASSPHRASE="xxx"
+
+for phase in clean prepare perform ; do 
+ mvn release:${PHASE} -Dgpg.passphrase="${PASSPHRASE}" -Dgpg.arguments="${PASSPHRASE}"
+done
+

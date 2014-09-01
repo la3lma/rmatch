@@ -84,6 +84,7 @@ public final class ATest {
 
     /**
      * Set up test items and a mocked context.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Before
     public void setUp() throws RegexpParserException {
@@ -115,6 +116,7 @@ public final class ATest {
     /**
      * This is kind of a tripwire test. It was written since no actions were run
      * i testMockedMatch.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
@@ -127,6 +129,7 @@ public final class ATest {
 
     /**
      * Look for a match terminated by the character  "b".
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testBterminated() throws RegexpParserException {
@@ -143,6 +146,7 @@ public final class ATest {
 
     /**
      * Look for a match terminated by end of string.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testEOSterminated() throws RegexpParserException {
