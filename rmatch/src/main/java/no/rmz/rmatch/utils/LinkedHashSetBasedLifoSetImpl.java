@@ -21,23 +21,21 @@ import java.util.*;
 /**
  * A mixture between a set and a LIFO stack. Adding the same element more than
  * once will not insert it more than once.
- * @param <> is the class of the instances that the LifoSetImpl will contain.
+ * @param <T>
  */
 public final  class LinkedHashSetBasedLifoSetImpl<T> implements LifoSet<T> {
 
+    // XXX I'm dubious about the synchronization model for this class.
+    //     It looks bogus to me.
+    
     /**
      * A set that holds all the member of the lifoset.
      */
     private final LinkedHashSet<T> members =
-           //  Collections.synchronizedSet(
-                    new LinkedHashSet<T>()
-            // )
-            ;
-
+                    new LinkedHashSet<>();
 
     public  LinkedHashSetBasedLifoSetImpl() {
     }
-
 
     /**
      * True iff there are no members.
