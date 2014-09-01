@@ -205,7 +205,7 @@ public abstract class AbstractNDFANode implements NDFANode {
                 // epsilons, and all the nodes we have already put into the
                 // result set.   The difference is added to the
                 // set of unexplored nodes.
-                final Set<NDFANode> newNodes = new HashSet<NDFANode>();
+                final Set<NDFANode> newNodes = new HashSet<>();
                 final Set<NDFANode> epsilons = current.getEpsilons();
                 if (!epsilons.isEmpty()) {
                     newNodes.addAll(epsilons);
@@ -303,7 +303,7 @@ public abstract class AbstractNDFANode implements NDFANode {
      * @return A collection of PrintableEdge instances.
      */
     public final Collection<PrintableEdge> getEpsilonEdgesToPrint() {
-        final Collection<PrintableEdge> result = new ArrayList<PrintableEdge>();
+        final Collection<PrintableEdge> result = new ArrayList<>();
         synchronized (monitor) {
             for (final NDFANode n : epsilonSet) {
                 result.add(new PrintableEdge(null, n));
