@@ -31,11 +31,11 @@ public final  class ListSetLifoSetImpl<T> implements LifoSet<T> {
     /**
      * A set that holds all the member of the lifoset.
      */
-    private final Set<T> members = new HashSet<T>();
+    private final Set<T> members = new HashSet<>();
     /**
      * A list that is used to represent the LIFO aspect of the LIFO set.
      */
-    private final List<T> lifo = new ArrayList<T>();
+    private final List<T> lifo = new ArrayList<>();
 
     public  ListSetLifoSetImpl() {
     }
