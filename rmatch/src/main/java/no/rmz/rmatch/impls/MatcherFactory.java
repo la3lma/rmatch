@@ -25,7 +25,6 @@ import no.rmz.rmatch.compiler.NDFACompilerImpl;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 
-
 /**
  * A factory instance that will generate matcher instances that
  * are optimized for the  urrent execution environment.  It's
@@ -64,7 +63,6 @@ public class MatcherFactory {
     public final static Matcher newMatcher() {
 
         final int noOfPartitions = no_of_available_processors * OVERBOOKING;
-
 
         return new MultiMatcher(
                 noOfPartitions,
