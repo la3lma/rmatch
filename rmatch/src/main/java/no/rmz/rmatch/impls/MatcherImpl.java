@@ -62,7 +62,6 @@ public final class MatcherImpl implements Matcher {
         this(new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
     }
 
-
     /**
      * This is useful for testing when we sometimes want to
      * inject mocked compilers and regexp factories.
@@ -97,12 +96,8 @@ public final class MatcherImpl implements Matcher {
 
     @Override
     public void match(final Buffer b) {
-
-        // XXX This is a hotspot wrt locking.  Is it
-        //     even necessary?
-   //       synchronized (me) {
-            me.match(b);
-   //     }
+        // XXX Should this be better synchronized?
+        me.match(b);
     }
 
     @Override
