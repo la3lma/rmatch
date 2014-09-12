@@ -42,7 +42,7 @@ public final class StringSource {
 
     /**
      * Create a new instance of the StringSource.
-     * @param string ther string we will be getting characters from.
+     * @param string the string we will be getting characters from.
      */
     public StringSource(final String string) {
         this.string = checkNotNull(string);
@@ -67,7 +67,7 @@ public final class StringSource {
     }
 
     /**
-     * If more characters after thd current, then return then return the
+     * If more characters after the current, then return then return the
      * next character without advancing the index pointer, otherwise return
      * null.
      * @return next character or null if there are no more characters to read.
