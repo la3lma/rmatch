@@ -41,7 +41,7 @@ public final class CharPlusNode extends AbstractNDFANode {
      * @param ch The character that will be recognized.
      * @param r The regular expression that this node is representing.
      * @param isTerminal True iff this node represents legal terminations of the
-     * regexp r.
+     *        regexp r.
      */
     public CharPlusNode(
             final Character ch,

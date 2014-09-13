@@ -87,6 +87,7 @@ public final class APlusTest {
      * CharPlusNode instance for "a" and a RegexpFactory that
      * will get the mocked compilation result when asked to compile
      * the string "a+".
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Before
     public void setUp() throws RegexpParserException {
