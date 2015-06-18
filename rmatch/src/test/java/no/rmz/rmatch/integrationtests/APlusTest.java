@@ -118,6 +118,7 @@ public final class APlusTest {
     /**
      * This is kind of a tripwire test. It was written since no actions were run
      * i testMockedMatch.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
@@ -129,6 +130,7 @@ public final class APlusTest {
 
     /**
      * Check that the string "ab" matches.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testMockedMatchLength1bTerminated() throws RegexpParserException {
@@ -147,6 +149,7 @@ public final class APlusTest {
 
     /**
      * Check that at match is found in  the string "bab".
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testMockedMatchLength1bTerminatedbPrefixed() throws RegexpParserException {
@@ -164,6 +167,7 @@ public final class APlusTest {
 
     /**
      * Check that the string "a" matches.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testMockedMatchLength1() throws RegexpParserException {
@@ -178,6 +182,7 @@ public final class APlusTest {
 
     /**
      * Test that the string "aa" matches.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testMockedMatchLength2() throws RegexpParserException {
@@ -194,6 +199,7 @@ public final class APlusTest {
 
     /**
      * Test that the string "aaa" matches.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testMockedMatchLength3() throws RegexpParserException {
@@ -209,6 +215,7 @@ public final class APlusTest {
 
     /**
      * Find multiple matches for the string "ababaab".
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testMockedTripleMatchLength7() throws RegexpParserException {

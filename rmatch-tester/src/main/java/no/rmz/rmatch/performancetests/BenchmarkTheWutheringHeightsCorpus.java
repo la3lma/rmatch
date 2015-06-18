@@ -5,7 +5,10 @@ import static no.rmz.rmatch.impls.MatcherFactory.newMatcher;
 import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.testMatcher;
 
 import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.impls.*;
 import no.rmz.rmatch.interfaces.*;
+
+import java.util.*;
 
 /**
  * A test scenario that will match a bunch of regular expressions against the
@@ -39,9 +42,11 @@ public final class BenchmarkTheWutheringHeightsCorpus {
             argx = argv;
         }
 
-        System.out.println("BenchmarkTheWutheringHeightsCorpus, argx = " + argx);
+        System.out.println("BenchmarkTheWutheringHeightsCorpus, argx = " + Arrays.toString(argx));
         final Matcher m = newMatcher();
         testMatcher(m, argx);
+
+        MatchSetImpl.dumpMatchStats();
 
         // This should normally not be done, since it's slow.  Haven't bothered
         // to add a switch for it yet.

@@ -20,31 +20,37 @@ import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.NodeStorage;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
 
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.*;
 
 /**
  * A an implementation of the MatchSet interface. A MatchSet keeps a set of
  * matches which starts from the same location in the input. The MatchSet will
- * initially contain several matches. As the matching process progressses fewer
+ * initially contain several matches. As the matching process progresses fewer
  * and fewer matches will remain, and eventually they will all be removed either
  * when firing an action, or just removed since it is discovered that the match
  * can not be brought to be final and then executed..
  */
 public final class MatchSetImpl implements MatchSet {
 
+    private final static Logger  LOG =
+            Logger.getLogger(MatchSetImpl.class.getName());
+
     /**
      * The set of matches being pursued through this MatchSetImpl.
      */
-    private Set<Match> matches;
+    private final Set<Match> matches;
     /**
      * The current determinstic node that is used when pushing the matches
      * further.
@@ -108,6 +114,7 @@ public final class MatchSetImpl implements MatchSet {
     private void addMatches(final DFANode startNode) {
         assert (startNode != null);
 
+        // There are about ten regexps added here.
         for (final Regexp r : currentNode.getRegexps()) {
             matches.add(startNode.newMatch(this, r));
         }

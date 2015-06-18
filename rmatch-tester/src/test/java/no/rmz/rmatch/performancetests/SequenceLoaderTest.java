@@ -247,7 +247,7 @@ public class SequenceLoaderTest {
 
     /**
      * Check with a few more regexps.
-     * @throws RegexpParserExecption when syntax errors occur.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Test
     public void testWutheringHeightsCorpusWithSomeRegexps()
@@ -272,7 +272,7 @@ public class SequenceLoaderTest {
      * Test with a regexp for just about every word occuring in
      * the corpus.
      *
-     * @throws RegexpParserExecption when syntax errors occur.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     @Ignore
     @Test
@@ -289,7 +289,7 @@ public class SequenceLoaderTest {
     private CorpusTestResult testWithRegexpsFromFile(final String regexpFile)
             throws RegexpParserException {
         final long timeAtStart = currentTimeMillis();
-        LOG.info("Checking matches in file " + regexpFile);
+        LOG.log(Level.INFO, "Checking matches in file {0}", regexpFile);
         final FileInhaler fh = new FileInhaler(new File(regexpFile));
         final CounterAction allWordsAction = new CounterAction();
         long noOfThingsToLookFor = 0;
@@ -306,22 +306,21 @@ public class SequenceLoaderTest {
             noOfThingsToLookFor++;
         }
 
-        LOG.info("no of words to look for: " + noOfThingsToLookFor);
+        LOG.log(Level.INFO, "no of words to look for: {0}", noOfThingsToLookFor);
 
         final Buffer b = new WutheringHeightsBuffer();
         m.match(b);
 
-        LOG.info("No of characters read:  "
-                + b.getCurrentPos()
-                + " chars from "
-                + regexpFile);
+        LOG.log(Level.INFO, "No of characters read:  {0} chars from {1}",
+                new Object[]{b.getCurrentPos(),
+                regexpFile});
         final int noOfMatches = allWordsAction.getCounter();
         LOG.log(Level.INFO,
                 "Total no of ''word''  matches in Wuthering Heights is {0}",
                 new Object[]{noOfMatches});
         final long timeAtEnd = currentTimeMillis();
         final long duration = (timeAtEnd - timeAtStart);
-        LOG.info("Duration was : " + duration + " millis.");
+        LOG.log(Level.INFO, "Duration was : {0} millis.", duration);
 
 
         final Runtime runtime = getRuntime();
