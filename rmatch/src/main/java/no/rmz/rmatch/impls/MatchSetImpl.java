@@ -101,7 +101,10 @@ public final class MatchSetImpl implements MatchSet {
         //     text that is l characters long, this  in turns
         //     adds a factor O(l*m) to the resource use of the
         //     algorithm.  Clearly not logarithmic in the number
-        //     of expressions, and thus a major nuisance.
+        //     of expressions, and thus a major nuisance.  Fix this
+        //     and we'll be an order of magnitude or two faster,
+        //     and then we're breathing java's native regexps down
+        //     the neck. But not before.
         addMatches(startNode);
     }
 
@@ -114,7 +117,7 @@ public final class MatchSetImpl implements MatchSet {
     private void addMatches(final DFANode startNode) {
         assert (startNode != null);
 
-        // There are about ten regexps added here.
+        // There are about ten regexps added here, on average.
         for (final Regexp r : currentNode.getRegexps()) {
             matches.add(startNode.newMatch(this, r));
         }
