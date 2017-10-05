@@ -1,10 +1,5 @@
 package no.rmz.rmatch.performancetests;
 
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
-import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.*;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +12,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.*;
 import java.util.regex.Pattern;
+import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 
 /**
  * The intent of this class is to look for matches in the wuthering heights
@@ -35,6 +34,24 @@ public class TestJavaRegexpUnfairly implements Matcher {
     private final static Logger LOG =
             Logger.getLogger(TestJavaRegexpUnfairly.class.getName());
     /**
+     * The main method.
+     *
+     * @param argv Command line arguments. If present, arg 1 is interpreted as a
+     * maximum limit on the number of regexps to use.
+     * @throws RegexpParserException when things go bad.
+     */
+    public static void main(final String[] argv) throws RegexpParserException {
+        
+        final Matcher matcher = new TestJavaRegexpUnfairly();
+        
+        final Buffer b = new WutheringHeightsBuffer("corpus/wuthr10.txt");
+        
+        MatcherBenchmarker.testMatcher(b, matcher, argv);
+        
+        // Kill all threads and get out of here
+        System.exit(0);
+    }
+    /**
      * A map that for all the actions we are managing, keeps track of all the
      * regexps that are triggered by that particular action.
      */
@@ -44,7 +61,7 @@ public class TestJavaRegexpUnfairly implements Matcher {
      * A collector of worker processes that should be used when running the
      * matches.
      */
-    private Collection<Callable<Object>> matchers = new LinkedList<>();
+    private final Collection<Callable<Object>> matchers = new LinkedList<>();
     /**
      * An executor service that will be used to run all the matchers. It should
      * have enough threads to never run out of cores that can do stuff.
@@ -54,7 +71,7 @@ public class TestJavaRegexpUnfairly implements Matcher {
      * A state parameter for the class. When in matching state it is illegal to
      * add more regexp/action pairs.
      */
-    private boolean matching = false;
+    private final boolean matching = false;
 
     public TestJavaRegexpUnfairly() {
         // Don't know what an optimal number is.
@@ -144,22 +161,4 @@ public class TestJavaRegexpUnfairly implements Matcher {
     public void shutdown() throws InterruptedException {
     }
 
-    /**
-     * The main method.
-     *
-     * @param argv Command line arguments. If present, arg 1 is interpreted as a
-     * maximum limit on the number of regexps to use.
-     * @throws RegexpParserException when things go bad.
-     */
-    public static void main(final String[] argv) throws RegexpParserException {
-
-        final Matcher matcher = new TestJavaRegexpUnfairly();
-
-        final Buffer b = new WutheringHeightsBuffer("corpus/wuthr10.txt");
-
-        MatcherBenchmarker.testMatcher(b, matcher, argv);
-
-        // Kill all threads and get out of here
-        System.exit(0);
-    }
 }

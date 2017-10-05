@@ -1,22 +1,16 @@
 package no.rmz.rmatch.performancetests;
 
+import java.util.Arrays;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.performancetests.utils.GraphDumper;
 
 /**
  * A test scenario that will match a bunch of regular expressions against the
  * text of Emily Brontes Wuthering Heights.
  */
 public final class BenchmarkTheWutheringHeightsCorpus {
-
-    /**
-     * No public constructor in an utility class.
-     */
-    private BenchmarkTheWutheringHeightsCorpus() {
-    }
 
     /**
      * The main method.
@@ -27,16 +21,15 @@ public final class BenchmarkTheWutheringHeightsCorpus {
      */
     public static void main(final String[] argv) throws RegexpParserException {
         // Get a matcher from the MatcherFactory.
-
-
+        
+        
         final String[] argx;
         if (argv == null || argv.length == 0) {
             argx = new String[] {"200"};
         } else {
             argx = argv;
         }
-
-        System.out.println("BenchmarkTheWutheringHeightsCorpus, argx = " + argx);
+        System.out.println("BenchmarkTheWutheringHeightsCorpus, argx = " + Arrays.toString(argx));
         final Matcher m = MatcherFactory.newMatcher();
         MatcherBenchmarker.testMatcher(m, argx);
 
@@ -45,8 +38,13 @@ public final class BenchmarkTheWutheringHeightsCorpus {
         // GraphDumper.dump(
         //          "benchmarkTheWutheringHeightsCorpus",
         //         m.getNodeStorage());
-
-        System.out.println("Done running BenchmarkTheWutheringHeightsCorpus");
         System.exit(0);
     }
+
+    /**
+     * No public constructor in an utility class.
+     */
+    private BenchmarkTheWutheringHeightsCorpus() {
+    }
+
 }
