@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Our task is to run the unfair test with an increasing number of matches
-# to run, and to run that in lock-step with a test using rmatch, 
+# to run, and to run that in lock-step with a test using rmatch,
 # measuring the time for each of these and dropping the result
 # into the logfile
 
@@ -36,7 +36,7 @@ LOGFILE="${LOGDIR}/logfile-${DATETIME}.csv"
 if [ -f "$LOGFILE" ] ; then
  echo "Oops.  The logfile ${LOGFILE} already exists. I don't dare to overwrite. Bailing out."
  echo 1
-else 
+else
  touch "$LOGFILE"
 fi
 
@@ -45,7 +45,7 @@ fi
 # to each test.
 
 STARTINDEX=1
-STEPSIZE=100
+STEPSIZE=1000
 NO_OF_REGEXPS=$(wc -l "$WORDS" | awk '{print $1}')
 
 function secondsSinceEpoch {
@@ -66,17 +66,17 @@ function runTest {
 
 function plotResults {
     PLOTDIR=plots
-    
-    if [ ! -d "$PLOTDIR" ] ; then 
+
+    if [ ! -d "$PLOTDIR" ] ; then
 	mkdir -p "$PLOTDIR"
     fi
-     
+
     PLOTFILE="${PLOTDIR}/results-${DATETIME}.ps"
     echo "Logging gnuplot visualization of test run results in plotfile ${PLOTFILE}"
-    if [ -f "${PLOTFILE}" ] ; then 
+    if [ -f "${PLOTFILE}" ] ; then
 	rm "${PLOTFILE}"
     fi
-    
+
     gnuplot -e "logfile='${LOGFILE}'; set terminal postscript landscape color" bin/plot-graph.gp > "${PLOTFILE}"
 }
 
@@ -98,5 +98,3 @@ while [  "$currentNoOfRegexps"  -le "$NO_OF_REGEXPS" ] ; do
    # even if the test fails some ways into the testrun.
    plotResults
 done
-
-
