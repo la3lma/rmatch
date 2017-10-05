@@ -37,7 +37,7 @@ public class LongJavaRegexpMatchDetector implements MatchDetector {
      * A collector of worker processes that should be used when running the
      * matches.
      */
-    private Collection<Callable<Object>> matchers = new LinkedList<>();
+    private final Collection<Callable<Object>> matchers = new LinkedList<>();
     /**
      * An executor service that will be used to run all the matchers. It should
      * have enough threads to never run out of cores that can do stuff.
