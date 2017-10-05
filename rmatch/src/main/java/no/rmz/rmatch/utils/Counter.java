@@ -18,6 +18,7 @@ package no.rmz.rmatch.utils;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A counter that will give integer values starting from zero.
@@ -25,32 +26,37 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class Counter {
 
     /**
-     * True iff counter can be decremented. By default it can.
+     * True iff counter can be decremented.
      */
-    private boolean canBeDecremented = true;
+    private final boolean canBeDecremented;
     /**
      * Name of the counter. Lives in a global address space so all counter names
      * has to be unique.
      */
     private final String name;
-    /**
-     * The current value of the counter.
-     */
-    private long value = 0;
+
     /**
      * A monitor used to regulate access to the counter.
      */
     private final Object monitor = new Object();
+
+    private final AtomicInteger atomicInt = new AtomicInteger(0);
 
     /**
      * Create a new counter. The name needs to be unique. By default counters
      * can be both incremented and decremented.
      *
      * @param name The name of the counter.
+     * @param canBeDecremented
      */
-    public Counter(final String name) {
+    public Counter(final String name, final boolean canBeDecremented) {
         this.name = checkNotNull(name, "Counter name can't be null").trim();
+        this.canBeDecremented = canBeDecremented;
         checkArgument(name.length() != 0, "Counter name can't be empty string");
+    }
+
+    public Counter(final String name) {
+        this(name, false);
     }
 
     /**
@@ -59,10 +65,7 @@ public final class Counter {
      * @return the new value.
      */
     public long inc() {
-        synchronized (monitor) {
-            value += 1;
-            return value;
-        }
+        return atomicInt.addAndGet(1);
     }
 
     /**
@@ -71,29 +74,19 @@ public final class Counter {
      * @return the new value.
      */
     public long dec() {
-        synchronized (monitor) {
-            if (!canBeDecremented) {
-                throw new IllegalStateException(
-                        "Can't decrement a counter that can't be decremented");
-            }
-            value -= 1;
-            return value;
+
+        if (!canBeDecremented) {
+            throw new IllegalStateException(
+                    "Can't decrement a counter that can't be decremented");
         }
+        return (atomicInt.addAndGet(-1));
     }
 
-    /**
-     * Disable decrementation for the counter.
-     */
-    public void setCannotBeDecremented() {
-        synchronized (monitor) {
-            canBeDecremented = false;
-        }
-    }
 
     @Override
     public String toString() {
         synchronized (monitor) {
-            return "#'" + name + "'=" + value;
+            return "#'" + name + "'=" + atomicInt.toString();
         }
     }
 }

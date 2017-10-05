@@ -41,10 +41,8 @@ public abstract class AbstractNDFANode implements NDFANode {
      * of this NDFA.
      */
     private static Counter cachedEdgesCounter =
-            Counters.newCounter("Cached edges going to an NDFA.");
-    static {
-        COUNTER.setCannotBeDecremented();
-    }
+ Counters.newCounter("Cached edges going to an NDFA.");
+
 
     /**
      * The set of epsilon-edges going out of this node.

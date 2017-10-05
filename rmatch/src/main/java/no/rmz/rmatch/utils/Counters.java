@@ -19,10 +19,15 @@ public final class Counters {
      * Get a new counter, uniquely named.
      *
      * @param name the name of the counter to create.
+     * @param canBeDecremented
      * @return THe newly crated counter.
      */
+    public static Counter newCounter(final String name, final boolean canBeDecremented) {
+        return INSTANCE.privateNewCounter(name, canBeDecremented);
+    }
+
     public static Counter newCounter(final String name) {
-        return INSTANCE.privateNewCounter(name);
+        return INSTANCE.privateNewCounter(name, false);
     }
 
     /**
@@ -68,18 +73,23 @@ public final class Counters {
      * @param name The name fo the counter.
      * @return a counter.
      */
-    private Counter privateNewCounter(final String name) {
+    private Counter privateNewCounter(final String name, boolean canBeDecremented) {
         synchronized (counters) {
             if (counters.containsKey(name)) {
                 throw new IllegalStateException(
                         "Attempt to get two counters with name " + name);
             } else {
-                final Counter result = new Counter(name);
+                final Counter result = new Counter(name, canBeDecremented);
                 counters.put(name, result);
                 return result;
             }
         }
     }
+
+    private Counter privateNewCounter(String name) {
+        return privateNewCounter(name, false);
+    }
+
 
     /**
      * Get all of the counters.

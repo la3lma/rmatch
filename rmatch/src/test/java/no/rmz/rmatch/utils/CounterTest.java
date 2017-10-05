@@ -24,7 +24,6 @@ import static org.junit.Assert.*;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.logging.*;
 
 /**
  *
@@ -64,18 +63,15 @@ public class CounterTest {
         final ExecutorService executors =
                 Executors.newFixedThreadPool(noOfThreadsInPool);
 
-        final Collection<Callable<Object>> runnables = new ArrayList<Callable<Object>>();
+        final Collection<Callable<Object>> runnables = new ArrayList<>();
 
         for (int j = 0; j < noOfRunnables; j++) {
             final Callable runnable =
-                    new Callable() {
-                @Override
-                public Object call() throws Exception {
-                    for (int i = 0; i < noOfIterationsInRunnable; i++) {
-                        counter.inc();
-                    }
-                    return null;
-                }
+ (Callable) () -> {
+                        for (int i = 0; i < noOfIterationsInRunnable; i++) {
+                            counter.inc();
+                        }
+                        return null;
             };
             runnables.add(runnable);
         }
