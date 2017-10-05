@@ -18,9 +18,10 @@ package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.*;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.TreeSet;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.Match;
@@ -165,8 +166,8 @@ public final class MatchEngineImpl implements MatchEngine {
 
         checkNotNull(b, "Buffer can't be null");
         final Set<MatchSet> activeMatchSets;
-        activeMatchSets = new ConcurrentSkipListSet<>(MatchSet.COMPARE_BY_ID);
-
+        activeMatchSets = Collections.synchronizedSet(
+                new TreeSet<MatchSet>(MatchSet.COMPARE_BY_ID));
 
         // Advance all match sets forward one character.
         while (b.hasNext()) {

@@ -87,4 +87,9 @@ public final class CorpusTestResult {
     public long getMaxNoOfMbsUsed() {
         return maxNoOfMbsUsed;
     }
+
+    @Override
+    public String toString() {
+        return "CorpusTestResult{" + "filename=" + filename + ", duration=" + duration + ", noOfMatches=" + noOfMatches + ", noOfWordsToLookFor=" + noOfWordsToLookFor + ", maxNoOfMbsUsed=" + maxNoOfMbsUsed + '}';
+    }
 }

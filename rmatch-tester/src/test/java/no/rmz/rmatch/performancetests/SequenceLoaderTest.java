@@ -1,21 +1,5 @@
 package no.rmz.rmatch.performancetests;
 
-import no.rmz.rmatch.performancetests.utils.FileInhaler;
-import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
-import no.rmz.rmatch.performancetests.utils.CSVAppender;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.impls.MatcherFactory;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
-import no.rmz.rmatch.utils.CounterAction;
-import no.rmz.rmatch.utils.Counters;
-
 import java.io.File;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,12 +7,26 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.impls.MatcherFactory;
+import no.rmz.rmatch.interfaces.Action;
+import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.interfaces.Matcher;
+import no.rmz.rmatch.interfaces.NDFANode;
+import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.performancetests.utils.CSVAppender;
+import no.rmz.rmatch.performancetests.utils.FileInhaler;
+import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
+import no.rmz.rmatch.utils.CounterAction;
+import no.rmz.rmatch.utils.Counters;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
@@ -205,7 +203,7 @@ public class SequenceLoaderTest {
     /**
      * The maximum amount of memory permitted used.
      */
-    private static final int MAX_MEMORY_TO_USE_IN_MB = 600;
+    private static final int MAX_MEMORY_TO_USE_IN_MB = 2000;
 
     /**
      * Check with only a very few regexps.
@@ -249,8 +247,8 @@ public class SequenceLoaderTest {
         //     we use now is fundamentally bogus!
         assertTrue(result.getNoOfMatches()
                 == NO_OF_OBSERVED_MATCHES_IN_SOME_REGEXP_TEST);
-        assertTrue(result.getDuration() < MAX_TIME_TO_USE_IN_MILLIS);
-        assertTrue(result.getMaxNoOfMbsUsed() < MAX_MEMORY_TO_USE_IN_MB);
+        assertTrue("result was = " + result, result.getDuration() < MAX_TIME_TO_USE_IN_MILLIS);
+        assertTrue("result was = " + result, result.getMaxNoOfMbsUsed() < MAX_MEMORY_TO_USE_IN_MB);
 
         CSVAppender.append(
                 MEASUREMENT_RESULTS_FROM_SOME_WORDS_TESTS,
