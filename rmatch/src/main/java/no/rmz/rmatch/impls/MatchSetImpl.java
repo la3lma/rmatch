@@ -272,7 +272,7 @@ public final class MatchSetImpl implements MatchSet {
 
     @Override
     public void removeMatch(final Match m) {
-        assert m != null;
+        checkNotNull(m);
         m.getRegexp().abandonMatchSet(this);
         matches.remove(m);
     }
