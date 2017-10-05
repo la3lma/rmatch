@@ -1,10 +1,10 @@
 package no.rmz.rmatch.performancetests;
 
 import java.util.Arrays;
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 
 /**
  * A test scenario that will match a bunch of regular expressions against the
@@ -21,11 +21,10 @@ public final class BenchmarkTheWutheringHeightsCorpus {
      */
     public static void main(final String[] argv) throws RegexpParserException {
         // Get a matcher from the MatcherFactory.
-        
-        
+
         final String[] argx;
         if (argv == null || argv.length == 0) {
-            argx = new String[] {"200"};
+            argx = new String[]{"5000"};
         } else {
             argx = argv;
         }
@@ -38,7 +37,7 @@ public final class BenchmarkTheWutheringHeightsCorpus {
         // GraphDumper.dump(
         //          "benchmarkTheWutheringHeightsCorpus",
         //         m.getNodeStorage());
-        System.exit(0);
+        System.exit(0);  // XXX In case of dangling threads
     }
 
     /**

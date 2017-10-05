@@ -1,8 +1,7 @@
 package no.rmz.rmatch.performancetests.utils;
 
-import no.rmz.rmatch.interfaces.Buffer;
-
 import java.io.File;
+import no.rmz.rmatch.interfaces.Buffer;
 
 
 /**

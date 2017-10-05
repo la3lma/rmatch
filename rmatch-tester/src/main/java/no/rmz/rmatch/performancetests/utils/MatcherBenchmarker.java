@@ -130,6 +130,10 @@ public final class MatcherBenchmarker {
             final Matcher matcher,
             final String[] argv)
             throws RegexpParserException {
+
+        System.out.println("Working Directory = "
+                + System.getProperty("user.dir"));
+
         final Buffer b = new WutheringHeightsBuffer();
 
         testMatcher(b, matcher, argv);

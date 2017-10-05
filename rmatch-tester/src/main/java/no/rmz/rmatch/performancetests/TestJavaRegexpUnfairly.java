@@ -41,13 +41,13 @@ public class TestJavaRegexpUnfairly implements Matcher {
      * @throws RegexpParserException when things go bad.
      */
     public static void main(final String[] argv) throws RegexpParserException {
-        
+
         final Matcher matcher = new TestJavaRegexpUnfairly();
-        
+
         final Buffer b = new WutheringHeightsBuffer("corpus/wuthr10.txt");
-        
+
         MatcherBenchmarker.testMatcher(b, matcher, argv);
-        
+
         // Kill all threads and get out of here
         System.exit(0);
     }
@@ -160,5 +160,4 @@ public class TestJavaRegexpUnfairly implements Matcher {
     @Override
     public void shutdown() throws InterruptedException {
     }
-
 }
