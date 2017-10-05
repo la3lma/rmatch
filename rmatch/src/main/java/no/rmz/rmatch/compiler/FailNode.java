@@ -32,7 +32,7 @@ final class FailNode extends AbstractNDFANode {
      * Create a new failing node.
      * @param r for this instance
      */
-    public FailNode(final Regexp r) {
+    FailNode(final Regexp r) {
         super(r, false, true);
         // XXX Time to make a builder?
     }
