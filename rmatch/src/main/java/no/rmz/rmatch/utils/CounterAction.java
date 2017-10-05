@@ -1,23 +1,8 @@
-/**
- * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
+
 
 package no.rmz.rmatch.utils;
 
-import no.rmz.rmatch.utils.Counters;
-import no.rmz.rmatch.utils.Counter;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
@@ -42,7 +27,7 @@ public final class CounterAction implements Action {
     /**
      * Should the reports be verbose?
      */
-    private boolean verbose = true;
+    private final boolean verbose = true;
     /**
      * Monitor used to synchronize access.
      */
@@ -54,7 +39,7 @@ public final class CounterAction implements Action {
     /**
      * The tick interval we'll actually use.
      */
-    private int tickInterval =
+    private final int tickInterval =
             DEFAULT_TICK_INTERVAL_FOR_IN_ACTIONS_BETWEEN_REPORTS;
     /**
      * Initialize the timestamp for the last tick to be the time of class
@@ -80,15 +65,10 @@ public final class CounterAction implements Action {
                 // plus all the counters.
                 long now = System.currentTimeMillis();
                 long duration = now - lastTick;
-                double speed = (double) duration / (double) tickInterval;
+                double speed = duration / (double) tickInterval;
 
 
-                LOG.info("Match counter == " + counter
-                        + ", duration = " + duration
-                        + ", speed = " + speed + " millis/tick"
-                        + ", start/end = " + start + "/" + end
-                        + ", match string = '" + b.getString(start, end + 1)
-                        + "' " + sb.toString());
+                LOG.log(Level.INFO, "Match counter == {0}, duration = {1}, speed = {2} millis/tick, start/end = {3}/{4}, match string = ''{5}'' {6}", new Object[]{counter, duration, speed, start, end, b.getString(start, end + 1), sb.toString()});
                 lastTick = now;
 
 

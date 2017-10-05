@@ -66,4 +66,7 @@ public class MatcherFactory {
                 new NDFACompilerImpl(),
                 RegexpFactory.DEFAULT_REGEXP_FACTORY);
     }
+
+    private MatcherFactory() {
+    }
 }

@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Comparator;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 
 /**
  * Simulating a heap using a TreeMap.

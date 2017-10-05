@@ -16,16 +16,17 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.MatchSet;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.interfaces.NodeStorage;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
+import no.rmz.rmatch.interfaces.DFANode;
+import no.rmz.rmatch.interfaces.Match;
+import no.rmz.rmatch.interfaces.MatchSet;
+import no.rmz.rmatch.interfaces.NodeStorage;
+import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
 
@@ -38,11 +39,50 @@ import no.rmz.rmatch.utils.Counters;
  * can not be brought to be final and then executed..
  */
 public final class MatchSetImpl implements MatchSet {
+    /**
+     * A counter for MatchSetImpls.
+     */
+    private static final Counter MY_COUNTER =
+            Counters.newCounter("MatchSetImpl");
+    /**
+     * Commit this match relative to a bunch of other matches.
+     *
+     * Now committing simply means adding this match to a collection of matches
+     * given as parameters.
+     *
+     * However, the current match is only added to the collection of runnable
+     * matches if it's dominating the regular expression it's representing
+     *
+     * If the current match is dominating it's regular expression, then add it
+     * to the set of runnable matches given as parameter.
+     *
+     * This method is public only to facilitate testing. It's not part of any
+     * interface and shouldn't be used directly anywhere.
+     *
+     * @param m the match to commit.
+     * @param runnableMatches a collector of runnable matches
+     */
+    public static void commitMatch(
+            final Match m,
+            final RunnableMatchesHolder runnableMatches) {
+        assert (!m.isActive());
+        assert (m.isFinal());
+        
+        final boolean isDominating =
+                m.getRegexp().isDominating(m);
+        final boolean isStronglyDominating =
+                m.getRegexp().isStronglyDominated(m);
+        
+        if (isDominating && !isStronglyDominating) {
+            runnableMatches.add(m);
+            m.getMatchSet().removeMatch(m);
+        }
+    }
 
     /**
      * The set of matches being pursued through this MatchSetImpl.
      */
-    private Set<Match> matches =
+    private final Set<Match> matches =
             new ConcurrentSkipListSet<Match>(Match.COMPARE_BY_OBJECT_ID);
     /**
      * The current determinstic node that is used when pushing the matches
@@ -52,22 +92,12 @@ public final class MatchSetImpl implements MatchSet {
     /**
      * The start position of all the matches associated with this MatchSetImpl.
      */
-    private int start;
+    private final int start;
     /**
      * An identifier uniquely identifying this MatchSetImpl among other
      * MatchSetImpl instances.
      */
-    private long id;
-    /**
-     * A counter for MatchSetImpls.
-     */
-    private static final Counter MY_COUNTER =
-            Counters.newCounter("MatchSetImpl");
-
-    @Override
-    public int getStart() {
-        return start;
-    }
+    private final long id;
 
     /**
      * Create a new MatchSetImpl.
@@ -95,6 +125,10 @@ public final class MatchSetImpl implements MatchSet {
         //     of expressions, and thus a showstopper.
         addMatches(startNode);
     }
+    @Override
+    public int getStart() {
+        return start;
+    }
 
     /**
      * Populate the set of matches with matches that could possibly start from
@@ -118,7 +152,7 @@ public final class MatchSetImpl implements MatchSet {
 
     @Override
     public Set getMatches() {
-        return matches;
+        return Collections.unmodifiableSet(matches);
     }
 
     @Override
@@ -236,40 +270,6 @@ public final class MatchSetImpl implements MatchSet {
         }
     }
 
-    /**
-     * Commit this match relative to a bunch of other matches.
-     *
-     * Now committing simply means adding this match to a collection of matches
-     * given as parameters.
-     *
-     * However, the current match is only added to the collection of runnable
-     * matches if it's dominating the regular expression it's representing
-     *
-     * If the current match is dominating it's regular expression, then add it
-     * to the set of runnable matches given as parameter.
-     *
-     * This method is public only to facilitate testing. It's not part of any
-     * interface and shouldn't be used directly anywhere.
-     *
-     * @param m the match to commit.
-     * @param runnableMatches a collector of runnable matches
-     */
-    public static void commitMatch(
-            final Match m,
-            final RunnableMatchesHolder runnableMatches) {
-        assert (!m.isActive());
-        assert (m.isFinal());
-
-        final boolean isDominating =
-                m.getRegexp().isDominating(m);
-        final boolean isStronglyDominating =
-                m.getRegexp().isStronglyDominated(m);
-
-        if (isDominating && !isStronglyDominating) {
-            runnableMatches.add(m);
-            m.getMatchSet().removeMatch(m);
-        }
-    }
 
     @Override
     public void removeMatch(final Match m) {

@@ -16,8 +16,8 @@
 
 package no.rmz.regepfilter.abstracts;
 
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import java.util.Collection;
+import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
@@ -38,35 +38,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class AbstractNDFANodeTest {
 
 
-    /**
-     * A really simple implementation of an abstract node.  We need to
-     * make an implementation. Since the AbstractNDFANode is, well,
-     * abstract, and can't be instantiated (yeah yeah, anonymous classes
-     * etc.)
-     */
-    public static final class AbstractNDFANodeImpl extends AbstractNDFANode {
-
-        /**
-         * Create a new instance of the test article.
-         * @param r a regexp.
-         * @param isTerminal True iff this node is terminal.
-         */
-        public AbstractNDFANodeImpl(
-                final Regexp r,
-                final boolean isTerminal) {
-            super(r, isTerminal);
-        }
-
-        @Override
-        public NDFANode getNextNDFA(final Character ch) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public Collection<PrintableEdge> getEdgesToPrint() {
-            return getEpsilonEdgesToPrint();
-        }
-    }
 
     /**
      * The test article.
@@ -78,6 +49,11 @@ public class AbstractNDFANodeTest {
      */
     @Mock
     Regexp regexp;
+    /**
+     * We need an NDFANode that is treated as an opaque object.
+     */
+    @Mock
+            NDFANode ndfanode;
 
 
     /**
@@ -159,11 +135,6 @@ public class AbstractNDFANodeTest {
         assertTrue(testArticleNDFANode.getEpsilons().isEmpty());
     }
 
-    /**
-     * We need an NDFANode that is treated as an opaque object.
-     */
-    @Mock
-    NDFANode ndfanode;
 
     /**
      * Test adding an epsilon edge, and checking that it was
@@ -186,5 +157,34 @@ public class AbstractNDFANodeTest {
         testArticleNDFANode.removeEpsilonReachableNode(ndfanode);
         assertTrue(testArticleNDFANode.getEpsilons().isEmpty());
         assertTrue(!testArticleNDFANode.getEpsilons().contains(ndfanode));
+    }
+    /**
+     * A really simple implementation of an abstract node.  We need to
+     * make an implementation. Since the AbstractNDFANode is, well,
+     * abstract, and can't be instantiated (yeah yeah, anonymous classes
+     * etc.)
+     */
+    public static final class AbstractNDFANodeImpl extends AbstractNDFANode {
+        
+        /**
+         * Create a new instance of the test article.
+         * @param r a regexp.
+         * @param isTerminal True iff this node is terminal.
+         */
+        public AbstractNDFANodeImpl(
+                final Regexp r,
+                final boolean isTerminal) {
+            super(r, isTerminal);
+        }
+        
+        @Override
+        public NDFANode getNextNDFA(final Character ch) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        
+        @Override
+        public Collection<PrintableEdge> getEdgesToPrint() {
+            return getEpsilonEdgesToPrint();
+        }
     }
 }

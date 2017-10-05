@@ -17,6 +17,7 @@
 package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,9 +25,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.MatchSet;
 import no.rmz.rmatch.interfaces.Match;
+import no.rmz.rmatch.interfaces.MatchSet;
+import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.NodeStorage;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.utils.Counter;
@@ -38,24 +39,35 @@ import no.rmz.rmatch.utils.Counters;
 public final class DFANodeImpl implements DFANode {
 
     /**
+     * Counter used to figure out both how many DFA nodes are allocated, and to
+     * generate unique IDs for the nodes (put in the "id" variable).
+     */
+    private static final Counter counter = Counters.newCounter("DFANodeImpl");
+    /**
+     * A counter for known edges going to other DFAs.
+     */
+    private static final Counter KNOWN_DFA_EDGES_COUNTER =
+            Counters.newCounter("Known DFA Edges");
+
+    /**
      * The set of regular expression this node represents.
      */
-    private Set<Regexp> regexps = new HashSet<Regexp>();
+    private final Set<Regexp> regexps = new HashSet<Regexp>();
     /**
      * A map of computed edges going out of this node. There may be more edges
      * going out of this node, but these are the nodes that has been encountered
      * so far during matching.
      */
-    private Map<Character, DFANode> nextMap = new HashMap<Character, DFANode>();
+    private final Map<Character, DFANode> nextMap = new HashMap<Character, DFANode>();
     /**
      * A map, corresponding to the nextMap, stating if the entry for a
      * particular character is valid or not.
      */
-    private Map<Character, Boolean> known = new HashMap<Character, Boolean>();
+    private final Map<Character, Boolean> known = new HashMap<Character, Boolean>();
     /**
      * The set of NDFANodes that this DFA node is representing.
      */
-    private SortedSet<NDFANode> basis = new TreeSet<NDFANode>();
+    private final SortedSet<NDFANode> basis = new TreeSet<NDFANode>();
     /**
      * Monitor for synchronized access to methods.
      */
@@ -64,16 +76,16 @@ public final class DFANodeImpl implements DFANode {
      * The set of regular expressions for which this node will make a match
      * fail.
      */
-    private Set<Regexp> isFailingSet = new HashSet<Regexp>();
-    /**
-     * Counter used to figure out both how many DFA nodes are allocated, and to
-     * generate unique IDs for the nodes (put in the "id" variable).
-     */
-    private static Counter counter = Counters.newCounter("DFANodeImpl");
+    private final Set<Regexp> isFailingSet = new HashSet<Regexp>();
     /**
      * An unique (per VM) id for this DFANode.
      */
     private final long id;
+    /**
+     * A cache used to memoize check for finality for particular regexprs.
+     */
+    private final Map<Regexp, Boolean> baseisFinalCache =
+            new HashMap();
 
     /**
      * Create a new DFA based representing a set of NDFA nodes.
@@ -130,7 +142,7 @@ public final class DFANodeImpl implements DFANode {
      * @return the map of nodes going out of this DFA node.
      */
     public Map<Character, DFANode> getNextMap() {
-        return nextMap;
+        return Collections.unmodifiableMap(nextMap);
     }
 
     @Override
@@ -155,7 +167,7 @@ public final class DFANodeImpl implements DFANode {
 
     @Override
     public Set getRegexps() {
-        return regexps;
+        return Collections.unmodifiableSet(regexps);
     }
 
     @Override
@@ -187,11 +199,6 @@ public final class DFANodeImpl implements DFANode {
             return result;
         }
     }
-    /**
-     * A counter for known edges going to other DFAs.
-     */
-    private static final Counter KNOWN_DFA_EDGES_COUNTER =
-            Counters.newCounter("Known DFA Edges");
 
     @Override
     public DFANode getNext(final Character ch, final NodeStorage ns) {
@@ -230,11 +237,6 @@ public final class DFANodeImpl implements DFANode {
         // XXX Abstract?
         throw new RuntimeException("Not implemented, perhaps not called?");
     }
-    /**
-     * A cache used to memoize check for finality for particular regexprs.
-     */
-    private final Map<Regexp, Boolean> baseisFinalCache =
-            new HashMap();
 
     /**
      * Calculate if the present DFANode is final for a particular regular

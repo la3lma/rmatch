@@ -16,21 +16,16 @@
 
 package no.rmz.rmatch.mockedcompiler;
 
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.compiler.CharNode;
 import no.rmz.rmatch.compiler.TerminalNode;
+import no.rmz.rmatch.interfaces.NDFANode;
+import no.rmz.rmatch.interfaces.Regexp;
 
 /**
  * A simple compiler for character sequences only to be used during testing.
  */
 public final class CharSequenceCompiler {
 
-    /**
-     * This is an utility class so no public constructor.
-     */
-    private CharSequenceCompiler() {
-    }
 
     /**
      * Compile a string to represent a regexp as part of a Regexp instance.
@@ -47,5 +42,10 @@ public final class CharSequenceCompiler {
         }
 
         return result;
+    }
+    /**
+     * This is an utility class so no public constructor.
+     */
+    private CharSequenceCompiler() {
     }
 }

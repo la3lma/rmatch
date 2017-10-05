@@ -52,7 +52,7 @@ public final class RunnableMatchesHolderImpl implements RunnableMatchesHolder {
      */
     @Override
     public Set<Match> getMatches() {
-        return matches;
+        return Collections.unmodifiableSet(matches);
     }
 
     /**

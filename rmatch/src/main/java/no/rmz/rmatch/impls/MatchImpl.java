@@ -27,6 +27,11 @@ import no.rmz.rmatch.utils.Counters;
  * A representation of a match implementing the Match interface.
  */
 public final class MatchImpl implements Match {
+    /**
+     * A counter that is increased every time a new MatchImpl is generated. Used
+     * for logging and benchmarking.
+     */
+    private static Counter counter = Counters.newCounter("MatchImpl");
 
     /**
      * True iff the match is final, in the sense that its current state
@@ -54,11 +59,6 @@ public final class MatchImpl implements Match {
      * An unique ID for the set of matches.
      */
     private final long id;
-    /**
-     * A counter that is increased every time a new MatchImpl is generated. Used
-     * for logging and benchmarking.
-     */
-    private static Counter counter = Counters.newCounter("MatchImpl");
 
     /**
      * Create a new Match implementation.

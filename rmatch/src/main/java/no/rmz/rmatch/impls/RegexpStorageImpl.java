@@ -16,18 +16,18 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.RegexpFactory;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.RegexpStorage;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.NDFACompiler;
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.interfaces.Action;
+import no.rmz.rmatch.interfaces.NDFACompiler;
+import no.rmz.rmatch.interfaces.NDFANode;
+import no.rmz.rmatch.interfaces.NodeStorage;
+import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.interfaces.RegexpFactory;
+import no.rmz.rmatch.interfaces.RegexpStorage;
 
 /**
  * An implementation of the regular expression storage interface. It stores all

@@ -41,16 +41,25 @@ import no.rmz.rmatch.interfaces.Regexp;
  * that it's nothing special.
  */
 public final class StartNode extends AbstractNDFANode {
+    /**
+     * The regexp that is nominally associated with the start node. It is an
+     * empty expression that does not match anything.
+     */
+    private static final Regexp START_NO_REGEXP = new RegexpImpl(""); // XX??
 
     /**
      * The DFA that represents the StartNode instance.
      */
     private DFANodeImpl topDFA = null;
     /**
-     * The regexp that is nominally associated with the start node. It is an
-     * empty expression that does not match anything.
+     * A monitor that is used to synchronize access to the StartNode instance.
      */
-    private static final Regexp START_NO_REGEXP = new RegexpImpl(""); // XX??
+    private final Object topDfaMonitor = new Object();
+    /**
+     * Map of directly outgoing NDFANodes. XXX Never added to. Review and most
+     * likely delete.
+     */
+    private final Map<Character, NDFANode> ndfaOutMap = new HashMap();
 
     /**
      * Create a enw StartNode instance.
@@ -60,10 +69,6 @@ public final class StartNode extends AbstractNDFANode {
     public StartNode(final NodeStorage ns) {
         super(START_NO_REGEXP, false);
     }
-    /**
-     * A monitor that is used to synchronize access to the StartNode instance.
-     */
-    private final Object topDfaMonitor = new Object();
 
     // XXX Since we already have the NodeStorage, why do we need
     //     a parameter for it? This is almost certainly a bug. Fix.
@@ -106,11 +111,6 @@ public final class StartNode extends AbstractNDFANode {
         checkNotNull(n, "Can't add null NDFA node");
         addEpsilonEdge(n);
     }
-    /**
-     * Map of directly outgoing NDFANodes. XXX Never added to. Review and most
-     * likely delete.
-     */
-    private Map<Character, NDFANode> ndfaOutMap = new HashMap();
 
     @Override
     public NDFANode getNextNDFA(final Character ch) {

@@ -34,10 +34,6 @@ import no.rmz.rmatch.utils.SortedSetComparatorImpl;
 public final class NodeStorageImpl implements NodeStorage {
 
     /**
-     * There is only one start node, and this is that node.
-     */
-    private final StartNode sn;
-    /**
      * A comparator for ordered sets of NDFA Nodes that will deem a set larger
      * than the other by finding the first element (as defined by the ordering
      * of the sets) that is different. A comparison of the differing element
@@ -46,6 +42,10 @@ public final class NodeStorageImpl implements NodeStorage {
     private static final Comparator<SortedSet<NDFANode>>
             SORTED_NDFANODE_SET_COMPARATOR =
                new SortedSetComparatorImpl<NDFANode>();
+    /**
+     * There is only one start node, and this is that node.
+     */
+    private final StartNode sn;
     /**
      * A map mapping sorted sets of NDFANodes into DFAnodes. Used to map sets of
      * NDFANodes to previously compiled DFAnodes representing that set of

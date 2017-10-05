@@ -45,6 +45,17 @@ public final class MultiMatcher implements Matcher {
      * ambitions.
      */
     private static final int MAX_NO_OF_MATCHERS = 10000;
+    /**
+     * Look up the CPU/Cores/Memory configuration of the computer on which we
+     * are running, and then use some heuristic to figure out an optimal number
+     * of partitions to use.
+     *
+     * @return the number of partitions to use
+     */
+    private static int divineOptimalNumberOfMatchers() {
+        final int cores = Runtime.getRuntime().availableProcessors();
+        return cores;
+    }
 
     /**
      * An array of matchers that are used when matching.
@@ -80,17 +91,6 @@ public final class MultiMatcher implements Matcher {
         this(divineOptimalNumberOfMatchers(), compiler, regexpFactory);
     }
 
-    /**
-     * Look up the CPU/Cores/Memory configuration of the computer on which we
-     * are running, and then use some heuristic to figure out an optimal number
-     * of partitions to use.
-     *
-     * @return the number of partitions to use
-     */
-    private static int divineOptimalNumberOfMatchers() {
-       final int cores = Runtime.getRuntime().availableProcessors();
-       return cores;
-    }
 
     /**
      * Create a new instance of the MultiMatcher.
@@ -137,7 +137,7 @@ public final class MultiMatcher implements Matcher {
     private Matcher getMatcher(final String regexpString) {
         checkNotNull(regexpString);
         final long hash =
-                (long) regexpString.hashCode()
+                regexpString.hashCode()
                 + (long) Integer.MAX_VALUE + 1;
         final int index = (int) (hash % noOfMatchers);
 

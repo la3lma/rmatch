@@ -16,24 +16,66 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.MatchSet;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.MatchEngine;
-import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.interfaces.NodeStorage;
 import static com.google.common.base.Preconditions.*;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
+import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.interfaces.DFANode;
+import no.rmz.rmatch.interfaces.Match;
+import no.rmz.rmatch.interfaces.MatchEngine;
+import no.rmz.rmatch.interfaces.MatchSet;
+import no.rmz.rmatch.interfaces.NodeStorage;
+import no.rmz.rmatch.interfaces.Regexp;
 
 /**
  * An implementation of a MatchEngine that can be used to match regular
  * expressions against input.
  */
 public final class MatchEngineImpl implements MatchEngine {
+    /**
+     * Perform matches by triggering the relevant actions.
+     *
+     * @param b The buffer we are reading matches from.
+     * @param matches The collection of matching we are performing.
+     * @param bePermissive  If permissive, set all the matches to be
+     *                      inactive and abandoned, otherwise
+     *                      expect them to be inactive and abandoned
+     *                      prior to invocation.
+     */
+    private static void performMatches(
+            final Buffer b,
+            final Collection<Match> matches,
+            final Boolean bePermissive) {
+        checkNotNull(matches);
+        checkNotNull(b);
+        for (final Match match : matches) {
+            if (bePermissive) {
+                match.setInactive();
+            }
+            performMatch(b, match);
+            if (bePermissive) {
+                match.abandon();
+            }
+        }
+    }
+    /**
+     * Perform actions associated with a match.
+     * @param b A buffer where the matched content is located.
+     * @param m The match to be performed.
+     */
+    private static void performMatch(final Buffer b, final Match m) {
+        checkNotNull(m);
+        checkNotNull(b);
+        if (m.isFinal()) {
+            final int start = m.getStart();
+            final int end = m.getEnd();
+            final Regexp regexp = m.getRegexp();
+            
+            regexp.performActions(b, start, end);
+        }
+    }
 
     /**
      * The instance that is used to map sets of NDFA nodes to NDFA nodes, and if
@@ -142,47 +184,4 @@ public final class MatchEngineImpl implements MatchEngine {
         activeMatchSets.clear();
     }
 
-    /**
-     * Perform matches by triggering the relevant actions.
-     *
-     * @param b The buffer we are reading matches from.
-     * @param matches The collection of matching we are performing.
-     * @param bePermissive  If permissive, set all the matches to be
-     *                      inactive and abandoned, otherwise
-     *                      expect them to be inactive and abandoned
-     *                      prior to invocation.
-     */
-    private static void performMatches(
-            final Buffer b,
-            final Collection<Match> matches,
-            final Boolean bePermissive) {
-        checkNotNull(matches);
-        checkNotNull(b);
-        for (final Match match : matches) {
-            if (bePermissive) {
-                match.setInactive();
-            }
-            performMatch(b, match);
-            if (bePermissive) {
-                match.abandon();
-            }
-        }
-    }
-
-    /**
-     * Perform actions associated with a match.
-     * @param b A buffer where the matched content is located.
-     * @param m The match to be performed.
-     */
-    private static void performMatch(final Buffer b, final Match m) {
-        checkNotNull(m);
-        checkNotNull(b);
-        if (m.isFinal()) {
-            final int start = m.getStart();
-            final int end = m.getEnd();
-            final Regexp regexp = m.getRegexp();
-
-            regexp.performActions(b, start, end);
-        }
-    }
 }
