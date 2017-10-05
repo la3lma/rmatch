@@ -16,18 +16,18 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.MatchSet;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Node;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Match;
 import static com.google.common.base.Preconditions.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import no.rmz.rmatch.interfaces.Action;
+import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.interfaces.Match;
+import no.rmz.rmatch.interfaces.MatchSet;
+import no.rmz.rmatch.interfaces.NDFANode;
+import no.rmz.rmatch.interfaces.Node;
+import no.rmz.rmatch.interfaces.Regexp;
 
 /**
  * Representation of a parsed regular expression.
@@ -238,20 +238,21 @@ public final class RegexpImpl implements Regexp {
 
     @Override
     public void commitUndominated(final RunnableMatchesHolder runnableMatches) {
-        if (!heaps.isEmpty()) {
-
-            // From each DominationHeap, only pick the most dominant (hence
-            // undominated) element.
-            for (final DominationHeap dh : heaps.values()) {
-                // Commit the current match if it's final
-                final Match firstMatch = dh.getFirstMatch();
-                if (firstMatch.isFinal()) {
-                    runnableMatches.add(firstMatch);
-                }
-            }
-            // Then clear the heaps
-            heaps.clear();
+        if (heaps.isEmpty()) {
+            return;
         }
+
+        // From each DominationHeap, only pick the most dominant (hence
+        // undominated) element.
+        for (final DominationHeap dh : heaps.values()) {
+            // Commit the current match if it's final
+            final Match firstMatch = dh.getFirstMatch();
+            if (firstMatch.isFinal()) {
+                runnableMatches.add(firstMatch);
+            }
+        }
+        // Then clear the heaps
+        heaps.clear();
     }
 
     @Override
