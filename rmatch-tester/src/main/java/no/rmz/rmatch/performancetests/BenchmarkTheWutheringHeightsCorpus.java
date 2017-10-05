@@ -24,7 +24,7 @@ public final class BenchmarkTheWutheringHeightsCorpus {
 
         final String[] argx;
         if (argv == null || argv.length == 0) {
-            argx = new String[]{"5000"};
+            argx = new String[]{"10000"};
         } else {
             argx = argv;
         }
