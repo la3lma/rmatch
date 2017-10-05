@@ -26,7 +26,6 @@ import no.rmz.rmatch.interfaces.Regexp;
  */
 public final class CharSequenceCompiler {
 
-
     /**
      * Compile a string to represent a regexp as part of a Regexp instance.
      *
@@ -37,12 +36,13 @@ public final class CharSequenceCompiler {
     public static NDFANode compile(final Regexp regexp, final String str) {
         NDFANode result = new TerminalNode(regexp);
         for (int i = str.length() - 1; i >= 0; i--) {
-            final Character myChar = Character.valueOf(str.charAt(i));
+            final Character myChar = str.charAt(i);
             result = new CharNode(result, myChar, regexp);
         }
 
         return result;
     }
+
     /**
      * This is an utility class so no public constructor.
      */

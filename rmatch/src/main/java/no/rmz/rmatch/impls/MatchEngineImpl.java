@@ -118,7 +118,7 @@ public final class MatchEngineImpl implements MatchEngine {
                 new RunnableMatchesHolderImpl();
 
         if (!activeMatchSets.isEmpty()) {
-            final Set<MatchSet> setsToRemove = new HashSet<MatchSet>();
+            final Set<MatchSet> setsToRemove = new HashSet<>();
             for (final MatchSet ms : activeMatchSets) {
                 ms.progress(ns, currentChar, currentPos, runnableMatches);
                 if (!ms.hasMatches()) {
@@ -164,8 +164,8 @@ public final class MatchEngineImpl implements MatchEngine {
     public void match(final Buffer b) {
 
         checkNotNull(b, "Buffer can't be null");
-        final Set<MatchSet> activeMatchSets =
-                new ConcurrentSkipListSet<MatchSet>(MatchSet.COMPARE_BY_ID);
+        final Set<MatchSet> activeMatchSets;
+        activeMatchSets = new ConcurrentSkipListSet<>(MatchSet.COMPARE_BY_ID);
 
 
         // Advance all match sets forward one character.
@@ -183,5 +183,4 @@ public final class MatchEngineImpl implements MatchEngine {
 
         activeMatchSets.clear();
     }
-
 }

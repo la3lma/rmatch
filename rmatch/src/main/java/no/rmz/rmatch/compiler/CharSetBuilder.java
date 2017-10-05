@@ -24,7 +24,7 @@ public final class CharSetBuilder {
     /**
      * A collection of char-ranges that this matcher will look for.
      */
-    private final Set<CharRange> charRanges = new TreeSet<CharRange>();
+    private final Set<CharRange> charRanges = new TreeSet<>();
 
     /**
      * True iff this CharSet should be treated as an "inverted" CharSet,
@@ -130,8 +130,6 @@ public final class CharSetBuilder {
      */
     void addRange(final char startOfRange, final char endOfRange) {
         charRanges.add(
-                new CharRange(
-                Character.valueOf(startOfRange),
-                Character.valueOf(endOfRange)));
+                new CharRange(startOfRange, endOfRange));
     }
 }

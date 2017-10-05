@@ -146,25 +146,22 @@ public interface Match {
     /**
      * A comparator that compares matches based on their domination status.
      */
-    Comparator<Match> COMPARE_BY_DOMINATION = new Comparator<Match>() {
-        @Override
-        public int compare(final Match ths, final Match that) {
-            if (ths == that) {
-                return 0;
-            } else if (ths.getRegexp() != that.getRegexp()) {
-                return 0;
-            } else if ((ths.getStart() == that.getStart())
-                    && (ths.getEnd() == that.getEnd())) {
-                return 0;
-            } else if ((ths.getStart() <= that.getStart())
-                    && (ths.getEnd() >= that.getEnd())) {
-                return -1;
-            } else if ((ths.getStart() >= that.getStart())
-                    && (ths.getEnd() <= that.getEnd())) {
-                return 1;
-            } else {
-                return 0;
-            }
+    Comparator<Match> COMPARE_BY_DOMINATION = (final Match ths, final Match that) -> {
+        if (ths == that) {
+            return 0;
+        } else if (ths.getRegexp() != that.getRegexp()) {
+            return 0;
+        } else if ((ths.getStart() == that.getStart())
+                && (ths.getEnd() == that.getEnd())) {
+            return 0;
+        } else if ((ths.getStart() <= that.getStart())
+                && (ths.getEnd() >= that.getEnd())) {
+            return -1;
+        } else if ((ths.getStart() >= that.getStart())
+                && (ths.getEnd() <= that.getEnd())) {
+            return 1;
+        } else {
+            return 0;
         }
     };
 }

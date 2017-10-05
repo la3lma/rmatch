@@ -39,5 +39,4 @@ public interface RunnableMatchesHolder {
      * @return the set of matches.
      */
     Set<Match> getMatches();
-
 }

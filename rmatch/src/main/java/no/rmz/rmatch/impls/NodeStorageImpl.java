@@ -52,8 +52,8 @@ public final class NodeStorageImpl implements NodeStorage {
      * NDFANodes.
      */
     private final Map<SortedSet<NDFANode>, DFANode> ndfamap =
-            new TreeMap<SortedSet<NDFANode>, DFANode>(
-            SORTED_NDFANODE_SET_COMPARATOR);
+ new TreeMap<>(
+                    SORTED_NDFANODE_SET_COMPARATOR);
 
     /**
      * Create a new instance of the node storage.
@@ -66,9 +66,9 @@ public final class NodeStorageImpl implements NodeStorage {
     @Override
     public Collection<NDFANode> getNDFANodes() {
         synchronized (ndfamap) {
-            final Set<NDFANode> result = new HashSet();
+            final Set<NDFANode> result = new HashSet<>();
             final Set<NDFANode> unexplored =
-                    new ConcurrentSkipListSet<NDFANode>();
+ new ConcurrentSkipListSet<>();
             unexplored.add(sn);
 
             while (!unexplored.isEmpty()) {

@@ -27,12 +27,11 @@ import no.rmz.rmatch.interfaces.Match;
  */
 public final class RunnableMatchesHolderImpl implements RunnableMatchesHolder {
 
-    /**
-     * The set we use.
-     */
-    private final Set<Match> matches =
-            Collections.newSetFromMap(new ConcurrentHashMap<Match, Boolean>());
-    // XXX Use concurrent skip list instead?
+    private final Set<Match> matches;
+
+    public RunnableMatchesHolderImpl() {
+        this.matches = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    }
 
     /**
      * Add a match to the set. Fail if the match isn't final.

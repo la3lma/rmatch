@@ -84,7 +84,7 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
         // back to the first chracter in the string.
         NDFANode nextNode = endNode;
         for (int i = str.length() - 1; i >= 0; i--) {
-            final Character myChar = Character.valueOf(str.charAt(i));
+            final Character myChar = str.charAt(i);
             nextNode = new CharNode(nextNode, myChar, regexp);
         }
 

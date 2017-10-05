@@ -59,7 +59,7 @@ public final class StartNode extends AbstractNDFANode {
      * Map of directly outgoing NDFANodes. XXX Never added to. Review and most
      * likely delete.
      */
-    private final Map<Character, NDFANode> ndfaOutMap = new HashMap();
+    private final Map<Character, NDFANode> ndfaOutMap;
 
     /**
      * Create a enw StartNode instance.
@@ -68,6 +68,7 @@ public final class StartNode extends AbstractNDFANode {
      */
     public StartNode(final NodeStorage ns) {
         super(START_NO_REGEXP, false);
+        this.ndfaOutMap = new HashMap<>();
     }
 
     // XXX Since we already have the NodeStorage, why do we need

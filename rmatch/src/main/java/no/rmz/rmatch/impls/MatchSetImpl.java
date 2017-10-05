@@ -78,12 +78,10 @@ public final class MatchSetImpl implements MatchSet {
             m.getMatchSet().removeMatch(m);
         }
     }
-
     /**
      * The set of matches being pursued through this MatchSetImpl.
      */
-    private final Set<Match> matches =
-            new ConcurrentSkipListSet<Match>(Match.COMPARE_BY_OBJECT_ID);
+    private final Set<Match> matches;
     /**
      * The current determinstic node that is used when pushing the matches
      * further.
@@ -108,6 +106,7 @@ public final class MatchSetImpl implements MatchSet {
     public MatchSetImpl(
             final int startIndex,
             final DFANode startNode) {
+        this.matches = new ConcurrentSkipListSet<>(Match.COMPARE_BY_OBJECT_ID);
         checkNotNull(startNode, "Startnode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");
         currentNode = startNode;
@@ -282,7 +281,7 @@ public final class MatchSetImpl implements MatchSet {
     public void finalCommit(final RunnableMatchesHolder runnableMatches) {
         checkNotNull(runnableMatches, "Target can't be null");
 
-        final Set<Regexp> visitedRegexps = new HashSet<Regexp>();
+        final Set<Regexp> visitedRegexps = new HashSet<>();
 
         for (final Match m : matches) {
             // We can't commit what isn't final or is still active

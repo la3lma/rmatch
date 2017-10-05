@@ -29,6 +29,7 @@ public interface Matcher {
      *
      * @param r A regular expression.
      * @param a An action to run.
+     * @throws no.rmz.rmatch.compiler.RegexpParserException
      */
     void add(final String r, final Action a) throws RegexpParserException;
 

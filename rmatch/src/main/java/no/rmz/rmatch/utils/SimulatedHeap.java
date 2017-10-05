@@ -38,7 +38,7 @@ public final class SimulatedHeap<T> {
     */
     public SimulatedHeap(final Comparator<T> c) {
         checkNotNull(c);
-        tm = new TreeMap<T, T>(c);
+        tm = new TreeMap<>(c);
     }
 
     /**

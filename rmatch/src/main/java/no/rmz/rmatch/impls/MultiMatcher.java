@@ -91,7 +91,6 @@ public final class MultiMatcher implements Matcher {
         this(divineOptimalNumberOfMatchers(), compiler, regexpFactory);
     }
 
-
     /**
      * Create a new instance of the MultiMatcher.
      *
@@ -137,7 +136,7 @@ public final class MultiMatcher implements Matcher {
     private Matcher getMatcher(final String regexpString) {
         checkNotNull(regexpString);
         final long hash =
-                regexpString.hashCode()
+ regexpString.hashCode()
                 + (long) Integer.MAX_VALUE + 1;
         final int index = (int) (hash % noOfMatchers);
 
@@ -163,13 +162,9 @@ public final class MultiMatcher implements Matcher {
                 new CountDownLatch(matchers.length);
         for (final Matcher matcher : matchers) {
 
-            final Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    matcher.match(b.clone());
-                    counter.countDown();
-
-                }
+            final Runnable runnable = () -> {
+                matcher.match(b.clone());
+                counter.countDown();
             };
             // runnable.run();
             executorService.execute(runnable);

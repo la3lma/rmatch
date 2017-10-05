@@ -90,19 +90,16 @@ public interface MatchSet {
      * identifier.
      */
     Comparator<MatchSet> COMPARE_BY_ID =
-            new Comparator<MatchSet>() {
-                @Override
-                public int compare(final MatchSet t, final MatchSet t1) {
-                    final long l1 = t.getId();
-                    final long l2 = t1.getId();
+ (final MatchSet t, final MatchSet t1) -> {
+                final long l1 = t.getId();
+                final long l2 = t1.getId();
 
-                    if (l1 < l2) {
-                        return -1;
-                    } else if (l2 < l1) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
+                if (l1 < l2) {
+                    return -1;
+                } else if (l2 < l1) {
+                    return 1;
+                } else {
+                    return 0;
                 }
             };
 }
