@@ -33,6 +33,14 @@ import no.rmz.rmatch.interfaces.Regexp;
  * Representation of a parsed regular expression.
  */
 public final class RegexpImpl implements Regexp {
+    /**
+     * A nice little prime.
+     */
+    private static final int SMALLISH_PRIME = 5;
+    /**
+     * A nice two digit prime.
+     */
+    private static final int BIGISH_PRIME = 89;
 
     /**
      * The Regexp string represented by this Regexp.
@@ -281,15 +289,6 @@ public final class RegexpImpl implements Regexp {
         }
     }
 
-    /**
-     * A nice little prime.
-     */
-    private static final int SMALLISH_PRIME = 5;
-
-    /**
-     * A nice two digit prime.
-     */
-    private static final int BIGISH_PRIME = 89;
 
     @Override
     public int hashCode() {  // XXX This looks stupid, probably is stupid.
