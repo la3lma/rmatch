@@ -154,7 +154,7 @@ public interface Match {
             } else if (ths.getRegexp() != that.getRegexp()) {
                 return 0;
             } else if ((ths.getStart() == that.getStart())
-                    && (ths.getEnd() == that.getEnd())) { // XXX was getStart
+                    && (ths.getEnd() == that.getEnd())) {
                 return 0;
             } else if ((ths.getStart() <= that.getStart())
                     && (ths.getEnd() >= that.getEnd())) {
@@ -165,7 +165,6 @@ public interface Match {
             } else {
                 return 0;
             }
-
         }
     };
 }
