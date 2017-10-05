@@ -1,5 +1,3 @@
-
-
 package no.rmz.rmatch.utils;
 
 import java.util.Collection;
@@ -47,7 +45,7 @@ public final class Counters {
      * A map mapping strings to countes.
      */
     private final Map<String, Counter> counters =
-            new TreeMap<String, Counter>();
+ new TreeMap<>();
 
     /**
      * Since this is an utility class we can't have public constructor.
