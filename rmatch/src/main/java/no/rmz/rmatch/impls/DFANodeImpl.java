@@ -42,7 +42,7 @@ public final class DFANodeImpl implements DFANode {
      * Counter used to figure out both how many DFA nodes are allocated, and to
      * generate unique IDs for the nodes (put in the "id" variable).
      */
-    private static final Counter counter = Counters.newCounter("DFANodeImpl");
+    private static final Counter COUNTER = Counters.newCounter("DFANodeImpl");
     /**
      * A counter for known edges going to other DFAs.
      */
@@ -52,7 +52,7 @@ public final class DFANodeImpl implements DFANode {
     /**
      * The set of regular expression this node represents.
      */
-    private final Set<Regexp> regexps = new HashSet<Regexp>();
+    private final Set<Regexp> regexps = new HashSet<>();
     /**
      * A map of computed edges going out of this node. There may be more edges
      * going out of this node, but these are the nodes that has been encountered
@@ -96,7 +96,7 @@ public final class DFANodeImpl implements DFANode {
         this.baseisFinalCache = new HashMap<>();
         basis.addAll(ndfanodeset);
         initialize(basis);
-        id = counter.inc();
+        id = COUNTER.inc();
     }
 
     /**
