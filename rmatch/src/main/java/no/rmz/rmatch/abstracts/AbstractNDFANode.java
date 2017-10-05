@@ -49,7 +49,7 @@ public abstract class AbstractNDFANode implements NDFANode {
     /**
      * The set of epsilon-edges going out of this node.
      */
-    private final SortedSet<NDFANode> epsilonSet = new TreeSet<NDFANode>();
+    private final SortedSet<NDFANode> epsilonSet = new TreeSet<>();
     /**
      * The regular expression associated with this NDFA.
      */
@@ -75,7 +75,7 @@ public abstract class AbstractNDFANode implements NDFANode {
      * thus to achieve much quicker execution times.
      */
     private final Map<Character, SortedSet<NDFANode>> cachedNext =
-            new HashMap<Character, SortedSet<NDFANode>>();
+ new HashMap<>();
 
     /**
      * Create a new AbstractNDFANode instance.
@@ -167,16 +167,16 @@ public abstract class AbstractNDFANode implements NDFANode {
 
             // Eventually the result we'll collect and return will go into this
             // set.
-            final SortedSet<NDFANode> resultNodes = new TreeSet<NDFANode>();
+            final SortedSet<NDFANode> resultNodes = new TreeSet<>();
 
             // Meanwhile we'll have a set of unexplored nodes that we'll have to
             // explore before we're done.
-            final LifoSet<NDFANode> unexploredNodes = new LifoSet<NDFANode>();
+            final LifoSet<NDFANode> unexploredNodes = new LifoSet<>();
 
             // The set of unexplored nodes start witht the current node.
             unexploredNodes.add(this);
 
-            final Set<NDFANode> visitedNodes = new HashSet<NDFANode>();
+            final Set<NDFANode> visitedNodes = new HashSet<>();
 
             while (!unexploredNodes.isEmpty()) {
 
@@ -220,7 +220,7 @@ public abstract class AbstractNDFANode implements NDFANode {
             // Then follow all epsilon links for the nodes in the resultNodes
             // set (transitively reflexive closure of epsilon links) and
             // add all of those to the result set.
-            final Set<NDFANode> epsilonClosure = new HashSet();
+            final Set<NDFANode> epsilonClosure = new HashSet<>();
             for (final NDFANode r : resultNodes) {
                 epsilonClosure.addAll(r.getEpsilons());
             }
@@ -301,7 +301,7 @@ public abstract class AbstractNDFANode implements NDFANode {
      * @return A collection of PrintableEdge instances.
      */
     public final Collection<PrintableEdge> getEpsilonEdgesToPrint() {
-        final Collection<PrintableEdge> result = new ArrayList<PrintableEdge>();
+        final Collection<PrintableEdge> result = new ArrayList<>();
         synchronized (monitor) {
             for (final NDFANode n : epsilonSet) {
                 result.add(new PrintableEdge(null, n));
