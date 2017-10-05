@@ -116,7 +116,7 @@ public final class MatchSetImpl implements MatchSet {
         // XXX This line represents the most egregious
         //     bug in the whole regexp package, since it
         //     incurs a cost in both runtime and used memory
-        //     directlyu proportional to the number of
+        //     directly proportional to the number of
         //     expressions (m) the matcher matches for.  For a
         //     text that is l characters long, this  in turns
         //     adds a factor O(l*m) to the resource use of the
