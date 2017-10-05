@@ -1,12 +1,5 @@
 package no.rmz.rmatch.performancetests.misc;
 
-import no.rmz.rmatch.performancetests.utils.MatchDetector;
-import no.rmz.rmatch.performancetests.utils.LineSource;
-import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,10 +12,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.*;
 import java.util.regex.Pattern;
-
+import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.interfaces.Action;
+import no.rmz.rmatch.interfaces.Buffer;
+import static no.rmz.rmatch.performancetests.misc.MultiJavaRegexpMatchDetector.makeMatchPerformer;
 import no.rmz.rmatch.performancetests.utils.JavaRegexpTester;
 import no.rmz.rmatch.performancetests.utils.LineMatcher;
+import no.rmz.rmatch.performancetests.utils.LineSource;
+import no.rmz.rmatch.performancetests.utils.MatchDetector;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 
 public class LongJavaRegexpMatchDetector implements MatchDetector {
 
@@ -79,19 +78,8 @@ public class LongJavaRegexpMatchDetector implements MatchDetector {
             pattern = Pattern.compile(rexpString);
             final java.util.regex.Matcher rmatcher = pattern.matcher("");
 
-            final Callable<Object> callable = new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    rmatcher.reset(linesource.getCurrentLine());
-                    if (rmatcher.find()) {
-                        // We'll see about this
-                        action.performMatch(null, -1, -1);
-                    }
-                    return null;
-                }
-            };
-            matchers.add(callable);
-
+            final Callable<Object> matchPerformer = makeMatchPerformer(linesource, rmatcher, action);
+            matchers.add(matchPerformer);
         }
     }
 

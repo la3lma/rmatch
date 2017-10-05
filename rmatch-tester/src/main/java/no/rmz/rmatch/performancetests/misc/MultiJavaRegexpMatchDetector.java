@@ -1,20 +1,21 @@
 package no.rmz.rmatch.performancetests.misc;
 
-import no.rmz.rmatch.performancetests.utils.JavaRegexpTester;
-import no.rmz.rmatch.performancetests.utils.LineMatcher;
-import no.rmz.rmatch.performancetests.utils.MatchDetector;
-import no.rmz.rmatch.performancetests.utils.LineSource;
-import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.performancetests.utils.JavaRegexpTester;
+import no.rmz.rmatch.performancetests.utils.LineMatcher;
+import no.rmz.rmatch.performancetests.utils.LineSource;
+import no.rmz.rmatch.performancetests.utils.MatchDetector;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 
 public final class MultiJavaRegexpMatchDetector implements MatchDetector {
 
@@ -22,13 +23,13 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
      * A collector of worker processes that should be used when running the
      * matches.
      */
-    private Collection<Callable<Object>> matchers = new LinkedList<>();
+    private final Collection<Callable<Object>> matchers = new LinkedList<>();
     /**
      * An executor service that will be used to run all the matchers. It should
      * have enough threads to never run out of cores that can do stuff.
      */
     private final ExecutorService es;
-    private LineSource linesource;
+    private final LineSource linesource;
 
     public MultiJavaRegexpMatchDetector(final LineSource linesource) {
         // Don't know what an optimal number is.
@@ -39,7 +40,6 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
     /**
      * Run all the matchers on an input line.
      *
-     * @param input
      */
     @Override
     public void detectMatchesForCurrentLine() {
@@ -56,6 +56,14 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
         pattern = Pattern.compile(rexpString);
         final java.util.regex.Matcher rmatcher = pattern.matcher("");
 
+        final Callable<Object> matchPerformer = makeMatchPerformer(linesource, rmatcher, actionToRun);
+        matchers.add(matchPerformer);
+    }
+
+    public final static Callable<Object> makeMatchPerformer(
+            final LineSource linesource,
+            final Matcher rmatcher,
+            final Action actionToRun) {
         final Callable<Object> callable = new Callable<Object>() {
             @Override
             public Object call() throws Exception {
@@ -67,7 +75,7 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
                 return null;
             }
         };
-        matchers.add(callable);
+        return callable;
     }
 
     /**
