@@ -55,14 +55,14 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
         final Pattern pattern;
         pattern = Pattern.compile(rexpString);
         final java.util.regex.Matcher rmatcher = pattern.matcher("");
-       //  System.out.println("Making matcher for " + rexpString);
+
         final Callable<Object> callable = new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 rmatcher.reset(linesource.getCurrentLine());
                 if (rmatcher.find()) {
-                    actionToRun.performMatch(null, -1, -1); // We'll see about this
                     // We'll see about this
+                    actionToRun.performMatch(null, -1, -1);
                 }
                 return null;
             }
