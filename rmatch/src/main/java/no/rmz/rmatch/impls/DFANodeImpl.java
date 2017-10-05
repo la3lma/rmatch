@@ -58,16 +58,16 @@ public final class DFANodeImpl implements DFANode {
      * going out of this node, but these are the nodes that has been encountered
      * so far during matching.
      */
-    private final Map<Character, DFANode> nextMap = new HashMap<Character, DFANode>();
+    private final Map<Character, DFANode> nextMap = new HashMap<>();
     /**
      * A map, corresponding to the nextMap, stating if the entry for a
      * particular character is valid or not.
      */
-    private final Map<Character, Boolean> known = new HashMap<Character, Boolean>();
+    private final Map<Character, Boolean> known = new HashMap<>();
     /**
      * The set of NDFANodes that this DFA node is representing.
      */
-    private final SortedSet<NDFANode> basis = new TreeSet<NDFANode>();
+    private final SortedSet<NDFANode> basis = new TreeSet<>();
     /**
      * Monitor for synchronized access to methods.
      */
@@ -76,7 +76,7 @@ public final class DFANodeImpl implements DFANode {
      * The set of regular expressions for which this node will make a match
      * fail.
      */
-    private final Set<Regexp> isFailingSet = new HashSet<Regexp>();
+    private final Set<Regexp> isFailingSet = new HashSet<>();
     /**
      * An unique (per VM) id for this DFANode.
      */
@@ -84,8 +84,7 @@ public final class DFANodeImpl implements DFANode {
     /**
      * A cache used to memoize check for finality for particular regexprs.
      */
-    private final Map<Regexp, Boolean> baseisFinalCache =
-            new HashMap();
+    private final Map<Regexp, Boolean> baseisFinalCache;
 
     /**
      * Create a new DFA based representing a set of NDFA nodes.
@@ -94,6 +93,7 @@ public final class DFANodeImpl implements DFANode {
      * represent.
      */
     public DFANodeImpl(final Set<NDFANode> ndfanodeset) {
+        this.baseisFinalCache = new HashMap<>();
         basis.addAll(ndfanodeset);
         initialize(basis);
         id = counter.inc();
@@ -191,7 +191,7 @@ public final class DFANodeImpl implements DFANode {
      */
     private SortedSet<NDFANode> getNextThroughBasis(final Character ch) {
         synchronized (monitor) {
-            final SortedSet<NDFANode> result = new TreeSet<NDFANode>();
+            final SortedSet<NDFANode> result = new TreeSet<>();
             for (final NDFANode n : basis) {
                 final SortedSet<NDFANode> nextSet = n.getNextSet(ch);
                 result.addAll(nextSet);
@@ -203,24 +203,26 @@ public final class DFANodeImpl implements DFANode {
     @Override
     public DFANode getNext(final Character ch, final NodeStorage ns) {
         synchronized (monitor) {
-            if (!known.containsKey(ch)) {
-                final SortedSet<NDFANode> nodes = getNextThroughBasis(ch);
-
-                if (!nodes.isEmpty()) {
-                    final DFANode dfaNode = ns.getDFANode(nodes);
-                    nextMap.put(ch, dfaNode);
-                }
-
-                KNOWN_DFA_EDGES_COUNTER.inc();
-                known.put(ch, Boolean.TRUE);
+            if (known.containsKey(ch)) {
+                return nextMap.get(ch);
             }
 
-            // Now, either this will return a node, or a null, and in
-            // any case that is what we know is the node
-            // we'll get to by following
-            // the ch.
-            return nextMap.get(ch);
+            final SortedSet<NDFANode> nodes = getNextThroughBasis(ch);
+
+            if (!nodes.isEmpty()) {
+                final DFANode dfaNode = ns.getDFANode(nodes);
+                nextMap.put(ch, dfaNode);
+            }
+
+            KNOWN_DFA_EDGES_COUNTER.inc();
+            known.put(ch, Boolean.TRUE);
         }
+
+        // Now, either this will return a node, or a null, and in
+        // any case that is what we know is the node
+        // we'll get to by following
+        // the ch.
+        return nextMap.get(ch);
     }
 
     @Override
