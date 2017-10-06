@@ -83,8 +83,7 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
         // build the chain backwards from the last char in the string
         // back to the first chracter in the string.
         NDFANode nextNode = endNode;
-        for (int i = str.length() - 1; i >= 0; i--) {
-            final Character myChar = str.charAt(i);
+        for (final Character myChar : str.toCharArray()) {
             nextNode = new CharNode(nextNode, myChar, regexp);
         }
 
