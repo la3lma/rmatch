@@ -281,8 +281,7 @@ public final class RegexpImpl implements Regexp {
     public boolean equals(final Object o) {
         if (o == null) {
             return false;
-        }
-        if (o instanceof RegexpImpl) {
+        } else if (o instanceof RegexpImpl) {
             return compareTo((Regexp) o) == 0;
         } else {
             return false;

@@ -171,25 +171,22 @@ public abstract class AbstractNDFANode implements NDFANode {
             // explore before we're done.
             final LifoSet<NDFANode> unexploredNodes = new LifoSet<>();
 
-            // The set of unexplored nodes start witht the current node.
+            // The set of unexplored nodes start with the current node.
             unexploredNodes.add(this);
 
             final Set<NDFANode> visitedNodes = new HashSet<>();
 
             while (!unexploredNodes.isEmpty()) {
 
-
                 // Get the first NDFA node
                 final NDFANode current = unexploredNodes.pop();
                 visitedNodes.add(current);
 
-
                 // By pursuing the current NDFA node through both
                 // character-specific and epsilon edges, we get a new
                 // a new NDFA node that is reachble through this character.
-                // we haven't expored this node, so we add it to the
-                // set of unexplored nodes (if it's not already an
-                // explored)
+                // If we  haven't expored this node, so we add it to the
+                // set of unexplored nodes.
                 final NDFANode nextNode = current.getNextNDFA(ch);
 
                 if (nextNode != null) {
@@ -201,7 +198,7 @@ public abstract class AbstractNDFANode implements NDFANode {
                 // epsilons, and all the nodes we have already put into the
                 // result set.   The difference is added to the
                 // set of unexplored nodes.
-                final Set<NDFANode> newNodes = new HashSet<NDFANode>();
+                final Set<NDFANode> newNodes = new HashSet<>();
                 final Set<NDFANode> epsilons = current.getEpsilons();
                 if (!epsilons.isEmpty()) {
                     newNodes.addAll(epsilons);
