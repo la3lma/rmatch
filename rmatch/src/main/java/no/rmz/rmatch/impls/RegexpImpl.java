@@ -69,8 +69,7 @@ public final class RegexpImpl implements Regexp {
      * implementation. It may in fact be much saner to put it into the MatchSet,
      * however, the MatchSet doesn't use it itself.
      */
-    private final Map<MatchSet, DominationHeap> heaps =
- new HashMap<>();
+    private final Map<MatchSet, DominationHeap> heaps;
     /**
      * The starting node in the NDFA that represents this regular expression.
      */
@@ -82,6 +81,7 @@ public final class RegexpImpl implements Regexp {
      * @param rexpString a string representation of the regular expression.
      */
     public RegexpImpl(final String rexpString) {
+        this.heaps = new HashMap<>();
         checkNotNull(rexpString, "regexpString can't be null");
         this.rexpString = rexpString;
     }
@@ -93,7 +93,7 @@ public final class RegexpImpl implements Regexp {
 
     @Override
     public void setMyNDFANode(final NDFANode myNode) {
-        assert (myNode != null);
+        assert (!isCompiled());
         this.myNode = myNode;
     }
 
@@ -231,17 +231,18 @@ public final class RegexpImpl implements Regexp {
         final MatchSet ms = m.getMatchSet();
 
         final DominationHeap dh = getDominationHeap(ms);
-        checkState(!dh.isEmpty());
+        // checkState(!dh.isEmpty());
 
         dh.remove(m);
         if (dh.isEmpty()) {
             heaps.remove(ms);
         }
 
-        // Postcondition
-        assert (heaps == null
-                || heaps.get(ms) == null
-                || !getDominationHeap(ms).containsMatch(m));
+        // Postcondition, just in case
+        //
+        // checkState(heaps == null
+        //        || heaps.get(ms) == null
+        //        || !getDominationHeap(ms).containsMatch(m));
     }
 
     @Override
@@ -290,13 +291,14 @@ public final class RegexpImpl implements Regexp {
 
 
     @Override
-    public int hashCode() {  // XXX This looks stupid, probably is stupid.
+    public int hashCode() {
         final int hashFromString;
         if (this.rexpString != null) {
             hashFromString = this.rexpString.hashCode();
         } else {
             hashFromString = 0;
         }
+        // XXX This looks stupid, probably is stupid.
         return SMALLISH_PRIME * BIGISH_PRIME + hashFromString;
     }
 
