@@ -48,6 +48,11 @@ STARTINDEX=1
 STEPSIZE=100
 NO_OF_REGEXPS=$(wc -l "$WORDS" | awk '{print $1}')
 
+
+function millisSinceEpoch {
+    echo $(gdate +%s%N | cut -b1-13)
+}
+
 function secondsSinceEpoch {
   echo $(date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s")
 }
@@ -55,9 +60,9 @@ function secondsSinceEpoch {
 function runTest {
   local CLASSNAME="$1"
   local NOOFREGEXPS="$2"
-  local   start=$(secondsSinceEpoch)
+  local   start=$(millisSinceEpoch)
   java  -Xmx7G  -disableassertions -server -cp "$JARFILEPATH" "no.rmz.rmatch.performancetests.$CLASSNAME" "$NOOFREGEXPS"  >  /dev/null 2>&1
-  local stop=$(secondsSinceEpoch)
+  local stop=$(millisSinceEpoch)
   local duration
   ((duration = stop - start))
   echo "$duration"
@@ -88,9 +93,10 @@ while [  "$currentNoOfRegexps"  -le "$NO_OF_REGEXPS" ] ; do
    unfairDuration=$(runTest TestJavaRegexpUnfairly             $currentNoOfRegexps)
    rmatchDuration=$(runTest BenchmarkTheWutheringHeightsCorpus $currentNoOfRegexps)
 
-   ((runIdx = runIdx + 1))
-   echo "   Duration of run $runIdx with $currentnoOfRegexps was unfair=$unfairDuration seconds, rmatch=$rmatchDuration"
-   echo "$currentNoOfRegexps, $rmatchDuration, $unfairDuration" >> "$LOGFILE"
+   ((runIdx =  runIdx + 1))
+   ratio=$(bc -l <<< "scale=2; $rmatchDuration/$unfairDuration")
+   echo "   Duration of run $runIdx with $currentnoOfRegexps was unfair=$unfairDuration milliseconds, rmatch=$rmatchDuration, ratio=$ratio"
+   echo "$currentNoOfRegexps, $rmatchDuration, $unfairDuration", "$ratio" >> "$LOGFILE"
    ((currentNoOfRegexps = $currentNoOfRegexps + $STEPSIZE))
 
    # We do this incrementally so that we can observe how a test is
