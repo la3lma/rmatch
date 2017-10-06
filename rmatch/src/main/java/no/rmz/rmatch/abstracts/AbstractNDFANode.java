@@ -157,84 +157,117 @@ public abstract class AbstractNDFANode implements NDFANode {
     public final SortedSet<NDFANode> getNextSet(final Character ch) {
 
         synchronized (monitor) {
+            return getNextSetNonThreadsafe(ch);
+        }
+    }
 
-            // If we get a cache hit, return the cached entry
-            if (cachedNext.containsKey(ch)) {
-                return cachedNext.get(ch);
+    /**
+     * Implement breadth first search through the set of nodes for NDFA nodes
+     * that are valid successors to the current node, through the parameter
+     * "ch".
+     *
+     * @param ch the char we're finding the set of NDFAs for.
+     * @return a set of NDFA nodes representing the next state for the DFA.
+     */
+    private SortedSet<NDFANode> getNextSetNonThreadsafe(final Character ch) {
+        // If we get a cache hit, return the cached entry
+        if (cachedNext.containsKey(ch)) {
+            return cachedNext.get(ch);
+        }
+
+        // Eventually the result we'll collect and return will go into this
+        // set.
+        final SortedSet<NDFANode> resultNodes = new TreeSet<>();
+
+        // Meanwhile we'll have a set of unexplored nodes that we'll have to
+        // explore before we're done.
+        final LifoSet<NDFANode> unexploredNodes = new LifoSet<>();
+
+        // The set of unexplored nodes start with the current node.
+        unexploredNodes.add(this);
+
+        final Set<NDFANode> visitedNodes = new HashSet<>();
+
+        while (!unexploredNodes.isEmpty()) {
+
+            // Get the first NDFA node
+            final NDFANode current = unexploredNodes.pop();
+            visitedNodes.add(current);
+
+            // By pursuing the current NDFA node through both
+            // character-specific and epsilon edges, we get a new
+            // a new NDFA node that is reachble through this character.
+            // If we  haven't expored this node, so we add it to the
+            // set of unexplored nodes.
+            final NDFANode nextNode = current.getNextNDFA(ch);
+
+            if (nextNode != null) {
+                resultNodes.add(nextNode);
             }
 
-            // Eventually the result we'll collect and return will go into this
-            // set.
-            final SortedSet<NDFANode> resultNodes = new TreeSet<>();
+            final Set<NDFANode> newNodes
+                    = extendByFollowingEpsilons(current);
 
-            // Meanwhile we'll have a set of unexplored nodes that we'll have to
-            // explore before we're done.
-            final LifoSet<NDFANode> unexploredNodes = new LifoSet<>();
+            // Remove new nodes that are already in the resultNodes
+            removeDuplicates(newNodes, resultNodes);
 
-            // The set of unexplored nodes start with the current node.
-            unexploredNodes.add(this);
-
-            final Set<NDFANode> visitedNodes = new HashSet<>();
-
-            while (!unexploredNodes.isEmpty()) {
-
-                // Get the first NDFA node
-                final NDFANode current = unexploredNodes.pop();
-                visitedNodes.add(current);
-
-                // By pursuing the current NDFA node through both
-                // character-specific and epsilon edges, we get a new
-                // a new NDFA node that is reachble through this character.
-                // If we  haven't expored this node, so we add it to the
-                // set of unexplored nodes.
-                final NDFANode nextNode = current.getNextNDFA(ch);
-
-                if (nextNode != null) {
-                    resultNodes.add(nextNode);
-                }
-
-                // Now we calculate a set difference between the  nodes
-                // that can be reached from the current node through its
-                // epsilons, and all the nodes we have already put into the
-                // result set.   The difference is added to the
-                // set of unexplored nodes.
-                final Set<NDFANode> newNodes = new HashSet<>();
-                final Set<NDFANode> epsilons = current.getEpsilons();
-                if (!epsilons.isEmpty()) {
-                    newNodes.addAll(epsilons);
-                }
-                if (!newNodes.isEmpty() && !resultNodes.isEmpty()) {
-                    newNodes.removeAll(resultNodes);
-                }
-                if (!newNodes.isEmpty()) {
-                    newNodes.removeAll(visitedNodes);
-                    unexploredNodes.addAll(newNodes);
-                }
+            if (!newNodes.isEmpty()) {
+                newNodes.removeAll(visitedNodes);
+                unexploredNodes.addAll(newNodes);
             }
+        }
 
-            // Then follow all epsilon links for the nodes in the resultNodes
-            // set (transitively reflexive closure of epsilon links) and
-            // add all of those to the result set.
-            final Set<NDFANode> epsilonClosure = new HashSet<>();
-            for (final NDFANode r : resultNodes) {
-                epsilonClosure.addAll(r.getEpsilons());
+        followEpsilonLinks(resultNodes);
+
+        // Updating the counter and the cache.
+        cachedEdgesCounter.inc();
+        cachedNext.put(ch, resultNodes);
+
+        // The set of NDFANode instances
+        // representing the next DFA node.
+        return resultNodes;
+    }
+
+    private static void removeDuplicates(
+            final Set<NDFANode> newNodes,
+            final SortedSet<NDFANode> resultNodes) {
+        if (!newNodes.isEmpty() && !resultNodes.isEmpty()) {
+            newNodes.removeAll(resultNodes);
+        }
+    }
+
+    private Set<NDFANode> extendByFollowingEpsilons(final NDFANode current) {
+        // Now we calculate a set difference between the  nodes
+        // that can be reached from the current node through its
+        // epsilons, and all the nodes we have already put into the
+        // result set.   The difference is added to the
+        // set of unexplored nodes.
+        final Set<NDFANode> newNodes = new HashSet<>();
+        final Set<NDFANode> epsilons = current.getEpsilons();
+        if (!epsilons.isEmpty()) {
+            newNodes.addAll(epsilons);
+        }
+        return newNodes;
+    }
+
+    /**
+     * Then follow all epsilon links for the nodes in the resultNodes set
+     * (transitively reflexive closure of epsilon links) and add all of those to
+     * the result set.
+     */
+    private static void followEpsilonLinks(final SortedSet<NDFANode> resultNodes) {
+
+        final Set<NDFANode> epsilonClosure = new HashSet<>();
+        for (final NDFANode r : resultNodes) {
+            epsilonClosure.addAll(r.getEpsilons());
+        }
+
+        while (!epsilonClosure.isEmpty()) {
+            final NDFANode next = epsilonClosure.iterator().next();
+            if (resultNodes.add(next)) {
+                epsilonClosure.addAll(next.getEpsilons());
             }
-
-            while (!epsilonClosure.isEmpty()) {
-                final NDFANode next = epsilonClosure.iterator().next();
-                if (resultNodes.add(next)) {
-                    epsilonClosure.addAll(next.getEpsilons());
-                }
-                epsilonClosure.remove(next);
-            }
-
-            // Updating the counter and the cache.
-            cachedEdgesCounter.inc();
-            cachedNext.put(ch, resultNodes);
-
-            // The set of NDFANode instances
-            // representing the next DFA node.
-            return resultNodes;
+            epsilonClosure.remove(next);
         }
     }
 
