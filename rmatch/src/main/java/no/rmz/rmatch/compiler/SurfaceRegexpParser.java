@@ -1,17 +1,17 @@
-/**
- * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+/*
+  Copyright 2012. Bjørn Remseth (rmz@rmz.no).
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
  */
 
 package no.rmz.rmatch.compiler;
@@ -62,7 +62,7 @@ public final class SurfaceRegexpParser {
     /**
      * A helper class used to parse regular expressions.
      */
-    public static final class PAux {
+    static final class PAux {
 
         /**
          * A compiler backend.
@@ -76,18 +76,16 @@ public final class SurfaceRegexpParser {
         private StringBuilder sb;
 
         /**
-         * A sourde of characters based on the input string.
+         * A source of characters based on the input string.
          */
         private final StringSource src;
 
         /**
-         * Create a new helper class instrance.
+         * Create a new helper class instance.
          * @param regexString the string to parse.
          * @param arb the builder to use.
-         * @throws RegexpParserException when bad things happen.
          */
-        public PAux(final String regexString, final AbstractRegexBuilder arb)
-                throws RegexpParserException {
+        PAux(final String regexString, final AbstractRegexBuilder arb) {
             this.arb = checkNotNull(arb);
             this.sb = new StringBuilder();
             this.src = new StringSource(regexString);
@@ -115,7 +113,7 @@ public final class SurfaceRegexpParser {
          * goal in itself, however it may in fact be better to emulate java's
          * regexp syntax.
          *
-         * That's the lofty objectives, the realites are much mor humble.
+         * That's the lofty objectives, the reality is much more humble.
          * We can parse this expression "abc[ab][^de]z?f+x*|y" and expressions
          * containing the same constructs (character sequences,
          * character sets (and inverted sets), various optional subexpressions
@@ -124,7 +122,7 @@ public final class SurfaceRegexpParser {
          *
          * @throws RegexpParserException when bad things happen during parsing.
          */
-        public void parse() throws RegexpParserException {
+        void parse() throws RegexpParserException {
             while (src.hasNext()) {
 
                 char ch = src.next();
@@ -132,84 +130,104 @@ public final class SurfaceRegexpParser {
                 // XXX Missing {m,n}, meaning "match at least m,
                 //     but no more than n times modifier.
 
-                if (ch == '|') {
-                    commitCurrentString(COMMIT_EMPTY_STRING_IF_NOTHING_IN_SB);
-                    arb.separateAlternatives();
-                } else if (ch == '\\') {
-                    if (src.hasNext()) {
-                        throw new RegexpParserException(
-                                "Expected char after escape char: \\");
+                switch (ch) {
+                    case '|':
+                        commitCurrentString(COMMIT_EMPTY_STRING_IF_NOTHING_IN_SB);
+                        arb.separateAlternatives();
+                        break;
+                    case '\\':
+                        parseQuotedChar();
+                        break;
+                    case '.':
+                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                        arb.addAnyChar();
+                        break;
+                    case '^':
+                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                        arb.addBeginningOfLine();
+                        break;
+                    case '$':
+                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                        arb.addEndOfLine();
+                        break;
+                    case '?':
+                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                        arb.addOptionalSingular();
+                        break;
+                    case '*':
+                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                        arb.addOptionalZeroOrMulti();
+                        break;
+                    case '+':
+                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                        arb.addOptionalOnceOrMulti();
+                        break;
+                    case '[':
+                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                        parseCharSet();
+                        break;
+                    default:
+                        sb.append(ch);
+                        break;
+                }
+            }
+            commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+        }
+
+        private void parseQuotedChar() throws RegexpParserException {
+            char ch;
+            if (src.hasNext()) {
+                throw new RegexpParserException(
+                        "Expected char after escape char: \\");
+            }
+            ch = src.next();
+            sb.append(ch);
+        }
+
+        private void parseCharSet() throws RegexpParserException {
+            char ch;
+            arb.startCharSet();
+            final Character nxt = src.peek();
+
+
+            if (nxt == null) {
+                throw new RegexpParserException(
+                        "Unterminated char set, missing ']'");
+            }
+
+            if (nxt == '^') {
+                arb.invertCharSet();
+                src.next();
+            }
+
+            boolean parsingRange = false;
+            while (src.hasNext()) {
+                ch = src.next();
+                if (ch == ']') {
+                    break;
+                } else if (ch == '-') {
+                    parsingRange = true;
+                } else if (parsingRange) {
+                    final String s = sb.toString();
+                    final int l = sb.length();
+                    if (l > 1) {
+                        arb.addToCharSet(s.substring(0, l - 1));
                     }
-                    ch = src.next();
-                    sb.append(ch);
-                } else if (ch == '.') {
-                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                    arb.addAnyChar();
-                } else if (ch == '^') {
-                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                    arb.addBeginningOfLine();
-                } else if (ch == '$') {
-                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                    arb.addEndOfLine();
-                } else if (ch == '?') {
-                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                    arb.addOptionalSingular();
-                } else if (ch == '*') {
-                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                    arb.addOptionalZeroOrMulti();
-                } else if (ch == '+') {
-                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                    arb.addOptionalOnceOrMulti();
-                } else if (ch == '[') {
-                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                    arb.startCharSet();
-                    Character nxt = src.peek();
-
-                    if (nxt == null) {
-                        throw new RegexpParserException(
-                                "Unterminated char set, missing ']'");
-                    }
-
-                    if (nxt == '^') {
-                        arb.invertCharSet();
-                        src.next();
-                    }
-
-
-                    boolean parsingRange = false;
-                    while (src.hasNext()) {
-                        ch = src.next();
-                        if (ch == ']') {
-                            break;
-                        } else if (ch == '-') {
-                            parsingRange = true;
-                        } else if (parsingRange) {
-                            final String s = sb.toString();
-                            final int l = sb.length();
-                            if (l > 1) {
-                                arb.addToCharSet(s.substring(0, l - 1));
-                            }
-                            arb.addRangeToCharSet(s.charAt(l - 1), ch);
-                            sb = new StringBuilder();
-                            parsingRange = false;
-                        } else {
-                            sb.append(ch);
-                        }
-                    }
-
-                    final String cs = sb.toString();
-                    if (!cs.isEmpty()) {
-                        arb.addToCharSet(cs);
-                        sb = new StringBuilder();
-                    }
-
-
-                    arb.endCharSet();
+                    arb.addRangeToCharSet(s.charAt(l - 1), ch);
+                    sb = new StringBuilder();
+                    parsingRange = false;
                 } else {
                     sb.append(ch);
                 }
             }
-            commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+
+            final String cs = sb.toString();
+            if (!cs.isEmpty()) {
+                arb.addToCharSet(cs);
+                sb = new StringBuilder();
+            }
+
+            arb.endCharSet();
         }
     }
 }
