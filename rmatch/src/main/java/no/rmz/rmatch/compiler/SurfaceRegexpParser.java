@@ -42,6 +42,7 @@ public final class SurfaceRegexpParser {
 
     /**
      * Create a new parser with a ARB backend.
+     *
      * @param arb Compiler backend.
      */
     public SurfaceRegexpParser(final AbstractRegexBuilder arb) {
@@ -51,6 +52,7 @@ public final class SurfaceRegexpParser {
 
     /**
      * Parse a string int a regular expression.
+     *
      * @param regexString the string to parse.
      * @throws RegexpParserException when bd things happen.
      */
@@ -82,8 +84,9 @@ public final class SurfaceRegexpParser {
 
         /**
          * Create a new helper class instance.
+         *
          * @param regexString the string to parse.
-         * @param arb the builder to use.
+         * @param arb         the builder to use.
          */
         PAux(final String regexString, final AbstractRegexBuilder arb) {
             this.arb = checkNotNull(arb);
@@ -94,6 +97,7 @@ public final class SurfaceRegexpParser {
         /**
          * send the current string to the compiler backend, then
          * start a new StringBuilder.
+         *
          * @param ifNotEmpty XXX Don't understand this.
          */
         private void commitCurrentString(final boolean ifNotEmpty) {
@@ -112,7 +116,7 @@ public final class SurfaceRegexpParser {
          * http://en.wikipedia.org/wiki/Regular_expression That's an interesting
          * goal in itself, however it may in fact be better to emulate java's
          * regexp syntax.
-         *
+         * <p>
          * That's the lofty objectives, the reality is much more humble.
          * We can parse this expression "abc[ab][^de]z?f+x*|y" and expressions
          * containing the same constructs (character sequences,
@@ -124,54 +128,57 @@ public final class SurfaceRegexpParser {
          */
         void parse() throws RegexpParserException {
             while (src.hasNext()) {
-
-                char ch = src.next();
-
-                // XXX Missing {m,n}, meaning "match at least m,
-                //     but no more than n times modifier.
-
-                switch (ch) {
-                    case '|':
-                        commitCurrentString(COMMIT_EMPTY_STRING_IF_NOTHING_IN_SB);
-                        arb.separateAlternatives();
-                        break;
-                    case '\\':
-                        parseQuotedChar();
-                        break;
-                    case '.':
-                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                        arb.addAnyChar();
-                        break;
-                    case '^':
-                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                        arb.addBeginningOfLine();
-                        break;
-                    case '$':
-                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                        arb.addEndOfLine();
-                        break;
-                    case '?':
-                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                        arb.addOptionalSingular();
-                        break;
-                    case '*':
-                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                        arb.addOptionalZeroOrMulti();
-                        break;
-                    case '+':
-                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                        arb.addOptionalOnceOrMulti();
-                        break;
-                    case '[':
-                        commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
-                        parseCharSet();
-                        break;
-                    default:
-                        sb.append(ch);
-                        break;
-                }
+                final char ch = src.next();
+                parseNextChar(ch);
             }
             commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+        }
+
+
+        // XXX Missing {m,n}, meaning "match at least m,
+        //     but no more than n times modifier.
+
+        private void parseNextChar(char ch) throws RegexpParserException {
+            switch (ch) {
+                case '|':
+                    commitCurrentString(COMMIT_EMPTY_STRING_IF_NOTHING_IN_SB);
+                    arb.separateAlternatives();
+                    break;
+                case '\\':
+                    parseQuotedChar();
+                    break;
+                case '.':
+                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                    arb.addAnyChar();
+                    break;
+                case '^':
+                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                    arb.addBeginningOfLine();
+                    break;
+                case '$':
+                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                    arb.addEndOfLine();
+                    break;
+                case '?':
+                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                    arb.addOptionalSingular();
+                    break;
+                case '*':
+                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                    arb.addOptionalZeroOrMulti();
+                    break;
+                case '+':
+                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                    arb.addOptionalOnceOrMulti();
+                    break;
+                case '[':
+                    commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+                    parseCharSet();
+                    break;
+                default:
+                    sb.append(ch);
+                    break;
+            }
         }
 
         private void parseQuotedChar() throws RegexpParserException {
