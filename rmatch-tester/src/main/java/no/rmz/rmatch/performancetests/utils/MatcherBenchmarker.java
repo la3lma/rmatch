@@ -128,13 +128,11 @@ public final class MatcherBenchmarker {
 
     public static void testMatcher(
             final Matcher matcher,
-            final String[] argv)
+            final String[] argv,
+            String pathToCorpus)
             throws RegexpParserException {
 
-        System.out.println("Working Directory = "
-                + System.getProperty("user.dir"));
-
-        final Buffer b = new WutheringHeightsBuffer();
+        final Buffer b = new WutheringHeightsBuffer(pathToCorpus);
 
         testMatcher(b, matcher, argv);
     }

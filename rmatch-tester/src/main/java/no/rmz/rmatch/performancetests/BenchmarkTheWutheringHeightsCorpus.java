@@ -6,6 +6,8 @@ import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 
+import static no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer.LOCATION_OF_WUTHERING_HEIGHTS;
+
 /**
  * A test scenario that will match a bunch of regular expressions against the
  * text of Emily Brontes Wuthering Heights.
@@ -30,7 +32,7 @@ public final class BenchmarkTheWutheringHeightsCorpus {
         }
         System.out.println("BenchmarkTheWutheringHeightsCorpus, argx = " + Arrays.toString(argx));
         final Matcher m = MatcherFactory.newMatcher();
-        MatcherBenchmarker.testMatcher(m, argx);
+        MatcherBenchmarker.testMatcher(m, argx, "rmatch-tester/" + LOCATION_OF_WUTHERING_HEIGHTS);
 
         // This should normally not be done, since it's slow.  Haven't bothered
         // to add a switch for it yet.
