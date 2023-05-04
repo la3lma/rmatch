@@ -49,18 +49,18 @@ STEPSIZE=100
 NO_OF_REGEXPS=$(wc -l "$WORDS" | awk '{print $1}')
 
 
-function millisSinceEpoch {
-    echo $(gdate +%s%N | cut -b1-13)
+millisSinceEpoch() {
+    gdate +%s%N | cut -b1-13
 }
 
-function secondsSinceEpoch {
-  echo $(date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s")
+secondsSinceEpoch() {
+  date -j -f "%a %b %d %T %Z %Y" "$(date)" "+%s"
 }
 
-function runTest {
+runTest() {
   local CLASSNAME="$1"
   local NOOFREGEXPS="$2"
-  local   start=$(millisSinceEpoch)
+  local start=$(millisSinceEpoch)
   java  -Xmx7G  -disableassertions -server -cp "$JARFILEPATH" "no.rmz.rmatch.performancetests.$CLASSNAME" "$NOOFREGEXPS"  >  /dev/null 2>&1
   local stop=$(millisSinceEpoch)
   local duration
@@ -69,7 +69,7 @@ function runTest {
 }
 
 
-function plotResults {
+plotResults() {
     PLOTDIR=plots
 
     if [ ! -d "$PLOTDIR" ] ; then
@@ -79,7 +79,7 @@ function plotResults {
     PLOTFILE="${PLOTDIR}/results-${DATETIME}.ps"
     echo "Logging gnuplot visualization of test run results in plotfile ${PLOTFILE}"
     if [ -f "${PLOTFILE}" ] ; then
-	rm "${PLOTFILE}"
+	    rm "${PLOTFILE}"
     fi
 
     gnuplot -e "logfile='${LOGFILE}'; set terminal postscript landscape color" bin/plot-graph.gp > "${PLOTFILE}"
@@ -97,7 +97,7 @@ while [  "$currentNoOfRegexps"  -le "$NO_OF_REGEXPS" ] ; do
    ratio=$(bc -l <<< "scale=2; $rmatchDuration/$unfairDuration")
    echo "   Duration of run $runIdx with $currentnoOfRegexps was unfair=$unfairDuration milliseconds, rmatch=$rmatchDuration, ratio=$ratio"
    echo "$currentNoOfRegexps, $rmatchDuration, $unfairDuration", "$ratio" >> "$LOGFILE"
-   ((currentNoOfRegexps = $currentNoOfRegexps + $STEPSIZE))
+   ((currentNoOfRegexps = currentNoOfRegexps + STEPSIZE))
 
    # We do this incrementally so that we can observe how a test is
    # going even if it isn't done.  Also, we want partial results
