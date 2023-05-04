@@ -44,7 +44,7 @@ public class TestJavaRegexpUnfairly implements Matcher {
 
         final Matcher matcher = new TestJavaRegexpUnfairly();
 
-        final Buffer b = new WutheringHeightsBuffer("corpus/wuthr10.txt");
+        final Buffer b = new WutheringHeightsBuffer("rmatch-tester/corpus/wuthr10.txt");
 
         MatcherBenchmarker.testMatcher(b, matcher, argv);
 
