@@ -1,6 +1,6 @@
 o Bump java version (currently 8, try to get closer to 8).
 o Maybe move to kotlin for conciseness?
-o Move all versions to top evel pom.xml
+o Move all versions to top level pom.xml
 o Incorporate a decade of library upgrades.
 o Consider picking this thing up again.
 o Consider making a notebook to track progress over time instead of the wretched shellscripts currently there.
