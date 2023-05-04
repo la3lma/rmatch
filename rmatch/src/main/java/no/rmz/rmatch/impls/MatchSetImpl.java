@@ -141,7 +141,9 @@ public final class MatchSetImpl implements MatchSet {
         for (final Regexp r : currentNode.getRegexps()) {
             // TODO: This is a hotspot.  Can we do a heuristic that can
             //       eliminate at least some of the new matches to be added,
-            //       that will give a noticeable improvement in speed.
+            //       that will give a noticeable improvement in speed.  If we can
+            //       just halve the time spent we're in the business of beating
+            //       the java regex matcher.
             matches.add(startNode.newMatch(this, r));
         }
 
