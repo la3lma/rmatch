@@ -133,7 +133,7 @@ public final class MatchSetImpl implements MatchSet {
      * Populate the set of matches with matches that could possibly start from
      * startNode starting point.
      *
-     * @param startNode the to populate the initial set of matches from.
+     * @param startNode the node to populate the initial set of matches from.
      */
     private void addMatches(final DFANode startNode) {
         assert (startNode != null);
@@ -142,7 +142,9 @@ public final class MatchSetImpl implements MatchSet {
             // TODO: This is a hotspot.  Can we do a heuristic that can
             //       eliminate at least some of the new matches to be added,
             //       that will give a noticeable improvement in speed.
-            matches.add(startNode.newMatch(this, r));
+            if (startNode.canStartRegex(r)) {
+                matches.add(startNode.newMatch(this, r));
+            }
         }
 
         // This was necessary to nail the bug caused by the natural
