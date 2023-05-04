@@ -31,12 +31,12 @@ public final class MatcherBenchmarker {
      * The location at which we pick up the corpus.
      */
     private static final String REGEXP_LOCATION =
-            "corpus/real-words-in-wuthering-heights.txt";
+            "rmatch-tester/corpus/real-words-in-wuthering-heights.txt";
     /**
      * Where to log the results of this test.
      */
     private static final String RESULT_LOG_LOCATION =
-            "measurements/handle-the-wuthering-heights-corpus.csv";
+            "rmatch-tester/measurements/handle-the-wuthering-heights-corpus.csv";
     /**
      * We need to remember how many milliseconds there are in a second. ;)
      */

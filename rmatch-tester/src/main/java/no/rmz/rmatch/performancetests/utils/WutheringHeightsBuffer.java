@@ -15,7 +15,7 @@ public final class WutheringHeightsBuffer implements Buffer, Cloneable {
      * project, where the Wuthering Heights text is stored.
      */
     private static final String LOCATION_OF_WUTHERING_HEIGHTS =
-            "corpus/wuthr10.txt";
+            "rmatch-tester/corpus/wuthr10.txt";
     /**
      * A StringBuffer instance that holds the entire text from Emily Brontes
      * Wuthering Heights.

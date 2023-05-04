@@ -31,7 +31,8 @@ public final class FileInhaler {
     public StringSourceBuffer inhaleAsStringBuffer() {
         synchronized (file) {
             if (!file.exists()) {
-                throw new IllegalStateException("Couldn't find file " + file);
+                String currentWorkingDirectory = System.getProperty("user.dir");
+                throw new IllegalStateException("Couldn't find file " + file + " while current working directory is " + currentWorkingDirectory);
             }
             final FileInputStream fstream;
             try {
@@ -93,7 +94,10 @@ public final class FileInhaler {
     public void inhaleIntoCollector(final Collector collector) {
         synchronized (file) {
             if (!file.exists()) {
-                throw new IllegalStateException("Couldn't find file " + file);
+                String currentDir = System.getProperty("user.dir");
+                System.out.println("Current dir using System:" + currentDir);
+
+                throw new IllegalStateException("Couldn't find file " + file + " while cwd=" + currentDir);
             }
             final FileInputStream fstream;
             try {
