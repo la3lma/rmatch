@@ -53,7 +53,7 @@ public final class MatchSetImpl implements MatchSet {
      * However, the current match is only added to the collection of runnable
      * matches if it's dominating the regular expression it's representing
      *
-     * If the current match is dominating it's regular expression, then add it
+     * If the current match is dominating its regular expression, then add it
      * to the set of runnable matches given as parameter.
      *
      * This method is public only to facilitate testing. It's not part of any
