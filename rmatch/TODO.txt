@@ -1,6 +1,7 @@
 o Make things run again :-)
 o Incorporate a decade of library upgrades.
 o Consider picking this thing up again.
+o Consider making a notebook to track progress over time instead of the wretched shellscripts currently there.
 o Do everything in http://maven.apache.org/guides/mini/guide-central-repository-upload.html 
   that is necessary to get released through maven central, then decide that it isn't worth it
   and instead set up a microrepo at github, at least for now.

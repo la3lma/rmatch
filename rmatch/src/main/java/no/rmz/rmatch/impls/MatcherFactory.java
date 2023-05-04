@@ -52,7 +52,7 @@ public class MatcherFactory {
      * environment. This is the recommenced way to get a matcher to use.
      * @return a new Matcher instance.
      */
-    public final static Matcher newMatcher() {
+    public static Matcher newMatcher() {
 
         final int noOfPartitions;
         if (AVAILABLE_PROCESSORS > 2) {

@@ -86,7 +86,7 @@ public final class Counter {
     @Override
     public String toString() {
         synchronized (monitor) {
-            return "#'" + name + "'=" + atomicInt.toString();
+            return "#'" + name + "'=" + atomicInt;
         }
     }
 }

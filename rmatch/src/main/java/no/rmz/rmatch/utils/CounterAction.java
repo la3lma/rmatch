@@ -50,7 +50,6 @@ public final class CounterAction implements Action {
         synchronized (monitor) {
             counter += 1;
 
-
             if (verbose && (counter % tickInterval) == 0) {
 
                 // Collecting a report from the known counters
@@ -65,10 +64,8 @@ public final class CounterAction implements Action {
                 long duration = now - lastTick;
                 double speed = duration / (double) tickInterval;
 
-
                 LOG.log(Level.INFO, "Match counter == {0}, duration = {1}, speed = {2} millis/tick, start/end = {3}/{4}, match string = ''{5}'' {6}", new Object[]{counter, duration, speed, start, end, b.getString(start, end + 1), sb.toString()});
                 lastTick = now;
-
 
             }
         }

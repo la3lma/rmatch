@@ -31,7 +31,7 @@ public final class MatchImpl implements Match {
      * A counter that is increased every time a new MatchImpl is generated. Used
      * for logging and benchmarking.
      */
-    private static Counter counter = Counters.newCounter("MatchImpl");
+    private static final Counter counter = Counters.newCounter("MatchImpl");
 
     /**
      * True iff the match is final, in the sense that its current state
