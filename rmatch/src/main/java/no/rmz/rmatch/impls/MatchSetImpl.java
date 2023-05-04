@@ -139,14 +139,16 @@ public final class MatchSetImpl implements MatchSet {
         assert (startNode != null);
 
         for (final Regexp r : currentNode.getRegexps()) {
+            // TODO: This is a hotspot.  Can we do a heuristic that can
+            //       eliminate at least some of the new matches to be added,
+            //       that will give a noticeable improvement in speed.
             matches.add(startNode.newMatch(this, r));
         }
 
         // This was necessary to nail the bug caused by the natural
         // comparison for matches not being by id. Don't want to
-        // see that again so I'm keeping the assertion.
+        // see that again, so I'm keeping the assertion.
         assert (matches.size() == currentNode.getRegexps().size());
-
     }
 
     @Override
