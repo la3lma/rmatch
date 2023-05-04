@@ -140,8 +140,8 @@ public final class MatchSetImpl implements MatchSet {
 
         for (final Regexp r : currentNode.getRegexps()) {
             // TODO: This is a hotspot.  Can we use a heuristic that can
-            //       eliminate at least some of the new matches to be added,
-            //       that will give a noticeable improvement in speed.  If we can
+            //       eliminate at least some of the new matches to be added?
+            //       If so, that will give a noticeable improvement in speed.  If we can
             //       just halve the time spent we're in the business of beating
             //       the java regex matcher. Example: Is the next character we will see
             //       one that is compatible with adding a particular regex?  This
