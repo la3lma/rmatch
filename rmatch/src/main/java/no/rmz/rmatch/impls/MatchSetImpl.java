@@ -143,7 +143,10 @@ public final class MatchSetImpl implements MatchSet {
             //       eliminate at least some of the new matches to be added,
             //       that will give a noticeable improvement in speed.  If we can
             //       just halve the time spent we're in the business of beating
-            //       the java regex matcher.
+            //       the java regex matcher. Example: Is the next character we will see
+            //       one that is compatible with adding a particular regex?  This
+            //       can maybe be stored in a table so that it's easily cached
+            //       and thus properly inner-loopy optimizable.
             matches.add(startNode.newMatch(this, r));
         }
 
