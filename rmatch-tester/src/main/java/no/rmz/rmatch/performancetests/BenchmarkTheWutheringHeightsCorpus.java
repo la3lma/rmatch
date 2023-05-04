@@ -47,5 +47,4 @@ public final class BenchmarkTheWutheringHeightsCorpus {
      */
     private BenchmarkTheWutheringHeightsCorpus() {
     }
-
 }

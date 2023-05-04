@@ -1,4 +1,4 @@
-o Make things run again :-)
+o Bump java version.
 o Incorporate a decade of library upgrades.
 o Consider picking this thing up again.
 o Consider making a notebook to track progress over time instead of the wretched shellscripts currently there.
