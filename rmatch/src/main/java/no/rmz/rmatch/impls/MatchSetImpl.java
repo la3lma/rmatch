@@ -142,9 +142,7 @@ public final class MatchSetImpl implements MatchSet {
             // TODO: This is a hotspot.  Can we do a heuristic that can
             //       eliminate at least some of the new matches to be added,
             //       that will give a noticeable improvement in speed.
-            if (startNode.canStartRegex(r)) {
-                matches.add(startNode.newMatch(this, r));
-            }
+            matches.add(startNode.newMatch(this, r));
         }
 
         // This was necessary to nail the bug caused by the natural
