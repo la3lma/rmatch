@@ -36,7 +36,7 @@ import no.rmz.rmatch.utils.Counters;
  * initially contain several matches. As the matching process progresses fewer
  * and fewer matches will remain, and eventually they will all be removed either
  * when firing an action, or just removed since it is discovered that the match
- * can not be brought to be final and then executed..
+ * can not be brought to be final and then executed.
  */
 public final class MatchSetImpl implements MatchSet {
     /**
