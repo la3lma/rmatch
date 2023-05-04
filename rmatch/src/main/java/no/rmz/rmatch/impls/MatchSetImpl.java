@@ -149,7 +149,7 @@ public final class MatchSetImpl implements MatchSet {
 
         // This was necessary to nail the bug caused by the natural
         // comparison for matches not being by id. Don't want to
-        // see that again, so I'm keeping the assertion.
+        // see that ever again, so I'm keeping the assertion.
         assert (matches.size() == currentNode.getRegexps().size());
     }
 
