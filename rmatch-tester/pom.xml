@@ -16,7 +16,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <netbeans.hint.deploy.server>Tomcat70</netbeans.hint.deploy.server>
 
-
         <guice.version>3.0</guice.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -28,8 +27,6 @@
         <junit.version>4.11</junit.version>
         <guava.version>13.0.1</guava.version>
     </properties>
-
-
 
 
     <dependencies>
