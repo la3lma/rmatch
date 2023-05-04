@@ -33,7 +33,7 @@ import no.rmz.rmatch.utils.Counters;
 /**
  * A an implementation of the MatchSet interface. A MatchSet keeps a set of
  * matches which starts from the same location in the input. The MatchSet will
- * initially contain several matches. As the matching process progressses fewer
+ * initially contain several matches. As the matching process progresses fewer
  * and fewer matches will remain, and eventually they will all be removed either
  * when firing an action, or just removed since it is discovered that the match
  * can not be brought to be final and then executed..
