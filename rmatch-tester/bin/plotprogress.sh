@@ -1,3 +1,4 @@
+#!/usr/bin/env gnuplot
 # Perhaps this http://itb.biologie.hu-berlin.de/~glauser/research/GNUplot_3.html is a better template?, allows
 # more dimensions than two in the timeseries, which is good.
 
