@@ -33,6 +33,11 @@
   </developers>
 
   <properties>
+    <mavenCompilerPlugin.version>3.11.0</mavenCompilerPlugin.version>
+    <mavenJarPlugin.version>3.3.0</mavenJarPlugin.version>
+    <mavenDependencyPlugin.version>3.5.0</mavenDependencyPlugin.version>
+    <mavenFindbugsPlugin.version>2.5.1</mavenFindbugsPlugin.version>
+    <mavenCheckstylePlugin.version>3.2.2</mavenCheckstylePlugin.version>
     <junit.version>4.13.2</junit.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
