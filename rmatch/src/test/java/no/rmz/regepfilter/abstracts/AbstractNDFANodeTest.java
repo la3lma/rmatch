@@ -20,12 +20,17 @@ import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collection;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +60,7 @@ public class AbstractNDFANodeTest {
     /**
      * Make a new test article.
      */
-    @Before
+    @BeforeEach
     public void setUp() {
          // Make a new, terminal node (that's what the "true"
          // indicates).
@@ -115,7 +120,8 @@ public class AbstractNDFANodeTest {
     /**
      * Unimplemented test.
      */
-    @Ignore @Test
+    @Disabled
+    @Test
     public final  void testGetNextSet() {
     }
 

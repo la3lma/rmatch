@@ -20,14 +20,14 @@ import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.interfaces.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,7 +71,7 @@ public final class AorBtest {
     /**
      * Set up test article and mocks.
      */
-    @Before
+    @BeforeEach
     public void setUp() throws RegexpParserException {
         final String finalAorB = "a|b";
         aOrBString = finalAorB;
@@ -106,10 +106,10 @@ public final class AorBtest {
      */
     @Test
     public void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
-        assertTrue("the regexp should not initially have actions",
-                !regexp.hasActions());
+        assertTrue(!regexp.hasActions(),
+                "the regexp should not initially have actions");
         m.add(aOrBString, action);
-        assertTrue("the regexp should have actions", regexp.hasActions());
+        assertTrue(regexp.hasActions(), "the regexp should have actions");
     }
 
     /**

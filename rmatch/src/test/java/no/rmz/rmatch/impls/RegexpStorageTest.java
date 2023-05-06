@@ -17,16 +17,18 @@ package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.when;
  * Test the RegexpStorage.
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class RegexpStorageTest {
 
     /**
@@ -88,7 +91,7 @@ public final class RegexpStorageTest {
      * the content compilationResult whenever the compile method is
      * invoked.
      */
-    @Before
+    @BeforeEach
     public void setUp() throws RegexpParserException {
         reString = "Fnord";
         stringSet = new HashSet<String>();

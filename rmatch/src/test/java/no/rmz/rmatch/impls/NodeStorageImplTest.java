@@ -19,6 +19,9 @@ package no.rmz.rmatch.impls;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.StringBuffer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,7 +30,7 @@ import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -60,17 +63,17 @@ class NodeStorageImplTest {
      * Check any invariants that should be true for the globally declared data
      * structures are actually true post ante.
      */
-    @After
+    @AfterEach
     public final void tearDown() {
-        assertTrue("Expecting emptyNdfaNodeSet to be empty",
-                emptyNdfaNodeSet.isEmpty());
+        assertTrue(emptyNdfaNodeSet.isEmpty(),
+                "Expecting emptyNdfaNodeSet to be empty");
     }
 
     /**
      * Set up a new NodeStorageImpl, a StringBuffer containing the string "a",
      * and an empty tree set in the emptyTreeSet field.
      */
-    @Before
+    @BeforeEach
     public final void setUp() {
         nsi = new NodeStorageImpl();
         buffer = new StringBuffer("a");
@@ -82,11 +85,11 @@ class NodeStorageImplTest {
      */
     @Test
     public final void testAddToStartnode() {
-        assertTrue("Node shouldn't initially be stored",
-                !nsi.isConnectedToStartnode(ndfaNode));
+        assertTrue(!nsi.isConnectedToStartnode(ndfaNode),
+                "Node shouldn't initially be stored");
         nsi.addToStartnode(ndfaNode);
-        assertTrue("Node should now be stored",
-                nsi.isConnectedToStartnode(ndfaNode));
+        assertTrue(nsi.isConnectedToStartnode(ndfaNode),
+                "Node should now be stored");
     }
 
     /**

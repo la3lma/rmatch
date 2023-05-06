@@ -18,6 +18,10 @@ package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.utils.StringBuffer;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test that a StringBuffer has the length that it should and that
@@ -38,7 +42,7 @@ public final class StringBufferTest {
     /**
      * Set up the test article.
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         staticString = "Fiskeboller";
         sb = new StringBuffer(staticString);

@@ -18,28 +18,22 @@ package no.rmz.rmatch.compiler;
 
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.RegexpFactory;
-import no.rmz.rmatch.interfaces.RegexpStorage;
+import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.testutils.GraphDumper;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import static org.mockito.Matchers.any;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Test the compiler for abstract regular expressions.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ARegexpCompilerTest {
 
     /**
@@ -332,7 +326,7 @@ public class ARegexpCompilerTest {
     /**
      * Test of addBeginningOfLine method, of class ARegexpCompiler.
      */
-    @Ignore
+    @Disabled
     @Test
     public final void testAddBeginningOfLine() throws RegexpParserException {
         final String regexpPattern = "^z";
@@ -357,7 +351,7 @@ public class ARegexpCompilerTest {
     /**
      * Test of addEndOfLine method, of class ARegexpCompiler.
      */
-    @Ignore
+    @Disabled
     @Test
     public final void testAddEndOfLine() throws RegexpParserException {
         final String regexpPattern = "z$";

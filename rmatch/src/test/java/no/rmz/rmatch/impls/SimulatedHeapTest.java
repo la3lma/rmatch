@@ -17,10 +17,15 @@
 package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.utils.SimulatedHeap;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Comparator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test our simulated heap.
@@ -65,7 +70,7 @@ public final class SimulatedHeapTest {
      * Set u the array "i" to contain integers i[j] = j for j in the range 0 ...
      * 99.
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         h = new SimulatedHeap<Integer>(CMP);
 

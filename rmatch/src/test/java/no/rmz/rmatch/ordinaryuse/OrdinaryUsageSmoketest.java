@@ -22,12 +22,13 @@ import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.testutils.GraphDumper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.Mockito.verify;
 
 /**
  * This is a basic test of two or more NDFA nodes after one another
@@ -64,7 +65,7 @@ public class OrdinaryUsageSmoketest {
      * Instantiate test articles and set up the compiler mock
      * to simulate proper compilation of "ab" and "ac".
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         m = new MatcherImpl();
     }
