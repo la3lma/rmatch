@@ -1,31 +1,25 @@
 package no.rmz.rmatch.performancetests;
 
-import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
-import java.util.logging.Logger;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.RegexpFactory;
-import no.rmz.rmatch.interfaces.RegexpStorage;
+import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.mockedcompiler.CharPlusNode;
+import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 import no.rmz.rmatch.utils.CounterAction;
-import static org.junit.Assert.assertTrue;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import static org.mockito.Matchers.any;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.logging.Logger;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * This is a test that checks that the regular expression "a+" can be run, and
@@ -35,14 +29,14 @@ import org.mockito.runners.MockitoJUnitRunner;
  * This set of tests assumes that the basic mechanics works, but will stress the
  * implementation by running larg(ish) tests.
  */
-@RunWith(MockitoJUnitRunner.class)
-public class APlusLoader {
+@ExtendWith(MockitoExtension.class)
+class APlusLoaderTests {
 
     /**
      * Our Dear Logger.
      */
     private static final Logger LOG =
-            Logger.getLogger(APlusLoader.class.getName());
+            Logger.getLogger(APlusLoaderTests.class.getName());
 
     /**
      * If we don't get at least fire matches, something is
@@ -84,7 +78,7 @@ public class APlusLoader {
     /**
      * Set up test items and context.
      */
-    @Before
+    @BeforeEach
     public void setUp() throws RegexpParserException {
         final String finalAPlus = "a+";
         aPlusString = finalAPlus;
@@ -92,8 +86,10 @@ public class APlusLoader {
         final NDFANode aplus =
                 new CharPlusNode(Character.valueOf('a'), regexp, true);
 
-        when(compiler.compile((Regexp) any(),
-                (RegexpStorage) any())).thenReturn(aplus);
+        when(compiler.compile(
+                (Regexp) any(),
+                (RegexpStorage) any()))
+                .thenReturn(aplus);
 
         final RegexpFactory regexpFactory = new RegexpFactory() {
             @Override
