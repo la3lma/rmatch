@@ -12,13 +12,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -59,7 +59,6 @@ class APlusLoaderTests {
     @Mock
     NDFACompiler compiler;
 
-
     /**
      * The string "a+".
      */
@@ -87,8 +86,8 @@ class APlusLoaderTests {
                 new CharPlusNode(Character.valueOf('a'), regexp, true);
 
         when(compiler.compile(
-                (Regexp) any(),
-                (RegexpStorage) any()))
+                any(Regexp.class),
+                any(RegexpStorage.class)))
                 .thenReturn(aplus);
 
         final RegexpFactory regexpFactory = new RegexpFactory() {
@@ -136,7 +135,7 @@ class APlusLoaderTests {
 
         for (int i = 0; i < noOfPatterns; i++) {
             final int offset = lengthOfPattern * i;
-            verify(action).performMatch(b,
+            Mockito.<Action>verify(action).performMatch(b,
                     offset + startIndexInPattern, offset + endIndexInPattern);
         }
     }
