@@ -16,15 +16,16 @@
 
 package no.rmz.rmatch.impls;
 
-import java.util.Comparator;
 import no.rmz.rmatch.utils.SimulatedHeap;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Comparator;
 
 /**
  * Test our simulated heap.
  */
+@ExtendWith(MockitoExtension.class)
 public final class SimulatedHeapTest {
 
     /**

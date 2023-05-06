@@ -16,23 +16,20 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.impls.DominationHeap;
-import java.util.Comparator;
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.Regexp;
-import org.junit.runner.RunWith;
-import org.junit.Test;
-import org.junit.Before;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.mockito.runners.MockitoJUnitRunner;
+import java.util.Comparator;
+
+import static org.mockito.Mockito.when;
 
 /**
  * Test that the domination protocol does indeed work as advertised.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DominationHeapTest {
 
     /**

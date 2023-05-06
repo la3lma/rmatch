@@ -16,29 +16,23 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.impls.DFANodeImpl;
-import no.rmz.rmatch.impls.RunnableMatchesHolder;
-import no.rmz.rmatch.impls.RegexpImpl;
-import no.rmz.rmatch.impls.MatchImpl;
-import no.rmz.rmatch.impls.MatchSetImpl;
-import java.util.Collections;
-import java.util.Set;
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.MatchSet;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collections;
+import java.util.Set;
+
 import static org.mockito.Mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Representation of an actual or potential match.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MatchImplTest {
 
    /**

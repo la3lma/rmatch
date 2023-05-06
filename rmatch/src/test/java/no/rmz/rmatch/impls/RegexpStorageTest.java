@@ -15,28 +15,25 @@
  */
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.impls.RegexpStorageImpl;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.RegexpStorage;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import java.util.*;
 import no.rmz.rmatch.compiler.RegexpParserException;
-
-import static org.junit.Assert.*;
+import no.rmz.rmatch.interfaces.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 /**
  * Test the RegexpStorage.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public final class RegexpStorageTest {
 
     /**

@@ -15,15 +15,13 @@
  */
 package no.rmz.rmatch.utils;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import java.util.*;
-import java.util.concurrent.*;
+import static org.junit.Assert.*;
 
 /**
  *

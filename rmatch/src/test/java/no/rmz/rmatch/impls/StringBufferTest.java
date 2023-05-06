@@ -18,9 +18,6 @@ package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.utils.StringBuffer;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Test that a StringBuffer has the length that it should and that

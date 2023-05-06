@@ -18,16 +18,14 @@ package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.NodeStorage;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Test the start node.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StartNodeTest {
 
     /**

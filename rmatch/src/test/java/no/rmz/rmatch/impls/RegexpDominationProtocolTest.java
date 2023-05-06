@@ -16,16 +16,12 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.impls.DFANodeImpl;
-import no.rmz.rmatch.impls.RegexpImpl;
-import no.rmz.rmatch.impls.MatchImpl;
-import no.rmz.rmatch.impls.MatchSetImpl;
-import static com.google.common.base.Preconditions.*;
-import java.util.Collections;
-import java.util.logging.Logger;
 import no.rmz.rmatch.interfaces.Match;
-import org.junit.*;
-import static org.junit.Assert.*;
+
+import java.util.Collections;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Testing the domination protocol, with contributions

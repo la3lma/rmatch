@@ -32,12 +32,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 /**
  * This is a basic test of two or more NDFA nodes after one another
  * encoding a sequence.  It runs with handcrafted nodes (no
- * compilers), and tests tha basic matcher algorithm.  If this doesn't work
- * nothing will.
+ * compilers), and tests the basic matcher algorithm.  If this doesn't work
+ * then nothing will.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OrdinaryUsageSmoketest {
-
 
     /**
      * Mocked action. Used to check that matches are found
@@ -45,8 +44,6 @@ public class OrdinaryUsageSmoketest {
      */
     @Mock
     Action action;
-
-
 
     /**
      * A test article, the matcher implementation.

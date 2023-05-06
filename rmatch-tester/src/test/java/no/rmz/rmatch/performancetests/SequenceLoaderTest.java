@@ -38,7 +38,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  * various weird bugs that does not necessarily manifest themselves in
  * very small tests.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SequenceLoaderTest {
 
     /**

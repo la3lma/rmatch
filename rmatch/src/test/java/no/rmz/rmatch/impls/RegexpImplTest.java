@@ -16,23 +16,18 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Node;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.impls.RegexpImpl;
+import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.StringBuffer;
-import org.junit.*;
-import static org.junit.Assert.*;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.Assert.*;
 
 /**
  * Testing the implementation of our Regexp interface.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RegexpImplTest {
 
     /**

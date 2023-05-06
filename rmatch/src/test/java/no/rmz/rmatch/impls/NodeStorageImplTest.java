@@ -16,29 +16,25 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.impls.NodeStorageImpl;
-import java.util.*;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.PrintableEdge;
-import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.StringBuffer;
-import org.junit.After;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collection;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Test the NodeStorage implementation for a few simple usecases.
  */
-@RunWith(MockitoJUnitRunner.class)
-public class NodeStorageImplTest {
+@ExtendWith(MockitoExtension.class)
+class NodeStorageImplTest {
 
     /**
      * An implementation instance. This is the test article that we check the

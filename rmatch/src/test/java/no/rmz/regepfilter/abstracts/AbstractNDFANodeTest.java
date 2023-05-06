@@ -16,28 +16,25 @@
 
 package no.rmz.regepfilter.abstracts;
 
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collection;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 /**
  * Test basic functions  in the AbstractNDFANode class.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AbstractNDFANodeTest {
-
-
 
     /**
      * The test article.
@@ -55,17 +52,14 @@ public class AbstractNDFANodeTest {
     @Mock
             NDFANode ndfanode;
 
-
     /**
      * Make a new test article.
      */
     @Before
     public void setUp() {
-        /**
-         * Make a new, terminal node (that's what the "true"
-         * indicates).
-         */
-        testArticleNDFANode = new AbstractNDFANodeImpl(regexp, true);
+         // Make a new, terminal node (that's what the "true"
+         // indicates).
+         testArticleNDFANode = new AbstractNDFANodeImpl(regexp, true);
     }
 
 
