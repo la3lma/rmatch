@@ -16,8 +16,9 @@
 
 package no.rmz.rmatch.interfaces;
 
-import java.util.Set;
 import no.rmz.rmatch.compiler.RegexpParserException;
+
+import java.util.Set;
 
 /**
  * Storage for regular expressions. It provides an interface for storing regular
@@ -75,5 +76,5 @@ public interface RegexpStorage {
      *
      * @return A set of regular expression representations.
      */
-    Set<Regexp> getRegexpSet();
+    Set<String> getRegexpSet();
 }

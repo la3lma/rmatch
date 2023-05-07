@@ -16,18 +16,14 @@
 
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.interfaces.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.RegexpFactory;
-import no.rmz.rmatch.interfaces.RegexpStorage;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An implementation of the regular expression storage interface. It stores all
@@ -136,7 +132,7 @@ public final class RegexpStorageImpl implements RegexpStorage {
     }
 
     @Override
-    public Set getRegexpSet() {
+    public Set<String> getRegexpSet() {
         synchronized (regexps) {
             return regexps.keySet();
         }
