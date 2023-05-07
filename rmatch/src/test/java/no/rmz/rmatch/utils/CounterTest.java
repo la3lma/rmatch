@@ -65,22 +65,21 @@ public class CounterTest {
         final int noOfIterationsInRunnable = 10000;
         final int noOfRunnables = noOfThreadsInPool;
         final int noOfIncrements = noOfRunnables * noOfIterationsInRunnable;
-        final ExecutorService executors =
-                Executors.newFixedThreadPool(noOfThreadsInPool);
+        try (final ExecutorService executors =
+                        Executors.newFixedThreadPool(noOfThreadsInPool)) {
 
-        final Collection<Callable<Object>> runnables = new ArrayList<>();
+            final Collection<Callable<Object>> runnables = new ArrayList<>();
 
-        for (int j = 0; j < noOfRunnables; j++) {
-            final Callable<Object> runnable = () -> {
-                        for (int i = 0; i < noOfIterationsInRunnable; i++) {
-                            counter.inc();
-                        }
-                        return null;
-            };
-            runnables.add(runnable);
-        }
+            for (int j = 0; j < noOfRunnables; j++) {
+                final Callable<Object> runnable = () -> {
+                    for (int i = 0; i < noOfIterationsInRunnable; i++) {
+                        counter.inc();
+                    }
+                    return null;
+                };
+                runnables.add(runnable);
+            }
 
-        try {
             executors.invokeAll(runnables);
         } catch (InterruptedException ex) {
             throw new RuntimeException(ex);

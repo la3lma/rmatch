@@ -15,14 +15,17 @@
  */
 
 package no.rmz.rmatch.abstracts;
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.*;
+
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
 import no.rmz.rmatch.utils.LifoSet;
+
+import java.util.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An abstract implementation of the NDANode interface. In fact, this
@@ -296,6 +299,7 @@ public abstract class AbstractNDFANode implements NDFANode {
     }
 
     @Override
+
     public final int compareTo(final NDFANode t) {
         if (!(t instanceof AbstractNDFANode)) {
             throw new UnsupportedOperationException("Not supported yet.");
