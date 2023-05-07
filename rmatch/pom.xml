@@ -137,8 +137,12 @@
                 <version>${mavenCompilerPlugin.version}</version>
 
                 <configuration>
-                    <source>${compileSource}</source>
-                    <target>${compileSource}</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <compilerArgs>
+                        <arg>-verbose</arg>
+                        <arg>-Xlint:all,-options,-path</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
