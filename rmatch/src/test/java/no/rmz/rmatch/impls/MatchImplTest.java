@@ -133,6 +133,7 @@ public class MatchImplTest {
      * Check that two presumably equal matches are indeed equal when
      * compared using domination.
      */
+    @Test
     public final void testCompareOtherWithNonmatchingRegex() {
         final Match match2 = new MatchImpl(ms, regexpMocked);
         assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(match, match2));
