@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,22 +16,13 @@
 
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.interfaces.MatchSet;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
+
+import java.util.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An implementation of deterministic finite automata nodes DFA.
@@ -166,7 +157,7 @@ public final class DFANodeImpl implements DFANode {
     }
 
     @Override
-    public Set getRegexps() {
+    public Set<Regexp> getRegexps() {
         return Collections.unmodifiableSet(regexps);
     }
 

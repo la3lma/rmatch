@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -92,13 +92,13 @@ public class MatchImplTest {
     @Test
     public final void testIsActiveFor() {
         // Check active (default)
-        assertEquals(true, match.isActive());
+        assertTrue(match.isActive());
         assertTrue(regexpReal.hasMatches());
         assertTrue(regexpReal.hasMatch(match));
 
         // Check active (after abandoning)
         match.abandon();
-        assertEquals(false, match.isActive());
+        assertFalse(match.isActive());
     }
 
    /**
@@ -110,7 +110,7 @@ public class MatchImplTest {
                 new MatchSetImpl(1,
                 new DFANodeImpl((Set<NDFANode>) Collections.EMPTY_SET));
         final Regexp r = new RegexpImpl("Krasnji Octobr");
-        assertTrue(!r.hasMatches());
+        assertFalse(r.hasMatches());
         final Match m = new MatchImpl(msx, r);
         assertTrue(r.hasMatches());
         assertEquals(r, m.getRegexp());
@@ -124,15 +124,14 @@ public class MatchImplTest {
      */
     @Test
     public final void testCompareToNull() {
-        NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
-            Match.COMPARE_BY_DOMINATION.compare(match, null);
-        });
+        NullPointerException thrown = assertThrows(NullPointerException.class, () -> Match.COMPARE_BY_DOMINATION.compare(match, null));
     }
 
     /**
      * Check that two presumably equal matches are indeed equal when
      * compared using domination.
      */
+    @Test
     public final void testCompareOtherWithNonmatchingRegex() {
         final Match match2 = new MatchImpl(ms, regexpMocked);
         assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(match, match2));
@@ -141,6 +140,7 @@ public class MatchImplTest {
     /**
      * Whe domination comparing, a match is equal to itself.
      */
+    @Test
     public final void testCompareOtherSelf() {
         assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(match, match));
     }
@@ -148,7 +148,7 @@ public class MatchImplTest {
    /**
     * A final and inactive match will when it is committed be sent
     * to a set of runnable matches.
-    *
+    * <p>
     * XXX  The negation isn't tested!
     */
     @Test

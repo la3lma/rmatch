@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,14 +16,15 @@
 
 package no.rmz.rmatch.interfaces;
 
-import java.util.Set;
 import no.rmz.rmatch.compiler.RegexpParserException;
+
+import java.util.Set;
 
 /**
  * Storage for regular expressions. It provides an interface for storing regular
  * expressions, as strings, and retrieving their corresponding representations
  * as Regexpr instances.
- *
+ * <p>
  * The lookup is syntactic, not semantic, so that equivalent regular expression
  * strings, such as "aa*" and "a+" will not be recognized as representing the
  * same regular language, even if they in fact do that.
@@ -75,5 +76,5 @@ public interface RegexpStorage {
      *
      * @return A set of regular expression representations.
      */
-    Set<Regexp> getRegexpSet();
+    Set<String> getRegexpSet();
 }

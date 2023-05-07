@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,7 @@ import org.mockito.quality.Strictness;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -94,13 +94,13 @@ public final class RegexpStorageTest {
     @BeforeEach
     public void setUp() throws RegexpParserException {
         reString = "Fnord";
-        stringSet = new HashSet<String>();
+        stringSet = new HashSet<>();
         rs = new RegexpStorageImpl(storage, compiler);
 
         // A really simple compiler, always returns the same
         // (mocked) node.
-        when(compiler.compile((Regexp) any(),
-                (RegexpStorage) any())).thenReturn(compilationResult);
+        when(compiler.compile(any(),
+                any())).thenReturn(compilationResult);
     }
 
     /**
@@ -108,11 +108,11 @@ public final class RegexpStorageTest {
      */
     @Test
     public void testAddRemoveRegexp() throws RegexpParserException {
-        assertTrue(!rs.hasRegexp(reString));
+        assertFalse(rs.hasRegexp(reString));
         rs.add(reString, a);
         assertTrue(rs.hasRegexp(reString));
         rs.remove(reString, a);
-        assertTrue(!rs.hasRegexp(reString));
+        assertFalse(rs.hasRegexp(reString));
     }
 
     /**
@@ -122,7 +122,7 @@ public final class RegexpStorageTest {
     public void testGetRegexp() {
         final Regexp re = rs.getRegexp(reString);
         assertTrue(rs.hasRegexp(reString));
-        assertTrue(rs.getRegexp(reString) == re);
+        assertSame(rs.getRegexp(reString), re);
     }
 
     /**
@@ -142,7 +142,7 @@ public final class RegexpStorageTest {
     @Test
     public void testRegexpSetExclusion() {
         rs.getRegexp(reString);
-        final Set s1 = rs.getRegexpSet();
+        final Set<String> s1 = rs.getRegexpSet();
         stringSet.add(reString);
         s1.removeAll(stringSet);
         assertTrue(s1.isEmpty());

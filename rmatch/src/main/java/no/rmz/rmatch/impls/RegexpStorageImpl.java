@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,18 +16,14 @@
 
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.interfaces.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.RegexpFactory;
-import no.rmz.rmatch.interfaces.RegexpStorage;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An implementation of the regular expression storage interface. It stores all
@@ -40,7 +36,7 @@ public final class RegexpStorageImpl implements RegexpStorage {
      * instances representing those strings.
      *
      */
-    private final Map<String, Regexp> regexps = new HashMap<String, Regexp>();
+    private final Map<String, Regexp> regexps = new HashMap<>();
     /**
      * A NodeStorage instance that is used when creating new nondeterminstic
      * nodes.
@@ -136,7 +132,7 @@ public final class RegexpStorageImpl implements RegexpStorage {
     }
 
     @Override
-    public Set getRegexpSet() {
+    public Set<String> getRegexpSet() {
         synchronized (regexps) {
             return regexps.keySet();
         }

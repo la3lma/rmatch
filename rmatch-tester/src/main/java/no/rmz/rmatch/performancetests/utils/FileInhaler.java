@@ -1,9 +1,10 @@
 package no.rmz.rmatch.performancetests.utils;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /**
@@ -34,12 +35,7 @@ public final class FileInhaler {
                 String currentWorkingDirectory = System.getProperty("user.dir");
                 throw new IllegalStateException("Couldn't find file " + file + " while current working directory is " + currentWorkingDirectory);
             }
-            final FileInputStream fstream;
-            try {
-                fstream = new FileInputStream(file);
-            } catch (FileNotFoundException ex) {
-                throw new IllegalStateException("Couldn't find file " + file);
-            }
+            final FileInputStream fstream = getFileInputStream();
             // Get the object of DataInputStream
             final DataInputStream in = new DataInputStream(fstream);
             final BufferedReader br =
@@ -60,6 +56,7 @@ public final class FileInhaler {
                     in.close();
                     fstream.close();
                 } catch (IOException ex) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new RuntimeException(ex);
                 }
             }
@@ -67,6 +64,19 @@ public final class FileInhaler {
         }
     }
 
+    /**
+     * Open this.file and return an FileInputStream instance
+     * @return the input stream instance
+     */
+    private FileInputStream getFileInputStream() {
+        final FileInputStream fstream;
+        try {
+            fstream = new FileInputStream(this.file);
+        } catch (FileNotFoundException ex) {
+            throw new IllegalStateException("Couldn't find file " + this.file);
+        }
+        return fstream;
+    }
 
     /**
      * Get the content of the file as a list of lines.
@@ -74,14 +84,9 @@ public final class FileInhaler {
      */
     public List<String> inhaleAsListOfLines() {
         synchronized (file) {
-            final List<String> result = new ArrayList<String>();
+            final List<String> result = new ArrayList<>();
 
-            inhaleIntoCollector(new Collector() {
-                @Override
-                public void add(final String strLine) {
-                    result.add(strLine);
-                }
-            });
+            inhaleIntoCollector(result::add);
             return result;
         }
     }
@@ -99,12 +104,7 @@ public final class FileInhaler {
 
                 throw new IllegalStateException("Couldn't find file " + file + " while cwd=" + currentDir);
             }
-            final FileInputStream fstream;
-            try {
-                fstream = new FileInputStream(file);
-            } catch (FileNotFoundException ex) {
-                throw new IllegalStateException("Couldn't find file " + file);
-            }
+            final FileInputStream fstream = getFileInputStream();
             // Get the object of DataInputStream
             final DataInputStream in = new DataInputStream(fstream);
             final BufferedReader br =

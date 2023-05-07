@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -110,7 +110,7 @@ public class ARegexpCompilerTest {
      * Inject some content to the test article (a compiler instance),
      * then mock up the NDFACompiler instance to return that
      * compilation result when asked to compile the regexpPattern.
-     *
+     * <p>
      * Then run a match against the testString and return the Matcher
      * Buffer pair so that the tests that use this method can set up
      * its own mockito verify statements that are test specific.
@@ -129,18 +129,15 @@ public class ARegexpCompilerTest {
         injector.inject(arc);
         final NDFANode abcNode = arc.getResult();
 
-        when(compiler.compile((Regexp) any(), // XXX SHould have used "eq" here.
-                (RegexpStorage) any())).thenReturn(abcNode);
+        when(compiler.compile(any(), // XXX SHould have used "eq" here.
+                any())).thenReturn(abcNode);
 
-        final RegexpFactory regexpFactory = new RegexpFactory() {
-            @Override
-            public Regexp newRegexp(final String regexpString) {
-                if (regexpString.equals(regexpPattern)) {
-                    return regexp;
-                } else {
-                    return RegexpFactory.DEFAULT_REGEXP_FACTORY
-                            .newRegexp(regexpString);
-                }
+        final RegexpFactory regexpFactory = regexpString -> {
+            if (regexpString.equals(regexpPattern)) {
+                return regexp;
+            } else {
+                return RegexpFactory.DEFAULT_REGEXP_FACTORY
+                        .newRegexp(regexpString);
             }
         };
 
@@ -166,12 +163,7 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.addString(regexpPattern);
-                    }
-                });
+                arb -> arb.addString(regexpPattern));
 
         GraphDumper.dump("ARegexpCompilerTestAddString",
                 mb.getM().getNodeStorage());
@@ -189,12 +181,9 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.addString("a");
-                        arb.addString("b");
-                    }
+                arb -> {
+                    arb.addString("a");
+                    arb.addString("b");
                 });
 
         GraphDumper.dump("testAddStringLength2",
@@ -212,13 +201,10 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.addString("a");
-                        arb.separateAlternatives();
-                        arb.addString("b");
-                    }
+                arb -> {
+                    arb.addString("a");
+                    arb.separateAlternatives();
+                    arb.addString("b");
                 });
 
         GraphDumper.dump("ARegexpCompilerTestSeparateAlternatives",
@@ -236,14 +222,11 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.startCharSet();
-                        arb.addToCharSet("a");
-                        arb.addToCharSet("b");
-                        arb.endCharSet();
-                    }
+                arb -> {
+                    arb.startCharSet();
+                    arb.addToCharSet("a");
+                    arb.addToCharSet("b");
+                    arb.endCharSet();
                 });
 
         GraphDumper.dump("testCharSet",
@@ -261,15 +244,12 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.startCharSet();
-                        arb.invertCharSet();
-                        arb.addToCharSet("a");
-                        arb.addToCharSet("b");
-                        arb.endCharSet();
-                    }
+                arb -> {
+                    arb.startCharSet();
+                    arb.invertCharSet();
+                    arb.addToCharSet("a");
+                    arb.addToCharSet("b");
+                    arb.endCharSet();
                 });
 
         GraphDumper.dump("testInverseCharSet",
@@ -287,13 +267,10 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.startCharSet();
-                        arb.addRangeToCharSet('a', 'c');
-                        arb.endCharSet();
-                    }
+                arb -> {
+                    arb.startCharSet();
+                    arb.addRangeToCharSet('a', 'c');
+                    arb.endCharSet();
                 });
 
         GraphDumper.dump("testAddRangeToCharSet",
@@ -311,12 +288,7 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.addAnyChar();
-                    }
-                });
+                AbstractRegexBuilder::addAnyChar);
 
         GraphDumper.dump("testAddAnyChar",
                 mb.getM().getNodeStorage());
@@ -334,13 +306,10 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.addBeginningOfLine();
-                        arb.addString("z");
-                        arb.addAnyChar();
-                    }
+                arb -> {
+                    arb.addBeginningOfLine();
+                    arb.addString("z");
+                    arb.addAnyChar();
                 });
 
         GraphDumper.dump("testAddBeginningOfLine",
@@ -359,13 +328,10 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.addBeginningOfLine();
-                        arb.addString("z");
-                        arb.addAnyChar();
-                    }
+                arb -> {
+                    arb.addBeginningOfLine();
+                    arb.addString("z");
+                    arb.addAnyChar();
                 });
 
         GraphDumper.dump("testAddendOfLine",
@@ -383,13 +349,10 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.addString("a");
-                        arb.addOptionalSingular();
-                        arb.addString("b");
-                    }
+                arb -> {
+                    arb.addString("a");
+                    arb.addOptionalSingular();
+                    arb.addString("b");
                 });
 
         GraphDumper.dump("testAddOptionalSingular",
@@ -407,14 +370,11 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.addString("b");
-                        arb.addString("a");
-                        arb.addOptionalZeroOrMulti();
-                        arb.addString("n");
-                    }
+                arb -> {
+                    arb.addString("b");
+                    arb.addString("a");
+                    arb.addOptionalZeroOrMulti();
+                    arb.addString("n");
                 });
 
         GraphDumper.dump("testAddOptionalZeroOrMulti",
@@ -433,14 +393,11 @@ public class ARegexpCompilerTest {
         final MB mb = runMatcherFromCompiler(
                 regexpPattern,
                 testString,
-                new InjectorOfAbstractRegexp() {
-                    @Override
-                    public void inject(final AbstractRegexBuilder arb) {
-                        arb.addString("b");
-                        arb.addString("a");
-                        arb.addOptionalOnceOrMulti();
-                        arb.addString("n");
-                    }
+                arb -> {
+                    arb.addString("b");
+                    arb.addString("a");
+                    arb.addOptionalOnceOrMulti();
+                    arb.addString("n");
                 });
 
         GraphDumper.dump("testAddOptionalOnceOrMulti",

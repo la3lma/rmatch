@@ -64,16 +64,13 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
             final LineSource linesource,
             final Matcher rmatcher,
             final Action actionToRun) {
-        final Callable<Object> callable = new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                rmatcher.reset(linesource.getCurrentLine());
-                if (rmatcher.find()) {
-                    // We'll see about this
-                    actionToRun.performMatch(null, -1, -1);
-                }
-                return null;
+        final Callable<Object> callable = () -> {
+            rmatcher.reset(linesource.getCurrentLine());
+            if (rmatcher.find()) {
+                // We'll see about this
+                actionToRun.performMatch(null, -1, -1);
             }
+            return null;
         };
         return callable;
     }

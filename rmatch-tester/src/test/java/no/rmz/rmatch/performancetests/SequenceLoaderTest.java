@@ -282,7 +282,7 @@ public class SequenceLoaderTest {
         long noOfThingsToLookFor = 0;
 
         final SortedMap<String, CounterAction> wordCounters =
-                new TreeMap<String, CounterAction>();
+                new TreeMap<>();
 
 
         for (final String word : fh.inhaleAsListOfLines()) {

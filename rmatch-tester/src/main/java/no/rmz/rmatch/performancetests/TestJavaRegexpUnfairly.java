@@ -24,7 +24,7 @@ import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
  * This will mean a lot more work for the matcher and that will be unfair, which
  * is the whole point of the exercise. This kind of matching is something the
  * rmatch matcher should be much better at.
- *
+ * <p>
  * XXXX: At present this is somewhat of an abomination. I expect that the
  * present class will have to be rewritten extensibly before it will produce
  * results that I have any confidence in.
@@ -95,17 +95,14 @@ public class TestJavaRegexpUnfairly implements Matcher {
                 // anyway.
                 final java.util.regex.Matcher rmatcher = pattern.matcher("");
 
-                final Callable<Object> callable = new Callable<Object>() {
-                    @Override
-                    public Object call() throws Exception {
-                        rmatcher.reset(strToSearchIn);
-                        while (rmatcher.find()) {
-                            final int start = rmatcher.start();
-                            final int end = rmatcher.end();
-                            action.performMatch(b, start, end);
-                        }
-                        return null;
+                final Callable<Object> callable = () -> {
+                    rmatcher.reset(strToSearchIn);
+                    while (rmatcher.find()) {
+                        final int start = rmatcher.start();
+                        final int end = rmatcher.end();
+                        action.performMatch(b, start, end);
                     }
+                    return null;
                 };
                 matchers.add(callable);
             }
@@ -126,7 +123,7 @@ public class TestJavaRegexpUnfairly implements Matcher {
     private Set<String> getSetForAction(final Action action) {
         final Set<String> targetSet;
         if (!actionToRegexpMap.containsKey(action)) {
-            targetSet = new HashSet<String>();
+            targetSet = new HashSet<>();
             actionToRegexpMap.put(action, targetSet);
         } else {
             targetSet = actionToRegexpMap.get(action);

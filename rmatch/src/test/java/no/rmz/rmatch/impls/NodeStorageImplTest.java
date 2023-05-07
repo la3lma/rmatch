@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -77,7 +77,7 @@ class NodeStorageImplTest {
     public final void setUp() {
         nsi = new NodeStorageImpl();
         buffer = new StringBuffer("a");
-        emptyNdfaNodeSet = new TreeSet();
+        emptyNdfaNodeSet = new TreeSet<>();
     }
 
     /**
@@ -85,8 +85,7 @@ class NodeStorageImplTest {
      */
     @Test
     public final void testAddToStartnode() {
-        assertTrue(!nsi.isConnectedToStartnode(ndfaNode),
-                "Node shouldn't initially be stored");
+        assertFalse(nsi.isConnectedToStartnode(ndfaNode), "Node shouldn't initially be stored");
         nsi.addToStartnode(ndfaNode);
         assertTrue(nsi.isConnectedToStartnode(ndfaNode),
                 "Node should now be stored");
@@ -109,7 +108,7 @@ class NodeStorageImplTest {
     @Test
     public final void testGetDFANodeFromEmptySet() {
         final DFANode dfaAmpty = nsi.getDFANode(emptyNdfaNodeSet);
-        assertEquals(dfaAmpty, nsi.getDFANode(new TreeSet<NDFANode>()));
+        assertEquals(dfaAmpty, nsi.getDFANode(new TreeSet<>()));
     }
     /**
      * Mock a regexp. We won't ever look into this regexp it's just treated as
@@ -126,7 +125,7 @@ class NodeStorageImplTest {
     public final void testGetDFANodeFromSingeltonSet() {
 
 
-        final SortedSet<NDFANode> singeltonSet = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> singeltonSet = new TreeSet<>();
 
         when(ndfaNode.getRegexp()).thenReturn(regexp);
         singeltonSet.add(ndfaNode);
@@ -197,8 +196,8 @@ class NodeStorageImplTest {
         final NDFANode n3 = new LoopyNdfaNode(r3);
 
         // Setting up the fixture for this test.
-        final SortedSet<NDFANode> s12d1 = new TreeSet<NDFANode>();
-        final SortedSet<NDFANode> s12d2 = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> s12d1 = new TreeSet<>();
+        final SortedSet<NDFANode> s12d2 = new TreeSet<>();
 
         s12d1.add(n1);
         s12d1.add(n2);
@@ -206,8 +205,8 @@ class NodeStorageImplTest {
         s12d2.add(n1);
         s12d2.add(n2);
 
-        final SortedSet<NDFANode> s13d1 = new TreeSet<NDFANode>();
-        final SortedSet<NDFANode> s13d2 = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> s13d1 = new TreeSet<>();
+        final SortedSet<NDFANode> s13d2 = new TreeSet<>();
 
         s13d1.add(n1);
         s13d1.add(n3);
@@ -215,8 +214,8 @@ class NodeStorageImplTest {
         s13d2.add(n1);
         s13d2.add(n3);
 
-        final SortedSet<NDFANode> s23d1 = new TreeSet<NDFANode>();
-        final SortedSet<NDFANode> s23d2 = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> s23d1 = new TreeSet<>();
+        final SortedSet<NDFANode> s23d2 = new TreeSet<>();
 
         s23d1.add(n2);
         s23d1.add(n3);
@@ -233,7 +232,7 @@ class NodeStorageImplTest {
         final DFANode s23dfa = nsi.getDFANode(s23d2);
         final DFANode s13dfa = nsi.getDFANode(s13d1);
 
-        assertTrue(s23dfa != s13dfa);
+        assertNotSame(s23dfa, s13dfa);
         assertNotSame(nsi.getDFANode(s23d2), nsi.getDFANode(s13d2));
         assertNotSame(nsi.getDFANode(s23d2), nsi.getDFANode(s12d1));
         assertNotSame(nsi.getDFANode(s23d2), nsi.getDFANode(s12d2));

@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,14 +16,16 @@
 
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.NodeStorage;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.utils.SortedSetComparatorImpl;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Implement the subset construction mechanism, but also keep track of a
@@ -41,7 +43,7 @@ public final class NodeStorageImpl implements NodeStorage {
      */
     private static final Comparator<SortedSet<NDFANode>>
             SORTED_NDFANODE_SET_COMPARATOR =
-               new SortedSetComparatorImpl<NDFANode>();
+            new SortedSetComparatorImpl<>();
     /**
      * There is only one start node, and this is that node.
      */
@@ -78,7 +80,7 @@ public final class NodeStorageImpl implements NodeStorage {
                 if (!result.contains(current)) {
                     result.add(current);
                     final Set<NDFANode> connectedNodes =
-                            new HashSet(current.getEpsilons());
+                            new HashSet<>(current.getEpsilons());
                     for (final PrintableEdge edge : current.getEdgesToPrint()) {
                         connectedNodes.add(edge.getDestination());
                     }
@@ -107,7 +109,7 @@ public final class NodeStorageImpl implements NodeStorage {
     /**
      * Checks if the internal representation of the NodeStorage has cached an
      * DFA representation for the NDFA node n.
-     *
+     * <p>
      * This method is not part of the NodeStorage interface, and is thus
      * intended to be used only for testing. If it is ever used for anything
      * else, then the NodeStorage interface should be expanded to include it.

@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -79,20 +80,17 @@ public final class ATest {
         regexp = new RegexpImpl(aString);
         final NDFANode aNode = new CharNode(
                 new TerminalNode(regexp),
-                Character.valueOf('a'), regexp);
+                'a', regexp);
 
-        when(compiler.compile((Regexp) any(),
-                (RegexpStorage) any())).thenReturn(aNode);
+        when(compiler.compile(any(),
+                any())).thenReturn(aNode);
 
-        final RegexpFactory regexpFactory = new RegexpFactory() {
-            @Override
-            public Regexp newRegexp(final String regexpString) {
-                if (regexpString.equals(finalA)) {
-                    return regexp;
-                } else {
-                    return RegexpFactory.DEFAULT_REGEXP_FACTORY
-                            .newRegexp(regexpString);
-                }
+        final RegexpFactory regexpFactory = regexpString -> {
+            if (regexpString.equals(finalA)) {
+                return regexp;
+            } else {
+                return RegexpFactory.DEFAULT_REGEXP_FACTORY
+                        .newRegexp(regexpString);
             }
         };
 
@@ -105,8 +103,7 @@ public final class ATest {
      */
     @Test
     public void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
-        assertTrue(!regexp.hasActions(),
-                "the regexp should not initially have actions");
+        assertFalse(regexp.hasActions(), "the regexp should not initially have actions");
         m.add(aString, action);
         assertTrue(regexp.hasActions(), "the regexp should have actions");
     }

@@ -67,6 +67,7 @@ public final class CSVAppender {
                     if (fileWriter != null) {
                         fileWriter.close();
                     } else {
+                        //noinspection ThrowFromFinallyBlock
                         throw new RuntimeException(
                                 "Something weird happening.  The file " 
                                 + filePath 

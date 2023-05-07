@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,9 +53,9 @@ public final class ComparableSetTest {
      */
     @BeforeEach
     public  void setUp() {
-        instance1 = new TreeSet<Integer>();
-        instance2 = new TreeSet<Integer>();
-        cmp = new SortedSetComparatorImpl<Integer>();
+        instance1 = new TreeSet<>();
+        instance2 = new TreeSet<>();
+        cmp = new SortedSetComparatorImpl<>();
     }
 
     /**
@@ -72,8 +72,8 @@ public final class ComparableSetTest {
      */
     @Test
     public  void testEqualIdenticalSingeltonSets() {
-        instance1.add(Integer.valueOf(1));
-        instance2.add(Integer.valueOf(1));
+        instance1.add(1);
+        instance2.add(1);
         assertEquals(0, cmp.compare(instance1, instance2));
     }
 
@@ -82,8 +82,8 @@ public final class ComparableSetTest {
      */
     @Test
     public  void testNonIdenticalSingeltonSets() {
-        instance1.add(Integer.valueOf(1));
-        instance2.add(Integer.valueOf(2));
+        instance1.add(1);
+        instance2.add(2);
         assertTrue(cmp.compare(instance1, instance2) < 0);
     }
 }

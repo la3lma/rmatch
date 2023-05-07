@@ -90,7 +90,7 @@ public final class CharSetBuilder {
         // and pass through to the intermediate node if matching
         // one of the chars.
         for (int i = str.length() - 1; i >= 0; i--) {
-            final Character myChar = Character.valueOf(str.charAt(i));
+            final Character myChar = str.charAt(i);
             final NDFANode node =
                     new CharNode(intermediateNode, myChar, regexp);
             arrival.addEpsilonEdge(node);

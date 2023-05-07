@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,8 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -109,18 +108,12 @@ public class RegexpImplTest {
         actionFired = false;
         timesFired = 0;
         b = new StringBuffer("Fnord");
-        a = new Action() {
-            @Override
-            public void performMatch(
-                    final Buffer b,
-                    final int start,
-                    final int end) {
-                timesFired += 1;
-                firedBuffer = b;
-                firedStart = start;
-                firedEnd = end;
-                actionFired = true;
-            }
+        a = (b, start, end) -> {
+            timesFired += 1;
+            firedBuffer = b;
+            firedStart = start;
+            firedEnd = end;
+            actionFired = true;
         };
     }
 
@@ -158,7 +151,7 @@ public class RegexpImplTest {
      */
     @Test
     public void testHasActions() {
-        assertTrue(!re.hasActions());
+        assertFalse(re.hasActions());
         re.add(a);
         assertTrue(re.hasActions());
     }
@@ -179,7 +172,7 @@ public class RegexpImplTest {
     public void testRemoveAction() {
         testAddAction();
         re.remove(a);
-        assertTrue(!re.hasAction(a));
+        assertFalse(re.hasAction(a));
     }
 
     /**
@@ -195,7 +188,7 @@ public class RegexpImplTest {
      */
     @Test
     public void testRegisterMatch() {
-        assertTrue(!re.hasMatch(match));
+        assertFalse(re.hasMatch(match));
         re.registerMatch(match);
         assertTrue(re.hasMatch(match));
     }
@@ -221,7 +214,7 @@ public class RegexpImplTest {
 
 
         re.add(a);
-        assertTrue(!actionFired);
+        assertFalse(actionFired);
 
 
         for (int i = 1; i < ARBITRARY_START; i++) {

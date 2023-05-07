@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -125,22 +126,19 @@ public class SequenceNodeTest {
                 CharSequenceCompiler.compile(acRegexp, AC_STRING);
 
         when(compiler.compile(eq(abRegexp),
-                (RegexpStorage) any())).thenReturn(abNode);
+                any())).thenReturn(abNode);
 
         when(compiler.compile(eq(acRegexp),
-                (RegexpStorage) any())).thenReturn(acNode);
+                any())).thenReturn(acNode);
 
-        final RegexpFactory regexpFactory = new RegexpFactory() {
-            @Override
-            public Regexp newRegexp(final String regexpString) {
-                if (regexpString.equals(AB_STRING)) {
-                    return abRegexp;
-                } else if (regexpString.equals(AC_STRING)) {
-                    return acRegexp;
-                } else {
-                    return RegexpFactory.DEFAULT_REGEXP_FACTORY
-                            .newRegexp(regexpString);
-                }
+        final RegexpFactory regexpFactory = regexpString -> {
+            if (regexpString.equals(AB_STRING)) {
+                return abRegexp;
+            } else if (regexpString.equals(AC_STRING)) {
+                return acRegexp;
+            } else {
+                return RegexpFactory.DEFAULT_REGEXP_FACTORY
+                        .newRegexp(regexpString);
             }
         };
 
@@ -152,9 +150,7 @@ public class SequenceNodeTest {
      */
     @Test
     public final void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
-        assertTrue(
-                !abRegexp.hasActions(),
-                "the regexp should not initially have actions");
+        assertFalse(abRegexp.hasActions(), "the regexp should not initially have actions");
         m.add(AB_STRING, action);
         assertTrue(abRegexp.hasActions(), "the regexp should have actions");
     }
@@ -192,6 +188,7 @@ public class SequenceNodeTest {
     /**
      * Test performing a match on "ac".
      */
+    @Test
     public void testMockedMatchLength1bTerminatedWithAbdcInLongString() throws RegexpParserException {
         final no.rmz.rmatch.utils.StringBuffer b =
                 new no.rmz.rmatch.utils

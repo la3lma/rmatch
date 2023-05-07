@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 /**
  * This is a test that checks that the regular expression "a+" can be run, and
  * eventually also compiled correctly.
- *
+ * <p>
  *
  * This set of tests assumes that the basic mechanics works, but will stress the
  * implementation by running larg(ish) tests.
@@ -83,22 +83,19 @@ class APlusLoaderTests {
         aPlusString = finalAPlus;
         regexp = new RegexpImpl(aPlusString);
         final NDFANode aplus =
-                new CharPlusNode(Character.valueOf('a'), regexp, true);
+                new CharPlusNode('a', regexp, true);
 
         when(compiler.compile(
                 any(Regexp.class),
                 any(RegexpStorage.class)))
                 .thenReturn(aplus);
 
-        final RegexpFactory regexpFactory = new RegexpFactory() {
-            @Override
-            public Regexp newRegexp(final String regexpString) {
-                if (regexpString.equals(finalAPlus)) {
-                    return regexp;
-                } else {
-                    return RegexpFactory.DEFAULT_REGEXP_FACTORY
-                            .newRegexp(regexpString);
-                }
+        final RegexpFactory regexpFactory = regexpString -> {
+            if (regexpString.equals(finalAPlus)) {
+                return regexp;
+            } else {
+                return RegexpFactory.DEFAULT_REGEXP_FACTORY
+                        .newRegexp(regexpString);
             }
         };
 
@@ -135,7 +132,7 @@ class APlusLoaderTests {
 
         for (int i = 0; i < noOfPatterns; i++) {
             final int offset = lengthOfPattern * i;
-            Mockito.<Action>verify(action).performMatch(b,
+            Mockito.verify(action).performMatch(b,
                     offset + startIndexInPattern, offset + endIndexInPattern);
         }
     }
