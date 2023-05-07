@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verify;
  * then nothing will.
  */
 @ExtendWith(MockitoExtension.class)
-public class OrdinaryUsageSmoketest {
+public class OrdinaryUsageSmokeTest {
 
     /**
      * Mocked action. Used to check that matches are found

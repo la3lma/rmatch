@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
  * (this is not AI's A* search algorithm. :-)
  */
 @ExtendWith(MockitoExtension.class)
-public final class AorBtest {
+public final class AorBTest {
 
     /**
      * Mocked, used to check for actions.
