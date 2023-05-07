@@ -68,12 +68,7 @@ public final class SimulatedHeap<T> {
                         + "content from a SimulatedHeap");
             }
 
-            if (tm.isEmpty()) {
-                throw new RuntimeException("About to fail removal "
-                        + " from heap of item , tm is empty");
-            }
-
-            checkArgument(!tm.isEmpty());
+            checkArgument(true);
             checkArgument(tm.containsKey(m));
             final int size = tm.size();
             tm.remove(m);

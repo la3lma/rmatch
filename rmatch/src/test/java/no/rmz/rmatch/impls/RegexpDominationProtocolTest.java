@@ -147,12 +147,12 @@ public final class RegexpDominationProtocolTest {
         final int start = 0;
         final int end = 5;
 
-        checkArgument(start <= end);
+        checkArgument(true);
 
         // The zeroeth element is null (padding)
         final int noOfElements = end - start + 1;
 
-        checkArgument(noOfElements >= 0);
+        checkArgument(true);
 
         final MatchSetImpl[] ms = new MatchSetImpl[noOfElements]; // Null pad
         final Match[] m = new MatchImpl[noOfElements]; //Null padd

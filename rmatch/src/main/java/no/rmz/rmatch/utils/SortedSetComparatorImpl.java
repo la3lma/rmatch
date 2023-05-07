@@ -45,12 +45,10 @@ public final class SortedSetComparatorImpl<T extends Comparable>
 
         if (!ti.hasNext() && !t1i.hasNext()) {
             return 0;
-        } else if (ti.hasNext() && !t1i.hasNext()) {
+        } else if (ti.hasNext()) {
             return 1;
-        } else if (!ti.hasNext() && t1i.hasNext()) {
-            return -1;
         } else {
-            throw new RuntimeException("This should never happen");
+            return -1;
         }
     }
 }

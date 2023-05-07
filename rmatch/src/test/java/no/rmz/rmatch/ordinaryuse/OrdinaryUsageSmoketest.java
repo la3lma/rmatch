@@ -89,7 +89,7 @@ public class OrdinaryUsageSmoketest {
                 "fnord",
                 m.getNodeStorage());
 
-        verify(action).performMatch(b, 0, 0 + "ab".length() - 1);
-        verify(action).performMatch(b, 0 + "ab".length() + 1, 0 + "ab".length() + 1 + "ac".length() - 1);
+        verify(action).performMatch(b, 0, "ab".length() - 1);
+        verify(action).performMatch(b, "ab".length() + 1, "ab".length() + 1 + "ac".length() - 1);
     }
 }
