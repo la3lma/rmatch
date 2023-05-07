@@ -2,9 +2,9 @@ package no.rmz.rmatch.performancetests;
 
 
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test reading the text of wuthering heights.
@@ -26,6 +26,6 @@ public final class WutheringHeightsBufferTest {
         final WutheringHeightsBuffer whb = new WutheringHeightsBuffer();
         final int len = whb.getLength();
 
-        assertTrue(len == MINIMUM_NUMBER_OF_CHARS_IN_WUTHERING_HEIGHTS);
+        assertEquals(MINIMUM_NUMBER_OF_CHARS_IN_WUTHERING_HEIGHTS, len);
     }
 }

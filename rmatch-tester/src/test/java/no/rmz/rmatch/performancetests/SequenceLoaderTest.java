@@ -1,5 +1,21 @@
 package no.rmz.rmatch.performancetests;
 
+import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.impls.MatcherFactory;
+import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.performancetests.utils.CSVAppender;
+import no.rmz.rmatch.performancetests.utils.FileInhaler;
+import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
+import no.rmz.rmatch.utils.CounterAction;
+import no.rmz.rmatch.utils.Counters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.io.File;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -7,27 +23,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.impls.MatcherFactory;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.performancetests.utils.CSVAppender;
-import no.rmz.rmatch.performancetests.utils.FileInhaler;
-import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
-import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
-import no.rmz.rmatch.utils.CounterAction;
-import no.rmz.rmatch.utils.Counters;
-import static org.junit.Assert.assertTrue;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * This is a kind of extended functionality test, bordering
@@ -38,7 +37,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  * various weird bugs that does not necessarily manifest themselves in
  * very small tests.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SequenceLoaderTest {
 
     /**
@@ -112,7 +111,7 @@ public class SequenceLoaderTest {
      * values, make a new MockerCompiler instance that
      * will return a mocked up compiler instance.
      */
-    @Before
+    @BeforeEach
     public final void setUp() {
         m = MatcherFactory.newMatcher();
     }
@@ -121,7 +120,7 @@ public class SequenceLoaderTest {
      * XXX This test fails, review and report back.
      * @throws RegexpParserExecption when syntax errors occur.
      */
-    @Ignore
+    @Disabled
     @Test
     public final void testMockedVerylongMatchSequences()
             throws RegexpParserException {
@@ -245,10 +244,9 @@ public class SequenceLoaderTest {
          testWithRegexpsFromFile(LOCATION_OF_SOME_WORDS_FROM_WUTHERING_HEIGHTS);
         // XXX The number of matches needs to be verified.  The number
         //     we use now is fundamentally bogus!
-        assertTrue(result.getNoOfMatches()
-                == NO_OF_OBSERVED_MATCHES_IN_SOME_REGEXP_TEST);
-        assertTrue("result was = " + result, result.getDuration() < MAX_TIME_TO_USE_IN_MILLIS);
-        assertTrue("result was = " + result, result.getMaxNoOfMbsUsed() < MAX_MEMORY_TO_USE_IN_MB);
+        assertEquals(NO_OF_OBSERVED_MATCHES_IN_SOME_REGEXP_TEST, result.getNoOfMatches());
+        assertTrue(result.getDuration() < MAX_TIME_TO_USE_IN_MILLIS, "result was = " + result);
+        assertTrue(result.getMaxNoOfMbsUsed() < MAX_MEMORY_TO_USE_IN_MB, "result was = " + result);
 
         CSVAppender.append(
                 MEASUREMENT_RESULTS_FROM_SOME_WORDS_TESTS,
@@ -263,7 +261,7 @@ public class SequenceLoaderTest {
      *
      * @throws RegexpParserExecption when syntax errors occur.
      */
-    @Ignore
+    @Disabled
     @Test
     public void testWutheringHeightsCorpusWithAWholeLotOfRegexps()
             throws RegexpParserException {
@@ -339,10 +337,10 @@ public class SequenceLoaderTest {
             }
         }
 
-        assertTrue("Not enough matches, got only " + result.getNoOfMatches()
-                + " but expected at least "
-                + result.getNoOfWordsToLookFor() + ".",
-                result.getNoOfMatches() > result.getNoOfWordsToLookFor());
+        assertTrue(result.getNoOfMatches() > result.getNoOfWordsToLookFor(),
+                "Not enough matches, got only " + result.getNoOfMatches()
+                        + " but expected at least "
+                        + result.getNoOfWordsToLookFor() + ".");
 
         return result;
     }

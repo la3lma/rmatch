@@ -16,19 +16,21 @@
 
 package no.rmz.rmatch.compiler;
 
-import org.junit.*;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * A set of tests that verifies that the surface syntax parser for regular
  * expressions is capable of converting regexps with correct syntax to abstract
  * regular expressions.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SurfaceRegexpParserTest {
 
     /**
@@ -45,7 +47,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Setting up the test article.
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         instance = new SurfaceRegexpParser(arb);
     }

@@ -18,22 +18,19 @@ package no.rmz.rmatch.integrationtests;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.RegexpFactory;
-import no.rmz.rmatch.interfaces.RegexpStorage;
+import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.mockedcompiler.CharSequenceCompiler;
 import no.rmz.rmatch.testutils.GraphDumper;
-import static org.junit.Assert.assertTrue;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * This is a basic test of two or more NDFA nodes after one another
@@ -41,7 +38,8 @@ import org.mockito.runners.MockitoJUnitRunner;
  * compilers), and tests tha basic matcher algorithm.  If this doesn't work
  * nothing will.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class SequenceNodeTest {
 
 
@@ -115,7 +113,7 @@ public class SequenceNodeTest {
      * Instantiate test articles and set up the compiler mock
      * to simulate proper compilation of "ab" and "ac".
      */
-    @Before
+    @BeforeEach
     public void setUp() throws RegexpParserException {
         abRegexp = new RegexpImpl(AB_STRING);
         acRegexp = new RegexpImpl(AC_STRING);
@@ -155,10 +153,10 @@ public class SequenceNodeTest {
     @Test
     public final void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
         assertTrue(
-                "the regexp should not initially have actions",
-                !abRegexp.hasActions());
+                !abRegexp.hasActions(),
+                "the regexp should not initially have actions");
         m.add(AB_STRING, action);
-        assertTrue("the regexp should have actions", abRegexp.hasActions());
+        assertTrue(abRegexp.hasActions(), "the regexp should have actions");
     }
 
     /**

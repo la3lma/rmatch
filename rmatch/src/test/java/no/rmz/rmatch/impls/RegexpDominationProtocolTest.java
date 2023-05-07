@@ -16,16 +16,15 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.impls.DFANodeImpl;
-import no.rmz.rmatch.impls.RegexpImpl;
-import no.rmz.rmatch.impls.MatchImpl;
-import no.rmz.rmatch.impls.MatchSetImpl;
-import static com.google.common.base.Preconditions.*;
-import java.util.Collections;
-import java.util.logging.Logger;
 import no.rmz.rmatch.interfaces.Match;
-import org.junit.*;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Testing the domination protocol, with contributions
@@ -49,7 +48,7 @@ public final class RegexpDominationProtocolTest {
      * Give us a regexp impleentation and a dfanode
      * representing no NDFAnodes (the empty set).
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         re = new RegexpImpl("Fnord");
         sn = new DFANodeImpl(Collections.EMPTY_SET);
@@ -171,8 +170,8 @@ public final class RegexpDominationProtocolTest {
             for (int j = i + 1; j < end; j++) {
                 final Match a1 = m[i - 1];
                 final Match a2 = m[j - 1];
-                assertTrue("a1 must not be null", a1 != null);
-                assertTrue("a2 must not be null", a2 != null);
+                assertTrue(a1 != null, "a1 must not be null");
+                assertTrue(a2 != null, "a2 must not be null");
                 assertTrue(Match.COMPARE_BY_DOMINATION.compare(a1, a2) < 0);
                 assertTrue(!(Match.COMPARE_BY_DOMINATION.compare(a2, a1) < 0));
             }

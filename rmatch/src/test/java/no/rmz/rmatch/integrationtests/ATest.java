@@ -16,33 +16,28 @@
 
 package no.rmz.rmatch.integrationtests;
 
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.RegexpStorage;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.impls.MatcherImpl;
-import no.rmz.rmatch.interfaces.RegexpFactory;
-import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.compiler.CharNode;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.compiler.TerminalNode;
-import static org.junit.Assert.assertTrue;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import static org.mockito.Matchers.any;
+import no.rmz.rmatch.impls.MatcherImpl;
+import no.rmz.rmatch.impls.RegexpImpl;
+import no.rmz.rmatch.interfaces.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * This is a test that checks that the regular expression "a" can be run.
  * If this doesn't work, then nothing will.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public final class ATest {
 
 
@@ -77,7 +72,7 @@ public final class ATest {
     /**
      * Set up test items and a mocked context.
      */
-    @Before
+    @BeforeEach
     public void setUp() throws RegexpParserException {
         final String finalA = "a";
         aString = finalA;
@@ -110,10 +105,10 @@ public final class ATest {
      */
     @Test
     public void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
-        assertTrue("the regexp should not initially have actions",
-                !regexp.hasActions());
+        assertTrue(!regexp.hasActions(),
+                "the regexp should not initially have actions");
         m.add(aString, action);
-        assertTrue("the regexp should have actions", regexp.hasActions());
+        assertTrue(regexp.hasActions(), "the regexp should have actions");
     }
 
 

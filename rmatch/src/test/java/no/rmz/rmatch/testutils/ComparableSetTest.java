@@ -16,14 +16,16 @@
 
 package no.rmz.rmatch.testutils;
 
+import no.rmz.rmatch.utils.SortedSetComparatorImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import no.rmz.rmatch.utils.SortedSetComparatorImpl;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import org.junit.Before;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *   Check the SortedSetComparatorImpl for integers.
@@ -49,7 +51,7 @@ public final class ComparableSetTest {
     /**
      * Set up the test articles.
      */
-    @Before
+    @BeforeEach
     public  void setUp() {
         instance1 = new TreeSet<Integer>();
         instance2 = new TreeSet<Integer>();

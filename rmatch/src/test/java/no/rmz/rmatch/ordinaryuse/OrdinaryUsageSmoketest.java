@@ -22,22 +22,22 @@ import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.testutils.GraphDumper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.Mockito.verify;
 
 /**
  * This is a basic test of two or more NDFA nodes after one another
  * encoding a sequence.  It runs with handcrafted nodes (no
- * compilers), and tests tha basic matcher algorithm.  If this doesn't work
- * nothing will.
+ * compilers), and tests the basic matcher algorithm.  If this doesn't work
+ * then nothing will.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OrdinaryUsageSmoketest {
-
 
     /**
      * Mocked action. Used to check that matches are found
@@ -45,8 +45,6 @@ public class OrdinaryUsageSmoketest {
      */
     @Mock
     Action action;
-
-
 
     /**
      * A test article, the matcher implementation.
@@ -67,7 +65,7 @@ public class OrdinaryUsageSmoketest {
      * Instantiate test articles and set up the compiler mock
      * to simulate proper compilation of "ab" and "ac".
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         m = new MatcherImpl();
     }

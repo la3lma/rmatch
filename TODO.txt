@@ -1,16 +1,12 @@
 o Bump java version (currently 8, try to get closer to 8).
+o fix the hotspot identified earlier
 o Maybe move to kotlin for conciseness?
-o Move all versions to top level pom.xml
 o Incorporate a decade of library upgrades.
-o Consider picking this thing up again.
 o Consider making a notebook to track progress over time instead of the wretched shellscripts currently there.
 o Do everything in http://maven.apache.org/guides/mini/guide-central-repository-upload.html 
   that is necessary to get released through maven central, then decide that it isn't worth it
   and instead set up a microrepo at github, at least for now.
-
 o Or perhaps use sonatype's stuff. https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-1a.TermsofServiceRepository%3ACentralRepositoryTermsofServiceforSubmitters
-
 o Tag a release.
-
 o Write a minimal set of documentation for that release.
 

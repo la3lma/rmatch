@@ -18,16 +18,17 @@ package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.NodeStorage;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test the start node.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StartNodeTest {
 
     /**
@@ -53,10 +54,10 @@ public class StartNodeTest {
     public final void testAddingNode() {
 
         final StartNode startNode = new StartNode(ns);
-        assertTrue("Node shouldn't initially be stored",
-                !startNode.getEpsilons().contains(ndfaNode));
+        assertTrue(!startNode.getEpsilons().contains(ndfaNode),
+                "Node shouldn't initially be stored");
         startNode.add(ndfaNode);
-        assertTrue("Node shouldn now be stored",
-                startNode.getEpsilons().contains(ndfaNode));
+        assertTrue(startNode.getEpsilons().contains(ndfaNode),
+                "Node shouldn now be stored");
     }
 }

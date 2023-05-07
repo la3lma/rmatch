@@ -19,24 +19,19 @@ package no.rmz.rmatch.integrationtests;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.RegexpFactory;
-import no.rmz.rmatch.interfaces.RegexpStorage;
+import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.mockedcompiler.CharPlusNode;
 import no.rmz.rmatch.testutils.GraphDumper;
-import static org.junit.Assert.assertTrue;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import static org.mockito.Matchers.any;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * This is a test that checks that the regular expression "a+" can be run, and
@@ -44,7 +39,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  *
  * (this is not AI's A* search algorithm. :-)
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public final class APlusTest {
 
     /**
@@ -80,7 +75,7 @@ public final class APlusTest {
      * will get the mocked compilation result when asked to compile
      * the string "a+".
      */
-    @Before
+    @BeforeEach
     public void setUp() throws RegexpParserException {
         final String finalaPlus = "a+";
         aplusString = finalaPlus;
@@ -112,10 +107,10 @@ public final class APlusTest {
      */
     @Test
     public void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
-        assertTrue("the regexp should not initially have actions",
-                !regexp.hasActions());
+        assertTrue(!regexp.hasActions(),
+                "the regexp should not initially have actions");
         m.add(aplusString, action);
-        assertTrue("the regexp should have actions", regexp.hasActions());
+        assertTrue(regexp.hasActions(), "the regexp should have actions");
     }
 
     /**

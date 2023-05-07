@@ -15,28 +15,28 @@
  */
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.impls.RegexpStorageImpl;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.RegexpStorage;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import java.util.*;
 import no.rmz.rmatch.compiler.RegexpParserException;
-
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import no.rmz.rmatch.interfaces.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 /**
  * Test the RegexpStorage.
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class RegexpStorageTest {
 
     /**
@@ -91,7 +91,7 @@ public final class RegexpStorageTest {
      * the content compilationResult whenever the compile method is
      * invoked.
      */
-    @Before
+    @BeforeEach
     public void setUp() throws RegexpParserException {
         reString = "Fnord";
         stringSet = new HashSet<String>();
