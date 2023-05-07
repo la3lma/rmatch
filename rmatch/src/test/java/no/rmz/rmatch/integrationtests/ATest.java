@@ -79,7 +79,7 @@ public final class ATest {
         regexp = new RegexpImpl(aString);
         final NDFANode aNode = new CharNode(
                 new TerminalNode(regexp),
-                Character.valueOf('a'), regexp);
+                'a', regexp);
 
         when(compiler.compile((Regexp) any(),
                 (RegexpStorage) any())).thenReturn(aNode);

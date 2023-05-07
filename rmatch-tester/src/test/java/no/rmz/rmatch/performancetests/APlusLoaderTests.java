@@ -83,7 +83,7 @@ class APlusLoaderTests {
         aPlusString = finalAPlus;
         regexp = new RegexpImpl(aPlusString);
         final NDFANode aplus =
-                new CharPlusNode(Character.valueOf('a'), regexp, true);
+                new CharPlusNode('a', regexp, true);
 
         when(compiler.compile(
                 any(Regexp.class),

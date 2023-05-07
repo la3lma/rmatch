@@ -81,7 +81,7 @@ public final class APlusTest {
         aplusString = finalaPlus;
         regexp = new RegexpImpl(aplusString);
         final NDFANode aPlusNode =
-                new CharPlusNode(Character.valueOf('a'), regexp, true);
+                new CharPlusNode('a', regexp, true);
 
         when(compiler.compile((Regexp) any(),
                 (RegexpStorage) any())).thenReturn(aPlusNode);

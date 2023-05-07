@@ -72,8 +72,8 @@ public final class ComparableSetTest {
      */
     @Test
     public  void testEqualIdenticalSingeltonSets() {
-        instance1.add(Integer.valueOf(1));
-        instance2.add(Integer.valueOf(1));
+        instance1.add(1);
+        instance2.add(1);
         assertEquals(0, cmp.compare(instance1, instance2));
     }
 
@@ -82,8 +82,8 @@ public final class ComparableSetTest {
      */
     @Test
     public  void testNonIdenticalSingeltonSets() {
-        instance1.add(Integer.valueOf(1));
-        instance2.add(Integer.valueOf(2));
+        instance1.add(1);
+        instance2.add(2);
         assertTrue(cmp.compare(instance1, instance2) < 0);
     }
 }

@@ -78,8 +78,8 @@ public final class AorBtest {
         regexp = new RegexpImpl(aOrBString);
         final NDFANode aPlusNode =
                 new AlternativeCharsNode(
-                Character.valueOf('a'),
-                Character.valueOf('b'),
+                        'a',
+                        'b',
                 regexp);
 
         when(compiler.compile((Regexp) any(),

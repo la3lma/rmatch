@@ -96,7 +96,7 @@ public final class StringBuffer implements Buffer, Cloneable {
     public Character getNext() {
         synchronized (monitor) {
             progress();
-            return Character.valueOf(currentChar);
+            return currentChar;
         }
     }
 

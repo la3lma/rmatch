@@ -78,7 +78,7 @@ public final class SimulatedHeapTest {
 
         i = new Integer[maxi];
         for (int j = 0; j < maxi; j++) {
-            i[j] = Integer.valueOf(j);
+            i[j] = j;
         }
     }
 
