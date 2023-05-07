@@ -56,6 +56,7 @@ public final class FileInhaler {
                     in.close();
                     fstream.close();
                 } catch (IOException ex) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new RuntimeException(ex);
                 }
             }
