@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 /**
  * This is a test that checks that the regular expression "a+" can be run, and
  * eventually also compiled correctly.
- *
+ * <p>
  *
  * This set of tests assumes that the basic mechanics works, but will stress the
  * implementation by running larg(ish) tests.

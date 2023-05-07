@@ -12,7 +12,7 @@ import no.rmz.rmatch.interfaces.NodeStorage;
  * Will pick up all the regexps located in the regexps file, create a Java
  * Regexp instance for each of them. It will then run all of the input lines
  * from the corpus through all of the regexps counting all of the matches.
- *
+ * <p>
  * The process is multithreaded so we shouldn't get into a congestion until
  * we're really short of CPU power.
  */

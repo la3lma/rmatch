@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,16 +44,16 @@ public final class MatchSetImpl implements MatchSet {
             Counters.newCounter("MatchSetImpl");
     /**
      * Commit this match relative to a bunch of other matches.
-     *
+     * <p>
      * Now committing simply means adding this match to a collection of matches
      * given as parameters.
-     *
+     * <p>
      * However, the current match is only added to the collection of runnable
      * matches if it's dominating the regular expression it's representing
-     *
+     * <p>
      * If the current match is dominating its regular expression, then add it
      * to the set of runnable matches given as parameter.
-     *
+     * <p>
      * This method is public only to facilitate testing. It's not part of any
      * interface and shouldn't be used directly anywhere.
      *

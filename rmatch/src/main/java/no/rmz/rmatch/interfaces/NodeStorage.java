@@ -1,12 +1,12 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- *
+ * <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * <p>
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,7 @@ import java.util.SortedSet;
  * determinstic nodes is O(2^N) where N is the number of nondeterminstic nodes,
  * so making them all is, for large regular expressions, usually not an option.
  * That is why we are opportunistic and cacheing etc.
- *
+ * <p>
  * The NodeStorage is the interface used to abstract this mechanism away.
  */
 public interface NodeStorage {

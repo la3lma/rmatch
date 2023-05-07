@@ -24,7 +24,7 @@ import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
  * This will mean a lot more work for the matcher and that will be unfair, which
  * is the whole point of the exercise. This kind of matching is something the
  * rmatch matcher should be much better at.
- *
+ * <p>
  * XXXX: At present this is somewhat of an abomination. I expect that the
  * present class will have to be rewritten extensibly before it will produce
  * results that I have any confidence in.
