@@ -72,7 +72,7 @@ public final class SimulatedHeapTest {
      */
     @BeforeEach
     public void setUp() {
-        h = new SimulatedHeap<Integer>(CMP);
+        h = new SimulatedHeap<>(CMP);
 
         maxi = NO_OF_ITEMS_IN_TESTHEAP;
 

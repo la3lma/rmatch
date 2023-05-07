@@ -74,7 +74,7 @@ public final class FileInhaler {
      */
     public List<String> inhaleAsListOfLines() {
         synchronized (file) {
-            final List<String> result = new ArrayList<String>();
+            final List<String> result = new ArrayList<>();
 
             inhaleIntoCollector(new Collector() {
                 @Override

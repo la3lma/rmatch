@@ -109,7 +109,7 @@ class NodeStorageImplTest {
     @Test
     public final void testGetDFANodeFromEmptySet() {
         final DFANode dfaAmpty = nsi.getDFANode(emptyNdfaNodeSet);
-        assertEquals(dfaAmpty, nsi.getDFANode(new TreeSet<NDFANode>()));
+        assertEquals(dfaAmpty, nsi.getDFANode(new TreeSet<>()));
     }
     /**
      * Mock a regexp. We won't ever look into this regexp it's just treated as
@@ -126,7 +126,7 @@ class NodeStorageImplTest {
     public final void testGetDFANodeFromSingeltonSet() {
 
 
-        final SortedSet<NDFANode> singeltonSet = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> singeltonSet = new TreeSet<>();
 
         when(ndfaNode.getRegexp()).thenReturn(regexp);
         singeltonSet.add(ndfaNode);
@@ -197,8 +197,8 @@ class NodeStorageImplTest {
         final NDFANode n3 = new LoopyNdfaNode(r3);
 
         // Setting up the fixture for this test.
-        final SortedSet<NDFANode> s12d1 = new TreeSet<NDFANode>();
-        final SortedSet<NDFANode> s12d2 = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> s12d1 = new TreeSet<>();
+        final SortedSet<NDFANode> s12d2 = new TreeSet<>();
 
         s12d1.add(n1);
         s12d1.add(n2);
@@ -206,8 +206,8 @@ class NodeStorageImplTest {
         s12d2.add(n1);
         s12d2.add(n2);
 
-        final SortedSet<NDFANode> s13d1 = new TreeSet<NDFANode>();
-        final SortedSet<NDFANode> s13d2 = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> s13d1 = new TreeSet<>();
+        final SortedSet<NDFANode> s13d2 = new TreeSet<>();
 
         s13d1.add(n1);
         s13d1.add(n3);
@@ -215,8 +215,8 @@ class NodeStorageImplTest {
         s13d2.add(n1);
         s13d2.add(n3);
 
-        final SortedSet<NDFANode> s23d1 = new TreeSet<NDFANode>();
-        final SortedSet<NDFANode> s23d2 = new TreeSet<NDFANode>();
+        final SortedSet<NDFANode> s23d1 = new TreeSet<>();
+        final SortedSet<NDFANode> s23d2 = new TreeSet<>();
 
         s23d1.add(n2);
         s23d1.add(n3);

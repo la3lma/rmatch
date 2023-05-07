@@ -94,7 +94,7 @@ public final class RegexpStorageTest {
     @BeforeEach
     public void setUp() throws RegexpParserException {
         reString = "Fnord";
-        stringSet = new HashSet<String>();
+        stringSet = new HashSet<>();
         rs = new RegexpStorageImpl(storage, compiler);
 
         // A really simple compiler, always returns the same

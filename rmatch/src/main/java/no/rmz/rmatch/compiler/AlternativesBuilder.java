@@ -45,7 +45,7 @@ public final class AlternativesBuilder {
      * the getResult method is the arrival node of the first CompiledFeragment.
      */
     private final LinkedList<CompiledFragment> alternatives =
-            new LinkedList<CompiledFragment>();
+            new LinkedList<>();
     /**
      * A reference to the last fragment added, or null if we are parsing a new
      * alternative.

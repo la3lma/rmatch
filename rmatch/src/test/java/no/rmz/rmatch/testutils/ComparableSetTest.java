@@ -53,9 +53,9 @@ public final class ComparableSetTest {
      */
     @BeforeEach
     public  void setUp() {
-        instance1 = new TreeSet<Integer>();
-        instance2 = new TreeSet<Integer>();
-        cmp = new SortedSetComparatorImpl<Integer>();
+        instance1 = new TreeSet<>();
+        instance2 = new TreeSet<>();
+        cmp = new SortedSetComparatorImpl<>();
     }
 
     /**

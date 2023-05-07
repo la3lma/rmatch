@@ -126,7 +126,7 @@ public class TestJavaRegexpUnfairly implements Matcher {
     private Set<String> getSetForAction(final Action action) {
         final Set<String> targetSet;
         if (!actionToRegexpMap.containsKey(action)) {
-            targetSet = new HashSet<String>();
+            targetSet = new HashSet<>();
             actionToRegexpMap.put(action, targetSet);
         } else {
             targetSet = actionToRegexpMap.get(action);

@@ -167,7 +167,7 @@ public final class MatchEngineImpl implements MatchEngine {
         checkNotNull(b, "Buffer can't be null");
         final Set<MatchSet> activeMatchSets;
         activeMatchSets = Collections.synchronizedSet(
-                new TreeSet<MatchSet>(MatchSet.COMPARE_BY_ID));
+                new TreeSet<>(MatchSet.COMPARE_BY_ID));
 
         // Advance all match sets forward one character.
         while (b.hasNext()) {

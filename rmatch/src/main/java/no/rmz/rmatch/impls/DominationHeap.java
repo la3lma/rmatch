@@ -65,7 +65,7 @@ public final class DominationHeap {
      * heap.
      */
     public DominationHeap(final Comparator<Match> comparator) {
-        heap = new SimulatedHeap<Match>(comparator);
+        heap = new SimulatedHeap<>(comparator);
     }
 
     /**

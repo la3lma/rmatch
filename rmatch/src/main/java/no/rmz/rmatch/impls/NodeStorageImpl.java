@@ -43,7 +43,7 @@ public final class NodeStorageImpl implements NodeStorage {
      */
     private static final Comparator<SortedSet<NDFANode>>
             SORTED_NDFANODE_SET_COMPARATOR =
-               new SortedSetComparatorImpl<NDFANode>();
+            new SortedSetComparatorImpl<>();
     /**
      * There is only one start node, and this is that node.
      */
