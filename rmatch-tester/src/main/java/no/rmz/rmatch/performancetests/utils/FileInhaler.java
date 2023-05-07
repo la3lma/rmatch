@@ -111,7 +111,7 @@ public final class FileInhaler {
                     new BufferedReader(new InputStreamReader(in));
             try {
                 String strLine;
-                //Read File Line By Line
+                // Read File Line By Line
                 while ((strLine = br.readLine()) != null) {
                     collector.add(strLine);
                 }
