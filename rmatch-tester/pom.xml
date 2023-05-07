@@ -17,44 +17,10 @@
     <url>http://maven.apache.org</url>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockitoCore.version}</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.3.1</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${mockitoJunitJupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>${findbugs.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>no.rmz</groupId>
             <artifactId>rmatch</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
     </dependencies>
 
@@ -64,13 +30,6 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${mavenSurefire.version}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.junit.platform</groupId>
-                        <artifactId>junit-platform-surefire-provider</artifactId>
-                        <version>${junitPlatformSurefireProvider.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
 
             <plugin>
@@ -81,7 +40,7 @@
                 <configuration>
                     <source>${compileSource}</source>
                     <target>${compileTarget}</target>
-                    <mainClass>no.rmz.rmatch.performancetests.misc.BenchmarkTheWutheringHeightsCorpus</mainClass> 
+                    <mainClass>no.rmz.rmatch.performancetests.misc.BenchmarkTheWutheringHeightsCorpus</mainClass>
                 </configuration>
             </plugin>
 
