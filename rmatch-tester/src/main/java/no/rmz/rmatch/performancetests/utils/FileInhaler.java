@@ -35,12 +35,7 @@ public final class FileInhaler {
                 String currentWorkingDirectory = System.getProperty("user.dir");
                 throw new IllegalStateException("Couldn't find file " + file + " while current working directory is " + currentWorkingDirectory);
             }
-            final FileInputStream fstream;
-            try {
-                fstream = new FileInputStream(file);
-            } catch (FileNotFoundException ex) {
-                throw new IllegalStateException("Couldn't find file " + file);
-            }
+            final FileInputStream fstream = getFileInputStream();
             // Get the object of DataInputStream
             final DataInputStream in = new DataInputStream(fstream);
             final BufferedReader br =
@@ -68,6 +63,19 @@ public final class FileInhaler {
         }
     }
 
+    /**
+     * Open this.file and return an FileInputStream instance
+     * @return the input stream instance
+     */
+    private FileInputStream getFileInputStream() {
+        final FileInputStream fstream;
+        try {
+            fstream = new FileInputStream(this.file);
+        } catch (FileNotFoundException ex) {
+            throw new IllegalStateException("Couldn't find file " + this.file);
+        }
+        return fstream;
+    }
 
     /**
      * Get the content of the file as a list of lines.
@@ -95,12 +103,7 @@ public final class FileInhaler {
 
                 throw new IllegalStateException("Couldn't find file " + file + " while cwd=" + currentDir);
             }
-            final FileInputStream fstream;
-            try {
-                fstream = new FileInputStream(file);
-            } catch (FileNotFoundException ex) {
-                throw new IllegalStateException("Couldn't find file " + file);
-            }
+            final FileInputStream fstream = getFileInputStream();
             // Get the object of DataInputStream
             final DataInputStream in = new DataInputStream(fstream);
             final BufferedReader br =
