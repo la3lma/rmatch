@@ -33,7 +33,7 @@ public final class SortedSetComparatorImpl<T extends Comparable>
 
     @Override
     public int compare(final SortedSet<T> t, final SortedSet<T> t1) {
-        final Iterator<T> ti = t.iterator();
+        final Iterator<T> ti  = t.iterator();
         final Iterator<T> t1i = t1.iterator();
 
         while (ti.hasNext() && t1i.hasNext()) {

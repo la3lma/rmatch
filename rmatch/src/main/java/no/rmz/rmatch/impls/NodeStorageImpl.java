@@ -16,14 +16,16 @@
 
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.NodeStorage;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.utils.SortedSetComparatorImpl;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Implement the subset construction mechanism, but also keep track of a
@@ -78,7 +80,7 @@ public final class NodeStorageImpl implements NodeStorage {
                 if (!result.contains(current)) {
                     result.add(current);
                     final Set<NDFANode> connectedNodes =
-                            new HashSet(current.getEpsilons());
+                            new HashSet<NDFANode>(current.getEpsilons());
                     for (final PrintableEdge edge : current.getEdgesToPrint()) {
                         connectedNodes.add(edge.getDestination());
                     }

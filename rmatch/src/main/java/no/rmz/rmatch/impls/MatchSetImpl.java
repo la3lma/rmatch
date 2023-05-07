@@ -16,19 +16,17 @@
 
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.utils.Counter;
+import no.rmz.rmatch.utils.Counters;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.interfaces.MatchSet;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.utils.Counter;
-import no.rmz.rmatch.utils.Counters;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A an implementation of the MatchSet interface. A MatchSet keeps a set of
@@ -157,7 +155,7 @@ public final class MatchSetImpl implements MatchSet {
     }
 
     @Override
-    public Set getMatches() {
+    public Set<Match> getMatches() {
         return Collections.unmodifiableSet(matches);
     }
 

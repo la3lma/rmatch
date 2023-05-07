@@ -77,7 +77,7 @@ class NodeStorageImplTest {
     public final void setUp() {
         nsi = new NodeStorageImpl();
         buffer = new StringBuffer("a");
-        emptyNdfaNodeSet = new TreeSet();
+        emptyNdfaNodeSet = new TreeSet<>();
     }
 
     /**

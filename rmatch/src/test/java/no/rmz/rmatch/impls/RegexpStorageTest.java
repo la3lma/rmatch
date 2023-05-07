@@ -142,7 +142,7 @@ public final class RegexpStorageTest {
     @Test
     public void testRegexpSetExclusion() {
         rs.getRegexp(reString);
-        final Set s1 = rs.getRegexpSet();
+        final Set<Regexp> s1 = rs.getRegexpSet();
         stringSet.add(reString);
         s1.removeAll(stringSet);
         assertTrue(s1.isEmpty());
