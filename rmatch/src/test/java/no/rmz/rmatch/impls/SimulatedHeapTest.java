@@ -54,12 +54,7 @@ public final class SimulatedHeapTest {
      * A comparator of integers.
      */
     private static final Comparator<Integer> CMP =
-            new Comparator<Integer>() {
-                @Override
-                public int compare(final Integer t, final Integer t1) {
-                    return t.compareTo(t1);
-                }
-            };
+            Comparator.naturalOrder();
 
     /**
      * Number of items in the testheap.

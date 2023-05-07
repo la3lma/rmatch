@@ -1,11 +1,10 @@
 package no.rmz.rmatch.performancetests.misc;
+
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
-
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,18 +42,9 @@ public final  class HelloMatch {
 
             // When a match is found, we will run this action which
             // will just print out the word.
-            final Action        a = new Action() {
-
-                @Override
-                public void performMatch(
-                        final Buffer b,
-                        final int start,
-                        final int end) {
-                    System.out.println("Match found: '"
-                            + b.getString(start, end + 1)
-                            + "'");
-                }
-            };
+            final Action        a = (b, start, end) -> System.out.println("Match found: '"
+                    + b.getString(start, end + 1)
+                    + "'");
 
             // Set up a couple of triggers. The first param is
             // a regular expression, and the second is an action that

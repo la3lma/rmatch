@@ -94,12 +94,6 @@ public interface MatchSet {
                 final long l1 = t.getId();
                 final long l2 = t1.getId();
 
-                if (l1 < l2) {
-                    return -1;
-                } else if (l2 < l1) {
-                    return 1;
-                } else {
-                    return 0;
-                }
+     return Long.compare(l1, l2);
             };
 }

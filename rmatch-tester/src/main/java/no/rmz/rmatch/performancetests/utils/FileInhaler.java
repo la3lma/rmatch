@@ -1,9 +1,10 @@
 package no.rmz.rmatch.performancetests.utils;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /**
@@ -76,12 +77,7 @@ public final class FileInhaler {
         synchronized (file) {
             final List<String> result = new ArrayList<>();
 
-            inhaleIntoCollector(new Collector() {
-                @Override
-                public void add(final String strLine) {
-                    result.add(strLine);
-                }
-            });
+            inhaleIntoCollector(result::add);
             return result;
         }
     }

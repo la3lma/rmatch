@@ -124,9 +124,7 @@ public class MatchImplTest {
      */
     @Test
     public final void testCompareToNull() {
-        NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
-            Match.COMPARE_BY_DOMINATION.compare(match, null);
-        });
+        NullPointerException thrown = assertThrows(NullPointerException.class, () -> Match.COMPARE_BY_DOMINATION.compare(match, null));
     }
 
     /**

@@ -130,17 +130,14 @@ public class SequenceNodeTest {
         when(compiler.compile(eq(acRegexp),
                 (RegexpStorage) any())).thenReturn(acNode);
 
-        final RegexpFactory regexpFactory = new RegexpFactory() {
-            @Override
-            public Regexp newRegexp(final String regexpString) {
-                if (regexpString.equals(AB_STRING)) {
-                    return abRegexp;
-                } else if (regexpString.equals(AC_STRING)) {
-                    return acRegexp;
-                } else {
-                    return RegexpFactory.DEFAULT_REGEXP_FACTORY
-                            .newRegexp(regexpString);
-                }
+        final RegexpFactory regexpFactory = regexpString -> {
+            if (regexpString.equals(AB_STRING)) {
+                return abRegexp;
+            } else if (regexpString.equals(AC_STRING)) {
+                return acRegexp;
+            } else {
+                return RegexpFactory.DEFAULT_REGEXP_FACTORY
+                        .newRegexp(regexpString);
             }
         };
 

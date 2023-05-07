@@ -80,7 +80,7 @@ public final class NodeStorageImpl implements NodeStorage {
                 if (!result.contains(current)) {
                     result.add(current);
                     final Set<NDFANode> connectedNodes =
-                            new HashSet<NDFANode>(current.getEpsilons());
+                            new HashSet<>(current.getEpsilons());
                     for (final PrintableEdge edge : current.getEdgesToPrint()) {
                         connectedNodes.add(edge.getDestination());
                     }

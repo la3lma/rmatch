@@ -323,7 +323,7 @@ public final class GraphDumper {
                 out.printf("%s -> %s [label = \"%c\" ]; \n",
                         nodeName(source),
                         nodeName(entry.getValue()),
-                        entry.getKey().charValue());
+                        entry.getKey());
             }
         }
         out.println("}");

@@ -95,17 +95,14 @@ public class TestJavaRegexpUnfairly implements Matcher {
                 // anyway.
                 final java.util.regex.Matcher rmatcher = pattern.matcher("");
 
-                final Callable<Object> callable = new Callable<Object>() {
-                    @Override
-                    public Object call() throws Exception {
-                        rmatcher.reset(strToSearchIn);
-                        while (rmatcher.find()) {
-                            final int start = rmatcher.start();
-                            final int end = rmatcher.end();
-                            action.performMatch(b, start, end);
-                        }
-                        return null;
+                final Callable<Object> callable = () -> {
+                    rmatcher.reset(strToSearchIn);
+                    while (rmatcher.find()) {
+                        final int start = rmatcher.start();
+                        final int end = rmatcher.end();
+                        action.performMatch(b, start, end);
                     }
+                    return null;
                 };
                 matchers.add(callable);
             }

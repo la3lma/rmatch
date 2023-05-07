@@ -109,18 +109,12 @@ public class RegexpImplTest {
         actionFired = false;
         timesFired = 0;
         b = new StringBuffer("Fnord");
-        a = new Action() {
-            @Override
-            public void performMatch(
-                    final Buffer b,
-                    final int start,
-                    final int end) {
-                timesFired += 1;
-                firedBuffer = b;
-                firedStart = start;
-                firedEnd = end;
-                actionFired = true;
-            }
+        a = (b, start, end) -> {
+            timesFired += 1;
+            firedBuffer = b;
+            firedStart = start;
+            firedEnd = end;
+            actionFired = true;
         };
     }
 
