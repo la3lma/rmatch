@@ -24,8 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -152,7 +151,7 @@ public class RegexpImplTest {
      */
     @Test
     public void testHasActions() {
-        assertTrue(!re.hasActions());
+        assertFalse(re.hasActions());
         re.add(a);
         assertTrue(re.hasActions());
     }
@@ -173,7 +172,7 @@ public class RegexpImplTest {
     public void testRemoveAction() {
         testAddAction();
         re.remove(a);
-        assertTrue(!re.hasAction(a));
+        assertFalse(re.hasAction(a));
     }
 
     /**
@@ -189,7 +188,7 @@ public class RegexpImplTest {
      */
     @Test
     public void testRegisterMatch() {
-        assertTrue(!re.hasMatch(match));
+        assertFalse(re.hasMatch(match));
         re.registerMatch(match);
         assertTrue(re.hasMatch(match));
     }
@@ -215,7 +214,7 @@ public class RegexpImplTest {
 
 
         re.add(a);
-        assertTrue(!actionFired);
+        assertFalse(actionFired);
 
 
         for (int i = 1; i < ARBITRARY_START; i++) {

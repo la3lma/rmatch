@@ -63,7 +63,7 @@ public final class CharPlusNode extends AbstractNDFANode {
     public Collection<PrintableEdge> getEdgesToPrint() {
         synchronized (monitor) {
             final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
-            result.add(new PrintableEdge("" + myChar + "", this));
+            result.add(new PrintableEdge(String.valueOf(myChar), this));
             return result;
         }
     }

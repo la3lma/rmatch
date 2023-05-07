@@ -53,7 +53,7 @@ public final class CounterAction implements Action {
             if (verbose && (counter % tickInterval) == 0) {
 
                 // Collecting a report from the known counters
-                final StringBuilder sb = new StringBuilder("");
+                final StringBuilder sb = new StringBuilder();
                 for (final Counter c : Counters.getCounters()) {
                     sb.append("  ").append(c.toString()).append(", ");
                 }

@@ -28,7 +28,7 @@ import org.mockito.quality.Strictness;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -99,8 +99,8 @@ public final class RegexpStorageTest {
 
         // A really simple compiler, always returns the same
         // (mocked) node.
-        when(compiler.compile((Regexp) any(),
-                (RegexpStorage) any())).thenReturn(compilationResult);
+        when(compiler.compile(any(),
+                any())).thenReturn(compilationResult);
     }
 
     /**
@@ -108,11 +108,11 @@ public final class RegexpStorageTest {
      */
     @Test
     public void testAddRemoveRegexp() throws RegexpParserException {
-        assertTrue(!rs.hasRegexp(reString));
+        assertFalse(rs.hasRegexp(reString));
         rs.add(reString, a);
         assertTrue(rs.hasRegexp(reString));
         rs.remove(reString, a);
-        assertTrue(!rs.hasRegexp(reString));
+        assertFalse(rs.hasRegexp(reString));
     }
 
     /**
@@ -122,7 +122,7 @@ public final class RegexpStorageTest {
     public void testGetRegexp() {
         final Regexp re = rs.getRegexp(reString);
         assertTrue(rs.hasRegexp(reString));
-        assertTrue(rs.getRegexp(reString) == re);
+        assertSame(rs.getRegexp(reString), re);
     }
 
     /**

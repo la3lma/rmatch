@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -82,8 +83,8 @@ public final class AorBtest {
                         'b',
                 regexp);
 
-        when(compiler.compile((Regexp) any(),
-                (RegexpStorage) any())).thenReturn(aPlusNode);
+        when(compiler.compile(any(),
+                any())).thenReturn(aPlusNode);
 
         final RegexpFactory regexpFactory = regexpString -> {
             if (regexpString.equals(finalAorB)) {
@@ -103,8 +104,7 @@ public final class AorBtest {
      */
     @Test
     public void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
-        assertTrue(!regexp.hasActions(),
-                "the regexp should not initially have actions");
+        assertFalse(regexp.hasActions(), "the regexp should not initially have actions");
         m.add(aOrBString, action);
         assertTrue(regexp.hasActions(), "the regexp should have actions");
     }

@@ -71,7 +71,7 @@ public class CounterTest {
         final Collection<Callable<Object>> runnables = new ArrayList<>();
 
         for (int j = 0; j < noOfRunnables; j++) {
-            final Callable<Object> runnable =  (Callable<Object>) () -> {
+            final Callable<Object> runnable = () -> {
                         for (int i = 0; i < noOfIterationsInRunnable; i++) {
                             counter.inc();
                         }

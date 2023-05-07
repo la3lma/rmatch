@@ -85,8 +85,7 @@ class NodeStorageImplTest {
      */
     @Test
     public final void testAddToStartnode() {
-        assertTrue(!nsi.isConnectedToStartnode(ndfaNode),
-                "Node shouldn't initially be stored");
+        assertFalse(nsi.isConnectedToStartnode(ndfaNode), "Node shouldn't initially be stored");
         nsi.addToStartnode(ndfaNode);
         assertTrue(nsi.isConnectedToStartnode(ndfaNode),
                 "Node should now be stored");
@@ -233,7 +232,7 @@ class NodeStorageImplTest {
         final DFANode s23dfa = nsi.getDFANode(s23d2);
         final DFANode s13dfa = nsi.getDFANode(s13d1);
 
-        assertTrue(s23dfa != s13dfa);
+        assertNotSame(s23dfa, s13dfa);
         assertNotSame(nsi.getDFANode(s23d2), nsi.getDFANode(s13d2));
         assertNotSame(nsi.getDFANode(s23d2), nsi.getDFANode(s12d1));
         assertNotSame(nsi.getDFANode(s23d2), nsi.getDFANode(s12d2));

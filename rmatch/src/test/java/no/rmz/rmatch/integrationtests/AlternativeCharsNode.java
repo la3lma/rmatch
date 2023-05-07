@@ -86,8 +86,8 @@ final class AlternativeCharsNode extends AbstractNDFANode {
     @Override
     public Collection<PrintableEdge> getEdgesToPrint() {
         final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
-        result.add(new PrintableEdge("" + first, terminal));
-        result.add(new PrintableEdge("" + second, terminal));
+        result.add(new PrintableEdge(String.valueOf(first), terminal));
+        result.add(new PrintableEdge(String.valueOf(second), terminal));
         return result;
     }
 }

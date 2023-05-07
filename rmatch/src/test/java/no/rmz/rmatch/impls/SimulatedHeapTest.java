@@ -24,8 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Comparator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test our simulated heap.
@@ -84,8 +83,8 @@ public final class SimulatedHeapTest {
     public void testAddOne() {
         assertTrue(h.isEmpty());
         h.add(i[1]);
-        assertTrue(!h.isEmpty());
-        assertTrue(h.getFirst() == i[1]);
+        assertFalse(h.isEmpty());
+        assertSame(h.getFirst(), i[1]);
         h.remove(i[1]);
         assertTrue(h.isEmpty());
     }
@@ -100,9 +99,9 @@ public final class SimulatedHeapTest {
         assertTrue(h.isEmpty());
         h.add(i[2]);
         h.add(i[1]);
-        assertTrue(h.getFirst() == i[1]);
+        assertSame(h.getFirst(), i[1]);
         h.remove(i[1]);
-        assertTrue(h.getFirst() == i[2]);
+        assertSame(h.getFirst(), i[2]);
         h.remove(i[2]);
         assertTrue(h.isEmpty());
     }

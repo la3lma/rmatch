@@ -132,7 +132,7 @@ class APlusLoaderTests {
 
         for (int i = 0; i < noOfPatterns; i++) {
             final int offset = lengthOfPattern * i;
-            Mockito.<Action>verify(action).performMatch(b,
+            Mockito.verify(action).performMatch(b,
                     offset + startIndexInPattern, offset + endIndexInPattern);
         }
     }

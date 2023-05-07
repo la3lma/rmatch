@@ -129,8 +129,8 @@ public class ARegexpCompilerTest {
         injector.inject(arc);
         final NDFANode abcNode = arc.getResult();
 
-        when(compiler.compile((Regexp) any(), // XXX SHould have used "eq" here.
-                (RegexpStorage) any())).thenReturn(abcNode);
+        when(compiler.compile(any(), // XXX SHould have used "eq" here.
+                any())).thenReturn(abcNode);
 
         final RegexpFactory regexpFactory = regexpString -> {
             if (regexpString.equals(regexpPattern)) {

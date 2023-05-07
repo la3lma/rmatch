@@ -28,8 +28,7 @@ import org.mockito.quality.Strictness;
 
 import java.util.Comparator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -109,7 +108,7 @@ public class DominationHeapTest {
     public void testRemoveOne() {
         assertTrue(heap.isEmpty());
         heap.addMatch(m1);
-        assertTrue(!heap.isEmpty());
+        assertFalse(heap.isEmpty());
         heap.remove(m1);
         assertTrue(heap.isEmpty());
     }
@@ -121,7 +120,7 @@ public class DominationHeapTest {
     public void testIsEmptyOne() {
         assertTrue(heap.isEmpty());
         heap.addMatch(m1);
-        assertTrue(!heap.isEmpty());
+        assertFalse(heap.isEmpty());
     }
 
     /**

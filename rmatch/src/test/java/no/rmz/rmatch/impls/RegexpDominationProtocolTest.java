@@ -24,7 +24,7 @@ import java.util.Collections;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Testing the domination protocol, with contributions
@@ -80,7 +80,7 @@ public final class RegexpDominationProtocolTest {
         final MatchImpl m = new MatchImpl(ms, re);
         assertTrue(re.hasMatches());
         re.abandonMatch(m);
-        assertTrue(!re.hasMatches());
+        assertFalse(re.hasMatches());
     }
 
     /**
@@ -102,9 +102,9 @@ public final class RegexpDominationProtocolTest {
         m2.setEnd(endPoint2);
 
         assertTrue(Match.COMPARE_BY_DOMINATION.compare(m2, m1) < 0);
-        assertTrue(!(Match.COMPARE_BY_DOMINATION.compare(m1, m2) < 0));
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m1, m1) == 0);
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m2, m2) == 0);
+        assertFalse(Match.COMPARE_BY_DOMINATION.compare(m1, m2) < 0);
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m1, m1));
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m2, m2));
     }
 
     /**
@@ -127,15 +127,15 @@ public final class RegexpDominationProtocolTest {
 
 
         assertTrue(Match.COMPARE_BY_DOMINATION.compare(m2, m1) < 0);
-        assertTrue(!(Match.COMPARE_BY_DOMINATION.compare(m1, m2) < 0));
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m1, m1) == 0);
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m2, m2) == 0);
+        assertFalse(Match.COMPARE_BY_DOMINATION.compare(m1, m2) < 0);
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m1, m1));
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m2, m2));
 
 
         assertTrue(Match.COMPARE_BY_DOMINATION.compare(m2, m1) < 0);
-        assertTrue(!(Match.COMPARE_BY_DOMINATION.compare(m1, m2) < 0));
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m1, m1) == 0);
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m2, m2) == 0);
+        assertFalse(Match.COMPARE_BY_DOMINATION.compare(m1, m2) < 0);
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m1, m1));
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m2, m2));
     }
 
     /**
@@ -170,17 +170,17 @@ public final class RegexpDominationProtocolTest {
             for (int j = i + 1; j < end; j++) {
                 final Match a1 = m[i - 1];
                 final Match a2 = m[j - 1];
-                assertTrue(a1 != null, "a1 must not be null");
-                assertTrue(a2 != null, "a2 must not be null");
+                assertNotNull(a1, "a1 must not be null");
+                assertNotNull(a2, "a2 must not be null");
                 assertTrue(Match.COMPARE_BY_DOMINATION.compare(a1, a2) < 0);
-                assertTrue(!(Match.COMPARE_BY_DOMINATION.compare(a2, a1) < 0));
+                assertFalse(Match.COMPARE_BY_DOMINATION.compare(a2, a1) < 0);
             }
         }
 
         for (int i = start + 1; i < end; i++) {
             final Match a = m[i - 1];
             checkNotNull(a);
-            assertTrue(Match.COMPARE_BY_DOMINATION.compare(a, a) == 0);
+            assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(a, a));
         }
     }
 
@@ -201,10 +201,10 @@ public final class RegexpDominationProtocolTest {
         final MatchImpl m2 = new MatchImpl(ms2, re);
         m2.setEnd(endMs2);
 
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m2, m1) == 0);
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m1, m2) == 0);
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m1, m1) == 0);
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m2, m2) == 0);
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m2, m1));
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m1, m2));
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m1, m1));
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m2, m2));
     }
 
     /**
@@ -224,10 +224,10 @@ public final class RegexpDominationProtocolTest {
         final MatchImpl m2 = new MatchImpl(ms, re2);
         m2.setEnd(endpoint2);
 
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m2, m1) == 0);
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m2, m2) == 0);
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m1, m1) == 0);
-        assertTrue(Match.COMPARE_BY_DOMINATION.compare(m1, m2) == 0);
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m2, m1));
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m2, m2));
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m1, m1));
+        assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(m1, m2));
     }
     // XXX @@@ Domination combined with abandonment isn't tested
     // XXX     No part of strong domination is tested.

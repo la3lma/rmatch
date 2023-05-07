@@ -29,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -125,10 +126,10 @@ public class SequenceNodeTest {
                 CharSequenceCompiler.compile(acRegexp, AC_STRING);
 
         when(compiler.compile(eq(abRegexp),
-                (RegexpStorage) any())).thenReturn(abNode);
+                any())).thenReturn(abNode);
 
         when(compiler.compile(eq(acRegexp),
-                (RegexpStorage) any())).thenReturn(acNode);
+                any())).thenReturn(acNode);
 
         final RegexpFactory regexpFactory = regexpString -> {
             if (regexpString.equals(AB_STRING)) {
@@ -149,9 +150,7 @@ public class SequenceNodeTest {
      */
     @Test
     public final void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
-        assertTrue(
-                !abRegexp.hasActions(),
-                "the regexp should not initially have actions");
+        assertFalse(abRegexp.hasActions(), "the regexp should not initially have actions");
         m.add(AB_STRING, action);
         assertTrue(abRegexp.hasActions(), "the regexp should have actions");
     }

@@ -92,13 +92,13 @@ public class MatchImplTest {
     @Test
     public final void testIsActiveFor() {
         // Check active (default)
-        assertEquals(true, match.isActive());
+        assertTrue(match.isActive());
         assertTrue(regexpReal.hasMatches());
         assertTrue(regexpReal.hasMatch(match));
 
         // Check active (after abandoning)
         match.abandon();
-        assertEquals(false, match.isActive());
+        assertFalse(match.isActive());
     }
 
    /**
@@ -110,7 +110,7 @@ public class MatchImplTest {
                 new MatchSetImpl(1,
                 new DFANodeImpl((Set<NDFANode>) Collections.EMPTY_SET));
         final Regexp r = new RegexpImpl("Krasnji Octobr");
-        assertTrue(!r.hasMatches());
+        assertFalse(r.hasMatches());
         final Match m = new MatchImpl(msx, r);
         assertTrue(r.hasMatches());
         assertEquals(r, m.getRegexp());
