@@ -142,6 +142,7 @@ public class MatchImplTest {
     /**
      * Whe domination comparing, a match is equal to itself.
      */
+    @Test
     public final void testCompareOtherSelf() {
         assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(match, match));
     }

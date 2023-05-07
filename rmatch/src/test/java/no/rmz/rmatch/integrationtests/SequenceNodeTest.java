@@ -192,6 +192,7 @@ public class SequenceNodeTest {
     /**
      * Test performing a match on "ac".
      */
+    @Test
     public void testMockedMatchLength1bTerminatedWithAbdcInLongString() throws RegexpParserException {
         final no.rmz.rmatch.utils.StringBuffer b =
                 new no.rmz.rmatch.utils
