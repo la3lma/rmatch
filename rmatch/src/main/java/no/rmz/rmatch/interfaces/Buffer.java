@@ -19,7 +19,7 @@ package no.rmz.rmatch.interfaces;
 /**
  * Buffers are the basic way to get access to the input being parsed.
  */
-public interface Buffer {
+public interface Buffer extends Comparable<Buffer> {
 
     /**
      * Return everything in the Buffer from, but not including the current
@@ -70,4 +70,22 @@ public interface Buffer {
      * @return A cloned buffer.
      */
     Buffer clone();
+
+
+    private static int compoundCompare(int... results) {
+        for (int result : results) {
+            if (result != 0) {
+                return result;
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    default int compareTo(Buffer other) {
+        return compoundCompare(
+        Integer.compare(this.getCurrentPos(), other.getCurrentPos()),
+                this.getString(0, this.getCurrentPos()).compareTo(other.getString(0, other.getCurrentPos())),
+                Boolean.compare(this.hasNext(), other.hasNext()));
+    }
 }

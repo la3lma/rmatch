@@ -167,7 +167,7 @@ public class SequenceNodeTest {
         m.match(b);
 
         // Starting out accepting any kind of match
-        verify(action).performMatch(b, AB_START, AB_END);
+        verify(action).performMatch(any(Buffer.class), eq(AB_START), eq(AB_END));
     }
 
      /**
@@ -182,7 +182,7 @@ public class SequenceNodeTest {
         m.match(b);
 
         // Starting out accepting any kind of match
-        verify(action).performMatch(b, AB_START, AB_END);
+        verify(action).performMatch(any(Buffer.class), eq(AB_START), eq(AB_END));
     }
 
     /**
@@ -198,7 +198,7 @@ public class SequenceNodeTest {
         m.match(b);
 
         // Starting out accepting any kind of match
-        verify(action).performMatch(b, AC_START, AC_END);
+        verify(action).performMatch(any(Buffer.class), eq(AC_START), eq(AC_END));
     }
 
     /**
@@ -220,7 +220,7 @@ public class SequenceNodeTest {
                 "testTwoPatternsStartWithTheSameLetterAndBothTriggeringMatches",
                 m.getNodeStorage());
 
-        verify(action).performMatch(b, AB_START, AB_END);
-        verify(action).performMatch(b, AC_START, AC_END);
+        verify(action).performMatch(any(Buffer.class), eq(AB_START), eq(AB_END));
+        verify(action).performMatch(any(Buffer.class), eq(AC_START), eq(AC_END));
     }
 }

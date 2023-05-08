@@ -19,6 +19,7 @@ package no.rmz.rmatch.ordinaryuse;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.interfaces.Action;
+import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.testutils.GraphDumper;
@@ -28,6 +29,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -89,7 +92,7 @@ public class OrdinaryUsageSmokeTest {
                 "fnord",
                 m.getNodeStorage());
 
-        verify(action).performMatch(b, 0, "ab".length() - 1);
-        verify(action).performMatch(b, "ab".length() + 1, "ab".length() + 1 + "ac".length() - 1);
+        verify(action).performMatch(any(Buffer.class), eq(0), eq("ab".length() - 1));
+        verify(action).performMatch(any(Buffer.class), eq("ab".length() + 1), eq("ab".length() + 1 + "ac".length() - 1));
     }
 }

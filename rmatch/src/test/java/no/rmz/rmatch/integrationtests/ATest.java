@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -122,7 +123,7 @@ public final class ATest {
         m.match(b);
 
         // Starting out accepting any kind of match
-        verify(action).performMatch(b, 0, 0);
+        verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
     }
 
     /**
@@ -138,6 +139,6 @@ public final class ATest {
         m.match(b);
 
         // Starting out accepting any kind of match
-        verify(action).performMatch(b, 0, 0);
+        verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
     }
 }

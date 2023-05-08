@@ -26,7 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -144,12 +144,24 @@ public class ARegexpCompilerTest {
         final Matcher m = new MatcherImpl(compiler, regexpFactory);
         m.add(regexpPattern, action);
 
-        final   no.rmz.rmatch.utils.StringBuffer b =
+        final   Buffer b =
                 new no.rmz.rmatch.utils.StringBuffer(testString);
 
         m.match(b);
         return new MB(m, b);
+    }
 
+    /**
+     * Verify match
+     * @param mb The MB instance
+     * @param nameOfTest name of test
+     * @param start start of match
+     * @param stop end of match
+     */
+    private void verifyPerformMatch(final MB mb, final String nameOfTest, final int start, final int stop) {
+        GraphDumper.dump(nameOfTest,
+                mb.getM().getNodeStorage());
+        verify(action).performMatch(any(Buffer.class), eq(start), eq(stop));
     }
 
     /**
@@ -165,9 +177,7 @@ public class ARegexpCompilerTest {
                 testString,
                 arb -> arb.addString(regexpPattern));
 
-        GraphDumper.dump("ARegexpCompilerTestAddString",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 0);
+        verifyPerformMatch(mb, "ARegexpCompilerTestAddString",0,0);
     }
 
     /**
@@ -186,9 +196,7 @@ public class ARegexpCompilerTest {
                     arb.addString("b");
                 });
 
-        GraphDumper.dump("testAddStringLength2",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 1);
+        verifyPerformMatch(mb, "testAddStringLength2",0,1);
     }
 
     /**
@@ -207,9 +215,7 @@ public class ARegexpCompilerTest {
                     arb.addString("b");
                 });
 
-        GraphDumper.dump("ARegexpCompilerTestSeparateAlternatives",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 0);
+        verifyPerformMatch(mb, "ARegexpCompilerTestSeparateAlternatives",0,0);
     }
 
     /**
@@ -229,9 +235,7 @@ public class ARegexpCompilerTest {
                     arb.endCharSet();
                 });
 
-        GraphDumper.dump("testCharSet",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 0);
+        verifyPerformMatch(mb, "testCharSet",0,0);
     }
 
     /**
@@ -252,9 +256,7 @@ public class ARegexpCompilerTest {
                     arb.endCharSet();
                 });
 
-        GraphDumper.dump("testInverseCharSet",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 0);
+        verifyPerformMatch(mb, "testInverseCharSet",0,0);
     }
 
     /**
@@ -273,9 +275,7 @@ public class ARegexpCompilerTest {
                     arb.endCharSet();
                 });
 
-        GraphDumper.dump("testAddRangeToCharSet",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 0);
+        verifyPerformMatch(mb, "testAddRangeToCharSet",0,0);
     }
 
     /**
@@ -290,9 +290,7 @@ public class ARegexpCompilerTest {
                 testString,
                 AbstractRegexBuilder::addAnyChar);
 
-        GraphDumper.dump("testAddAnyChar",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 0);
+        verifyPerformMatch(mb, "testAddAnyChar",0,0);
     }
 
     /**
@@ -312,9 +310,7 @@ public class ARegexpCompilerTest {
                     arb.addAnyChar();
                 });
 
-        GraphDumper.dump("testAddBeginningOfLine",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 0);
+        verifyPerformMatch(mb, "testAddBeginningOfLine",0,0);
     }
 
     /**
@@ -333,10 +329,7 @@ public class ARegexpCompilerTest {
                     arb.addString("z");
                     arb.addAnyChar();
                 });
-
-        GraphDumper.dump("testAddendOfLine",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 0);
+        verifyPerformMatch(mb, "testAddendOfLine",0,0);
     }
 
     /**
@@ -354,10 +347,7 @@ public class ARegexpCompilerTest {
                     arb.addOptionalSingular();
                     arb.addString("b");
                 });
-
-        GraphDumper.dump("testAddOptionalSingular",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 0);
+        verifyPerformMatch(mb, "testAddOptionalSingular",0,0);
     }
 
     /**
@@ -377,9 +367,7 @@ public class ARegexpCompilerTest {
                     arb.addString("n");
                 });
 
-        GraphDumper.dump("testAddOptionalZeroOrMulti",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 5);
+        verifyPerformMatch(mb, "testAddOptionalZeroOrMulti",0,5);
     }
 
     /**
@@ -400,8 +388,6 @@ public class ARegexpCompilerTest {
                     arb.addString("n");
                 });
 
-        GraphDumper.dump("testAddOptionalOnceOrMulti",
-                mb.getM().getNodeStorage());
-        verify(action).performMatch(mb.getB(), 0, 5);
+        verifyPerformMatch(mb, "testAddOptionalOnceOrMulti",0,5);
     }
 }

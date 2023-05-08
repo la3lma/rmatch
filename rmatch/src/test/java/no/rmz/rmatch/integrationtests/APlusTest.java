@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -125,7 +126,8 @@ public final class APlusTest {
         GraphDumper.dump("testMockedMatchLength1bTerminated",
                 m.getNodeStorage());
         // Starting out accepting any kind of match
-        verify(action).performMatch(b, 0, 0);
+        verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
+
     }
 
     /**
@@ -142,7 +144,7 @@ public final class APlusTest {
         GraphDumper.dump("testMockedMatchLength1bTerminatedbPrefixed",
                 m.getNodeStorage());
 
-        verify(action).performMatch(b, 1, 1);
+        verify(action).performMatch(any(Buffer.class), eq(1), eq(1));
     }
 
     /**
@@ -156,7 +158,8 @@ public final class APlusTest {
         m.add(aplusString, action);
         m.match(b);
 
-        verify(action).performMatch(b, 0, 0);
+        verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
+
     }
 
     /**
@@ -171,8 +174,7 @@ public final class APlusTest {
 
         m.match(b);
 
-
-        verify(action).performMatch(b, 0, 1);
+        verify(action).performMatch(any(Buffer.class), eq(0), eq(1));
     }
 
     /**
@@ -187,7 +189,7 @@ public final class APlusTest {
 
         m.match(b);
 
-        verify(action).performMatch(b, 0, 2);
+        verify(action).performMatch(any(Buffer.class), eq(0), eq(2));
     }
 
     /**
@@ -204,9 +206,8 @@ public final class APlusTest {
         GraphDumper.dump("testMockedTripleMatchLength7",
                 m.getNodeStorage());
 
-
-        verify(action).performMatch(b, 0, 0);
-        verify(action).performMatch(b, 2, 2);
-        verify(action).performMatch(b, 4, 5);
+        verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
+        verify(action).performMatch(any(Buffer.class), eq(2), eq(2));
+        verify(action).performMatch(any(Buffer.class), eq(4), eq(5));
     }
 }

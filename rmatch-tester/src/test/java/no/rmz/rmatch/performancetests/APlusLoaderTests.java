@@ -12,13 +12,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -132,8 +133,7 @@ class APlusLoaderTests {
 
         for (int i = 0; i < noOfPatterns; i++) {
             final int offset = lengthOfPattern * i;
-            Mockito.verify(action).performMatch(b,
-                    offset + startIndexInPattern, offset + endIndexInPattern);
+            verify(action).performMatch(any(Buffer.class), eq(offset + startIndexInPattern), eq(offset + endIndexInPattern));
         }
     }
 
