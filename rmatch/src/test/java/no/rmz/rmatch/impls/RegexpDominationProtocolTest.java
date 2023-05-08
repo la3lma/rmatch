@@ -79,7 +79,7 @@ public final class RegexpDominationProtocolTest {
         final MatchSetImpl ms = new MatchSetImpl(1, sn, null);
         final MatchImpl m = new MatchImpl(ms, re);
         assertTrue(re.hasMatches());
-        re.abandonMatch(m);
+        re.abandonMatch(m, null);
         assertFalse(re.hasMatches());
     }
 

@@ -37,7 +37,7 @@ public interface Match {
      * Abandon this match. Remove all references to it from everything the match
      * knows points to it (the match set and the regexp).
      */
-    void abandon();
+    void abandon(Character currentChar);
 
     /**
      * True iff the match has been abandoned.
@@ -155,4 +155,8 @@ public interface Match {
             return 0;
         }
     };
+
+    public default boolean isZeroLength() {
+        return (this.getEnd() - this.getStart()) == 0;
+    }
 }

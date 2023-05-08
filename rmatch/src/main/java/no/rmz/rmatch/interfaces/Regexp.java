@@ -29,7 +29,7 @@ public interface Regexp extends Comparable<Regexp> {
      *
      * @param m the match to remove references to.
      */
-    void abandonMatch(final Match m);
+    void abandonMatch(final Match m, Character currentChar);
 
     /**
      * Add an action to a regexp.
@@ -203,7 +203,5 @@ public interface Regexp extends Comparable<Regexp> {
      * @param character
      * @return True only if it's certain that the char cannot start a match for this regex.
      */
-    default boolean excludedAsStartCharacter(Character character) {
-        return false;  // TODO: Placeholder, this will be improved in various ways.
-    }
+     boolean excludedAsStartCharacter(Character character);
 }

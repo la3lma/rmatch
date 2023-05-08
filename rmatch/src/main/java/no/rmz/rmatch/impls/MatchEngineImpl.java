@@ -50,7 +50,7 @@ public final class MatchEngineImpl implements MatchEngine {
             }
             performMatch(b, match);
             if (bePermissive) {
-                match.abandon();
+                match.abandon(null);
             }
         }
     }
@@ -127,7 +127,7 @@ public final class MatchEngineImpl implements MatchEngine {
         // that fact.
         final DFANode currentNode = ns.getNext(currentChar);
         if (currentNode != null) {
-            final MatchSet ms = new MatchSetImpl(currentPos, currentNode);
+            final MatchSet ms = new MatchSetImpl(currentPos, currentNode, currentChar);
             if (ms.hasMatches()) {
                 activeMatchSets.add(ms);
             }

@@ -131,9 +131,9 @@ public final class MatchSetImpl implements MatchSet {
             //       one that is compatible with adding a particular regex?  This
             //       can maybe be stored in a table so that it's easily cached
             //       and thus properly inner-loopy optimizable.
-            if (peekedCharacter != null && !r.excludedAsStartCharacter(peekedCharacter)) {
+            if (!r.excludedAsStartCharacter(peekedCharacter)) {
                 matches.add(startNode.newMatch(this, r));
-            }
+           }
         }
 
         // This was necessary to nail the bug caused by the natural
@@ -207,7 +207,7 @@ public final class MatchSetImpl implements MatchSet {
                 if (m.isFinal()) {
                     commitMatch(m, runnableMatches);
                     if (!m.isAbandoned()) {
-                        m.abandon();
+                        m.abandon(currentChar);
                     }
                 }
                 removeMatch(m);
@@ -220,7 +220,7 @@ public final class MatchSetImpl implements MatchSet {
         if (currentNode.failsSomeRegexps()) {
             for (final Match m : matches) {
                 if (currentNode.isFailingFor(m.getRegexp())) {
-                    m.abandon();
+                    m.abandon(currentChar);
                     matches.remove(m);
                 }
             }
@@ -249,7 +249,7 @@ public final class MatchSetImpl implements MatchSet {
                 }
 
                 if (!m.isAbandoned()) {
-                    m.abandon();
+                    m.abandon(currentChar);
                 }
 
                 removeMatch(m);

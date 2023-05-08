@@ -16,13 +16,12 @@
 
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import no.rmz.rmatch.interfaces.*;
+
+import java.util.*;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Representation of a parsed regular expression.
@@ -69,6 +68,13 @@ public final class RegexpImpl implements Regexp {
      * The starting node in the NDFA that represents this regular expression.
      */
     private NDFANode myNode;
+
+
+    /**
+     * The set of characters that by example has been proven not to be possible to start
+     * this regexp with.
+     */
+    private Set<Character> nonStartingChars = Collections.synchronizedSet(new HashSet<>());
 
     /**
      * Make a new instance of Regexp representing a regular expression.
@@ -217,11 +223,16 @@ public final class RegexpImpl implements Regexp {
     }
 
     @Override
-    public void abandonMatch(final Match m) {
+    public void abandonMatch(final Match m, Character currentChar) {
         checkNotNull(m);
         checkArgument(this == m.getRegexp());
         checkArgument(hasMatches());
         checkArgument(hasMatch(m));
+
+        if (m.isZeroLength() && currentChar != null) {
+            this.nonStartingChars.add(currentChar);
+        }
+
 
         final MatchSet ms = m.getMatchSet();
 
@@ -302,5 +313,10 @@ public final class RegexpImpl implements Regexp {
         checkNotNull(m);
         final MatchSet ms = m.getMatchSet();
         return (heaps != null) && (heaps.get(ms) != null);
+    }
+
+    @Override
+    public boolean excludedAsStartCharacter(Character character) {
+        return this.nonStartingChars.contains(character);
     }
 }

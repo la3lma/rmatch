@@ -16,12 +16,14 @@
 
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.*;
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.MatchSet;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A representation of a match implementing the Match interface.
@@ -106,9 +108,9 @@ public final class MatchImpl implements Match {
     }
 
     @Override
-    public void abandon() {
+    public void abandon(Character currentChar) {
         checkState(!isAbandoned());
-        r.abandonMatch(this);
+        r.abandonMatch(this, currentChar);
         isActive = false;
     }
 
