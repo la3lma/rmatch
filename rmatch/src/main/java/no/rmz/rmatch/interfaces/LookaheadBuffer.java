@@ -4,9 +4,8 @@ public interface LookaheadBuffer extends Buffer {
 
     /**
      * Will return the character that will be read after the current one.
-     * @return The next character to be read.
+     * @return The next character to be read. If no more characters to be read
+     * then return null.
      */
-    default Character peek() {
-        return 'z'; // TODO: Obviously a placeholder, this shouldn't be default.
-    }
+    Character peek();
 }

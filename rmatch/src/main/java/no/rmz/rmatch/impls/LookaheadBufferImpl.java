@@ -5,40 +5,77 @@ import no.rmz.rmatch.interfaces.LookaheadBuffer;
 
 public class LookaheadBufferImpl implements LookaheadBuffer {
 
+    private final Object lock = new Object();
     private final Buffer buffer;
+    private Character peekedChar;
+    private boolean havePeeked;
 
     public LookaheadBufferImpl(final Buffer buffer) {
         this.buffer = buffer;
+        this.havePeeked = false;
+        this.peekedChar = null;
     }
 
     @Override
     @Deprecated
     public String getCurrentRestString() {
-        return buffer.getCurrentRestString();
+        synchronized (lock) {
+            return buffer.getCurrentRestString();
+        }
     }
 
     @Override
     public String getString(int start, int stop) {
-        return buffer.getString(start, stop);
+        synchronized (lock) {
+            return buffer.getString(start, stop);
+        }
     }
 
     @Override
     public boolean hasNext() {
-        return buffer.hasNext();
+        synchronized (lock) {
+            return buffer.hasNext();
+        }
     }
 
     @Override
     public Character getNext() {
-        return buffer.getNext();
+        synchronized(lock) {
+            if (havePeeked) {
+                havePeeked = false;
+                return peekedChar;
+            } else {
+                return buffer.getNext();
+            }
+        }
     }
 
     @Override
     public int getCurrentPos() {
-        return buffer.getCurrentPos();
+        synchronized (lock) {
+            return buffer.getCurrentPos();
+        }
     }
 
     @Override
     public Buffer clone() {
-        return new LookaheadBufferImpl(buffer.clone());
+        synchronized (lock) {
+            return new LookaheadBufferImpl(buffer.clone());
+        }
+    }
+
+    @Override
+    public Character peek() {
+        synchronized (lock) {
+            if (!this.havePeeked) {
+                this.havePeeked = true;
+                if (buffer.hasNext()) {
+                    this.peekedChar = buffer.getNext();
+                } else {
+                    this.peekedChar = null;
+                }
+            }
+            return peekedChar;
+        }
     }
 }

@@ -39,8 +39,8 @@
                 <version>${mavenCompilerPlugin.version}</version>
 
                 <configuration>
-                    <source>${compileSource}</source>
-                    <target>${compileTarget}</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                     <mainClass>no.rmz.rmatch.performancetests.misc.BenchmarkTheWutheringHeightsCorpus</mainClass>
                 </configuration>
             </plugin>
