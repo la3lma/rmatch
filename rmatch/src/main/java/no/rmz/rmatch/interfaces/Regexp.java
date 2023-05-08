@@ -195,4 +195,15 @@ public interface Regexp extends Comparable<Regexp> {
      * @return true iff the match is associated with this regexp.
      */
     boolean hasMatch(final Match m);
+
+    /**
+     * A heuristic to be used for optimization:  If there is certain
+     * the character can NOT be the start of a match for this regex, then return
+     * true, else return false.
+     * @param character
+     * @return True only if it's certain that the char cannot start a match for this regex.
+     */
+    default boolean excludedAsStartCharacter(Character character) {
+        return false;  // TODO: Placeholder, this will be improved in various ways.
+    }
 }
