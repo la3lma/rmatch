@@ -18,7 +18,6 @@ package no.rmz.rmatch.interfaces;
 
 import java.util.Comparator;
 import java.util.Set;
-import no.rmz.rmatch.impls.RunnableMatchesHolder;
 
 /**
  * A set of matches that is being processed by a matcher. The set of matches all

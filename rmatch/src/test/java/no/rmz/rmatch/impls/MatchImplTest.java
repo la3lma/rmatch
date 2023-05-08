@@ -16,10 +16,7 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.interfaces.MatchSet;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.interfaces.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

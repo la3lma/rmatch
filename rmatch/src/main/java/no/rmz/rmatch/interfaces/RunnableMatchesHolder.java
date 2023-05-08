@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package no.rmz.rmatch.impls;
+package no.rmz.rmatch.interfaces;
 
 import java.util.Set;
 import no.rmz.rmatch.interfaces.Match;

@@ -21,13 +21,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.interfaces.MatchSet;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.Node;
-import no.rmz.rmatch.interfaces.Regexp;
+
+import no.rmz.rmatch.interfaces.*;
 
 /**
  * Representation of a parsed regular expression.

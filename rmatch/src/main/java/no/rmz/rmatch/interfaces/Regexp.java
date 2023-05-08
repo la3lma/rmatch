@@ -17,7 +17,6 @@
 package no.rmz.rmatch.interfaces;
 
 import no.rmz.rmatch.impls.DominationHeap;
-import no.rmz.rmatch.impls.RunnableMatchesHolder;
 
 /**
  * A representation of a regular expression. Regexps are comparable to each

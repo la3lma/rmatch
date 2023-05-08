@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import no.rmz.rmatch.interfaces.Match;
+import no.rmz.rmatch.interfaces.RunnableMatchesHolder;
 
 /**
  * A holder for runnable matches.

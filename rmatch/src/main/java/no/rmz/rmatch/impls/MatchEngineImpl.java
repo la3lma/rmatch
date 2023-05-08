@@ -156,26 +156,25 @@ public final class MatchEngineImpl implements MatchEngine {
 
     @Override
     public void match(final Buffer b) {
-
-        // TODO: This fails!
-        // LookaheadBuffer b = new LookaheadBufferImpl(ob);
-
         checkNotNull(b, "Buffer can't be null");
+
+        final LookaheadBuffer lb = new LookaheadBufferImpl(b);
+
         final Set<MatchSet> activeMatchSets;
         activeMatchSets = Collections.synchronizedSet(
                 new TreeSet<>(MatchSet.COMPARE_BY_ID));
 
         // Advance all match sets forward one character.
-        while (b.hasNext()) {
-            final Character nextChar = b.getNext();
-            final int currentPos = b.getCurrentPos();
-            matcherProgress(b, nextChar, currentPos, activeMatchSets);
+        while (lb.hasNext()) {
+            final Character nextChar = lb.getNext();
+            final int currentPos = lb.getCurrentPos();
+            matcherProgress(lb, nextChar, currentPos, activeMatchSets);
         }
 
         // Handle the stragglers
         for (final MatchSet ms : activeMatchSets) {
             // Be permissive when handling stragglers
-            performMatches(b, ms.getMatches(), true);
+            performMatches(lb, ms.getMatches(), true);
         }
 
         activeMatchSets.clear();
