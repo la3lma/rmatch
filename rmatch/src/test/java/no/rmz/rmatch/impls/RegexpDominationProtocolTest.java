@@ -61,7 +61,7 @@ public final class RegexpDominationProtocolTest {
      */
     @Test
     public void testRegisterMatch() {
-        final MatchSetImpl ms = new MatchSetImpl(1, sn);
+        final MatchSetImpl ms = new MatchSetImpl(1, sn, null);
         // The variable m isn't used, but since we makea new
         // match impl, it will indirectly affect the result of the test
 
@@ -76,7 +76,7 @@ public final class RegexpDominationProtocolTest {
      */
     @Test
     public void testAbandonMatch() {
-        final MatchSetImpl ms = new MatchSetImpl(1, sn);
+        final MatchSetImpl ms = new MatchSetImpl(1, sn, null);
         final MatchImpl m = new MatchImpl(ms, re);
         assertTrue(re.hasMatches());
         re.abandonMatch(m);
@@ -95,7 +95,7 @@ public final class RegexpDominationProtocolTest {
         final int endPoint1 = 2;
         final int endPoint2 = 3;
 
-        final MatchSetImpl ms = new MatchSetImpl(startPoint, sn);
+        final MatchSetImpl ms = new MatchSetImpl(startPoint, sn, null);
         final MatchImpl m1 = new MatchImpl(ms, re);
         m1.setEnd(endPoint1);
         final MatchImpl m2 = new MatchImpl(ms, re);
@@ -118,8 +118,8 @@ public final class RegexpDominationProtocolTest {
         final int startPoint2 = 2;
         final int endpoint = 3;
 
-        final MatchSetImpl ms1 = new MatchSetImpl(startPoint1, sn);
-        final MatchSetImpl ms2 = new MatchSetImpl(startPoint2, sn);
+        final MatchSetImpl ms1 = new MatchSetImpl(startPoint1, sn, null);
+        final MatchSetImpl ms2 = new MatchSetImpl(startPoint2, sn, null);
         final MatchImpl m1 = new MatchImpl(ms2, re);
         m1.setEnd(endpoint);
         final MatchImpl m2 = new MatchImpl(ms1, re);
@@ -159,7 +159,7 @@ public final class RegexpDominationProtocolTest {
 
         for (int i = start; i <= end; i++) {
             checkNotNull(sn);
-            ms[i] = new MatchSetImpl(i, sn);
+            ms[i] = new MatchSetImpl(i, sn, null);
             checkNotNull(ms[i], "Expected ms[" + i + "] to be non-null");
             m[i] = new MatchImpl(ms[i], re);
             m[i].setEnd(end);
@@ -194,8 +194,8 @@ public final class RegexpDominationProtocolTest {
         final int startMs2 = 2;
         final int endMs1 = 3;
         final int endMs2 = 4;
-        final MatchSetImpl ms1 = new MatchSetImpl(startMs1, sn);
-        final MatchSetImpl ms2 = new MatchSetImpl(startMs2, sn);
+        final MatchSetImpl ms1 = new MatchSetImpl(startMs1, sn, null);
+        final MatchSetImpl ms2 = new MatchSetImpl(startMs2, sn, null);
         final MatchImpl m1 = new MatchImpl(ms1, re);
         m1.setEnd(endMs1);
         final MatchImpl m2 = new MatchImpl(ms2, re);
@@ -218,7 +218,7 @@ public final class RegexpDominationProtocolTest {
         final int endpoint1 = 2;
 
         final RegexpImpl re2 = new RegexpImpl("Foobar");
-        final MatchSetImpl ms = new MatchSetImpl(startPoint, sn);
+        final MatchSetImpl ms = new MatchSetImpl(startPoint, sn, null);
         final MatchImpl m1 = new MatchImpl(ms, re);
         m1.setEnd(endpoint1);
         final MatchImpl m2 = new MatchImpl(ms, re2);
