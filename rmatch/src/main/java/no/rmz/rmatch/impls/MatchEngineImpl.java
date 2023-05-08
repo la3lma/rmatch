@@ -97,7 +97,7 @@ public final class MatchEngineImpl implements MatchEngine {
      * @param activeMatchSets The set of active match sets.
      */
     private void matcherProgress(
-            final Buffer b,
+            final LookaheadBuffer b,
             final Character currentChar,
             final int currentPos,
             final Set<MatchSet> activeMatchSets) {
@@ -128,7 +128,9 @@ public final class MatchEngineImpl implements MatchEngine {
         final DFANode currentNode = ns.getNext(currentChar);
         if (currentNode != null) {
             final MatchSet ms = new MatchSetImpl(currentPos, currentNode);
-            activeMatchSets.add(ms);
+            if (ms.hasMatches()) {
+                activeMatchSets.add(ms);
+            }
         }
 
         // Then run through all the active match sets to see

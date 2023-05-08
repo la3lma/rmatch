@@ -47,7 +47,7 @@ public interface MatchSet {
     int getStart();
 
     /**
-     * True if there are any matches in this MatcSet.
+     * True if there are any matches in this MatchSet.
      * @return do we have any matches?
      */
     boolean hasMatches();

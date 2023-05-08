@@ -111,7 +111,7 @@ public final class MatchSetImpl implements MatchSet {
         start = startIndex;
         id = MY_COUNTER.inc();
 
-        // XXX This line represents the most egregious
+        // XXX This lines represents the most egregious
         //     bug in the whole regexp package, since it
         //     incurs a cost in both runtime and used memory
         //     directly proportional to the number of
@@ -120,21 +120,6 @@ public final class MatchSetImpl implements MatchSet {
         //     adds a factor O(l*m) to the resource use of the
         //     algorithm.  Clearly not logarithmic in the number
         //     of expressions, and thus a showstopper.
-        addMatches(startNode);
-    }
-    @Override
-    public int getStart() {
-        return start;
-    }
-
-    /**
-     * Populate the set of matches with matches that could possibly start from
-     * startNode starting point.
-     *
-     * @param startNode the node to populate the initial set of matches from.
-     */
-    private void addMatches(final DFANode startNode) {
-        assert (startNode != null);
 
         for (final Regexp r : currentNode.getRegexps()) {
             // TODO: This is a hotspot.  Can we use a heuristic that can
@@ -152,6 +137,11 @@ public final class MatchSetImpl implements MatchSet {
         // comparison for matches not being by id. Don't want to
         // see that ever again, so I'm keeping the assertion.
         assert (matches.size() == currentNode.getRegexps().size());
+    }
+
+    @Override
+    public int getStart() {
+        return start;
     }
 
     @Override
