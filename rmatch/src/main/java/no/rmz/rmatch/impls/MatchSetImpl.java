@@ -103,7 +103,8 @@ public final class MatchSetImpl implements MatchSet {
      */
     public MatchSetImpl(
             final int startIndex,
-            final DFANode startNode) {
+            final DFANode startNode,
+            final Character peekedCharacter) {
         this.matches = new ConcurrentSkipListSet<>(Match.COMPARE_BY_OBJECT_ID);
         checkNotNull(startNode, "Startnode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");
@@ -130,13 +131,16 @@ public final class MatchSetImpl implements MatchSet {
             //       one that is compatible with adding a particular regex?  This
             //       can maybe be stored in a table so that it's easily cached
             //       and thus properly inner-loopy optimizable.
-            matches.add(startNode.newMatch(this, r));
+            if (peekedCharacter != null && !r.excludedAsStartCharacter(peekedCharacter)) {
+                matches.add(startNode.newMatch(this, r));
+            }
         }
 
         // This was necessary to nail the bug caused by the natural
         // comparison for matches not being by id. Don't want to
         // see that ever again, so I'm keeping the assertion.
-        assert (matches.size() == currentNode.getRegexps().size());
+        // TODO: This no longer is true due to the optimizations being introduced above.
+        // assert (matches.size() == currentNode.getRegexps().size());
     }
 
     @Override
