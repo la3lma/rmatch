@@ -16,19 +16,17 @@
 
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.*;
-import java.lang.reflect.Array;
+import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.interfaces.*;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.RegexpFactory;
+import java.util.stream.IntStream;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A multithreaded matcher. It will keep an array of matchers, into which it
@@ -117,12 +115,9 @@ public final class MultiMatcher implements Matcher {
         /**
          * Set up a set of partition into which we can pour regexps.
          */
-        matchers = (Matcher[]) Array.newInstance(
-                Matcher.class,
-                noOfMatchers);
-        for (int i = 0; i < noOfMatchers; i++) {
-            matchers[i] = new MatcherImpl(compiler, regexpFactory);
-        }
+        matchers = IntStream.range(0, noOfMatchers)
+                .mapToObj(i -> new MatcherImpl(compiler, regexpFactory))
+                .toArray(Matcher[]::new);
     }
 
     /**

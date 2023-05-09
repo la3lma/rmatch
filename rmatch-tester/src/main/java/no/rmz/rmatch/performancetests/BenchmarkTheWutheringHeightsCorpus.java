@@ -1,15 +1,16 @@
 package no.rmz.rmatch.performancetests;
 
-import java.util.Arrays;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
-import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
+
+import java.util.Arrays;
 
 import static no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer.LOCATION_OF_WUTHERING_HEIGHTS;
 
 /**
- * A test scenario that will match a bunch of regular expressions against the
+ * A test scenario that will match a bunch (by default 10K) of regular expressions against the
  * text of Emily Brontes Wuthering Heights.
  */
 public final class BenchmarkTheWutheringHeightsCorpus {

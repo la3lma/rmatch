@@ -1,21 +1,20 @@
 package no.rmz.rmatch.performancetests;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
+import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.interfaces.Action;
+import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.interfaces.Matcher;
+import no.rmz.rmatch.interfaces.NodeStorage;
+import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
+import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
+
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.*;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
-import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 
 /**
  * The intent of this class is to look for matches in the wuthering heights
@@ -74,8 +73,13 @@ public class TestJavaRegexpUnfairly implements Matcher {
     private final boolean matching = false;
 
     public TestJavaRegexpUnfairly() {
-        // Don't know what an optimal number is.
-        es = Executors.newFixedThreadPool(10);
+        // Don't know what an optimal number is.  The heuristic
+        // implemented below is that the threads processors are fake
+        // hyperthreads, and the real number of cores is halve that,
+        // so that's then number of executors we should go for.
+        // It's a guess, it may be wrong.
+        int cores = Runtime.getRuntime().availableProcessors() / 2;
+        es = Executors.newFixedThreadPool(cores);
     }
 
     /**

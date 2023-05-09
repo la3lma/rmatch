@@ -1,13 +1,14 @@
 package no.rmz.rmatch.performancetests.utils;
 
-import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.Counters;
+
+import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A harness for running  benchmarks for matcher implementations
@@ -91,7 +92,7 @@ public final class MatcherBenchmarker {
         }
         final int finalCount = wordAction.getCounter();
         LOG.log(Level.INFO,
-                "Total no of ''word  matches in Wuthering Heights is {0}",
+                "Total no of word  matches in Wuthering Heights is {0}",
                 new Object[]{finalCount});
         final long timeAtEnd = System.currentTimeMillis();
         final long duration = timeAtEnd - timeAtStart;
