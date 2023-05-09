@@ -130,8 +130,7 @@ public final class MultiMatcher implements Matcher {
      */
     private Matcher getMatcher(final String regexpString) {
         checkNotNull(regexpString);
-        final long hash =
- regexpString.hashCode()
+        final long hash = regexpString.hashCode()
                 + (long) Integer.MAX_VALUE + 1;
         final int index = (int) (hash % noOfMatchers);
 
