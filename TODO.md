@@ -7,6 +7,7 @@
 * Introduce more tests that stresses the scale more.  The "unfair comparison" may be a little too unfair.
 * Refactor a bunch of code to be more java-20 compliant.  Do use chat-gpt for that.
 * Find some better way to interpret benchmarking results.
+* Would it make sense to write a piece of code that uses chat-gpt to generate attempts at refactoring after running them through unit tests?
 
 # Some time in the future
 

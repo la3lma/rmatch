@@ -1,3 +1,4 @@
+NoOfRegexps, javaMillis, regexMillis, quotient
 1, 128, 122, 1.04
 101, 134, 118, 1.13
 201, 129, 120, 1.07

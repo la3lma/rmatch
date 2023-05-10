@@ -12,7 +12,7 @@ import java.io.IOException;
 public final class CSVAppender {
 
     /**
-     * Utility class should have private construcgtor.
+     * Utility class should have private constructor.
      */
     private CSVAppender() {
     }
@@ -42,7 +42,7 @@ public final class CSVAppender {
 
                 // Write header line if file didn't already exist
                 if (!exists) {
-                    bw.append("secondsSinceEpoch, millisDuration, memoryInMb");
+                    bw.append("secondsSinceEpoch,millisDuration,memoryInMb");
                     bw.newLine();
                 }
 

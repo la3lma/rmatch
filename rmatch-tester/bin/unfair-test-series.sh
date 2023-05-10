@@ -85,6 +85,8 @@ plotResults() {
     gnuplot -e "logfile='${LOGFILE}'; set terminal postscript landscape color" bin/plot-graph.gp > "${PLOTFILE}"
 }
 
+echo "NoOfRegexps,javaMillis,regexMillis,quotient" >> "$LOGFILE"
+
 currentNoOfRegexps=$STARTINDEX
 runIdx=1
 while [  "$currentNoOfRegexps"  -le "$NO_OF_REGEXPS" ] ; do
