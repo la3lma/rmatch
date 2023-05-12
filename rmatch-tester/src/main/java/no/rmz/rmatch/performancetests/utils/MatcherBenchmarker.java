@@ -7,6 +7,7 @@ import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.Counters;
 
 import java.io.File;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -107,6 +108,55 @@ public final class MatcherBenchmarker {
         LOG.log(Level.INFO, "Counter = " + finalCount);
         Counters.dumpCounters();
     }
+
+    public static void testACorpusNG(Matcher matcher, final List<String> allRegexps, final Buffer buf) {
+        final CounterAction wordAction = new CounterAction();
+        for (String regex: allRegexps) {
+            try {
+                matcher.add(regex, wordAction);
+            } catch (RegexpParserException e) {
+                System.err.println("Could not add action for regex " + regex);
+                System.exit(1);
+            }
+        }
+
+        // Run the matches
+        final long timeAtStart = System.currentTimeMillis();
+        matcher.match(buf);
+        try {
+            matcher.shutdown();
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
+        }
+        final long timeAtEnd = System.currentTimeMillis();
+        final long duration = timeAtEnd - timeAtStart;
+
+        final int finalCount = wordAction.getCounter();
+        LOG.log(Level.INFO,
+                "Total no of word  matches in corpus Heights is {0}",
+                new Object[]{finalCount});
+
+        LOG.info("Duration was : " + duration + " millis.");
+        final Runtime runtime = Runtime.getRuntime();
+        final int mb = 1024 * 1024;
+        final long usedMemoryInMb =
+                (runtime.totalMemory() - runtime.freeMemory()) / mb;
+        LOG.log(Level.INFO, "usedMemoryInMb = " + usedMemoryInMb);
+
+        LOG.log(Level.INFO, "Counter = " + finalCount);
+        Counters.dumpCounters();
+
+        /*
+        Maybe do this, but maybe also use sqlite.
+
+        CSVAppender.append(logLocation, new long[]{
+                System.currentTimeMillis() / MILLISECONDS_IN_A_SECOND,
+                duration, usedMemoryInMb});
+         */
+
+    }
+
+
 
     public static void testMatcher(
             final Buffer b,

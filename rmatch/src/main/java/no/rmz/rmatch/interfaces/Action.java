@@ -23,7 +23,7 @@ package no.rmz.rmatch.interfaces;
 public interface Action {
 
     /**
-     * When a match is found, march actions corresponding to that match is
+     * When a match is found, actions corresponding to that match is
      * triggered.
      * <p>
      * An instance that can perform a match action must implement this
