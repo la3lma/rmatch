@@ -13,5 +13,4 @@ public interface MatchDetector {
      * @param input
      */
     void detectMatchesForCurrentLine();
-    
 }

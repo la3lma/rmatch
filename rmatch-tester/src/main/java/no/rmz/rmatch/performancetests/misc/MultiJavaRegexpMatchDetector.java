@@ -1,5 +1,10 @@
 package no.rmz.rmatch.performancetests.misc;
 
+import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.interfaces.Action;
+import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.performancetests.utils.*;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.Callable;
@@ -7,15 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.performancetests.utils.JavaRegexpTester;
-import no.rmz.rmatch.performancetests.utils.LineMatcher;
-import no.rmz.rmatch.performancetests.utils.LineSource;
-import no.rmz.rmatch.performancetests.utils.MatchDetector;
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
-import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 
 public final class MultiJavaRegexpMatchDetector implements MatchDetector {
 
@@ -24,11 +20,13 @@ public final class MultiJavaRegexpMatchDetector implements MatchDetector {
      * matches.
      */
     private final Collection<Callable<Object>> matchers = new LinkedList<>();
+
     /**
      * An executor service that will be used to run all the matchers. It should
      * have enough threads to never run out of cores that can do stuff.
      */
     private final ExecutorService es;
+
     private final LineSource linesource;
 
     public MultiJavaRegexpMatchDetector(final LineSource linesource) {

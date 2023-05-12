@@ -5,6 +5,7 @@ import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
+import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.TestRunResult;
 import no.rmz.rmatch.utils.StringBuffer;
 
 import java.io.File;
@@ -12,8 +13,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.testACorpusNG;
 
 /**
  * A test scenario that will match a bunch (by default 10K) of regular expressions against the
@@ -62,6 +68,9 @@ public final class BenchmarkLargeCorpus {
             System.exit(1);
         }
 
+        // Clean up the set of regexps a little.
+        allRegexps = allRegexps.stream().filter(c -> c.trim().length() != 0).distinct().collect(Collectors.toUnmodifiableList());
+
         StringBuilder corpus = new StringBuilder();
         for (int i = 2; i < argv.length;  i++) {
             String filePath = argv[i];
@@ -99,15 +108,96 @@ public final class BenchmarkLargeCorpus {
         System.out.println("========");
         System.out.println("Run the native matcher");
         // Run the regex matcher
-        MatcherBenchmarker.testACorpusNG(m, regexps, buf);
+        TestRunResult rmatchResult = testACorpusNG("rmatch", m, regexps, buf);
 
+        System.gc();
         // Run the java regex  matcher
         System.out.println("========");
         System.out.println("Run the java matcher");
         JavaRegexpMatcher jm = new JavaRegexpMatcher();
-        MatcherBenchmarker.testACorpusNG(jm, regexps, buf);
+        TestRunResult javaResult = testACorpusNG("java", jm, regexps, buf);
+
+        // Describe the test runs individually
+        describeTestResult(rmatchResult);
+        describeTestResult(javaResult);
+
+
+        // Then compare them and point out any problems
+        final List<MatcherBenchmarker.LoggedMatch> loggedMatches =
+                new ArrayList<>(javaResult.loggedMatches().size() + rmatchResult.loggedMatches().size());
+        loggedMatches.addAll(javaResult.loggedMatches());
+        loggedMatches.addAll(rmatchResult.loggedMatches());
+        loggedMatches.sort(new Comparator<MatcherBenchmarker.LoggedMatch>() {
+            @Override
+            public int compare(MatcherBenchmarker.LoggedMatch o1, MatcherBenchmarker.LoggedMatch o2) {
+                if (o1 == o2) {
+                    return 0;
+                }
+                if (o1 == null) {
+                    return -1;
+                }
+                if (o2 == null) {
+                    return 1;
+                }
+                int result = o1.regex().compareTo(o2.regex());
+                if (result != 0) {
+                    return result;
+                }
+                result = Integer.compare(o1.start(), o2.start());
+                if (result != 0) {
+                    return result;
+                }
+                result = Integer.compare(o1.end(), o2.end());
+                if (result != 0) {
+                    return result;
+                }
+                return o1.matcherTypeName().compareTo(o2.matcherTypeName());
+            }
+        });
+
+        // Traverse this list looking for pairs of matches for the same thing for java and rmatch
+        // matchers, reporting discrepancies when they are detected.
+
+        int numberOfMismatchesDetected = 0;
+        int numberOfCorrespondingMatchesDetected = 0;
+        for (int i = 0; i < loggedMatches.size() - 2; i++) {
+            MatcherBenchmarker.LoggedMatch rmatchMatch = loggedMatches.get(i);
+            MatcherBenchmarker.LoggedMatch javaMatch = loggedMatches.get(i + 1);
+
+            /// XXX KLUUDGE
+            if (rmatchMatch.matcherTypeName().equals("java")) {
+                MatcherBenchmarker.LoggedMatch tmp = rmatchMatch;
+                rmatchMatch = javaMatch;
+                javaMatch = tmp;
+            }
+
+            if (!rmatchMatch.matcherTypeName().equals(javaMatch.matcherTypeName()) &&
+                    rmatchMatch.regex().equals(javaMatch.regex()) &&
+                    rmatchMatch.start() == javaMatch.start() &&
+                    rmatchMatch.end() == (javaMatch.end() -1)) {
+                // This is a nice proper match in both matchers
+                i += 1;
+                numberOfCorrespondingMatchesDetected += 1;
+            } else {
+                // TODO: The reason we get a lot of mismatches is java matches ends one later than the others.
+                numberOfMismatchesDetected += 1;
+                // System.out.println("Mismatch detected at i = " + i);
+            }
+        }
+
+        System.out.println("\nNumber of mismatches = " + numberOfMismatchesDetected);
+        System.out.println("Number of matches    = " + numberOfCorrespondingMatchesDetected);
+        System.out.println("Sum of matches and mismatches = " + (numberOfMismatchesDetected + numberOfCorrespondingMatchesDetected));
 
         System.exit(0);
+    }
+
+    private static void describeTestResult(TestRunResult rmatchResult) {
+        System.out.println("-------");
+        System.out.println("Name: " + rmatchResult.matcherTypeName());
+        System.out.println("Time: " + rmatchResult.durationInMillis() + " ms");
+        System.out.println("No of logged matches: " + rmatchResult.loggedMatches().size());
+        System.out.println("Megabytes used: " + rmatchResult.usedMemoryInMb());
     }
 
     /**

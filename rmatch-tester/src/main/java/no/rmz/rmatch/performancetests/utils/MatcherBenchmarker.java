@@ -1,12 +1,14 @@
 package no.rmz.rmatch.performancetests.utils;
 
 import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.Counters;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -109,11 +111,31 @@ public final class MatcherBenchmarker {
         Counters.dumpCounters();
     }
 
-    public static void testACorpusNG(Matcher matcher, final List<String> allRegexps, final Buffer buf) {
-        final CounterAction wordAction = new CounterAction();
+    public record  LoggedMatch(String matcherTypeName, String regex, int start, int end){}
+
+    public record TestRunResult(String matcherTypeName, List<LoggedMatch> loggedMatches, long usedMemoryInMb, long durationInMillis){};
+
+    public static TestRunResult testACorpusNG(
+            final String matcherTypeName,
+            final Matcher matcher,
+            final List<String> allRegexps,
+            final Buffer buf) {
+
+        Object guard = new Object();
+        List<LoggedMatch> loggedMatches = new ArrayList<>(488035);
+
         for (String regex: allRegexps) {
+            Action action = new Action() {
+                @Override
+                public void performMatch(Buffer b, int start, int end) {
+                    LoggedMatch ob = new LoggedMatch(matcherTypeName, regex, start, end);
+                    synchronized (guard) {
+                        loggedMatches.add(ob);
+                    }
+                }
+            };
             try {
-                matcher.add(regex, wordAction);
+                matcher.add(regex, action);
             } catch (RegexpParserException e) {
                 System.err.println("Could not add action for regex " + regex);
                 System.exit(1);
@@ -131,11 +153,6 @@ public final class MatcherBenchmarker {
         final long timeAtEnd = System.currentTimeMillis();
         final long duration = timeAtEnd - timeAtStart;
 
-        final int finalCount = wordAction.getCounter();
-        LOG.log(Level.INFO,
-                "Total no of word  matches in corpus Heights is {0}",
-                new Object[]{finalCount});
-
         LOG.info("Duration was : " + duration + " millis.");
         final Runtime runtime = Runtime.getRuntime();
         final int mb = 1024 * 1024;
@@ -143,20 +160,8 @@ public final class MatcherBenchmarker {
                 (runtime.totalMemory() - runtime.freeMemory()) / mb;
         LOG.log(Level.INFO, "usedMemoryInMb = " + usedMemoryInMb);
 
-        LOG.log(Level.INFO, "Counter = " + finalCount);
-        Counters.dumpCounters();
-
-        /*
-        Maybe do this, but maybe also use sqlite.
-
-        CSVAppender.append(logLocation, new long[]{
-                System.currentTimeMillis() / MILLISECONDS_IN_A_SECOND,
-                duration, usedMemoryInMb});
-         */
-
+        return new TestRunResult(matcherTypeName, loggedMatches, usedMemoryInMb, duration);
     }
-
-
 
     public static void testMatcher(
             final Buffer b,
