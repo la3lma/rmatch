@@ -97,7 +97,7 @@ public final class MatchEngineImpl implements MatchEngine {
      * @param activeMatchSets The set of active match sets.
      */
     private void matcherProgress(
-            final LookaheadBuffer b,
+            final Buffer b,
             final Character currentChar,
             final int currentPos,
             final Set<MatchSet> activeMatchSets) {
@@ -160,23 +160,21 @@ public final class MatchEngineImpl implements MatchEngine {
     public void match(final Buffer b) {
         checkNotNull(b, "Buffer can't be null");
 
-        final LookaheadBuffer lb = new LookaheadBufferImpl(b);
-
         final Set<MatchSet> activeMatchSets;
         activeMatchSets = Collections.synchronizedSet(
                 new TreeSet<>(MatchSet.COMPARE_BY_ID));
 
         // Advance all match sets forward one character.
-        while (lb.hasNext()) {
-            final Character nextChar = lb.getNext();
-            final int currentPos = lb.getCurrentPos();
-            matcherProgress(lb, nextChar, currentPos, activeMatchSets);
+        while (b.hasNext()) {
+            final Character nextChar = b.getNext();
+            final int currentPos = b.getCurrentPos();
+            matcherProgress(b, nextChar, currentPos, activeMatchSets);
         }
 
         // Handle the stragglers
         for (final MatchSet ms : activeMatchSets) {
             // Be permissive when handling stragglers
-            performMatches(lb, ms.getMatches(), true);
+            performMatches(b, ms.getMatches(), true);
         }
 
         activeMatchSets.clear();
