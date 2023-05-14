@@ -11,8 +11,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -119,7 +118,7 @@ public final class MatcherBenchmarker {
 
     public record  LoggedMatch(String matcherTypeName, String regex, int start, int end){}
 
-    public record TestRunResult(String matcherTypeName, List<LoggedMatch> loggedMatches, long usedMemoryInMb, long durationInMillis){};
+    public record TestRunResult(String matcherTypeName, Collection<LoggedMatch> loggedMatches, long usedMemoryInMb, long durationInMillis){};
 
     public record TestPairSummary(
             long timestamp,
@@ -191,7 +190,32 @@ public final class MatcherBenchmarker {
             final Buffer buf) {
 
         Object guard = new Object();
-        List<LoggedMatch> loggedMatches = new ArrayList<>(488035);
+
+        Comparator<LoggedMatch> matchComparator = new Comparator<MatcherBenchmarker.LoggedMatch>() {
+            @Override
+            public int compare(MatcherBenchmarker.LoggedMatch o1, MatcherBenchmarker.LoggedMatch o2) {
+                if (o1 == o2) {
+                    return 0;
+                }
+                if (o1 == null) {
+                    return -1;
+                }
+                if (o2 == null) {
+                    return 1;
+                }
+                int result = Integer.compare(o1.start(), o2.start());
+                if (result != 0) {
+                    return result;
+                }
+                result = o1.regex().compareTo(o2.regex());
+                if (result != 0) {
+                    return result;
+                }
+                return Integer.compare(o1.end(), o2.end());
+            }
+        };
+
+        final Collection<LoggedMatch> loggedMatches = new TreeSet<LoggedMatch>(matchComparator);
 
         for (String regex: allRegexps) {
             Action action = new Action() {
