@@ -20,6 +20,7 @@ import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -104,13 +105,15 @@ public final class MatchSetImpl implements MatchSet {
     public MatchSetImpl(
             final int startIndex,
             final DFANode startNode,
-            final Character peekedCharacter) {
+            final Character peekedCharacter,
+            final Collection<Regexp> regexpsKnownToStartWithPeekedCharacter,
+            final Collection<Regexp> regexpsThatMayStartWithPeekedCharacter) {
         this.matches = new ConcurrentSkipListSet<>(Match.COMPARE_BY_OBJECT_ID);
         checkNotNull(startNode, "Startnode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");
-        currentNode = startNode;
-        start = startIndex;
-        id = MY_COUNTER.inc();
+        this.currentNode = startNode;
+        this.start = startIndex;
+        this.id = MY_COUNTER.inc();
 
         // XXX This lines represents the most egregious
         //     bug in the whole regexp package, since it
@@ -122,7 +125,15 @@ public final class MatchSetImpl implements MatchSet {
         //     algorithm.  Clearly not logarithmic in the number
         //     of expressions, and thus a showstopper.
 
-        for (final Regexp r : currentNode.getRegexps()) {
+        // XXX: Why are we not using regexp storage rather than current node
+        //      as a source of regexps.  Because if we did, then we could interrogate
+        //      using the char to find only the regexps that could possibly start.
+
+        for (final Regexp r: regexpsKnownToStartWithPeekedCharacter) {
+            matches.add(startNode.newMatch(this, r));
+        }
+
+        for (final Regexp r : regexpsThatMayStartWithPeekedCharacter) {
             // TODO: This is a hotspot.  Can we use a heuristic that can
             //       eliminate at least some of the new matches to be added?
             //       If so, that will give a noticeable improvement in speed.  If we can

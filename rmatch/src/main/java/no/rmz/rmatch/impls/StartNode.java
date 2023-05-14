@@ -18,18 +18,13 @@ package no.rmz.rmatch.impls;
 
 // XXX Don't mix: Either use some sort of NDFA with
 //     a charmap (and epsilons), or use something else. Don't mix!!!
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
+
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.PrintableEdge;
-import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.interfaces.*;
+
+import java.util.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A startnode is a special kind of node that a Node Storage has only one of. It
@@ -46,6 +41,7 @@ public final class StartNode extends AbstractNDFANode {
      * empty expression that does not match anything.
      */
     private static final Regexp START_NO_REGEXP = new RegexpImpl(""); // XX??
+    private final RegexpStorage regexpStorage;
 
     /**
      * The DFA that represents the StartNode instance.
@@ -55,6 +51,7 @@ public final class StartNode extends AbstractNDFANode {
      * A monitor that is used to synchronize access to the StartNode instance.
      */
     private final Object topDfaMonitor = new Object();
+
     /**
      * Map of directly outgoing NDFANodes. XXX Never added to. Review and most
      * likely delete.
@@ -66,10 +63,12 @@ public final class StartNode extends AbstractNDFANode {
      *
      * @param  ns the node storage this StartNode is associated with.
      */
-    public StartNode(final NodeStorage ns) {
+    public StartNode(final NodeStorage ns, RegexpStorage rs) {
         super(START_NO_REGEXP, false);
+        this.regexpStorage = checkNotNull(rs);
         this.ndfaOutMap = new HashMap<>();
     }
+
 
     // XXX Since we already have the NodeStorage, why do we need
     //     a parameter for it? This is almost certainly a bug. Fix.
@@ -103,6 +102,23 @@ public final class StartNode extends AbstractNDFANode {
         return result;
     }
 
+
+    @Override
+    public Set<Character> knownStarterChars() {
+        final Set<Character> result = new HashSet<>();
+        synchronized (monitor) {
+            for (NDFANode epsilon : getEpsilons()) {
+                Set<Character> partialResult = epsilon.knownStarterChars();
+                if (partialResult.isEmpty()) {
+                    return partialResult;
+                }
+                result.addAll(partialResult);
+            }
+        }
+        return result;
+    }
+
+
     /**
      * Add a new NDFA Node to the startnode.
      *
@@ -121,5 +137,9 @@ public final class StartNode extends AbstractNDFANode {
     @Override
     public Collection<PrintableEdge> getEdgesToPrint() {
         return getEpsilonEdgesToPrint();
+    }
+
+    public RegexpStorage getRegexpStorage() {
+        return this.regexpStorage;
     }
 }

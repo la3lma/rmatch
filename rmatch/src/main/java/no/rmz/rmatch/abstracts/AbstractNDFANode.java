@@ -44,7 +44,7 @@ public abstract class AbstractNDFANode implements NDFANode {
      * of this NDFA.
      */
     private static final Counter cachedEdgesCounter =
- Counters.newCounter("Cached edges going to an NDFA.");
+                Counters.newCounter("Cached edges going to an NDFA.");
 
 
     /**
@@ -75,8 +75,7 @@ public abstract class AbstractNDFANode implements NDFANode {
      * A cache that is used by the getNextSet method to memoize its results and
      * thus to achieve much quicker execution times.
      */
-    private final Map<Character, SortedSet<NDFANode>> cachedNext =
- new HashMap<>();
+    private final Map<Character, SortedSet<NDFANode>> cachedNext = new HashMap<>();
 
     /**
      * Create a new AbstractNDFANode instance.
@@ -280,6 +279,9 @@ public abstract class AbstractNDFANode implements NDFANode {
             return Collections.unmodifiableSortedSet(epsilonSet);
         }
     }
+
+
+
 
     @Override
     public final void addEpsilonEdge(final NDFANode n) {

@@ -69,7 +69,6 @@ public final class RegexpImpl implements Regexp {
      */
     private NDFANode myNode;
 
-
     /**
      * The set of characters that by example has been proven not to be possible to start
      * this regexp with.
@@ -85,6 +84,15 @@ public final class RegexpImpl implements Regexp {
         this.heaps = new HashMap<>();
         checkNotNull(rexpString, "regexpString can't be null");
         this.rexpString = rexpString;
+    }
+
+    @Override
+    public Set<Character> knownStarterChars() {
+        if (myNode != null) {
+            return myNode.knownStarterChars();
+        } else {
+            return Collections.emptySet();
+        }
     }
 
     @Override
@@ -211,7 +219,7 @@ public final class RegexpImpl implements Regexp {
         }
         final DominationHeap dm = getDominationHeap(m.getMatchSet());
         if (dm.isEmpty()) {
-            // If we don't know anyting about the ms of the m, we can't dominate
+            // If we don't know anything about the ms of the m, we can't dominate.
             return false;
         }
         final Match mostDominant = dm.getFirstMatch();

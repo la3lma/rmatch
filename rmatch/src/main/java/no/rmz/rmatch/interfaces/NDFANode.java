@@ -17,6 +17,8 @@
 package no.rmz.rmatch.interfaces;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 import java.util.SortedSet;
 
 /**
@@ -129,4 +131,15 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
      * this NDFANode's Regexp.
      */
     boolean isFailing();
+
+    /**
+     * If the NDFA can determine that there is a definitive set of characters that can
+     * start a match, then it may chose to return this set.  It's ok to return an
+     * empty set if no starters are known, or if the set is too large to be practical to work with.
+     * However, if a set is returned, then the ndfa must _only_ start with one of the characters in the set.
+     * @return A set of characters the NDFA can start with.
+     */
+    default Set<Character> knownStarterChars() {
+        return Collections.emptySet();
+    }
 }

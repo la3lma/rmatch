@@ -19,9 +19,7 @@ package no.rmz.rmatch.impls;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -60,9 +58,8 @@ public final class RegexpStorageImpl implements RegexpStorage {
      * @param compiler the compiler.
      */
     public RegexpStorageImpl(
-            final NodeStorage storage,
             final NDFACompiler compiler) {
-        this(storage, compiler, RegexpFactory.DEFAULT_REGEXP_FACTORY);
+        this(compiler, RegexpFactory.DEFAULT_REGEXP_FACTORY);
     }
 
     /**
@@ -75,13 +72,16 @@ public final class RegexpStorageImpl implements RegexpStorage {
      * @param regexpFactory A RegexpFactory instance to use.
      */
     public RegexpStorageImpl(
-            final NodeStorage storage,
             final NDFACompiler compiler,
             final RegexpFactory regexpFactory) {
-        this.storage = checkNotNull(storage, "Null storage is meaningless");
+        this.storage = new NodeStorageImpl(this);
         this.compiler = checkNotNull(compiler, "Null compiler is meaningless");
         this.regexpFactory = checkNotNull(regexpFactory,
                 "regexpFactory can't be null");
+    }
+
+    public NodeStorage getNodeStorage() {
+        return this.storage;
     }
 
     @Override
@@ -116,8 +116,40 @@ public final class RegexpStorageImpl implements RegexpStorage {
                 r.setMyNDFANode(n);
                 storage.addToStartnode(n);
             }
+
+            Set<Character> starterChars = r.knownStarterChars();
+            if (!starterChars.isEmpty()) {
+                for (Character c: starterChars) {
+                    if (!this.canOnlyStartAtSpecificCharsMap.containsKey(c)) {
+                        this.canOnlyStartAtSpecificCharsMap.put(c, new HashSet<>());
+                    }
+                    this.canOnlyStartAtSpecificCharsMap.get(c).add(r);
+                }
+            } else {
+                canStartAtAnyCharSet.add(r);
+            }
         }
     }
+
+    private final Map<Character, Set<Regexp>> canOnlyStartAtSpecificCharsMap = new HashMap<>();
+
+    private final  Set<Regexp> canStartAtAnyCharSet = new HashSet<>();
+
+
+    @Override
+    public Set<Regexp> getRegexpsThatCanStartWithSpecificChar(Character ch) {
+        if (this.canOnlyStartAtSpecificCharsMap.containsKey(ch)) {
+            return this.canOnlyStartAtSpecificCharsMap.get(ch);
+        } else {
+            return Collections.emptySet();
+        }
+    }
+
+    @Override
+    public Set<Regexp> getRegexpsThatCanStartWithAnyChar() {
+        return canStartAtAnyCharSet;
+    }
+
 
     @Override
     public void remove(final String rexp, final Action a) {

@@ -77,4 +77,17 @@ public interface RegexpStorage {
      * @return A set of regular expression representations.
      */
     Set<String> getRegexpSet();
+
+    /**
+     * The regexps that can start with this particular character
+     * @param ch
+     * @return A set of regexps
+     */
+    public Set<Regexp> getRegexpsThatCanStartWithSpecificChar(Character ch);
+
+    /**
+     * The regexps that can start with any character.
+     * @return A set of regexps
+     */
+    public Set<Regexp> getRegexpsThatCanStartWithAnyChar();
 }

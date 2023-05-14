@@ -107,7 +107,6 @@ public final class DFANodeImpl implements DFANode {
                 r.addTerminalNode(this);
             }
 
-
             if (node.isFailing()) {
                 isFailingSet.add(r);
             }

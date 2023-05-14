@@ -28,6 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * expressions against input.
  */
 public final class MatchEngineImpl implements MatchEngine {
+
+    private RegexpStorage regexpStorage;
+
+
     /**
      * Perform matches by triggering the relevant actions.
      *
@@ -83,9 +87,9 @@ public final class MatchEngineImpl implements MatchEngine {
      *
      * @param ns non null NodeStorage instance.
      */
-    public MatchEngineImpl(final NodeStorage ns) {
+    public MatchEngineImpl(RegexpStorage regexpStorage, final NodeStorage ns) {
         this.ns = checkNotNull(ns, "NodeStorage can't be null");
-
+        this.regexpStorage = checkNotNull(regexpStorage, "Regex storage can't be null");
     }
 
     /**
@@ -127,7 +131,12 @@ public final class MatchEngineImpl implements MatchEngine {
         // that fact.
         final DFANode currentNode = ns.getNext(currentChar);
         if (currentNode != null) {
-            final MatchSet ms = new MatchSetImpl(currentPos, currentNode, currentChar);
+            final MatchSet ms = new MatchSetImpl(
+                    currentPos,
+                    currentNode,
+                    currentChar,
+                    regexpStorage.getRegexpsThatCanStartWithSpecificChar(currentChar),
+                    regexpStorage.getRegexpsThatCanStartWithAnyChar());
             if (ms.hasMatches()) {
                 activeMatchSets.add(ms);
             }

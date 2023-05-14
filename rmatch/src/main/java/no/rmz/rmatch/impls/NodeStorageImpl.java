@@ -16,10 +16,7 @@
 
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.PrintableEdge;
+import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.SortedSetComparatorImpl;
 
 import java.util.*;
@@ -54,23 +51,20 @@ public final class NodeStorageImpl implements NodeStorage {
      * NDFANodes.
      */
     private final Map<SortedSet<NDFANode>, DFANode> ndfamap =
- new TreeMap<>(
-                    SORTED_NDFANODE_SET_COMPARATOR);
+         new TreeMap<>(SORTED_NDFANODE_SET_COMPARATOR);
 
     /**
      * Create a new instance of the node storage.
      */
-    public NodeStorageImpl() {
-        sn = new StartNode(this);
-
+    public NodeStorageImpl(RegexpStorage rs) {
+        sn = new StartNode(this, rs);
     }
 
     @Override
     public Collection<NDFANode> getNDFANodes() {
         synchronized (ndfamap) {
             final Set<NDFANode> result = new HashSet<>();
-            final Set<NDFANode> unexplored =
- new ConcurrentSkipListSet<>();
+            final Set<NDFANode> unexplored = new ConcurrentSkipListSet<>();
             unexplored.add(sn);
 
             while (!unexplored.isEmpty()) {

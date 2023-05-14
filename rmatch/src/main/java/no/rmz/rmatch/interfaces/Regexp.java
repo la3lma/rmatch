@@ -18,6 +18,8 @@ package no.rmz.rmatch.interfaces;
 
 import no.rmz.rmatch.impls.DominationHeap;
 
+import java.util.Set;
+
 /**
  * A representation of a regular expression. Regexps are comparable to each
  * other, but essentially that is just comparison of the regexp strings.
@@ -204,4 +206,12 @@ public interface Regexp extends Comparable<Regexp> {
      * @return True only if it's certain that the char cannot start a match for this regex.
      */
      boolean excludedAsStartCharacter(Character character);
+
+    /**
+     * The set of characters that it is known this regex can start with. Empty set if
+     * no such set is known, the assumption being that any character is a possible
+     * start of a match.
+     * @return A set of characters.
+     */
+    public Set<Character> knownStarterChars();
 }
