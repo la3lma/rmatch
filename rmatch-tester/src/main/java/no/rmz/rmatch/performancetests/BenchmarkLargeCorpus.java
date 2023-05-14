@@ -157,70 +157,46 @@ public final class BenchmarkLargeCorpus {
         describeTestResult(rmatchResult);
         describeTestResult(javaResult);
 
-
-        // Then compare them and point out any problems
-        final List<MatcherBenchmarker.LoggedMatch> loggedMatches =
-                new ArrayList<>(javaResult.loggedMatches().size() + rmatchResult.loggedMatches().size());
-        loggedMatches.addAll(javaResult.loggedMatches());
-        loggedMatches.addAll(rmatchResult.loggedMatches());
-        loggedMatches.sort(new Comparator<MatcherBenchmarker.LoggedMatch>() {
-            @Override
-            public int compare(MatcherBenchmarker.LoggedMatch o1, MatcherBenchmarker.LoggedMatch o2) {
-                if (o1 == o2) {
-                    return 0;
-                }
-                if (o1 == null) {
-                    return -1;
-                }
-                if (o2 == null) {
-                    return 1;
-                }
-                int result = o1.regex().compareTo(o2.regex());
-                if (result != 0) {
-                    return result;
-                }
-                result = Integer.compare(o1.start(), o2.start());
-                if (result != 0) {
-                    return result;
-                }
-                result = Integer.compare(o1.end(), o2.end());
-                if (result != 0) {
-                    return result;
-                }
-                return o1.matcherTypeName().compareTo(o2.matcherTypeName());
-            }
-        });
-
-        // Traverse this list looking for pairs of matches for the same thing for java and rmatch
-        // matchers, reporting discrepancies when they are detected.
-
-        int numberOfMismatchesDetected = 0;
         int numberOfCorrespondingMatchesDetected = 0;
-        MatcherBenchmarker.LoggedMatch javaMatch = null;
-        for (int i = 0; i < loggedMatches.size() - 2; i++) {
-            MatcherBenchmarker.LoggedMatch rmatchMatch = loggedMatches.get(i);
-            javaMatch = loggedMatches.get(i + 1);
+        int numberOfMismatchesDetected = 0;
 
-            /// XXX KLUUDGE
-            if (rmatchMatch.matcherTypeName().equals("java")) {
-                MatcherBenchmarker.LoggedMatch tmp = rmatchMatch;
-                rmatchMatch = javaMatch;
-                javaMatch = tmp;
-            }
-
-            if (!rmatchMatch.matcherTypeName().equals(javaMatch.matcherTypeName()) &&
-                    rmatchMatch.regex().equals(javaMatch.regex()) &&
-                    rmatchMatch.start() == javaMatch.start() &&
-                    rmatchMatch.end() == (javaMatch.end() - 1)) {
-                // This is a nice proper match in both matchers
-                i += 1;
+        // Traverse the java matches and try to find matching rmatch matches
+        ArrayList<MatcherBenchmarker.LoggedMatch> matches = new ArrayList<>();
+        for (var k : javaResult.loggedMatches()) {
+            if (rmatchResult.loggedMatches().contains(k)) {
+                matches.add(k);
                 numberOfCorrespondingMatchesDetected += 1;
             } else {
-                // TODO: The reason we get a lot of mismatches is java matches ends one later than the others.
                 numberOfMismatchesDetected += 1;
-                // System.out.println("Mismatch detected at i = " + i);
             }
         }
+
+        for (var k: matches) {
+            javaResult.loggedMatches().remove(k);
+            rmatchResult.loggedMatches().remove(k);
+        }
+
+        matches.clear();
+
+        // Then do the same for the rmatch matches
+        for (var n : rmatchResult.loggedMatches()) {
+            if (javaResult.loggedMatches().contains(n)) {
+                matches.add(n);
+                numberOfCorrespondingMatchesDetected += 1;
+            } else {
+                numberOfMismatchesDetected += 1;
+            }
+        }
+
+        for (var k: matches) {
+            javaResult.loggedMatches().remove(k);
+            rmatchResult.loggedMatches().remove(k);
+        }
+
+        if (numberOfMismatchesDetected != (javaResult.loggedMatches().size() + rmatchResult.loggedMatches().size())) {
+            System.err.println("Double mismatch detected");
+        }
+
 
         System.out.println("\nNumber of mismatches = " + numberOfMismatchesDetected);
         System.out.println("Number of matches    = " + numberOfCorrespondingMatchesDetected);
