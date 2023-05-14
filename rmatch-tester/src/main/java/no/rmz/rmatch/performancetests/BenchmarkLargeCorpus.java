@@ -13,12 +13,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.String.*;
 import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.testACorpusNG;
 
 /**
@@ -26,6 +27,15 @@ import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.testACorpu
  * text of Emily Brontes Wuthering Heights.
  */
 public final class BenchmarkLargeCorpus {
+
+    private static String byteArrayToHexString(byte[] b) {
+        String result = "";
+        for (int i=0; i < b.length; i++) {
+            result +=
+                    Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
+        }
+        return result;
+    }
 
     /**
      * The main method.
@@ -43,6 +53,10 @@ public final class BenchmarkLargeCorpus {
         System.out.println("Current working directory is " + cwd);
         // Parse command line
 
+        // TODO: Get these from the command line:
+        String logfile = "logs/large-corpus-log.csv";
+        String testSeriesId = valueOf(UUID.randomUUID());
+
         if (argv.length < 3) {
             System.err.println("Not enough parameters. Require at least 3: no of regexps, file where regexps are stored, one or more files to search through");
             System.exit(1);
@@ -56,7 +70,7 @@ public final class BenchmarkLargeCorpus {
 
         String nameOfRegexpFile = argv[1];
         if (!new File(nameOfRegexpFile).exists()) {
-            System.err.println("Regexp file does not exist:'" + nameOfRegexpFile+ "'");
+            System.err.println("Regexp file does not exist:'" + nameOfRegexpFile + "'");
             System.exit(1);
         }
 
@@ -64,32 +78,49 @@ public final class BenchmarkLargeCorpus {
         try {
             allRegexps = Files.readAllLines(Paths.get(nameOfRegexpFile));
         } catch (IOException e) {
-            System.err.println("Couldn't read regexps from file:'" + nameOfRegexpFile+ "'");
+            System.err.println("Couldn't read regexps from file:'" + nameOfRegexpFile + "'");
             System.exit(1);
         }
 
         // Clean up the set of regexps a little.
         allRegexps = allRegexps.stream().filter(c -> c.trim().length() != 0).distinct().collect(Collectors.toUnmodifiableList());
 
+        String algorithm = "SHA-1";
+
+        // Then scramble their ordering based on their hash
+        final Map<String, String> regexMap = new TreeMap<>();
+        for (String r : allRegexps) {
+            MessageDigest md = null;
+            try {
+                md = MessageDigest.getInstance(algorithm);
+            } catch (NoSuchAlgorithmException e) {
+                System.err.println("Could not find digester algorithm '" + algorithm + "'");
+                System.exit(1);
+            }
+            regexMap.put(byteArrayToHexString(md.digest(r.getBytes())), r);
+        }
+
+        allRegexps = regexMap.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toUnmodifiableList());
+
         StringBuilder corpus = new StringBuilder();
-        for (int i = 2; i < argv.length;  i++) {
+        for (int i = 2; i < argv.length; i++) {
             String filePath = argv[i];
             File file = new File(filePath);
             if (!file.exists()) {
-                System.err.println("Corpus file does not exist:'" + filePath+ "'");
+                System.err.println("Corpus file does not exist:'" + filePath + "'");
                 System.exit(1);
             }
             try (Stream<String> stream = Files
                     .lines(Paths.get(filePath), StandardCharsets.UTF_8)) {
                 stream.forEach(s -> corpus.append(s).append("\n"));
             } catch (IOException e) {
-                System.err.println("Something went wrong while reading file '" + filePath+ "'");
+                System.err.println("Something went wrong while reading file '" + filePath + "'");
                 System.exit(1);
             }
         }
 
         // Report what we intend to do
-        System.out.println("About to match "  + noOfRegexps + " regexps from " + "'" + nameOfRegexpFile + "'" + " then match them against a bunch of files");
+        System.out.println("About to match " + noOfRegexps + " regexps from " + "'" + nameOfRegexpFile + "'" + " then match them against a bunch of files");
         System.out.println("that contains in total " + corpus.length() + " characters");
 
         // TODO: Make sure that the results from the matchers are identical (right now they are not!)
@@ -103,7 +134,7 @@ public final class BenchmarkLargeCorpus {
         final Matcher m = MatcherFactory.newMatcher();
         Buffer buf = new StringBuffer(corpus.toString());
         List<String> regexps;
-        regexps = allRegexps.subList(0, noOfRegexps - 1 );
+        regexps = allRegexps.subList(0, noOfRegexps - 1);
 
         System.out.println("========");
         System.out.println("Run the native matcher");
@@ -160,9 +191,10 @@ public final class BenchmarkLargeCorpus {
 
         int numberOfMismatchesDetected = 0;
         int numberOfCorrespondingMatchesDetected = 0;
+        MatcherBenchmarker.LoggedMatch javaMatch = null;
         for (int i = 0; i < loggedMatches.size() - 2; i++) {
             MatcherBenchmarker.LoggedMatch rmatchMatch = loggedMatches.get(i);
-            MatcherBenchmarker.LoggedMatch javaMatch = loggedMatches.get(i + 1);
+            javaMatch = loggedMatches.get(i + 1);
 
             /// XXX KLUUDGE
             if (rmatchMatch.matcherTypeName().equals("java")) {
@@ -174,7 +206,7 @@ public final class BenchmarkLargeCorpus {
             if (!rmatchMatch.matcherTypeName().equals(javaMatch.matcherTypeName()) &&
                     rmatchMatch.regex().equals(javaMatch.regex()) &&
                     rmatchMatch.start() == javaMatch.start() &&
-                    rmatchMatch.end() == (javaMatch.end() -1)) {
+                    rmatchMatch.end() == (javaMatch.end() - 1)) {
                 // This is a nice proper match in both matchers
                 i += 1;
                 numberOfCorrespondingMatchesDetected += 1;
@@ -188,6 +220,19 @@ public final class BenchmarkLargeCorpus {
         System.out.println("\nNumber of mismatches = " + numberOfMismatchesDetected);
         System.out.println("Number of matches    = " + numberOfCorrespondingMatchesDetected);
         System.out.println("Sum of matches and mismatches = " + (numberOfMismatchesDetected + numberOfCorrespondingMatchesDetected));
+
+
+        MatcherBenchmarker.TestPairSummary result =
+            new MatcherBenchmarker.TestPairSummary(System.currentTimeMillis(), testSeriesId,
+                rmatchResult.matcherTypeName(), rmatchResult.usedMemoryInMb(), rmatchResult.durationInMillis(),
+                javaResult.matcherTypeName(), javaResult.usedMemoryInMb(), javaResult.durationInMillis(),
+                numberOfCorrespondingMatchesDetected,
+                numberOfMismatchesDetected,
+                    noOfRegexps,
+                    corpus.length()
+                );
+
+        MatcherBenchmarker.writeSummaryToFile(logfile, result);
 
         System.exit(0);
     }

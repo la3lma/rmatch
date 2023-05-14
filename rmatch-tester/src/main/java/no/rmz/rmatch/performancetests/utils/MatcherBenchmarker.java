@@ -8,10 +8,15 @@ import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.Counters;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A harness for running  benchmarks for matcher implementations
@@ -111,9 +116,73 @@ public final class MatcherBenchmarker {
         Counters.dumpCounters();
     }
 
+
     public record  LoggedMatch(String matcherTypeName, String regex, int start, int end){}
 
     public record TestRunResult(String matcherTypeName, List<LoggedMatch> loggedMatches, long usedMemoryInMb, long durationInMillis){};
+
+    public record TestPairSummary(
+            long timestamp,
+            String testSeriesId,
+            String matcherTypeName1, long usedMemoryInMb1, long durationInMillis1,
+            String matcherTypeName2, long usedMemoryInMb2, long durationInMillis2,
+            int noOfMatches,
+            int noOfMismatches,
+            int noOfRegexps,
+            int corpusLength
+    ){}
+
+
+    public static void writeSummaryToFile(String filePath, TestPairSummary summary) {
+        File csvOutputFile = new File(filePath);
+        boolean writeHeader = !csvOutputFile.exists();
+        try (FileWriter fw = new FileWriter(csvOutputFile, !writeHeader)){
+            PrintWriter pw = new PrintWriter(fw);
+            if (writeHeader) {
+                pw.println("timestamp," +
+                        "testSeriesId," +
+                        "matcherTypeName1,usedMemoryInMb1,durationInMillis1," +
+                        "matcherTypeName2,usedMemoryInMb2,durationInMillis2," +
+                        "noOfMatches," +
+                        "noOfMismatches," +
+                        "noOfRegexps," +
+                        "corpusLength");
+            }
+
+            pw.println(convertToCsv(summary));
+        } catch (IOException e) {
+            System.err.println("Could not open CSV file '"+filePath+"'");
+        }
+    }
+
+    private static String escapeSpecialCharacters(String data) {
+        String escapedData = data.replaceAll("\\R", " ");
+        if (data.contains(",") || data.contains("\"") || data.contains("'")) {
+            data = data.replace("\"", "\"\"");
+            escapedData = "\"" + data + "\"";
+        }
+        return escapedData;
+    }
+
+    private static String convertToCsv(TestPairSummary summary) {
+        String[] data = new String[] {
+                Long.toString(summary.timestamp()),
+                summary.testSeriesId(),
+                summary.matcherTypeName1(),
+                Long.toString(summary.usedMemoryInMb1()),
+                Long.toString(summary.durationInMillis1()),
+                summary.matcherTypeName2(),
+                Long.toString(summary.usedMemoryInMb2()),
+                Long.toString(summary.durationInMillis2()),
+                Integer.toString(summary.noOfMatches()),
+                Integer.toString(summary.noOfMismatches()),
+                Integer.toString(summary.corpusLength())
+        };
+        return Stream.of(data)
+                .map(c -> escapeSpecialCharacters(c))
+                .collect(Collectors.joining(","));
+    }
+
 
     public static TestRunResult testACorpusNG(
             final String matcherTypeName,

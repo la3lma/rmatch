@@ -1,0 +1,3 @@
+timestamp,testSeriesId,matcherTypeName1,usedMemoryInMb1,durationInMillis1,matcherTypeName2,usedMemoryInMb2,durationInMillis2,noOfMatches,noOfMismatches,noOfRegexps,corpusLength
+1684077047943,adb90d54-a153-425f-bbc3-17a480452d63,rmatch,275,12248,java,36,245,8395,45235,662077
+1684077082694,3c89a575-e70e-481c-84a6-f0b0c4d2bcdd,rmatch,246,20799,java,36,574,8395,45235,662077
