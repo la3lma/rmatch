@@ -83,7 +83,7 @@ public class JavaRegexpMatcher implements Matcher {
                     rmatcher.reset(strToSearchIn);
                     while (rmatcher.find()) {
                         final int start = rmatcher.start();
-                        final int end = rmatcher.end();
+                        final int end = rmatcher.end() - 1;
                         action.performMatch(b, start, end);
                     }
                     return null;
