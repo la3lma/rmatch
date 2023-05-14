@@ -197,6 +197,14 @@ public final class BenchmarkLargeCorpus {
             System.err.println("Double mismatch detected");
         }
 
+        // Todo: Look at only the first mismatch, in the java set.  See where the match with the least
+        //       difference to the one not matching exists in the other set (the original set). Also seee which
+        //       matches _do_ exist for the interval being covered by the mismatched element and report that.
+        //       The hypotheses are that there is either an alignment problem, a dominance problem, or simply that
+        //       the expression itself wasn't encoded in the (rmatch) matcher.  We need to eek out these issues
+        //       and figure out what fails.
+
+
 
         System.out.println("\nNumber of mismatches = " + numberOfMismatchesDetected);
         System.out.println("Number of matches    = " + numberOfCorrespondingMatchesDetected);
