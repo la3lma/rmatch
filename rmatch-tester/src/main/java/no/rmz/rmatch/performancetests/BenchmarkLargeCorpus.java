@@ -62,12 +62,6 @@ public final class BenchmarkLargeCorpus {
             System.exit(1);
         }
 
-        int noOfRegexps = Integer.parseInt(argv[0]);
-        if (noOfRegexps <= 0) {
-            System.err.println("Number of regexps to use must be positive");
-            System.exit(1);
-        }
-
         String nameOfRegexpFile = argv[1];
         if (!new File(nameOfRegexpFile).exists()) {
             System.err.println("Regexp file does not exist:'" + nameOfRegexpFile + "'");
@@ -101,6 +95,17 @@ public final class BenchmarkLargeCorpus {
         }
 
         allRegexps = regexMap.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toUnmodifiableList());
+
+        int noOfRegexps = Integer.parseInt(argv[0]);
+        if (noOfRegexps == -1) {
+            noOfRegexps = allRegexps.size();
+            System.out.println("Using all regexps: " + noOfRegexps);
+        } else if (noOfRegexps < -1) {
+            System.out.println("Number of regexps must be nonegative (or -1 to indicate all)");
+            System.exit(1);
+        } else if (noOfRegexps > allRegexps.size()) {
+            System.out.println("max number of regexps is: " + noOfRegexps + ", using that");
+        }
 
         StringBuilder corpus = new StringBuilder();
         for (int i = 2; i < argv.length; i++) {
