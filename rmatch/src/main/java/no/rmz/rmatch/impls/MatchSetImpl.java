@@ -131,6 +131,8 @@ public final class MatchSetImpl implements MatchSet {
             //       one that is compatible with adding a particular regex?  This
             //       can maybe be stored in a table so that it's easily cached
             //       and thus properly inner-loopy optimizable.
+            //       For some regexps we know which ones can start on a char,
+            //       and for those, maybe only run through exactly those and no others?
             if (!r.excludedAsStartCharacter(peekedCharacter)) {
                 matches.add(startNode.newMatch(this, r));
            }

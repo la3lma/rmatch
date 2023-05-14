@@ -1,14 +1,22 @@
 package no.rmz.rmatch.performancetests.utils;
 
 import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.Counters;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A harness for running  benchmarks for matcher implementations
@@ -106,6 +114,122 @@ public final class MatcherBenchmarker {
             duration, usedMemoryInMb});
         LOG.log(Level.INFO, "Counter = " + finalCount);
         Counters.dumpCounters();
+    }
+
+
+    public record  LoggedMatch(String matcherTypeName, String regex, int start, int end){}
+
+    public record TestRunResult(String matcherTypeName, List<LoggedMatch> loggedMatches, long usedMemoryInMb, long durationInMillis){};
+
+    public record TestPairSummary(
+            long timestamp,
+            String testSeriesId,
+            String matcherTypeName1, long usedMemoryInMb1, long durationInMillis1,
+            String matcherTypeName2, long usedMemoryInMb2, long durationInMillis2,
+            int noOfMatches,
+            int noOfMismatches,
+            int noOfRegexps,
+            int corpusLength
+    ){}
+
+
+    public static void writeSummaryToFile(String filePath, TestPairSummary summary) {
+        File csvOutputFile = new File(filePath);
+        boolean writeHeader = !csvOutputFile.exists();
+        try (FileWriter fw = new FileWriter(csvOutputFile, !writeHeader)){
+            PrintWriter pw = new PrintWriter(fw);
+            if (writeHeader) {
+                pw.println("timestamp," +
+                        "testSeriesId," +
+                        "matcherTypeName1,usedMemoryInMb1,durationInMillis1," +
+                        "matcherTypeName2,usedMemoryInMb2,durationInMillis2," +
+                        "noOfMatches," +
+                        "noOfMismatches," +
+                        "noOfRegexps," +
+                        "corpusLength");
+            }
+
+            pw.println(convertToCsv(summary));
+        } catch (IOException e) {
+            System.err.println("Could not open CSV file '"+filePath+"'");
+        }
+    }
+
+    private static String escapeSpecialCharacters(String data) {
+        String escapedData = data.replaceAll("\\R", " ");
+        if (data.contains(",") || data.contains("\"") || data.contains("'")) {
+            data = data.replace("\"", "\"\"");
+            escapedData = "\"" + data + "\"";
+        }
+        return escapedData;
+    }
+
+    private static String convertToCsv(TestPairSummary summary) {
+        String[] data = new String[] {
+                Long.toString(summary.timestamp()),
+                summary.testSeriesId(),
+                summary.matcherTypeName1(),
+                Long.toString(summary.usedMemoryInMb1()),
+                Long.toString(summary.durationInMillis1()),
+                summary.matcherTypeName2(),
+                Long.toString(summary.usedMemoryInMb2()),
+                Long.toString(summary.durationInMillis2()),
+                Integer.toString(summary.noOfMatches()),
+                Integer.toString(summary.noOfMismatches()),
+                Integer.toString(summary.corpusLength())
+        };
+        return Stream.of(data)
+                .map(c -> escapeSpecialCharacters(c))
+                .collect(Collectors.joining(","));
+    }
+
+
+    public static TestRunResult testACorpusNG(
+            final String matcherTypeName,
+            final Matcher matcher,
+            final List<String> allRegexps,
+            final Buffer buf) {
+
+        Object guard = new Object();
+        List<LoggedMatch> loggedMatches = new ArrayList<>(488035);
+
+        for (String regex: allRegexps) {
+            Action action = new Action() {
+                @Override
+                public void performMatch(Buffer b, int start, int end) {
+                    LoggedMatch ob = new LoggedMatch(matcherTypeName, regex, start, end);
+                    synchronized (guard) {
+                        loggedMatches.add(ob);
+                    }
+                }
+            };
+            try {
+                matcher.add(regex, action);
+            } catch (RegexpParserException e) {
+                System.err.println("Could not add action for regex " + regex);
+                System.exit(1);
+            }
+        }
+
+        // Run the matches
+        final long timeAtStart = System.currentTimeMillis();
+        matcher.match(buf);
+        try {
+            matcher.shutdown();
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
+        }
+        final long timeAtEnd = System.currentTimeMillis();
+        final long duration = timeAtEnd - timeAtStart;
+
+        LOG.info("Duration was : " + duration + " millis.");
+        final Runtime runtime = Runtime.getRuntime();
+        final int mb = 1024 * 1024;
+        final long usedMemoryInMb =
+                (runtime.totalMemory() - runtime.freeMemory()) / mb;
+        LOG.log(Level.INFO, "usedMemoryInMb = " + usedMemoryInMb);
+
+        return new TestRunResult(matcherTypeName, loggedMatches, usedMemoryInMb, duration);
     }
 
     public static void testMatcher(
