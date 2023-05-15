@@ -16,10 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -84,61 +81,9 @@ public final class BenchmarkLargeCorpus {
             System.exit(1);
         }
 
-        List<String> allRegexps = null;
-        try {
-            allRegexps = Files.readAllLines(Paths.get(nameOfRegexpFile));
-        } catch (IOException e) {
-            System.err.println("Couldn't read regexps from file:'" + nameOfRegexpFile + "'");
-            System.exit(1);
-        }
-
-        // Clean up the set of regexps a little.
-        allRegexps = allRegexps.stream().filter(c -> c.trim().length() != 0).distinct().collect(Collectors.toUnmodifiableList());
-
-        String algorithm = "SHA-1";
-
-        // Then scramble their ordering based on their hash
-        final Map<String, String> regexMap = new TreeMap<>();
-        for (String r : allRegexps) {
-            MessageDigest md = null;
-            try {
-                md = MessageDigest.getInstance(algorithm);
-            } catch (NoSuchAlgorithmException e) {
-                System.err.println("Could not find digester algorithm '" + algorithm + "'");
-                System.exit(1);
-            }
-            regexMap.put(byteArrayToHexString(md.digest(r.getBytes())), r);
-        }
-
-        allRegexps = regexMap.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toUnmodifiableList());
-
         int noOfRegexps = Integer.parseInt(argv[0]);
-        if (noOfRegexps == -1) {
-            noOfRegexps = allRegexps.size();
-            System.out.println("Using all regexps: " + noOfRegexps);
-        } else if (noOfRegexps < -1) {
-            System.out.println("Number of regexps must be nonegative (or -1 to indicate all)");
-            System.exit(1);
-        } else if (noOfRegexps > allRegexps.size()) {
-            System.out.println("max number of regexps is: " + noOfRegexps + ", using that");
-        }
-
-        StringBuilder corpus = new StringBuilder();
-        for (int i = 2; i < argv.length; i++) {
-            String filePath = argv[i];
-            File file = new File(filePath);
-            if (!file.exists()) {
-                System.err.println("Corpus file does not exist:'" + filePath + "'");
-                System.exit(1);
-            }
-            try (Stream<String> stream = Files
-                    .lines(Paths.get(filePath), StandardCharsets.UTF_8)) {
-                stream.forEach(s -> corpus.append(s).append("\n"));
-            } catch (IOException e) {
-                System.err.println("Something went wrong while reading file '" + filePath + "'");
-                System.exit(1);
-            }
-        }
+        final List<String> regexps = readRegexpsFromFile(nameOfRegexpFile, noOfRegexps);
+        final StringBuilder corpus = getStringBuilderFromFileContent(Arrays.copyOfRange(argv, 2, argv.length));
 
         // Report what we intend to do
         System.out.println("About to match " + noOfRegexps + " regexps from " + "'" + nameOfRegexpFile + "'" + " then match them against a bunch of files");
@@ -154,8 +99,7 @@ public final class BenchmarkLargeCorpus {
         // Then run the test
         final Matcher m = MatcherFactory.newMatcher();
         Buffer buf = new StringBuffer(corpus.toString());
-        List<String> regexps;
-        regexps = allRegexps.subList(0, noOfRegexps - 1);
+
 
         System.out.println("========");
         System.out.println("Run the native matcher");
@@ -203,6 +147,26 @@ public final class BenchmarkLargeCorpus {
         System.exit(0);
     }
 
+    public static StringBuilder getStringBuilderFromFileContent(String[] filenameList) {
+        StringBuilder corpus = new StringBuilder();
+        for (int i = 0; i < filenameList.length; i++) {
+            String filePath = filenameList[i];
+            File file = new File(filePath);
+            if (!file.exists()) {
+                System.err.println("Corpus file does not exist:'" + filePath + "'");
+                System.exit(1);
+            }
+            try (Stream<String> stream = Files
+                    .lines(Paths.get(filePath), StandardCharsets.UTF_8)) {
+                stream.forEach(s -> corpus.append(s).append("\n"));
+            } catch (IOException e) {
+                System.err.println("Something went wrong while reading file '" + filePath + "'");
+                System.exit(1);
+            }
+        }
+        return corpus;
+    }
+
     private static void describeTestResult(TestRunResult rmatchResult) {
         System.out.println("-------");
         System.out.println("Name: " + rmatchResult.matcherTypeName());
@@ -215,5 +179,49 @@ public final class BenchmarkLargeCorpus {
      * No public constructor in an utility class.
      */
     private BenchmarkLargeCorpus() {
+    }
+
+
+    public final static List<String> readRegexpsFromFile(String nameOfRegexpFile, int noOfRegexps) {
+        List<String> allRegexps = null;
+        try {
+            allRegexps = Files.readAllLines(Paths.get(nameOfRegexpFile));
+        } catch (IOException e) {
+            System.err.println("Couldn't read regexps from file:'" + nameOfRegexpFile + "'");
+            System.exit(1);
+        }
+
+        // Clean up the set of regexps a little.
+        allRegexps = allRegexps.stream().filter(c -> c.trim().length() != 0).distinct().collect(Collectors.toUnmodifiableList());
+
+        String algorithm = "SHA-1";
+
+        // Then scramble their ordering based on their hash
+        final Map<String, String> regexMap = new TreeMap<>();
+        for (String r : allRegexps) {
+            MessageDigest md = null;
+            try {
+                md = MessageDigest.getInstance(algorithm);
+            } catch (NoSuchAlgorithmException e) {
+                System.err.println("Could not find digester algorithm '" + algorithm + "'");
+                System.exit(1);
+            }
+            regexMap.put(byteArrayToHexString(md.digest(r.getBytes())), r);
+        }
+
+        allRegexps = regexMap.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toUnmodifiableList());
+
+        if (noOfRegexps == -1) {
+            noOfRegexps = allRegexps.size();
+            System.out.println("Using all regexps: " + noOfRegexps);
+        } else if (noOfRegexps < -1) {
+            System.out.println("Number of regexps must be nonegative (or -1 to indicate all)");
+            System.exit(1);
+        } else if (noOfRegexps > allRegexps.size()) {
+            System.out.println("max number of regexps is: " + noOfRegexps + ", using that");
+        }
+        List<String> regexps;
+        regexps = allRegexps.subList(0, noOfRegexps - 1);
+        return regexps;
     }
 }
