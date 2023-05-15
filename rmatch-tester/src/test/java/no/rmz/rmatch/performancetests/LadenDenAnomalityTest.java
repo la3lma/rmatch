@@ -74,7 +74,7 @@ public class LadenDenAnomalityTest {
      * Test matching the two regexps concurrently.
      */
     @Test
-    public final void testUseOfOrdinaryMatcherImpl() throws RegexpParserException {
+    public final void testUseOfOrdinaryMatcherOn1500SubsetOfRegexps() throws RegexpParserException {
 
         // Prepare
         final String[] corpusPaths = new String[]{"corpus/crime-and-punishment-by-dostoyevsky.txt"};
@@ -88,7 +88,7 @@ public class LadenDenAnomalityTest {
             switch (r) {
                 case "den":  m.add("den", denAction); break;
                 case "laden":  m.add("laden", ladenAction); break;
-                default:  m.add("den", defaultAction);
+                default:  m.add(r, defaultAction);
             }
         }
 
