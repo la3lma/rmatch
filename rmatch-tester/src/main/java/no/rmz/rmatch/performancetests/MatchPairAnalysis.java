@@ -54,6 +54,34 @@ final class MatchPairAnalysis {
 
         findMismatches(javaMatches, rmatchMatches);
 
+        // Analyze first java mismatch (if any)
+        if (javaMatches.size() > 0) {
+            MatcherBenchmarker.LoggedMatch jm = javaMatches.first();
+            // Find matches that span the same interval in the regexp match set
+            System.out.println("Analyzing mismatching java match: " + jm);
+            for (var rm: this.originalRmatchResult.loggedMatches()) {
+                if (rm.start() <= jm.start() && rm.end() >= jm.end()) {
+                    System.out.println("  rm match dominating: " + rm);
+                }
+                if (jm.start() <= rm.start() && rm.start() <= jm.end()) {
+                    System.out.println("  rm start inside jm: " + rm);
+                }
+                if (jm.start() <= rm.end() && rm.end() <= jm.end()) {
+                    System.out.println("  rm end inside jm: " + rm);
+                }
+
+                if (jm.start() <= rm.start() && rm.end() >= jm.end()) {
+                    System.out.println("  jm match dominating: " + jm);
+                }
+                if (rm.start() <= jm.start() && jm.start() <= rm.end()) {
+                    System.out.println("  jm start inside rm: " + rm);
+                }
+                if (rm.start() <= jm.end() && jm.end() <= rm.end()) {
+                    System.out.println("  jm end inside rm: " + jm);
+                }
+            }
+        }
+
         this.result =
                 new MatcherBenchmarker.TestPairSummary(System.currentTimeMillis(), testSeriesId, metadata,
                         rmatchResult.matcherTypeName(), rmatchResult.usedMemoryInMb(), rmatchResult.durationInMillis(),

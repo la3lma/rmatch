@@ -1,6 +1,9 @@
 # Right now
 
-*  Delete the funkiness introduced for lookahead buffers.  Turns out it is wasn't necessary.
+* It seems that dominance isn't entirely good?  when running against the Dostoyevsky corpus,
+  the regexp "laden" is matched by java, but not by rmatch.  Rmatch does find an included
+  match for the regexp "den", but of course, it should have found both.   This is an error
+  and should be debugged using a focused unit test.
 * Look at how to make static string regexps even more efficient at pruning based on first char.
 * Consider making a notebook to track progress over time instead of the wretched shellscripts currently there.
 * At the very least, fix those scripts.
