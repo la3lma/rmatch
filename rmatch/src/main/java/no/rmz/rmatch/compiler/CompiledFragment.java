@@ -30,7 +30,7 @@ import no.rmz.rmatch.interfaces.Regexp;
 public final class CompiledFragment {
 
     /**
-     * The regexp for which this is acompilation fragment.
+     * The regexp for which this is a compilation fragment.
      */
     private final Regexp r;
 

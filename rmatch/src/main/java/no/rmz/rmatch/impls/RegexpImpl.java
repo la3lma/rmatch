@@ -74,7 +74,7 @@ public final class RegexpImpl implements Regexp {
      * The set of characters that by example has been proven not to be possible to start
      * this regexp with.
      */
-    private Set<Character> nonStartingChars = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Character> nonStartingChars = Collections.synchronizedSet(new HashSet<>());
 
     /**
      * Make a new instance of Regexp representing a regular expression.

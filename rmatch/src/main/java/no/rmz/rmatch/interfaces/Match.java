@@ -156,7 +156,7 @@ public interface Match {
         }
     };
 
-    public default boolean isZeroLength() {
+    default boolean isZeroLength() {
         return (this.getEnd() - this.getStart()) == 0;
     }
 }
