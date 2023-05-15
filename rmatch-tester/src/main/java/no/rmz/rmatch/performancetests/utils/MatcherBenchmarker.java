@@ -123,6 +123,7 @@ public final class MatcherBenchmarker {
     public record TestPairSummary(
             long timestamp,
             String testSeriesId,
+            String metadata,
             String matcherTypeName1, long usedMemoryInMb1, long durationInMillis1,
             String matcherTypeName2, long usedMemoryInMb2, long durationInMillis2,
             int noOfMatches,
@@ -140,6 +141,7 @@ public final class MatcherBenchmarker {
             if (writeHeader) {
                 pw.println("timestamp," +
                         "testSeriesId," +
+                        "metadata," +
                         "matcherTypeName1,usedMemoryInMb1,durationInMillis1," +
                         "matcherTypeName2,usedMemoryInMb2,durationInMillis2," +
                         "noOfMatches," +
@@ -167,6 +169,7 @@ public final class MatcherBenchmarker {
         String[] data = new String[] {
                 Long.toString(summary.timestamp()),
                 summary.testSeriesId(),
+                summary.metadata(),
                 summary.matcherTypeName1(),
                 Long.toString(summary.usedMemoryInMb1()),
                 Long.toString(summary.durationInMillis1()),
@@ -182,6 +185,30 @@ public final class MatcherBenchmarker {
                 .collect(Collectors.joining(","));
     }
 
+    public final static Comparator<LoggedMatch> matchComparator = new Comparator<MatcherBenchmarker.LoggedMatch>() {
+        @Override
+        public int compare(MatcherBenchmarker.LoggedMatch o1, MatcherBenchmarker.LoggedMatch o2) {
+            if (o1 == o2) {
+                return 0;
+            }
+            if (o1 == null) {
+                return -1;
+            }
+            if (o2 == null) {
+                return 1;
+            }
+            int result = Integer.compare(o1.start(), o2.start());
+            if (result != 0) {
+                return result;
+            }
+            result = o1.regex().compareTo(o2.regex());
+            if (result != 0) {
+                return result;
+            }
+            return Integer.compare(o1.end(), o2.end());
+        }
+    };
+
 
     public static TestRunResult testACorpusNG(
             final String matcherTypeName,
@@ -191,31 +218,8 @@ public final class MatcherBenchmarker {
 
         Object guard = new Object();
 
-        Comparator<LoggedMatch> matchComparator = new Comparator<MatcherBenchmarker.LoggedMatch>() {
-            @Override
-            public int compare(MatcherBenchmarker.LoggedMatch o1, MatcherBenchmarker.LoggedMatch o2) {
-                if (o1 == o2) {
-                    return 0;
-                }
-                if (o1 == null) {
-                    return -1;
-                }
-                if (o2 == null) {
-                    return 1;
-                }
-                int result = Integer.compare(o1.start(), o2.start());
-                if (result != 0) {
-                    return result;
-                }
-                result = o1.regex().compareTo(o2.regex());
-                if (result != 0) {
-                    return result;
-                }
-                return Integer.compare(o1.end(), o2.end());
-            }
-        };
-
-        final Collection<LoggedMatch> loggedMatches = new TreeSet<LoggedMatch>(matchComparator);
+        final Collection<LoggedMatch> loggedMatches =
+               new TreeSet<LoggedMatch>(matchComparator);
 
         for (String regex: allRegexps) {
             Action action = new Action() {

@@ -4,23 +4,28 @@ import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.TestRunResult;
 import no.rmz.rmatch.utils.StringBuffer;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.String.*;
+import static java.lang.String.valueOf;
 import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.testACorpusNG;
+import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.writeSummaryToFile;
 
 /**
  * A test scenario that will match a bunch (by default 10K) of regular expressions against the
@@ -36,6 +41,17 @@ public final class BenchmarkLargeCorpus {
         }
         return result;
     }
+
+    public static String getCurrentGitBranch() throws IOException, InterruptedException {
+        Process process = Runtime.getRuntime().exec( "git rev-parse --abbrev-ref HEAD" );
+        process.waitFor();
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader( process.getInputStream() ) );
+
+        return reader.readLine();
+    }
+
 
     /**
      * The main method.
@@ -157,45 +173,22 @@ public final class BenchmarkLargeCorpus {
         describeTestResult(rmatchResult);
         describeTestResult(javaResult);
 
-        int numberOfCorrespondingMatchesDetected = 0;
-        int numberOfMismatchesDetected = 0;
-
-        // Traverse the java matches and try to find matching rmatch matches
-        ArrayList<MatcherBenchmarker.LoggedMatch> matches = new ArrayList<>();
-        for (var k : javaResult.loggedMatches()) {
-            if (rmatchResult.loggedMatches().contains(k)) {
-                matches.add(k);
-                numberOfCorrespondingMatchesDetected += 1;
-            } else {
-                numberOfMismatchesDetected += 1;
-            }
+        String metadata;
+        try {
+            metadata = getCurrentGitBranch();
+        } catch (Exception e) {
+            System.err.println("Could not get git branch, setting metadata to 'unknown'");
+            metadata = "unknown";
         }
 
-        for (var k: matches) {
-            javaResult.loggedMatches().remove(k);
-            rmatchResult.loggedMatches().remove(k);
-        }
-
-        matches.clear();
-
-        // Then do the same for the rmatch matches
-        for (var n : rmatchResult.loggedMatches()) {
-            if (javaResult.loggedMatches().contains(n)) {
-                matches.add(n);
-                numberOfCorrespondingMatchesDetected += 1;
-            } else {
-                numberOfMismatchesDetected += 1;
-            }
-        }
-
-        for (var k: matches) {
-            javaResult.loggedMatches().remove(k);
-            rmatchResult.loggedMatches().remove(k);
-        }
-
-        if (numberOfMismatchesDetected != (javaResult.loggedMatches().size() + rmatchResult.loggedMatches().size())) {
-            System.err.println("Double mismatch detected");
-        }
+        final MatchPairAnalysis analysis = new MatchPairAnalysis(
+                testSeriesId,
+                metadata,
+                noOfRegexps,
+                corpus.length(),
+                javaResult,
+                rmatchResult);
+        analysis.printSummary(System.out);
 
         // Todo: Look at only the first mismatch, in the java set.  See where the match with the least
         //       difference to the one not matching exists in the other set (the original set). Also seee which
@@ -205,23 +198,7 @@ public final class BenchmarkLargeCorpus {
         //       and figure out what fails.
 
 
-
-        System.out.println("\nNumber of mismatches = " + numberOfMismatchesDetected);
-        System.out.println("Number of matches    = " + numberOfCorrespondingMatchesDetected);
-        System.out.println("Sum of matches and mismatches = " + (numberOfMismatchesDetected + numberOfCorrespondingMatchesDetected));
-
-
-        MatcherBenchmarker.TestPairSummary result =
-            new MatcherBenchmarker.TestPairSummary(System.currentTimeMillis(), testSeriesId,
-                rmatchResult.matcherTypeName(), rmatchResult.usedMemoryInMb(), rmatchResult.durationInMillis(),
-                javaResult.matcherTypeName(), javaResult.usedMemoryInMb(), javaResult.durationInMillis(),
-                numberOfCorrespondingMatchesDetected,
-                numberOfMismatchesDetected,
-                    noOfRegexps,
-                    corpus.length()
-                );
-
-        MatcherBenchmarker.writeSummaryToFile(logfile, result);
+        writeSummaryToFile(logfile, analysis.getResult());
 
         System.exit(0);
     }
