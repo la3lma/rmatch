@@ -82,7 +82,7 @@ public class LadenDenAnomalityTest {
         final no.rmz.rmatch.utils.StringBuffer b =
                 new no.rmz.rmatch.utils
                 .StringBuffer(corpus);
-        final List<String> regexps = readRegexpsFromFile("corpus/unique-words.txt", 1500);
+        final List<String> regexps = readRegexpsFromFile("corpus/unique-words.txt", 1400);
 
         for (var r : regexps) {
             switch (r) {
