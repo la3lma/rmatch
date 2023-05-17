@@ -39,17 +39,16 @@ import static org.mockito.Mockito.verify;
  * This test is a mimimal replication of that error situation.
  */
 @ExtendWith(MockitoExtension.class)
-public class DenLadenAnomality {
+public class DenLadenAnomalityTest {
 
     @Mock
     Action denAction;
-
+    
     @Mock
     Action ladenAction;
 
     @Mock
     Action defaultAction;
-
 
     /**
      * Test matching the two regexps concurrently.
