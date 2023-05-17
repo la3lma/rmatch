@@ -90,6 +90,5 @@ public class DenLadenAnomality {
         // Verify
         verify(denAction).performMatch(any(Buffer.class),   anyInt(), anyInt());
         verify(ladenAction).performMatch(any(Buffer.class), anyInt(), anyInt());
-
     }
 }
