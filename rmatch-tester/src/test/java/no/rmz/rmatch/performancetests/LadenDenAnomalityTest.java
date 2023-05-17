@@ -383,25 +383,12 @@ public class LadenDenAnomalityTest {
         this.regexps.add("laden");
         this.regexps.add("ll");
 
-        int delta = 40;
 
-
-        // final String str  = corpus.substring(128315 - delta, 128315);
         final String str = """
                 lly
                 drawn by heavy cart-horses and laden""";
 
-        if (!str.contains("laden")) {
-            throw new RuntimeException("No laden in string");
-        } else {
-            log.println("Looking in string: '" + str + "'");
-        }
         this.buffer = new no.rmz.rmatch.utils.StringBuffer(str);
-
-        // this.buffer = new no.rmz.rmatch.utils.StringBuffer("laden");
-
-        // boolean result = ladenFailed(this.regexps);
-        // log.println("Pre Result = " + result);
 
         for (var r : this.regexps) {
             switch (r) {
@@ -419,7 +406,7 @@ public class LadenDenAnomalityTest {
         // Act
         m.match(buffer);
 
-
+        // Verify
         verify(denAction).performMatch(any(Buffer.class),   anyInt(), anyInt());
         verify(ladenAction).performMatch(any(Buffer.class), anyInt(), anyInt());
 
