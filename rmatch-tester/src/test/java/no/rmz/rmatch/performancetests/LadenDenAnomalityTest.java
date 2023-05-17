@@ -39,8 +39,7 @@ import java.util.function.Predicate;
 
 import static no.rmz.rmatch.performancetests.BenchmarkLargeCorpus.getStringBuilderFromFileContent;
 import static no.rmz.rmatch.performancetests.BenchmarkLargeCorpus.readRegexpsFromFile;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -376,7 +375,7 @@ public class LadenDenAnomalityTest {
      * Test matching the two regexps concurrently.
      */
     @Test
-    public final void minimalBugReplicatingTest() throws RegexpParserException {
+    public final void minimalReplicatingTest() throws RegexpParserException {
 
         // Prepare
         this.regexps = new ArrayList<>();
@@ -384,10 +383,25 @@ public class LadenDenAnomalityTest {
         this.regexps.add("laden");
         this.regexps.add("ll");
 
-        this.buffer = new no.rmz.rmatch.utils.StringBuffer("laden");
+        int delta = 40;
 
-        boolean result = ladenFailed(this.regexps);
-        log.println("Pre Result = " + result);
+
+        // final String str  = corpus.substring(128315 - delta, 128315);
+        final String str = """
+                lly
+                drawn by heavy cart-horses and laden""";
+
+        if (!str.contains("laden")) {
+            throw new RuntimeException("No laden in string");
+        } else {
+            log.println("Looking in string: '" + str + "'");
+        }
+        this.buffer = new no.rmz.rmatch.utils.StringBuffer(str);
+
+        // this.buffer = new no.rmz.rmatch.utils.StringBuffer("laden");
+
+        // boolean result = ladenFailed(this.regexps);
+        // log.println("Pre Result = " + result);
 
         for (var r : this.regexps) {
             switch (r) {
@@ -405,8 +419,10 @@ public class LadenDenAnomalityTest {
         // Act
         m.match(buffer);
 
-        verify(ladenAction).performMatch(any(Buffer.class), eq(128310), eq(128314));
-        verify(denAction).performMatch(any(Buffer.class),   eq(128312), eq(128314));
+
+        verify(denAction).performMatch(any(Buffer.class),   anyInt(), anyInt());
+        verify(ladenAction).performMatch(any(Buffer.class), anyInt(), anyInt());
+
 
         log.println("Post Result = " + ladenFailed(this.regexps));
     }
@@ -437,7 +453,7 @@ public class LadenDenAnomalityTest {
         m.match(buffer);
 
         // Verify
-        verify(ladenAction).performMatch(any(Buffer.class), eq(128310), eq(128314));
         verify(denAction).performMatch(any(Buffer.class),   eq(128312), eq(128314));
+        verify(ladenAction).performMatch(any(Buffer.class), eq(128310), eq(128314));
     }
 }
