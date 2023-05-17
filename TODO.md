@@ -1,9 +1,9 @@
 # Right now
 
-* It seems that dominance isn't entirely good?  when running against the Dostoyevsky corpus,
-  the regexp "laden" is matched by java, but not by rmatch.  Rmatch does find an included
-  match for the regexp "den", but of course, it should have found both.   This is an error
-  and should be debugged using a focused unit test.
+* Using the focused test, figure out what goes wrong.
+   * Print out the NDFA graph
+   * Maybe also the DFA graph, but that probably is less useful.
+   * Scratch head until enlightment hits.
 * Set up a github action build for PRs (and main).
   https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
 * Look at how to make static string regexps even more efficient at pruning based on first char.
