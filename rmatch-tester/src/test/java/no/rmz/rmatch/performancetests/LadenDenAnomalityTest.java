@@ -50,6 +50,9 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 public class LadenDenAnomalityTest {
 
+    private static MicroLogger log = new MicroLogger(new File("findMinimalRegexpSetLog.txt"));
+
+
     /**
      * Mocked action. Used to check that matches are found
      * in the right locations.
@@ -85,10 +88,33 @@ public class LadenDenAnomalityTest {
         this.corpus = getStringBuilderFromFileContent(corpusPaths).toString();
         this.buffer = new no.rmz.rmatch.utils.StringBuffer(corpus);
         this.regexps = readRegexpsFromFile("corpus/unique-words.txt", 1400);
+
+        // Restrict using numbers found by searching
+        // this.regexps = this.regexps.subList(1077, 1118); // -> Test passing that should fail!
+
+        System.out.println("regexp 1117 = " + this.regexps.get(1117));
+        System.out.println("regexp 1118 = " + this.regexps.get(1118));
+        System.out.println("regexp 1077 = " + this.regexps.get(1077));
+        System.out.println("regexp 1306 = " + this.regexps.get(1306));
+        System.out.println("regexp 1307 = " + this.regexps.get(1307));
+        System.out.println("regexp 1308 = " + this.regexps.get(1308));
+
+        this.regexps = this.regexps.subList(1077, 1307);
+        var foo = new ArrayList<String>(1307 - 1077 + 1);
+        foo.addAll(this.regexps);
+        this.regexps = foo;
+
+        this.regexps.remove(1302 - 1077);
     }
 
 
     private boolean ladenFailed(Collection<String> regexps) {
+
+        if (!(rangeContains("den", regexps) && rangeContains("laden", regexps))) {
+            return false;
+        }
+
+        final var localMatcher = new MatcherImpl();
 
         // Prepare
         final AtomicBoolean denWasRun = new AtomicBoolean(false);
@@ -98,7 +124,7 @@ public class LadenDenAnomalityTest {
             for (var r : regexps) {
                 switch (r) {
                     case "den":
-                        this.m.add("den", new Action() {
+                        localMatcher.add("den", new Action() {
                             @Override
                             public void performMatch(Buffer b, int start, int end) {
                                 denWasRun.set(true);
@@ -106,7 +132,7 @@ public class LadenDenAnomalityTest {
                         });
                         break;
                     case "laden":
-                        this.m.add("laden", new Action() {
+                        localMatcher.add("laden", new Action() {
                             @Override
                             public void performMatch(Buffer b, int start, int end) {
                                 ladenWasRun.set(true);
@@ -114,7 +140,7 @@ public class LadenDenAnomalityTest {
                         });
                         break;
                     default:
-                        this.m.add(r, defaultAction);
+                        localMatcher.add(r, defaultAction);
                 }
             }
         } catch (Exception e) {
@@ -122,7 +148,7 @@ public class LadenDenAnomalityTest {
         }
 
         // Act
-        m.match(buffer);
+        localMatcher.match(buffer);
 
         return denWasRun.get() && !ladenWasRun.get();
     }
@@ -158,7 +184,7 @@ public class LadenDenAnomalityTest {
         }
 
         public int findLimit(Predicate<Integer> tester, boolean direction) {
-            System.out.println("findLimit direction = "  + direction);
+            log.println("findLimit direction = "  + direction);
 
             int high = upperLimit;
             int low = lowerLimit;
@@ -166,7 +192,7 @@ public class LadenDenAnomalityTest {
             // Binary search
             while (high - low > 3) {
                 int pivot = low + ((high - low) / 2);
-                System.out.println("   Binary searching (low, high, pivot) = ("  + low + ", "+ high + ", " + pivot + ")");
+                log.println("   Binary searching (low, high, pivot) = ("  + low + ", "+ high + ", " + pivot + ")");
 
                 if (tester.test(pivot) ^ direction) {
                     high = pivot;
@@ -182,7 +208,7 @@ public class LadenDenAnomalityTest {
             if (direction) {
                 while (low < high) {
                     result = low;
-                    System.out.println("   preliminary result ="  + result);
+                    log.println("   preliminary result ="  + result);
 
                     if (tester.test(low + 1)) {
                         low += 1;
@@ -195,7 +221,7 @@ public class LadenDenAnomalityTest {
                 result = high;
                 while (low < high) {
                     result = high;
-                    System.out.println("   preliminary result ="  + result);
+                    log.println("   preliminary result ="  + result);
 
                     if (tester.test(high - 1)) {
                         high -= 1;
@@ -205,7 +231,7 @@ public class LadenDenAnomalityTest {
                 }
             }
 
-            System.out.println("   findLimit result = "  + result);
+            log.println("   findLimit result = "  + result);
 
             return result;
         }
@@ -242,9 +268,8 @@ public class LadenDenAnomalityTest {
     @Test
     public final void findMinimalRegexpSet() throws RegexpParserException {
 
-        MicroLogger log = new MicroLogger(new File("findMinimalRegexpSetLog.txt"));
-        AtomicInteger start = new AtomicInteger(205);
-        AtomicInteger end = new AtomicInteger(this.regexps.size() - 1);
+        AtomicInteger start = new AtomicInteger(1077);
+        AtomicInteger end = new AtomicInteger(1118 /* this.regexps.size() - 1 */);
         boolean result = true;
 
         final BinarySearcher searcher;
@@ -252,43 +277,17 @@ public class LadenDenAnomalityTest {
                 new Predicate<Integer>() {
                     @Override
                     public boolean test(Integer upperLimit) {
-                        return ladenFailed(LadenDenAnomalityTest.this.regexps.subList(start.get(), upperLimit));
+                        return rangeIsValid(LadenDenAnomalityTest.this.regexps.subList(start.get(), upperLimit));
                     }
                 },
                 new Predicate<Integer>() {
                     @Override
                     public boolean test(Integer lowerLimit) {
-                        return ladenFailed(LadenDenAnomalityTest.this.regexps.subList(lowerLimit, end.get()));
+                        return rangeIsValid(LadenDenAnomalityTest.this.regexps.subList(lowerLimit, end.get()));
                     }
                 });
 
         final Interval interval = searcher.findInterval();
-/*
-        // TODO: If we need to do this more than once, then rewrite to use binary search
-        //       for both top and bottom.
-        for (; start < end && result; start += 1) {
-            result = ladenFailed(this.regexps.subList(start, end));
-            if (result) {
-                log.println("Success for start = " + start);
-            }
-        }
-
-        if (!result) {
-            start -= 1;
-        }
-
-        if (start == end) {
-            Assertions.fail("Start == end, and that is weird");
-        }
-
-        result = true;
-        for (; start < end && result; end -= 1) {
-            result = ladenFailed(this.regexps.subList(start, end));
-            if (result) {
-                log.println("Success for end = " + end);
-            }
-        }
-*/
         start.set(interval.lower);
         end.set(interval.upper);
 
@@ -296,19 +295,19 @@ public class LadenDenAnomalityTest {
         var sublist = new ArrayList<String>();
         sublist.addAll(regexps.subList(start.get(), end.get()));
         if (ladenFailed(sublist)) {
-            System.out.println("Yes. this interval works!: " + start.get() + "," + end.get());
+            log.println("Yes. this interval works!: " + start.get() + "," + end.get());
             for (int i = start.get() ; i <= end.get(); i++) {
-                System.out.println(" i = " + i + ", regex = " + regexps.get(i));
+                log.println(" i = " + i + ", regex = " + regexps.get(i));
             }
         } else {
-            System.out.println("No. this interval does not works!: " + start.get() + "," + end.get());
+            log.println("No. this interval does not works!: " + start.get() + "," + end.get());
         }
 
 
-        System.out.println("Determined boundaries: start = " + start + ", end = " + end);
-        System.out.println("Trying to remove individual regexps");
+        log.println("Determined boundaries: start = " + start + ", end = " + end);
+        log.println("Trying to remove individual regexps");
 
-        for (int i = start.get(); i < end.get(); i += 1) {
+        for (int i = start.get(); i <= end.get(); i += 1) {
             var testlist = new ArrayList<String>();
             testlist.addAll(regexps.subList(start.get(), end.get()));
             testlist.remove(i - start.get());
@@ -316,11 +315,102 @@ public class LadenDenAnomalityTest {
             if (result) {
                 log.println("Success for removal of i = " + i + ", regex = " + this.regexps.get(i));
             } else {
-                log.println("Failure for removal of i = " + i + ",  regex = " + this.regexps.get(i));
+                log.println(" ==> Failure for removal of i = " + i + ",  regex = " + this.regexps.get(i));
             }
         }
         System.out.println("Done.");
     }
+
+    private static boolean rangeContains(String den, Collection<String> range) {
+        return range.contains(den);
+    }
+
+    private boolean rangeIsValid(Collection<String> range) {
+        return rangeContains("den", range) && rangeContains("laden", range) && ladenFailed(range);
+    }
+
+    @Test
+    public final void ablationTest() {
+
+        log.println("Pre result = " + ladenFailed(this.regexps));
+
+        List<String>  removable = new ArrayList<>();
+
+        int nextToRemove = 0;
+
+        List<String> current = null;
+
+        while (current == null || nextToRemove < current.size()) {
+
+            current = new ArrayList<>();
+            current.addAll(this.regexps);
+            current.removeAll(removable);
+
+            String regexUnderTest = current.get(nextToRemove);
+            current.remove(nextToRemove);
+            if (!ladenFailed(current)) {
+                log.println(" => Could not remove " + regexUnderTest);
+                nextToRemove += 1;
+            } else {
+                log.println("Could remove " + regexUnderTest);
+                removable.add(regexUnderTest);
+            }
+        }
+
+        current = new ArrayList<>();
+        current.addAll(this.regexps);
+        current.removeAll(removable);
+
+        boolean result = ladenFailed(current);
+        log.println("Post Result = " + result);
+
+
+        log.println("Minimal set of regexps that will pass the ladenFailed test:");
+        for(var r: current) {
+            log.println(" --> " + r);
+        }
+    }
+
+
+    /**
+     * Test matching the two regexps concurrently.
+     */
+    @Test
+    public final void minimalBugReplicatingTest() throws RegexpParserException {
+
+        // Prepare
+        this.regexps = new ArrayList<>();
+        this.regexps.add("den");
+        this.regexps.add("laden");
+        this.regexps.add("ll");
+
+        this.buffer = new no.rmz.rmatch.utils.StringBuffer("laden");
+
+        boolean result = ladenFailed(this.regexps);
+        log.println("Pre Result = " + result);
+
+        for (var r : this.regexps) {
+            switch (r) {
+                case "den":
+                    m.add("den", denAction);
+                    break;
+                case "laden":
+                    m.add("laden", ladenAction);
+                    break;
+                default:
+                    m.add(r, defaultAction);
+            }
+        }
+
+        // Act
+        m.match(buffer);
+
+        verify(ladenAction).performMatch(any(Buffer.class), eq(128310), eq(128314));
+        verify(denAction).performMatch(any(Buffer.class),   eq(128312), eq(128314));
+
+        log.println("Post Result = " + ladenFailed(this.regexps));
+    }
+
 
 
     /**
@@ -348,6 +438,6 @@ public class LadenDenAnomalityTest {
 
         // Verify
         verify(ladenAction).performMatch(any(Buffer.class), eq(128310), eq(128314));
-        verify(denAction).performMatch(any(Buffer.class), eq(128312), eq(128314));
+        verify(denAction).performMatch(any(Buffer.class),   eq(128312), eq(128314));
     }
 }
