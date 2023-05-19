@@ -70,8 +70,8 @@ public class DenLadenAnomalityTest {
         regexps.add("ll");
 
         final String str = """
-                lly
-                drawn by heavy cart-horses and laden""";
+                ll
+                laden""";
 
         no.rmz.rmatch.interfaces.Buffer buffer = new no.rmz.rmatch.utils.StringBuffer(str);
 

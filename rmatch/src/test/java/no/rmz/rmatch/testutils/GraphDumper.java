@@ -253,7 +253,7 @@ public final class GraphDumper {
         checkNotNull(nodeStorage);
         checkNotNull(ndfaOut);
         checkNotNull(dfaOut);
-        dumpNdfa(nodeStorage.getNDFANodes(), dfaOut);
+        dumpNdfa(nodeStorage.getNDFANodes(), ndfaOut);
         dumpDfa(nodeStorage.getDFANodes(), dfaOut);
     }
 
