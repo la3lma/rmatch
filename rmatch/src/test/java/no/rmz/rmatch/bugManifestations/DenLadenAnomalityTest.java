@@ -21,11 +21,15 @@ import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
+import no.rmz.rmatch.testutils.GraphDumper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +47,7 @@ public class DenLadenAnomalityTest {
 
     @Mock
     Action denAction;
-    
+
     @Mock
     Action ladenAction;
 
@@ -57,7 +61,8 @@ public class DenLadenAnomalityTest {
     public final void minimalReplicatingTest() throws RegexpParserException {
 
         // Prepare
-        Matcher m = new MatcherImpl();
+        MatcherImpl mi = new MatcherImpl();
+        Matcher m = mi;
 
         List<String> regexps = new ArrayList<>();
         regexps.add("den");
@@ -85,6 +90,18 @@ public class DenLadenAnomalityTest {
 
         // Act
         m.match(buffer);
+
+
+        // Document
+        try {
+            GraphDumper.dump(
+                    mi.getNodeStorage(),
+                    new PrintStream(new File("graphs/ladenPostRunningNdfa.gv")),
+                    new PrintStream(new File("graphs/ladenPostRunningDfa.gv")));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
 
         // Verify
         verify(denAction).performMatch(any(Buffer.class),   anyInt(), anyInt());

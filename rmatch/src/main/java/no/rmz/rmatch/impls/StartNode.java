@@ -17,19 +17,15 @@
 package no.rmz.rmatch.impls;
 
 // XXX Don't mix: Either use some sort of NDFA with
-//     a charmap (and epsilons), or use something else. Don't mix!!!
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
+//     a charmap (and
+//     epsilons), or use something else. Don't mix!!!
+
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.PrintableEdge;
-import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.interfaces.*;
+
+import java.util.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A startnode is a special kind of node that a Node Storage has only one of. It

@@ -43,7 +43,7 @@ public final class NodeStorageImpl implements NodeStorage {
      */
     private static final Comparator<SortedSet<NDFANode>>
             SORTED_NDFANODE_SET_COMPARATOR =
-            new SortedSetComparatorImpl<>();
+                    new SortedSetComparatorImpl<>();
     /**
      * There is only one start node, and this is that node.
      */
@@ -54,23 +54,20 @@ public final class NodeStorageImpl implements NodeStorage {
      * NDFANodes.
      */
     private final Map<SortedSet<NDFANode>, DFANode> ndfamap =
- new TreeMap<>(
-                    SORTED_NDFANODE_SET_COMPARATOR);
+                new TreeMap<>(SORTED_NDFANODE_SET_COMPARATOR);
 
     /**
      * Create a new instance of the node storage.
      */
     public NodeStorageImpl() {
         sn = new StartNode(this);
-
     }
 
     @Override
     public Collection<NDFANode> getNDFANodes() {
         synchronized (ndfamap) {
             final Set<NDFANode> result = new HashSet<>();
-            final Set<NDFANode> unexplored =
- new ConcurrentSkipListSet<>();
+            final Set<NDFANode> unexplored = new ConcurrentSkipListSet<>();
             unexplored.add(sn);
 
             while (!unexplored.isEmpty()) {
