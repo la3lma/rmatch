@@ -1,5 +1,7 @@
 # Right now
-
+* Wrap it up
+* Make sure it is correct
+* Start looking for more ways to fix concurrency issues.
 * Using the focused test, figure out what goes wrong.
    * Print out the NDFA graph
    * Maybe also the DFA graph, but that probably is less useful.
