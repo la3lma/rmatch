@@ -119,6 +119,7 @@ public final class DFANodeImpl implements DFANode {
      *
      * @return the id
      */
+    @Override
     public long getId() {
         return id;
     }
@@ -200,13 +201,17 @@ public final class DFANodeImpl implements DFANode {
 
             final SortedSet<NDFANode> nodes = getNextThroughBasis(ch);
 
+            DFANode dfaNode = null;
             if (!nodes.isEmpty()) {
-                final DFANode dfaNode = ns.getDFANode(nodes);
+                dfaNode = ns.getDFANode(nodes);
                 nextMap.put(ch, dfaNode);
             }
 
             KNOWN_DFA_EDGES_COUNTER.inc();
             known.put(ch, Boolean.TRUE);
+            if (dfaNode != null) {
+                return dfaNode;
+            }
         }
 
         // Now, either this will return a node, or a null, and in
