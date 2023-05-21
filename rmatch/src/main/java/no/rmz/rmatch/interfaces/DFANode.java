@@ -103,4 +103,11 @@ public interface DFANode extends Node {
      * @return true iff failing for regexp.
      */
     boolean isFailingFor(final Regexp regexp);
+
+    /**
+     * Return an unique long that identifies this DFA in this matcher engine.
+     * Mostly intended to be used during debugging, to visualize the graph of the
+     * DFA.
+     */
+    long getId();
 }

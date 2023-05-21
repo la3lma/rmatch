@@ -134,8 +134,8 @@ public final class MatcherBenchmarker {
 
 
     public static void writeSummaryToFile(String filePath, TestPairSummary summary) {
-        File csvOutputFile = new File(filePath);
-        boolean writeHeader = !csvOutputFile.exists();
+        final File csvOutputFile = new File(filePath);
+        final boolean writeHeader = !csvOutputFile.exists();
         try (FileWriter fw = new FileWriter(csvOutputFile, !writeHeader)){
             PrintWriter pw = new PrintWriter(fw);
             if (writeHeader) {

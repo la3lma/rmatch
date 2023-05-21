@@ -16,7 +16,10 @@
 
 package no.rmz.rmatch.testutils;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import no.rmz.rmatch.abstracts.AbstractNDFANode;
+import no.rmz.rmatch.impls.DFANodeImpl;
+import no.rmz.rmatch.interfaces.*;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -24,13 +27,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
-import no.rmz.rmatch.impls.DFANodeImpl;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.PrintableEdge;
-import no.rmz.rmatch.interfaces.Regexp;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Utility class to dump the content of a graph as a Graphviz file.
@@ -59,6 +57,7 @@ public final class GraphDumper {
      */
     private static boolean isTerminalForAnyRegexp(final DFANode dfanode) {
         // XXX This could be cached in the DFANOde, but is it worth it?
+        // TODO: Optimization?
         checkNotNull(dfanode);
         for (final Regexp r : dfanode.getRegexps()) {
             if (dfanode.isTerminalFor(r)) {
@@ -246,15 +245,17 @@ public final class GraphDumper {
      * Dump all nodes  and the edges between them as graphviz representations
      * to the "out" PrintStream.
      * @param nodeStorage A set of nodes to dump.
-     * @param out the PrintSteram to dump a GraphViz representation to.
+     * @param ndfaOut the PrintSteram to dump a GraphViz representation to.
      */
     public static void dump(
             final NodeStorage nodeStorage,
-            final PrintStream out) {
+            final PrintStream ndfaOut,
+            final PrintStream dfaOut) {
         checkNotNull(nodeStorage);
-        checkNotNull(out);
-        dumpNdfa(nodeStorage.getNDFANodes(), out);
-        dumpDfa(nodeStorage.getDFANodes(), out);
+        checkNotNull(ndfaOut);
+        checkNotNull(dfaOut);
+        dumpNdfa(nodeStorage.getNDFANodes(), ndfaOut);
+        dumpDfa(nodeStorage.getDFANodes(), dfaOut);
     }
 
     /**
@@ -303,6 +304,10 @@ public final class GraphDumper {
 
         out.println("node [shape = doublecircle ];");
         for (final DFANode dfanode : dfaNodes) {
+            if (dfanode == null ) {
+                System.err.println("Detected a null node in the dfanodes list, should never happen!");
+            }
+
             if (isTerminalForAnyRegexp(dfanode)) {
                 out.printf("   %s\n", nodeName(dfanode));
             }

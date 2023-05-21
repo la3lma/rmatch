@@ -1,17 +1,17 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
  * <p>
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * <p>
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package no.rmz.rmatch.impls;
@@ -42,6 +42,7 @@ public final class MatchSetImpl implements MatchSet {
      */
     private static final Counter MY_COUNTER =
             Counters.newCounter("MatchSetImpl");
+
     /**
      * Commit this match relative to a bunch of other matches.
      * <p>
@@ -65,17 +66,18 @@ public final class MatchSetImpl implements MatchSet {
             final RunnableMatchesHolder runnableMatches) {
         assert (!m.isActive());
         assert (m.isFinal());
-        
+
         final boolean isDominating =
                 m.getRegexp().isDominating(m);
         final boolean isStronglyDominating =
                 m.getRegexp().isStronglyDominated(m);
-        
+
         if (isDominating && !isStronglyDominating) {
             runnableMatches.add(m);
             m.getMatchSet().removeMatch(m);
         }
     }
+
     /**
      * The set of matches being pursued through this MatchSetImpl.
      */
@@ -123,19 +125,7 @@ public final class MatchSetImpl implements MatchSet {
         //     of expressions, and thus a showstopper.
 
         for (final Regexp r : currentNode.getRegexps()) {
-            // TODO: This is a hotspot.  Can we use a heuristic that can
-            //       eliminate at least some of the new matches to be added?
-            //       If so, that will give a noticeable improvement in speed.  If we can
-            //       just halve the time spent we're in the business of beating
-            //       the java regex matcher. Example: Is the next character we will see
-            //       one that is compatible with adding a particular regex?  This
-            //       can maybe be stored in a table so that it's easily cached
-            //       and thus properly inner-loopy optimizable.
-            //       For some regexps we know which ones can start on a char,
-            //       and for those, maybe only run through exactly those and no others?
-            if (!r.excludedAsStartCharacter(peekedCharacter)) {
                 matches.add(startNode.newMatch(this, r));
-           }
         }
 
         // This was necessary to nail the bug caused by the natural
@@ -198,36 +188,35 @@ public final class MatchSetImpl implements MatchSet {
         currentNode = currentNode.getNext(currentChar, ns);
 
         if (currentNode == null) {
-            // Found no nodes going out of the current node, so we have
-            // to stop pursuing the matches we've already got.
-            // This actually marks the MatchSetImpl instance for
-            // destruction, but we won't do anything more about that fact
-            // from within this loop.
-
-            for (final Match m : matches) {
-                m.setInactive();
-                if (m.isFinal()) {
-                    commitMatch(m, runnableMatches);
-                    if (!m.isAbandoned()) {
-                        m.abandon(currentChar);
-                    }
-                }
-                removeMatch(m);
-            }
+            terminateAssociatedMatches(currentChar, runnableMatches);
             return;
         }
 
-        // Check if there are any regexps for which matches must fail
-        // for this node, and fail them.
-        if (currentNode.failsSomeRegexps()) {
-            for (final Match m : matches) {
-                if (currentNode.isFailingFor(m.getRegexp())) {
+        failMatchesThatCannotContinue(currentChar);
+
+        progressMatches(currentChar, currentPos, runnableMatches);
+    }
+
+    private void terminateAssociatedMatches(Character currentChar, RunnableMatchesHolder runnableMatches) {
+        // Found no nodes going out of the current node, so we have
+        // to stop pursuing the matches we've already got.
+        // This actually marks the MatchSetImpl instance for
+        // destruction, but we won't do anything more about that fact
+        // from within this loop.
+
+        for (final Match m : matches) {
+            m.setInactive();
+            if (m.isFinal()) {
+                commitMatch(m, runnableMatches);
+                if (!m.isAbandoned()) {
                     m.abandon(currentChar);
-                    matches.remove(m);
                 }
             }
+            removeMatch(m);
         }
+    }
 
+    private void progressMatches(Character currentChar, int currentPos, RunnableMatchesHolder runnableMatches) {
         // got a current  node, so we'll se what we can do to progress
         // the matches we've got.
         for (final Match m : matches) {
@@ -266,6 +255,19 @@ public final class MatchSetImpl implements MatchSet {
                 // If we're also in a final position for this match, note that
                 // fact so that we can trigger actions for this match.
                 m.setFinal(isFinal);
+            }
+        }
+    }
+
+    private void failMatchesThatCannotContinue(Character currentChar) {
+        // Check if there are any regexps for which matches must fail
+        // for this node, and fail them.
+        if (currentNode.failsSomeRegexps()) {
+            for (final Match m : matches) {
+                if (currentNode.isFailingFor(m.getRegexp())) {
+                    m.abandon(currentChar);
+                    matches.remove(m);
+                }
             }
         }
     }

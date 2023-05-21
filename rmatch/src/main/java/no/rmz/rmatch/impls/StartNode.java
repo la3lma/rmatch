@@ -1,35 +1,31 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
  * <p>
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * <p>
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package no.rmz.rmatch.impls;
 
 // XXX Don't mix: Either use some sort of NDFA with
-//     a charmap (and epsilons), or use something else. Don't mix!!!
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
+//     a charmap (and
+//     epsilons), or use something else. Don't mix!!!
+
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.PrintableEdge;
-import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.interfaces.*;
+
+import java.util.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A startnode is a special kind of node that a Node Storage has only one of. It
@@ -73,6 +69,7 @@ public final class StartNode extends AbstractNDFANode {
 
     // XXX Since we already have the NodeStorage, why do we need
     //     a parameter for it? This is almost certainly a bug. Fix.
+
     /**
      * Get the next DFA for a specific character.
      *
@@ -121,5 +118,9 @@ public final class StartNode extends AbstractNDFANode {
     @Override
     public Collection<PrintableEdge> getEdgesToPrint() {
         return getEpsilonEdgesToPrint();
+    }
+
+    public DFANodeImpl asDfaNode() {
+        return this.topDFA;
     }
 }
