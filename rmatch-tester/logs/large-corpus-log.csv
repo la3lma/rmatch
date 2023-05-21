@@ -16,3 +16,7 @@ timestamp,testSeriesId,metadata,matcherTypeName1,usedMemoryInMb1,durationInMilli
 1684157759873,65dcbf51-4263-49e5-b9b7-31151d53aa58,u/la3lma/bugfix-laden-den-anomality,rmatch,436,10341,java,69,756,112977,2,1154369
 1684157783284,42827c54-2a9b-42b6-b6be-e3525674511b,u/la3lma/bugfix-laden-den-anomality,rmatch,853,5928,java,67,551,112977,2,1154369
 1684157840213,2f1c9651-c766-444b-96d1-40fc6aa6f3a1,u/la3lma/bugfix-laden-den-anomality,rmatch,488,10292,java,68,1114,112977,2,1154369
+1684616624408,2c19e437-a8cb-4995-9ee5-2ef44a975f32,u/la3lma/bugfix-laden-den-anomality,rmatch,1295,165310,java,541,9875,1144409,8,1154369
+1684617778396,9d79a0eb-fd6e-4644-8e4b-4d566c63c8b4,u/la3lma/bugfix-laden-den-anomality,rmatch,2597,189487,java,542,8029,1144409,8,1154369
+1684618501386,6b74dc40-6f60-4872-a917-bd8607455cf7,u/la3lma/bugfix-laden-den-anomality,rmatch,1123,185346,java,545,8990,1144409,8,1154369
+1684619469284,be1b9ce1-6f43-4299-ad74-d361d38b08a8,u/la3lma/bugfix-laden-den-anomality,rmatch,2492,171732,java,545,7333,1144409,8,1154369
