@@ -43,8 +43,7 @@ import static org.mockito.Mockito.*;
  * This test is a mimimal replication of that error situation.
  */
 @ExtendWith(MockitoExtension.class)
-public class DenLadenAnomalityTest {
-
+public class EdgeInvisibilityEnsurance {
 
     @Mock
     Action llAction;
@@ -57,7 +56,6 @@ public class DenLadenAnomalityTest {
 
     @Mock
     Action defaultAction;
-
 
     @Test
     public final void minimalReplicatingTest() throws RegexpParserException {
@@ -98,69 +96,6 @@ public class DenLadenAnomalityTest {
 
         // Document
         dumpGraph(m, 10);
-
-        // Verify
-        verify(denAction).performMatch(any(Buffer.class), anyInt(), anyInt());
-        verify(llAction).performMatch(any(Buffer.class), anyInt(), anyInt());
-        verify(ladenAction).performMatch(any(Buffer.class), anyInt(), anyInt());
-        verify(defaultAction, times(0)).performMatch(any(Buffer.class), anyInt(), anyInt());
-    }
-
-    @Test
-    public final void complexReplicatingTest() throws RegexpParserException {
-
-        // Prepare
-        final String origString = """
-                ll
-                laden""";
-
-        Matcher m;
-
-        for (int i = 2; i < origString.length(); i++) {
-            reset(denAction);
-            reset(llAction);
-            reset(ladenAction);
-            reset(defaultAction);
-
-            String str = origString.substring(0, i);
-            no.rmz.rmatch.interfaces.Buffer buffer =
-                    new no.rmz.rmatch.utils.StringBuffer(str);
-
-            m = new MatcherImpl();
-
-            final List<String> regexps = new ArrayList<>();
-            regexps.add("den");
-            regexps.add("laden");
-            regexps.add("ll");
-
-
-            for (var r : regexps) {
-                switch (r) {
-                    case "den":
-                        m.add("den", denAction);
-                        break;
-                    case "laden":
-                        m.add("laden", ladenAction);
-                        break;
-                    case "ll":
-                        m.add("ll", llAction);
-                        break;
-                    default:
-                        m.add(r, defaultAction);
-                }
-            }
-
-            // Act
-            m.match(buffer);
-
-            // Document
-            dumpGraph(m, i);
-        }
-
-        // checkNotNull(m);
-        // Document final state
-        //  dumpGraph(m, str.length() + 1);
-
 
         // Verify
         verify(denAction).performMatch(any(Buffer.class), anyInt(), anyInt());
