@@ -227,7 +227,7 @@ public class SequenceLoaderTest {
     }
 
     /**
-     * This is the number of mathes we expect to see when looking for
+     * This is the number of matches we expect to see when looking for
      * matches using the "some-words-in..." list of words to look for.
      */
     private static final int NO_OF_OBSERVED_MATCHES_IN_SOME_REGEXP_TEST =
