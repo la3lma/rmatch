@@ -35,7 +35,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * This test is intended to replicate the behavior that when running against the
@@ -44,6 +44,10 @@ import static org.mockito.Mockito.verify;
  */
 @ExtendWith(MockitoExtension.class)
 public class DenLadenAnomalityTest {
+
+
+    @Mock
+    Action llAction;
 
     @Mock
     Action denAction;
@@ -54,26 +58,24 @@ public class DenLadenAnomalityTest {
     @Mock
     Action defaultAction;
 
-    /**
-     * Test matching the two regexps concurrently.
-     */
+
     @Test
     public final void minimalReplicatingTest() throws RegexpParserException {
 
         // Prepare
-        MatcherImpl mi = new MatcherImpl();
-        Matcher m = mi;
-
-        List<String> regexps = new ArrayList<>();
-        regexps.add("den");
-        regexps.add("laden");
-        regexps.add("ll");
-
-        final String str = """
+        final String origString = """
                 ll
                 laden""";
 
-        no.rmz.rmatch.interfaces.Buffer buffer = new no.rmz.rmatch.utils.StringBuffer(str);
+        no.rmz.rmatch.interfaces.Buffer buffer =
+                new no.rmz.rmatch.utils.StringBuffer(origString);
+
+        Matcher m = new MatcherImpl();
+
+        final List<String> regexps = new ArrayList<>();
+        regexps.add("den");
+        regexps.add("laden");
+        regexps.add("ll");
 
         for (var r : regexps) {
             switch (r) {
@@ -83,6 +85,9 @@ public class DenLadenAnomalityTest {
                 case "laden":
                     m.add("laden", ladenAction);
                     break;
+                case "ll":
+                    m.add("ll", llAction);
+                    break;
                 default:
                     m.add(r, defaultAction);
             }
@@ -91,20 +96,87 @@ public class DenLadenAnomalityTest {
         // Act
         m.match(buffer);
 
-
         // Document
-        try {
-            GraphDumper.dump(
-                    mi.getNodeStorage(),
-                    new PrintStream(new File("graphs/ladenPostRunningNdfa.gv")),
-                    new PrintStream(new File("graphs/ladenPostRunningDfa.gv")));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+        dumpGraph(m, 10);
+
+        // Verify
+        verify(denAction).performMatch(any(Buffer.class), anyInt(), anyInt());
+        verify(llAction).performMatch(any(Buffer.class), anyInt(), anyInt());
+        verify(ladenAction).performMatch(any(Buffer.class), anyInt(), anyInt());
+        verify(defaultAction, times(0)).performMatch(any(Buffer.class), anyInt(), anyInt());
+    }
+
+    @Test
+    public final void complexReplicatingTest() throws RegexpParserException {
+
+        // Prepare
+        final String origString = """
+                ll
+                laden""";
+
+        Matcher m;
+
+        for (int i = 2; i < origString.length(); i++) {
+            reset(denAction);
+            reset(llAction);
+            reset(ladenAction);
+            reset(defaultAction);
+
+            String str = origString.substring(0, i);
+            no.rmz.rmatch.interfaces.Buffer buffer =
+                    new no.rmz.rmatch.utils.StringBuffer(str);
+
+            m = new MatcherImpl();
+
+            final List<String> regexps = new ArrayList<>();
+            regexps.add("den");
+            regexps.add("laden");
+            regexps.add("ll");
+
+
+            for (var r : regexps) {
+                switch (r) {
+                    case "den":
+                        m.add("den", denAction);
+                        break;
+                    case "laden":
+                        m.add("laden", ladenAction);
+                        break;
+                    case "ll":
+                        m.add("ll", llAction);
+                        break;
+                    default:
+                        m.add(r, defaultAction);
+                }
+            }
+
+            // Act
+            m.match(buffer);
+
+            // Document
+            dumpGraph(m, i);
         }
+
+        // checkNotNull(m);
+        // Document final state
+        //  dumpGraph(m, str.length() + 1);
 
 
         // Verify
-        verify(denAction).performMatch(any(Buffer.class),   anyInt(), anyInt());
+        verify(denAction).performMatch(any(Buffer.class), anyInt(), anyInt());
+        verify(llAction).performMatch(any(Buffer.class), anyInt(), anyInt());
         verify(ladenAction).performMatch(any(Buffer.class), anyInt(), anyInt());
+        verify(defaultAction, times(0)).performMatch(any(Buffer.class), anyInt(), anyInt());
+    }
+
+    private static void dumpGraph(Matcher mi, int index) {
+        try {
+            GraphDumper.dump(
+                    mi.getNodeStorage(),
+                    new PrintStream(new File(String.format("graphs/ladenPostRunningNdfa-%d.gv", index))),
+                    new PrintStream(new File(String.format("graphs/ladenPostRunningDfa-%d.gv", index))));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

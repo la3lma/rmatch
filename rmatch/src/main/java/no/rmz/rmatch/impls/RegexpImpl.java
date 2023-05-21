@@ -69,13 +69,6 @@ public final class RegexpImpl implements Regexp {
      */
     private NDFANode myNode;
 
-
-    /**
-     * The set of characters that by example has been proven not to be possible to start
-     * this regexp with.
-     */
-    private final Set<Character> nonStartingChars = Collections.synchronizedSet(new HashSet<>());
-
     /**
      * Make a new instance of Regexp representing a regular expression.
      *
@@ -229,11 +222,6 @@ public final class RegexpImpl implements Regexp {
         checkArgument(hasMatches());
         checkArgument(hasMatch(m));
 
-        if (m.isZeroLength() && currentChar != null) {
-            this.nonStartingChars.add(currentChar);
-        }
-
-
         final MatchSet ms = m.getMatchSet();
 
         final DominationHeap dh = getDominationHeap(ms);
@@ -313,10 +301,5 @@ public final class RegexpImpl implements Regexp {
         checkNotNull(m);
         final MatchSet ms = m.getMatchSet();
         return (heaps != null) && (heaps.get(ms) != null);
-    }
-
-    @Override
-    public boolean excludedAsStartCharacter(Character character) {
-        return this.nonStartingChars.contains(character);
     }
 }
