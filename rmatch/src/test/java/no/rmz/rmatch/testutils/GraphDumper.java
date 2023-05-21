@@ -57,6 +57,7 @@ public final class GraphDumper {
      */
     private static boolean isTerminalForAnyRegexp(final DFANode dfanode) {
         // XXX This could be cached in the DFANOde, but is it worth it?
+        // TODO: Optimization?
         checkNotNull(dfanode);
         for (final Regexp r : dfanode.getRegexps()) {
             if (dfanode.isTerminalFor(r)) {
@@ -303,6 +304,10 @@ public final class GraphDumper {
 
         out.println("node [shape = doublecircle ];");
         for (final DFANode dfanode : dfaNodes) {
+            if (dfanode == null ) {
+                System.err.println("Detected a null node in the dfanodes list, should never happen!");
+            }
+
             if (isTerminalForAnyRegexp(dfanode)) {
                 out.printf("   %s\n", nodeName(dfanode));
             }
