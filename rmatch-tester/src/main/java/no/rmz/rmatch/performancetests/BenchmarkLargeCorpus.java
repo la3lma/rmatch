@@ -67,7 +67,7 @@ public final class BenchmarkLargeCorpus {
         // Parse command line
 
         // TODO: Get these from the command line:
-        String logfile = "logs/large-corpus-log.csv";
+        String logfile = "rmatch-tester/logs/large-corpus-log.csv";
         String testSeriesId = valueOf(UUID.randomUUID());
 
         if (argv.length < 3) {
