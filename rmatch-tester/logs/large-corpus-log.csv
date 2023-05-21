@@ -23,3 +23,4 @@ timestamp,testSeriesId,metadata,matcherTypeName1,usedMemoryInMb1,durationInMilli
 1684686755497,f6274c78-5ddc-429d-96ba-3c615b3ef6e2,u/la3lma/bugfix-laden-den-anomality,rmatch,630,77670,java,534,8660,1144409,8,1154369
 1684690298317,cfe9ab64-67ed-452f-bc2c-e1888bbef761,u/la3lma/optimize-using-chatgtp,rmatch,544,270680,java,534,38350,1144409,8,1154369
 1684694087580,c97bd1d8-f33d-4e24-bc31-19b4d2da448a,u/la3lma/optimize-using-chatgtp,rmatch,1121,685808,java,518,23044,1144409,8,1154369
+1684701470283,e7bfc22e-426f-49e8-b021-cb8a1d0e5772,u/la3lma/optimize-using-chatgtp,rmatch,1066,126728,java,519,7290,1144409,8,1154369

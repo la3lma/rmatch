@@ -1,17 +1,17 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
  * <p>
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * <p>
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package no.rmz.rmatch.impls;
@@ -21,6 +21,9 @@ import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -49,33 +52,28 @@ public final class DFANodeImpl implements DFANode {
      * going out of this node, but these are the nodes that has been encountered
      * so far during matching.
      */
-    private final Map<Character, DFANode> nextMap = new HashMap<>();
+    private final ConcurrentMap<Character, DFANode> nextMap = new ConcurrentHashMap<>();
+
     /**
-     * A map, corresponding to the nextMap, stating if the entry for a
-     * particular character is valid or not.
-     */
-    private final Map<Character, Boolean> known = new HashMap<>();
-    /**
-     * The set of NDFANodes that this DFA node is representing.
+     * The set of NDFANodes that this DFA node is representing.  It is immutable!
+     * TODO: Make this into an immutable set.
      */
     private final SortedSet<NDFANode> basis = new TreeSet<>();
-    /**
-     * Monitor for synchronized access to methods.
-     */
-    private final Object monitor = new Object();
+
     /**
      * The set of regular expressions for which this node will make a match
      * fail.
      */
-    private final Set<Regexp> isFailingSet = new HashSet<>();
+    private final Set<Regexp> isFailingSet = ConcurrentHashMap.newKeySet();
+
     /**
      * An unique (per VM) id for this DFANode.
      */
     private final long id;
     /**
-     * A cache used to memoize check for finality for particular regexprs.
+     * A cache used to memoize check for finality for particular regexps.
      */
-    private final Map<Regexp, Boolean> baseisFinalCache;
+    private final Map<Regexp, Boolean> baseIsFinalCache = new ConcurrentHashMap<>();
 
     /**
      * Create a new DFA based representing a set of NDFA nodes.
@@ -84,7 +82,6 @@ public final class DFANodeImpl implements DFANode {
      * represent.
      */
     public DFANodeImpl(final Set<NDFANode> ndfanodeset) {
-        this.baseisFinalCache = new HashMap<>();
         basis.addAll(ndfanodeset);
         initialize(basis);
         id = COUNTER.inc();
@@ -106,7 +103,6 @@ public final class DFANodeImpl implements DFANode {
             if (node.isTerminal()) {
                 r.addTerminalNode(this);
             }
-
 
             if (node.isFailing()) {
                 isFailingSet.add(r);
@@ -164,9 +160,7 @@ public final class DFANodeImpl implements DFANode {
 
     @Override
     public void addLink(final Character c, final DFANode n) {
-        synchronized (monitor) {
-            nextMap.put(c, n);
-        }
+        nextMap.put(c, n);
     }
 
     @Override
@@ -175,57 +169,34 @@ public final class DFANodeImpl implements DFANode {
     }
 
     /**
-     * Get the next basis for a DFANode by persuing the current basis through
+     * Get the next basis for a DFANode by pursuing the current basis through
      * the character.
      *
      * @param ch the character to explore.
      * @return A set of NDFANodes that serves as basis for the next DFANode.
      */
     private SortedSet<NDFANode> getNextThroughBasis(final Character ch) {
-        synchronized (monitor) {
-            final SortedSet<NDFANode> result = new TreeSet<>();
-            for (final NDFANode n : basis) {
-                final SortedSet<NDFANode> nextSet = n.getNextSet(ch);
-                result.addAll(nextSet);
-            }
-            return result;
-        }
+        return basis.parallelStream()
+                .flatMap(n -> n.getNextSet(ch).stream())
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     @Override
     public DFANode getNext(final Character ch, final NodeStorage ns) {
-        synchronized (monitor) {
-            if (known.containsKey(ch)) {
-                return nextMap.get(ch);
-            }
+        return nextMap.computeIfAbsent(ch, key -> {
+            KNOWN_DFA_EDGES_COUNTER.inc();
 
             final SortedSet<NDFANode> nodes = getNextThroughBasis(ch);
-
-            DFANode dfaNode = null;
             if (!nodes.isEmpty()) {
-                dfaNode = ns.getDFANode(nodes);
-                nextMap.put(ch, dfaNode);
+                return ns.getDFANode(nodes);
             }
-
-            KNOWN_DFA_EDGES_COUNTER.inc();
-            known.put(ch, Boolean.TRUE);
-            if (dfaNode != null) {
-                return dfaNode;
-            }
-        }
-
-        // Now, either this will return a node, or a null, and in
-        // any case that is what we know is the node
-        // we'll get to by following
-        // the ch.
-        return nextMap.get(ch);
+            return null;
+        });
     }
 
     @Override
     public void removeLink(final Character c) {
-        synchronized (monitor) {
-            nextMap.remove(c);
-        }
+        nextMap.remove(c);
     }
 
     @Override
@@ -244,21 +215,9 @@ public final class DFANodeImpl implements DFANode {
      * @return true iff this node is final for r.
      */
     private boolean baseIsFinalFor(final Regexp r) {
-        synchronized (monitor) {
-
-            if (baseisFinalCache.containsKey(r)) {
-                return baseisFinalCache.get(r);
-            }
-
-            for (final NDFANode n : basis) {
-                if (r.hasTerminalNdfaNode(n)) {
-                    baseisFinalCache.put(r, true);
-                    return true;
-                }
-            }
-            baseisFinalCache.put(r, false);
-            return false;
-        }
+        return baseIsFinalCache.computeIfAbsent(r, key ->
+                basis.stream().anyMatch(n -> key.hasTerminalNdfaNode(n))
+        );
     }
 
     @Override
