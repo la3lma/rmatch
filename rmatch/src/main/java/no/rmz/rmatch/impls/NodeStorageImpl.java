@@ -92,8 +92,11 @@ public final class NodeStorageImpl implements NodeStorage {
 
     @Override
     public Collection<DFANode> getDFANodes() {
-        synchronized (ndfamap) {
-            return ndfamap.values();
+        synchronized (this.ndfamap) {
+            final List<DFANode>  result = new ArrayList<>();
+            result.addAll(this.ndfamap.values());
+            result.add(sn.asDfaNode());
+            return result;
         }
     }
 
