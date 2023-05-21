@@ -6,8 +6,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.matchComparator;
@@ -55,17 +53,6 @@ final class MatchPairAnalysis {
         this.rmatchMatches.addAll(rmatchResult.loggedMatches());
 
         findMismatches(javaMatches, rmatchMatches);
-
-        AtomicBoolean foundLaden = new AtomicBoolean(false);
-        rmatchMatches.stream().filter(c -> c.regex().equals("laden")).collect(Collectors.toList()).forEach(
-                m -> {
-                    System.out.println("laden match  = " + m);
-                    foundLaden.set(true);
-                });
-
-        if (!foundLaden.get()) {
-            System.out.println("Couldn't find laden matches");
-        }
 
         // Analyze first java mismatch (if any)
         if (javaMatches.size() > 0) {
