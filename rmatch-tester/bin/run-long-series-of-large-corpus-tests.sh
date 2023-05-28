@@ -30,11 +30,12 @@ if [ -z "$SERIES_ID" ]; then
     exit 1
 fi
 
-NO_OF_REGEXS=10000
+# Either a specific number, of -1 for all regexps.
+NO_OF_REGEXS=-1
 
 ## Run a test series
 
-LENGTH_OF_SERIES=3
+LENGTH_OF_SERIES=10
 echo "Running test series ${SERIES_ID}"
 
 iteration=0
