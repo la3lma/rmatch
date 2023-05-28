@@ -148,7 +148,7 @@ public final class MatcherBenchmarker {
                         "noOfMismatches," +
                         "noOfRegexps," +
                         "corpusLength," +
-                        "1to2Ratio");
+                        "2to1Ratio");
             }
 
             pw.println(convertToCsv(summary));
