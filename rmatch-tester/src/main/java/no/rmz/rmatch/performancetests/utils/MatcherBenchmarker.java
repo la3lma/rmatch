@@ -178,6 +178,7 @@ public final class MatcherBenchmarker {
                 Long.toString(summary.durationInMillis2()),
                 Integer.toString(summary.noOfMatches()),
                 Integer.toString(summary.noOfMismatches()),
+                Integer.toString(summary.noOfRegexps()),
                 Integer.toString(summary.corpusLength())
         };
         return Stream.of(data)
