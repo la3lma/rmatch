@@ -67,11 +67,10 @@ public final class BenchmarkLargeCorpus {
         // Parse command line
 
         // TODO: Get these from the command line:
-        String logfile = "rmatch-tester/logs/large-corpus-log.csv";
-        String testSeriesId = valueOf(UUID.randomUUID());
+        String logfile = "logs/large-corpus-log.csv";
 
-        if (argv.length < 3) {
-            System.err.println("Not enough parameters. Require at least 3: no of regexps, file where regexps are stored, one or more files to search through");
+        if (argv.length < 4) {
+            System.err.println("Not enough parameters. Require at least 3: no of regexps, file where regexps are stored, series-ID (or empty string if auto-generated) one or more files to search through");
             System.exit(1);
         }
 
@@ -84,7 +83,15 @@ public final class BenchmarkLargeCorpus {
         final int argvNoOfRegexps = Integer.parseInt(argv[0]);
         final List<String> regexps = readRegexpsFromFile(nameOfRegexpFile, argvNoOfRegexps);
         final int actualNoOfRegexps = regexps.size();
-        final StringBuilder corpus = getStringBuilderFromFileContent(Arrays.copyOfRange(argv, 2, argv.length));
+
+        String testSeriesId = valueOf(UUID.randomUUID());
+        String idFromArgv = argv[2].trim();
+        if (idFromArgv.length() > 0) {
+            testSeriesId = idFromArgv;
+        }
+
+        final StringBuilder corpus = getStringBuilderFromFileContent(Arrays.copyOfRange(argv, 3, argv.length));
+
 
         // Report what we intend to do
         System.out.println("About to match " + actualNoOfRegexps + " regexps from " + "'" + nameOfRegexpFile + "'" + " then match them against a bunch of files");
