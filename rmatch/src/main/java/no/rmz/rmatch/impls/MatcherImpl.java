@@ -16,17 +16,11 @@
 
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
 import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.MatchEngine;
-import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NDFACompiler;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.RegexpFactory;
-import no.rmz.rmatch.interfaces.RegexpStorage;
+import no.rmz.rmatch.interfaces.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An implementation ofthe Matcher interface that hooks together
@@ -61,8 +55,6 @@ public final class MatcherImpl implements Matcher {
     public MatcherImpl() {
         this(new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
     }
-
-
 
     /**
      * This is useful for testing when we sometimes want to
