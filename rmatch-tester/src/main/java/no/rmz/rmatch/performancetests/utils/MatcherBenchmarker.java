@@ -147,7 +147,8 @@ public final class MatcherBenchmarker {
                         "noOfMatches," +
                         "noOfMismatches," +
                         "noOfRegexps," +
-                        "corpusLength");
+                        "corpusLength," +
+                        "1to2Ratio");
             }
 
             pw.println(convertToCsv(summary));
@@ -179,7 +180,8 @@ public final class MatcherBenchmarker {
                 Integer.toString(summary.noOfMatches()),
                 Integer.toString(summary.noOfMismatches()),
                 Integer.toString(summary.noOfRegexps()),
-                Integer.toString(summary.corpusLength())
+                Integer.toString(summary.corpusLength()),
+                Float.toString((float)summary.durationInMillis1() / (float)summary.durationInMillis2())
         };
         return Stream.of(data)
                 .map(c -> escapeSpecialCharacters(c))
