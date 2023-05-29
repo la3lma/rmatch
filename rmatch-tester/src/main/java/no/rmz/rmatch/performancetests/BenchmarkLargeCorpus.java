@@ -67,11 +67,10 @@ public final class BenchmarkLargeCorpus {
         // Parse command line
 
         // TODO: Get these from the command line:
-        String logfile = "rmatch-tester/logs/large-corpus-log.csv";
-        String testSeriesId = valueOf(UUID.randomUUID());
+        String logfile = "logs/large-corpus-log.csv";
 
-        if (argv.length < 3) {
-            System.err.println("Not enough parameters. Require at least 3: no of regexps, file where regexps are stored, one or more files to search through");
+        if (argv.length < 4) {
+            System.err.println("Not enough parameters. Require at least 3: no of regexps, file where regexps are stored, series-ID (or empty string if auto-generated) one or more files to search through");
             System.exit(1);
         }
 
@@ -81,12 +80,21 @@ public final class BenchmarkLargeCorpus {
             System.exit(1);
         }
 
-        int noOfRegexps = Integer.parseInt(argv[0]);
-        final List<String> regexps = readRegexpsFromFile(nameOfRegexpFile, noOfRegexps);
-        final StringBuilder corpus = getStringBuilderFromFileContent(Arrays.copyOfRange(argv, 2, argv.length));
+        final int argvNoOfRegexps = Integer.parseInt(argv[0]);
+        final List<String> regexps = readRegexpsFromFile(nameOfRegexpFile, argvNoOfRegexps);
+        final int actualNoOfRegexps = regexps.size();
+
+        String testSeriesId = valueOf(UUID.randomUUID());
+        String idFromArgv = argv[2].trim();
+        if (idFromArgv.length() > 0) {
+            testSeriesId = idFromArgv;
+        }
+
+        final StringBuilder corpus = getStringBuilderFromFileContent(Arrays.copyOfRange(argv, 3, argv.length));
+
 
         // Report what we intend to do
-        System.out.println("About to match " + noOfRegexps + " regexps from " + "'" + nameOfRegexpFile + "'" + " then match them against a bunch of files");
+        System.out.println("About to match " + actualNoOfRegexps + " regexps from " + "'" + nameOfRegexpFile + "'" + " then match them against a bunch of files");
         System.out.println("that contains in total " + corpus.length() + " characters");
 
         // TODO: Make sure that the results from the matchers are identical (right now they are not!)
@@ -98,16 +106,19 @@ public final class BenchmarkLargeCorpus {
 
         // Then run the test
         final Matcher m = MatcherFactory.newMatcher();
-        Buffer buf = new StringBuffer(corpus.toString());
+        final String corpusString = corpus.toString();
+        Buffer buf = new StringBuffer(corpusString);
 
 
         System.out.println("========");
         System.out.println("Run the native matcher");
+
         // Run the regex matcher
         TestRunResult rmatchResult = testACorpusNG("rmatch", m, regexps, buf);
 
+
+        // Run the java regex matcher, but only after we've done a GC to free up memory.
         System.gc();
-        // Run the java regex  matcher
         System.out.println("========");
         System.out.println("Run the java matcher");
         JavaRegexpMatcher jm = new JavaRegexpMatcher();
@@ -128,13 +139,13 @@ public final class BenchmarkLargeCorpus {
         final MatchPairAnalysis analysis = new MatchPairAnalysis(
                 testSeriesId,
                 metadata,
-                noOfRegexps,
-                corpus.length(),
+                actualNoOfRegexps,
+                corpusString.length(),
                 javaResult,
                 rmatchResult);
         analysis.printSummary(System.out);
 
-        // Todo: Look at only the first mismatch, in the java set.  See where the match with the least
+        // TODO: Look at only the first mismatch, in the java set.  See where the match with the least
         //       difference to the one not matching exists in the other set (the original set). Also seee which
         //       matches _do_ exist for the interval being covered by the mismatched element and report that.
         //       The hypotheses are that there is either an alignment problem, a dominance problem, or simply that
@@ -147,7 +158,7 @@ public final class BenchmarkLargeCorpus {
         System.exit(0);
     }
 
-    public static StringBuilder getStringBuilderFromFileContent(String[] filenameList) {
+    public static StringBuilder getStringBuilderFromFileContent(final String[] filenameList) {
         StringBuilder corpus = new StringBuilder();
         for (int i = 0; i < filenameList.length; i++) {
             String filePath = filenameList[i];
