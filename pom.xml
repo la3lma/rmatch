@@ -50,7 +50,7 @@
         <mavenSourcePlugin.version>2.2</mavenSourcePlugin.version>
         <mavenSurefire.version>3.1.0</mavenSurefire.version>
         <mockitoCore.version>5.3.1</mockitoCore.version>
-        <mockitoJunitJupiter.version>5.9.2</mockitoJunitJupiter.version>
+        <mockitoJunitJupiter.version>5.9.3</mockitoJunitJupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
