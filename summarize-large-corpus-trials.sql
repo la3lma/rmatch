@@ -1,0 +1,20 @@
+select min(timestamp) as timestamp,
+       testSeriesId,
+       metadata,
+       noOfMatches,
+       noOfMismatches,
+       corpusLength,
+       noOfRegexps,
+       min(durationInMillis1) as 'minJavaDuration',
+       max(durationInMillis1) as 'maxJavaDuration',
+       avg(durationInMillis1) as 'avgJavaDuration',
+       min(durationInMillis2) as 'minRegexDuration',
+       max(durationInMillis2) as 'maxRegexDuration',
+       avg(durationInMillis2) as 'avgRegexuration',
+--       stdev(durationInMillis1) as 'stdevJavaDuration',
+--       stdev(durationInMillis2) as 'stdevRegexDuration',
+       ((1.0*min(durationInMillis1))/(1.0*min(durationInMillis2))) as 'minMinRatio',
+       ((1.0*max(durationInMillis1))/(1.0*max(durationInMillis2))) as 'maxMaxRatio',
+       ((1.0*avg(durationInMillis1))/(1.0*avg(durationInMillis2))) as 'avgAvgRatio'
+--       ((1.0*stdev(durationInMillis1))/(1.0*stdev(durationInMillis2))) as 'stdevStdevRatio'
+from Measurements  where timestamp >= 1685294890722 group by testSeriesId  order by timestamp asc;
