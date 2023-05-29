@@ -1,8 +1,6 @@
 # Right now
-* Copy all of the benchmarking code from the chatgpt2 branh to master 
-* including the logdata
-* Run all of the benchmarks in master branch to establish baseline.
-* Modify benchmarking code to be able to just run rmatch or java regexps.  There is much more variation in the performance of java regexps, so we need a larger sample size to get reliable data (also I'm genuinely wondering why the variation is so large)
+* Wrap it up
+* Make sure it is correct
 * Start looking for more ways to fix concurrency issues.
 * Using the focused test, figure out what goes wrong.
    * Print out the NDFA graph
