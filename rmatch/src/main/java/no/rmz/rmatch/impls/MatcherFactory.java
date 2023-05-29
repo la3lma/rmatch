@@ -17,11 +17,12 @@
 
 package no.rmz.rmatch.impls;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.RegexpFactory;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 
 
 /**
@@ -44,8 +45,6 @@ public class MatcherFactory {
      */
     private static final int AVAILABLE_PROCESSORS
             = OS_MBEAN.getAvailableProcessors();
-
-
 
     /**
      * Return a matcher that is assumed to be optimal for the current execution
