@@ -1,5 +1,5 @@
 # Right now
-* Wrap it up
+* Make the lage-corpus-log thingy be parsed and interpreted by a notebook.  We shouldn't be making optimizations that are not optimizing.
 * Make sure it is correct
 * Start looking for more ways to fix concurrency issues.
 * Using the focused test, figure out what goes wrong.
