@@ -13,8 +13,9 @@ select min(timestamp) as timestamp,
        avg(durationInMillis1) as 'avgRegexDuration',
 --       stdev(durationInMillis2) as 'stdevJavaDuration',
 --       stdev(durationInMillis1) as 'stdevRegexDuration',
+       ((1.0*min(durationInMillis1))/6154) as 'againstBestJavaRatio',
        ((1.0*min(durationInMillis1))/(1.0*min(durationInMillis2))) as 'minMinRatio',
        ((1.0*max(durationInMillis1))/(1.0*max(durationInMillis2))) as 'maxMaxRatio',
        ((1.0*avg(durationInMillis1))/(1.0*avg(durationInMillis2))) as 'avgAvgRatio'
 --       ((1.0*stdev(durationInMillis1))/(1.0*stdev(durationInMillis2))) as 'stdevStdevRatio'
-from Measurements  where timestamp >= 1685294890722 group by testSeriesId  order by timestamp asc;
+from Measurements  where timestamp >= 1685300128023 group by testSeriesId  order by timestamp asc;
