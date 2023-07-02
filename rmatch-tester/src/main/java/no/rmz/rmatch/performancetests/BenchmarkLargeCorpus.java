@@ -17,7 +17,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.valueOf;
@@ -31,12 +30,11 @@ import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.writeSumma
 public final class BenchmarkLargeCorpus {
 
     private static String byteArrayToHexString(byte[] b) {
-        String result = "";
-        for (int i=0; i < b.length; i++) {
-            result +=
-                    Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
+        StringBuilder result = new StringBuilder();
+        for (byte value : b) {
+            result.append(Integer.toString((value & 0xff) + 0x100, 16).substring(1));
         }
-        return result;
+        return result.toString();
     }
 
     public static String getCurrentGitBranch() throws IOException, InterruptedException {
@@ -160,8 +158,7 @@ public final class BenchmarkLargeCorpus {
 
     public static StringBuilder getStringBuilderFromFileContent(final String[] filenameList) {
         StringBuilder corpus = new StringBuilder();
-        for (int i = 0; i < filenameList.length; i++) {
-            String filePath = filenameList[i];
+        for (String filePath : filenameList) {
             File file = new File(filePath);
             if (!file.exists()) {
                 System.err.println("Corpus file does not exist:'" + filePath + "'");
@@ -193,7 +190,7 @@ public final class BenchmarkLargeCorpus {
     }
 
 
-    public final static List<String> readRegexpsFromFile(String nameOfRegexpFile, int noOfRegexps) {
+    public static List<String> readRegexpsFromFile(String nameOfRegexpFile, int noOfRegexps) {
         List<String> allRegexps = null;
         try {
             allRegexps = Files.readAllLines(Paths.get(nameOfRegexpFile));
@@ -203,7 +200,7 @@ public final class BenchmarkLargeCorpus {
         }
 
         // Clean up the set of regexps a little.
-        allRegexps = allRegexps.stream().filter(c -> c.trim().length() != 0).distinct().collect(Collectors.toUnmodifiableList());
+        allRegexps = allRegexps.stream().filter(c -> c.trim().length() != 0).distinct().toList();
 
         String algorithm = "SHA-1";
 
@@ -220,7 +217,7 @@ public final class BenchmarkLargeCorpus {
             regexMap.put(byteArrayToHexString(md.digest(r.getBytes())), r);
         }
 
-        allRegexps = regexMap.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toUnmodifiableList());
+        allRegexps = regexMap.values().stream().toList();
 
         if (noOfRegexps == -1) {
             noOfRegexps = allRegexps.size();

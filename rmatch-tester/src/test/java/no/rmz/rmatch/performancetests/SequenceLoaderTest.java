@@ -215,7 +215,8 @@ public class SequenceLoaderTest {
                 testWithRegexpsFromFile(VERY_FEW_WORDS_FROM_WUTHERING_HEIGHTS);
         // XXX The number of matches needs to be verified.  The number
         //     we use now is fundamentally bogus!
-        assertTrue(result.getDuration() < MAX_TIME_TO_USE_IN_MILLIS);
+        assertTrue(result.getDuration() < MAX_TIME_TO_USE_IN_MILLIS,
+                "Used too much time: " + result.getDuration() + ".  Expected less than " + MAX_TIME_TO_USE_IN_MILLIS);
         System.out.println("Used this much memory: " + result.getMaxNoOfMbsUsed());
         assertTrue(result.getMaxNoOfMbsUsed() < MAX_MEMORY_TO_USE_IN_MB);
 
