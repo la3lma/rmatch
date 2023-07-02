@@ -1,4 +1,7 @@
 # Right now
+
+* Take a look at https://stackoverflow.com/questions/7989658/java-what-is-the-overhead-of-using-concurrentskiplist-when-no-concurrency-is-ne
+  and see if it is worth it to use ConcurrentSkipListMap instead of TreeMap, or even a sorted list with no concurrency. The heuristic seems to be hat the added overhead for the concurrently safe things are only worth wile doing if there is a lot of concurrency or a lot of data, t the way we have prtitioned the thihgs we are working on that may not be the case. Perhaps some benchmarking on the size of the set would be in order.
 * Wrap it up
 * Make sure it is correct
 * Start looking for more ways to fix concurrency issues.

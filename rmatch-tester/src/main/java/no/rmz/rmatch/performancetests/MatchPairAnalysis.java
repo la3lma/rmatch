@@ -135,6 +135,7 @@ final class MatchPairAnalysis {
         out.println("\nNumber of mismatches = " + numberOfMismatchesDetected);
         out.println("Number of matches    = " + numberOfCorrespondingMatchesDetected);
         out.println("Sum of matches and mismatches = " + (numberOfMismatchesDetected + numberOfCorrespondingMatchesDetected));
+        out.println("Native to regexp ratio = " + (float)this.originalRmatchResult.durationInMillis()  / (float)this.originalJavaResult.durationInMillis());
     }
 
     public MatcherBenchmarker.TestPairSummary getResult() {
