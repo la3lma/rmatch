@@ -159,4 +159,8 @@ public interface Match {
     default boolean isZeroLength() {
         return (this.getEnd() - this.getStart()) == 0;
     }
+
+    default boolean notReadyForCommit() {
+        return !isFinal() || isActive();
+    }
 }

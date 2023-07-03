@@ -287,8 +287,7 @@ public final class MatchSetImpl implements MatchSet {
         final Set<Regexp> visitedRegexps = new HashSet<>();
 
         for (final Match m : matches) {
-            // We can't commit what isn't final or is still active
-            if (!m.isFinal() || m.isActive()) {
+            if (m.notReadyForCommit()) {
                 continue;
             }
             final Regexp r = m.getRegexp();
