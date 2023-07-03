@@ -24,12 +24,13 @@ import no.rmz.rmatch.impls.DominationHeap;
  */
 public interface Regexp extends Comparable<Regexp> {
 
+
     /**
      * Remove all references that the regexp has to the match m.
      *
      * @param m the match to remove references to.
      */
-    void abandonMatch(final Match m, Character currentChar);
+    void abandonMatch(final Match m, final Character currentChar);
 
     /**
      * Add an action to a regexp.

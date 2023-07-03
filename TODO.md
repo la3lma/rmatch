@@ -1,5 +1,5 @@
 # Right now
-
+* Consider using assert instead of notnull, to ensure runtime efficiency.
 * Set up a github action build for PRs (and main).
 * Set up code quality feedback for the builds.
 * If it makes sense, put some of the main statistics on the front page to announce where this is headed.

@@ -18,7 +18,10 @@ package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.interfaces.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -50,6 +53,8 @@ public final class RegexpImpl implements Regexp {
      * this regular expression.
      */
     private final Set<Node> activeNodes = new HashSet<>();
+
+
     /**
      * The set of nodes that permit successful termination of matches for this
      * regular expression.
@@ -216,7 +221,7 @@ public final class RegexpImpl implements Regexp {
     }
 
     @Override
-    public void abandonMatch(final Match m, Character currentChar) {
+    public void abandonMatch(final Match m, final Character currentChar) {
         checkNotNull(m);
         checkArgument(this == m.getRegexp());
         checkArgument(hasMatches());
