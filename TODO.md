@@ -1,5 +1,8 @@
 # Right now
 
+* Set up a github action build for PRs (and main).
+* Set up code quality feedback for the builds.
+* If it makes sense, put some of the main statistics on the front page to announce where this is headed.
 * Take a look at https://stackoverflow.com/questions/7989658/java-what-is-the-overhead-of-using-concurrentskiplist-when-no-concurrency-is-ne
   and see if it is worth it to use ConcurrentSkipListMap instead of TreeMap, or even a sorted list with no concurrency. The heuristic seems to be hat the added overhead for the concurrently safe things are only worth wile doing if there is a lot of concurrency or a lot of data, t the way we have prtitioned the thihgs we are working on that may not be the case. Perhaps some benchmarking on the size of the set would be in order.
 * Wrap it up
@@ -9,7 +12,6 @@
    * Print out the NDFA graph
    * Maybe also the DFA graph, but that probably is less useful.
    * Scratch head until enlightment hits.
-* Set up a github action build for PRs (and main).
   https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
 * Look at how to make static string regexps even more efficient at pruning based on first char.
 * Consider making a notebook to track progress over time instead of the wretched shellscripts currently there.
