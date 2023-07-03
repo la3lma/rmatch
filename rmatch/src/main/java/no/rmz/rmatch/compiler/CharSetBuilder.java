@@ -2,14 +2,17 @@
 
 package no.rmz.rmatch.compiler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A builder for a CharSet.
@@ -64,24 +67,7 @@ public final class CharSetBuilder {
         // characters of the character set, then we will fail the match
         // by getting to  a failing node.
         if (isInverted) {
-            final NDFANode failingMatchNode = new FailNode(regexp);
-            intermediateNode = failingMatchNode;
-            final NDFANode gettingThroughAnyhow =
-                    new AbstractNDFANode(regexp, false) {
-                        @Override
-                        public NDFANode getNextNDFA(final Character ch) {
-                            return endNode;
-                        }
-
-                        @Override
-                        public Collection<PrintableEdge> getEdgesToPrint() {
-                            final Collection<PrintableEdge> result =
-                                    getEpsilonEdgesToPrint();
-                            result.add(new PrintableEdge(".", endNode));
-                            return result;
-                        }
-                    };
-            arrival.addEpsilonEdge(gettingThroughAnyhow);
+            intermediateNode = createInvertedMatch(arrival, endNode);
         } else {
             intermediateNode = endNode;
         }
@@ -90,7 +76,7 @@ public final class CharSetBuilder {
         // and pass through to the intermediate node if matching
         // one of the chars.
         for (int i = str.length() - 1; i >= 0; i--) {
-            final Character myChar = str.charAt(i);
+            final char myChar = str.charAt(i);
             final NDFANode node =
                     new CharNode(intermediateNode, myChar, regexp);
             arrival.addEpsilonEdge(node);
@@ -106,6 +92,30 @@ public final class CharSetBuilder {
         }
 
         return result;
+    }
+
+    @NotNull
+    private NDFANode createInvertedMatch(NDFANode arrival, NDFANode endNode) {
+        final NDFANode intermediateNode;
+        final NDFANode failingMatchNode = new FailNode(regexp);
+        intermediateNode = failingMatchNode;
+        final NDFANode gettingThroughAnyhow =
+                new AbstractNDFANode(regexp, false) {
+                    @Override
+                    public NDFANode getNextNDFA(final Character ch) {
+                        return endNode;
+                    }
+
+                    @Override
+                    public Collection<PrintableEdge> getEdgesToPrint() {
+                        final Collection<PrintableEdge> result =
+                                getEpsilonEdgesToPrint();
+                        result.add(new PrintableEdge(".", endNode));
+                        return result;
+                    }
+                };
+        arrival.addEpsilonEdge(gettingThroughAnyhow);
+        return intermediateNode;
     }
 
     /**
