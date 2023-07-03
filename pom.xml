@@ -48,7 +48,7 @@
         <mavenJarPlugin.version>3.3.0</mavenJarPlugin.version>
         <mavenReleasePlugin.version>3.0.1</mavenReleasePlugin.version>
         <mavenSourcePlugin.version>3.3.0</mavenSourcePlugin.version>
-        <mavenSurefire.version>3.1.0</mavenSurefire.version>
+        <mavenSurefire.version>3.1.2</mavenSurefire.version>
         <mockitoCore.version>5.4.0</mockitoCore.version>
         <mockitoJunitJupiter.version>5.9.3</mockitoJunitJupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
