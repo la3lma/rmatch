@@ -246,7 +246,7 @@ public final class RegexpImpl implements Regexp {
         }
 
         // From each DominationHeap, only pick the most dominant (hence
-        // undominated) element.
+        // un-dominated) element.
         for (final DominationHeap dh : heaps.values()) {
             // Commit the current match if it's final
             final Match firstMatch = dh.getFirstMatch();
