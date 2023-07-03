@@ -216,7 +216,10 @@ public final class MatchSetImpl implements MatchSet {
         }
     }
 
-    private void progressMatches(Character currentChar, int currentPos, RunnableMatchesHolder runnableMatches) {
+    private void progressMatches(
+            final Character currentChar,
+            final int currentPos,
+            final RunnableMatchesHolder runnableMatches) {
         // got a current  node, so we'll se what we can do to progress
         // the matches we've got.
         for (final Match m : matches) {
@@ -230,33 +233,54 @@ public final class MatchSetImpl implements MatchSet {
 
             // If this node is active for the current regexp,
             // that means that we don't have to abandon
-            if (!isActive) {
-
-                // Ok, we can't continue this match, perhaps it's already
-                // final, and in that case we should commit what we've got
-                // before abandoning it.
-                if (m.isFinal()) {
-                    commitMatch(m, runnableMatches);
-                }
-
-                if (!m.isAbandoned()) {
-                    m.abandon(currentChar);
-                }
-
-                removeMatch(m);
+            if (isActive) {
+                processActiveMatch(currentPos, m, regexp);
             } else {
-
-                // Mmkay, this is an active match and we have somewhere
-                // to progress to, so we're advancing the end position of
-                // the match by one.
-                m.setEnd(currentPos);
-
-                final boolean isFinal = currentNode.isTerminalFor(regexp);
-                // If we're also in a final position for this match, note that
-                // fact so that we can trigger actions for this match.
-                m.setFinal(isFinal);
+                progressInactiveMatch(currentChar, runnableMatches, m);
             }
         }
+    }
+
+    /**
+     *  This is an active match, and we have somewhere
+     *  to progress to, so we're advancing the end position of
+     *  the match by one.
+     * @param currentPos The current position
+     * @param m The match we are progressing
+     * @param regexp The regexp associated with the match
+     */
+    private void processActiveMatch(
+            final int currentPos,
+            final Match m,
+            final Regexp regexp) {
+
+        m.setEnd(currentPos);
+
+        final boolean isFinal = currentNode.isTerminalFor(regexp);
+        // If we're also in a final position for this match, note that
+        // fact so that we can trigger actions for this match.
+        m.setFinal(isFinal);
+    }
+
+    /**
+     * We can't continue this match, perhaps it's already
+     * final, and in that case we should commit what we've got
+     * before abandoning it.
+     * @param currentChar The character we are currently processing
+     * @param runnableMatches The matches we are currently running
+     * @param m The current match
+     */
+    private void progressInactiveMatch(final Character currentChar, final RunnableMatchesHolder runnableMatches, final Match m) {
+
+        if (m.isFinal()) {
+            commitMatch(m, runnableMatches);
+        }
+
+        if (!m.isAbandoned()) {
+            m.abandon(currentChar);
+        }
+
+        removeMatch(m);
     }
 
     private void failMatchesThatCannotContinue(Character currentChar) {
