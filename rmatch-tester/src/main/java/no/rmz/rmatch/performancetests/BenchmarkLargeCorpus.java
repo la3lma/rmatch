@@ -60,9 +60,7 @@ public final class BenchmarkLargeCorpus {
      */
     public static void main(final String[] argv) throws RegexpParserException {
 
-        String cwd = Paths.get(".").toAbsolutePath().normalize().toString();
-        System.out.println("Current working directory is " + cwd);
-        // Parse command line
+        reportOnCurrentWorkingDirectory();
 
         // TODO: Get these from the command line:
         String logfile = "logs/large-corpus-log.csv";
@@ -82,18 +80,14 @@ public final class BenchmarkLargeCorpus {
         final List<String> regexps = readRegexpsFromFile(nameOfRegexpFile, argvNoOfRegexps);
         final int actualNoOfRegexps = regexps.size();
 
-        String testSeriesId = valueOf(UUID.randomUUID());
-        String idFromArgv = argv[2].trim();
-        if (idFromArgv.length() > 0) {
-            testSeriesId = idFromArgv;
-        }
+        String testSeriesId = getTestSeriesId(argv[2].trim());
 
-        final StringBuilder corpus = getStringBuilderFromFileContent(Arrays.copyOfRange(argv, 3, argv.length));
-
+        final String corpusString =
+                getStringBuilderFromFileContent(Arrays.copyOfRange(argv, 3, argv.length)).toString();
 
         // Report what we intend to do
         System.out.println("About to match " + actualNoOfRegexps + " regexps from " + "'" + nameOfRegexpFile + "'" + " then match them against a bunch of files");
-        System.out.println("that contains in total " + corpus.length() + " characters");
+        System.out.println("that contains in total " + corpusString.length() + " characters");
 
         // TODO: Make sure that the results from the matchers are identical (right now they are not!)
         //           -- Do that using a matcher that builds up a structure that can be used to compare results
@@ -104,9 +98,8 @@ public final class BenchmarkLargeCorpus {
 
         // Then run the test
         final Matcher m = MatcherFactory.newMatcher();
-        final String corpusString = corpus.toString();
-        Buffer buf = new StringBuffer(corpusString);
 
+        Buffer buf = new StringBuffer(corpusString);
 
         System.out.println("========");
         System.out.println("Run the native matcher");
@@ -122,17 +115,22 @@ public final class BenchmarkLargeCorpus {
         JavaRegexpMatcher jm = new JavaRegexpMatcher();
         TestRunResult javaResult = testACorpusNG("java", jm, regexps, buf);
 
+        reportResult(logfile, actualNoOfRegexps, testSeriesId, corpusString, rmatchResult, javaResult);
+
+        System.exit(0);
+    }
+
+    private static void reportOnCurrentWorkingDirectory() {
+        String cwd = Paths.get(".").toAbsolutePath().normalize().toString();
+        System.out.println("Current working directory is " + cwd);
+    }
+
+    private static void reportResult(String logfile, int actualNoOfRegexps, String testSeriesId, String corpusString, TestRunResult rmatchResult, TestRunResult javaResult) {
         // Describe the test runs individually
         describeTestResult(rmatchResult);
         describeTestResult(javaResult);
 
-        String metadata;
-        try {
-            metadata = getCurrentGitBranch();
-        } catch (Exception e) {
-            System.err.println("Could not get git branch, setting metadata to 'unknown'");
-            metadata = "unknown";
-        }
+        final String metadata = getMetadata();
 
         final MatchPairAnalysis analysis = new MatchPairAnalysis(
                 testSeriesId,
@@ -152,8 +150,25 @@ public final class BenchmarkLargeCorpus {
 
 
         writeSummaryToFile(logfile, analysis.getResult());
+    }
 
-        System.exit(0);
+    private static String getTestSeriesId(String idFromArgv) {
+        String testSeriesId = valueOf(UUID.randomUUID());
+        if (idFromArgv.length() > 0) {
+            testSeriesId = idFromArgv;
+        }
+        return testSeriesId;
+    }
+
+    private static String getMetadata() {
+        String metadata;
+        try {
+            metadata = getCurrentGitBranch();
+        } catch (Exception e) {
+            System.err.println("Could not get git branch, setting metadata to 'unknown'");
+            metadata = "unknown";
+        }
+        return metadata;
     }
 
     public static StringBuilder getStringBuilderFromFileContent(final String[] filenameList) {
