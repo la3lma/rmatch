@@ -55,7 +55,7 @@ public class SurfaceRegexpParserTest {
     /**
      * test that a single character can be parsed.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testParseSingleChar() throws Exception {
@@ -66,7 +66,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Test that a longish string can be parsed.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testParseLongishString() throws Exception {
@@ -77,7 +77,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Test that a simple set of alternatives can be parsed.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testParseSimpleAlternative() throws Exception {
@@ -91,7 +91,7 @@ public class SurfaceRegexpParserTest {
      * Test that an "alternative" consisting of a single alternative is
      * correctly parsed.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testParseHalfSimpleAlternative() throws Exception {
@@ -102,10 +102,10 @@ public class SurfaceRegexpParserTest {
     }
 
     /**
-     * Test that an alternative consisting of three altenatives are correctly
+     * Test that alternatives consisting of three alternatives are correctly
      * parsed.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testParseTripleAlternative() throws Exception {
@@ -119,7 +119,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Check that a question mark is correctly parsed.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testQuestionMark() throws Exception {
@@ -130,7 +130,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Test that a star is correctly parsed.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testStar() throws Exception {
@@ -142,7 +142,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Test that a plus is correctly parsed.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testPlus() throws Exception {
@@ -154,7 +154,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Test that a beginning of line (BOL) is parsed correctly.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testBOL() throws Exception {
@@ -167,7 +167,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Test that end of line (EOL) is parsed correctly.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testEOL() throws Exception {
@@ -179,7 +179,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Thest that the "any char" (dot) syntax is parsed correctly.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public void testAny() throws Exception {
@@ -191,7 +191,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Test that a simple character set is parsed correctly.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testSimpleCharSet() throws Exception {
@@ -206,7 +206,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Test that the character set inversion syntax works correctly.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public  final void testInvertedCharSet() throws Exception {
@@ -221,7 +221,7 @@ public class SurfaceRegexpParserTest {
      * Check that the character range set in the char set syntax is parsed
      * correctly.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testCharSetRange() throws Exception {
@@ -234,7 +234,7 @@ public class SurfaceRegexpParserTest {
     /**
      * Test a range within a character set.
      *
-     * @throws Exception well it can happen.
+     * @throws Exception ... well it can happen.
      */
     @Test
     public final void testCharSetRangeInContext() throws Exception {

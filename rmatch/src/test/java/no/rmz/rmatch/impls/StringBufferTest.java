@@ -35,7 +35,7 @@ public final class StringBufferTest {
     private Buffer sb;
 
     /**
-     * But in reality this is the string we're putting in there.
+     * But in reality, this is the string we're putting in there.
      */
     private String staticString;
 

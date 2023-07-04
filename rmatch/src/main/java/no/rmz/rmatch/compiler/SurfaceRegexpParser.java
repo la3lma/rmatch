@@ -41,7 +41,7 @@ public final class SurfaceRegexpParser {
     private final AbstractRegexBuilder arb;
 
     /**
-     * Create a new parser with a ARB backend.
+     * Create a new parser with an ARB backend.
      *
      * @param arb Compiler backend.
      */
@@ -51,7 +51,7 @@ public final class SurfaceRegexpParser {
     }
 
     /**
-     * Parse a string int a regular expression.
+     * Parse a string into a regular expression.
      *
      * @param regexString the string to parse.
      * @throws RegexpParserException when bd things happen.
@@ -114,12 +114,12 @@ public final class SurfaceRegexpParser {
         /**
          * The objective is to parse all legal regexps as described in
          * <a href="http://en.wikipedia.org/wiki/Regular_expression">...</a> That's an interesting
-         * goal in itself, however it may in fact be better to emulate java's
+         * goal in itself, however, it may in fact be better to emulate java's
          * regexp syntax.
          * <p>
-         * That's the lofty objectives, the reality is much more humble.
+         * That's the lofty objective, the reality is much humbler.
          * We can parse this expression "abc[ab][^de]z?f+x*|y" and expressions
-         * containing the same constructs (character sequences,
+         * containing the same constructs (character sequences),
          * character sets (and inverted sets), various optional subexpressions
          * of single-char length, and not much more.   This will eventually
          * change, but for now that's what we've got.

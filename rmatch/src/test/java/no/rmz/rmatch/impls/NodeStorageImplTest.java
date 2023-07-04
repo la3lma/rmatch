@@ -183,7 +183,7 @@ class NodeStorageImplTest {
     }
 
     /**
-     * We now set up three NDFANodes based the three size two subsets of a set
+     * We now set up three NDFANodes based the three-size two subsets of a set
      * of size three and make sure that we get the right DFANOdes for many kinds
      * of lookups using these combinations.
      */

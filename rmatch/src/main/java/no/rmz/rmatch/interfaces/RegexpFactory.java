@@ -20,8 +20,8 @@ import static com.google.common.base.Preconditions.*;
 import no.rmz.rmatch.impls.RegexpImpl;
 
 /**
- * A producer of regexp instances. This is an useful interface to have when
- * testing various things. In production the default DEFAULT_REGEXP_FACTORY will
+ * A producer of regexp instances. This is a useful interface to have when
+ * testing various things. In production, the default DEFAULT_REGEXP_FACTORY will
  * be used all the time.
  */
 public interface RegexpFactory {

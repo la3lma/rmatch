@@ -22,8 +22,8 @@ import java.util.SortedSet;
 
 /**
  * Implements a comparator for sorted sets of T. All the elements in the set
- * must be comparable, and since the sets are sortable we can traverse the
- * elements in lexographical order. The first set to contain something the other
+ * must be comparable, and since the sets are sortable, we can traverse the
+ * elements in lexicographical order. The first set to contain something the other
  * set doesn't contain is larger than the other.
  *
  * @param <T>
