@@ -28,7 +28,7 @@ import java.util.SortedSet;
  *
  * @param <T>
  */
-public final class SortedSetComparatorImpl<T extends Comparable>
+public final class SortedSetComparatorImpl<T extends Comparable<T>>
         implements Comparator<SortedSet<T>>, Serializable {
 
     @Override
