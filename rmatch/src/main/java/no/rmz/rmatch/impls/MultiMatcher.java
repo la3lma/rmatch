@@ -112,8 +112,8 @@ public final class MultiMatcher implements Matcher {
 
         executorService = Executors.newFixedThreadPool(noOfMatchers);
 
-        /**
-         * Set up a set of partition into which we can pour regexps.
+        /*
+          Set up a set of partition into which we can pour regexps.
          */
         matchers = IntStream.range(0, noOfMatchers)
                 .mapToObj(i -> new MatcherImpl(compiler, regexpFactory))

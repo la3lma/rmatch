@@ -33,8 +33,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 /**
@@ -77,17 +75,10 @@ public class EdgeInvisibilityEnsurance {
 
         for (var r : regexps) {
             switch (r) {
-                case "den":
-                    m.add("den", denAction);
-                    break;
-                case "laden":
-                    m.add("laden", ladenAction);
-                    break;
-                case "ll":
-                    m.add("ll", llAction);
-                    break;
-                default:
-                    m.add(r, defaultAction);
+                case "den" -> m.add("den", denAction);
+                case "laden" -> m.add("laden", ladenAction);
+                case "ll" -> m.add("ll", llAction);
+                default -> m.add(r, defaultAction);
             }
         }
 

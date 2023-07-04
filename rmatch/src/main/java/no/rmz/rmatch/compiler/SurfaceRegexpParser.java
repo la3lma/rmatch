@@ -113,7 +113,7 @@ public final class SurfaceRegexpParser {
 
         /**
          * The objective is to parse all legal regexps as described in
-         * http://en.wikipedia.org/wiki/Regular_expression That's an interesting
+         * <a href="http://en.wikipedia.org/wiki/Regular_expression">...</a> That's an interesting
          * goal in itself, however it may in fact be better to emulate java's
          * regexp syntax.
          * <p>
@@ -140,44 +140,40 @@ public final class SurfaceRegexpParser {
 
         private void parseNextChar(char ch) throws RegexpParserException {
             switch (ch) {
-                case '|':
+                case '|' -> {
                     commitCurrentString(COMMIT_EMPTY_STRING_IF_NOTHING_IN_SB);
                     arb.separateAlternatives();
-                    break;
-                case '\\':
-                    parseQuotedChar();
-                    break;
-                case '.':
+                }
+                case '\\' -> parseQuotedChar();
+                case '.' -> {
                     commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
                     arb.addAnyChar();
-                    break;
-                case '^':
+                }
+                case '^' -> {
                     commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
                     arb.addBeginningOfLine();
-                    break;
-                case '$':
+                }
+                case '$' -> {
                     commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
                     arb.addEndOfLine();
-                    break;
-                case '?':
+                }
+                case '?' -> {
                     commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
                     arb.addOptionalSingular();
-                    break;
-                case '*':
+                }
+                case '*' -> {
                     commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
                     arb.addOptionalZeroOrMulti();
-                    break;
-                case '+':
+                }
+                case '+' -> {
                     commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
                     arb.addOptionalOnceOrMulti();
-                    break;
-                case '[':
+                }
+                case '[' -> {
                     commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
                     parseCharSet();
-                    break;
-                default:
-                    sb.append(ch);
-                    break;
+                }
+                default -> sb.append(ch);
             }
         }
 
