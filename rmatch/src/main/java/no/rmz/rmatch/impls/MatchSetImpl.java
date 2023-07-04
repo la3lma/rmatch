@@ -125,7 +125,7 @@ public final class MatchSetImpl implements MatchSet {
         //     of expressions, and thus a showstopper.
 
         for (final Regexp r : currentNode.getRegexps()) {
-                matches.add(startNode.newMatch(this, r));
+            matches.add(startNode.newMatch(this, r));
         }
 
         // This was necessary to nail the bug caused by the natural
