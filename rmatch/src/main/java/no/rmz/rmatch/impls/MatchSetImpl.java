@@ -197,12 +197,18 @@ public final class MatchSetImpl implements MatchSet {
         progressMatches(currentChar, currentPos, runnableMatches);
     }
 
-    private void terminateAssociatedMatches(Character currentChar, RunnableMatchesHolder runnableMatches) {
-        // Found no nodes going out of the current node, so we have
-        // to stop pursuing the matches we've already got.
-        // This actually marks the MatchSetImpl instance for
-        // destruction, but we won't do anything more about that fact
-        // from within this loop.
+    /**
+     * Found no nodes going out of the current node, so we have
+     * to stop pursuing the matches we've already got.
+     * This actually marks the MatchSetImpl instance for
+     * destruction, but we won't do anything more about that fact
+     * from within a loop.
+     *
+     * @param m The match to remove.
+     */
+    private void terminateAssociatedMatches(
+            final Character currentChar,
+            final RunnableMatchesHolder runnableMatches) {
 
         for (final Match m : matches) {
             m.setInactive();

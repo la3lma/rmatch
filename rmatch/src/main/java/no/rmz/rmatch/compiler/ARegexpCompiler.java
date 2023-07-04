@@ -16,9 +16,10 @@
 
 package no.rmz.rmatch.compiler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A (partial) compiler that will produce NDFAs that represents regular
@@ -81,7 +82,7 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
 
         // Produce a chain of nodes linked by the next character.
         // build the chain backwards from the last char in the string
-        // back to the first chracter in the string.
+        // back to the first character in the string.
         NDFANode nextNode = endNode;
         for (int i = str.length() - 1; i >= 0; i--) {
             final Character myChar = str.charAt(i);
