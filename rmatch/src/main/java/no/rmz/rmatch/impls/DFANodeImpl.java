@@ -23,7 +23,6 @@ import no.rmz.rmatch.utils.Counters;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -176,9 +175,13 @@ public final class DFANodeImpl implements DFANode {
      * @return A set of NDFANodes that serves as basis for the next DFANode.
      */
     private SortedSet<NDFANode> getNextThroughBasis(final Character ch) {
-        return basis.parallelStream()
-                .flatMap(n -> n.getNextSet(ch).stream())
-                .collect(Collectors.toCollection(TreeSet::new));
+        TreeSet<NDFANode> result = new TreeSet<>();
+
+        for (NDFANode n : basis) {
+            result.addAll(n.getNextSet(ch));
+        }
+
+        return result;
     }
 
     @Override
