@@ -41,7 +41,7 @@ import static org.mockito.Mockito.*;
  * This test is a mimimal replication of that error situation.
  */
 @ExtendWith(MockitoExtension.class)
-public class EdgeInvisibilityEnsurance {
+public class EdgeInvisibilityEnsuranceTest {
 
     @Mock
     Action llAction;

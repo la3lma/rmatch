@@ -118,7 +118,7 @@ public final class MatcherBenchmarker {
 
     public record  LoggedMatch(String matcherTypeName, String regex, int start, int end){}
 
-    public record TestRunResult(String matcherTypeName, Collection<LoggedMatch> loggedMatches, long usedMemoryInMb, long durationInMillis){};
+    public record TestRunResult(String matcherTypeName, Collection<LoggedMatch> loggedMatches, long usedMemoryInMb, long durationInMillis){}
 
     public record TestPairSummary(
             long timestamp,

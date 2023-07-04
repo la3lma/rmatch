@@ -176,6 +176,7 @@ public final class MultiMatcher implements Matcher {
             matcher.shutdown();
         }
         executorService.shutdown();
+        //noinspection ResultOfMethodCallIgnored
         executorService.awaitTermination(3, TimeUnit.SECONDS);
     }
 

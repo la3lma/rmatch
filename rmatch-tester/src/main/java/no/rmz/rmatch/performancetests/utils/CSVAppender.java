@@ -74,6 +74,7 @@ public final class CSVAppender {
                                 + " resulted in a null pointer");
                     }
                 } catch (IOException ex) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new RuntimeException(ex);
                 }
             }

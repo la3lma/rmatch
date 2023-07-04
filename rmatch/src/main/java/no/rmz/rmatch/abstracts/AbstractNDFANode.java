@@ -22,6 +22,7 @@ import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
 import no.rmz.rmatch.utils.LifoSet;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -299,8 +300,7 @@ public abstract class AbstractNDFANode implements NDFANode {
     }
 
     @Override
-
-    public final int compareTo(final NDFANode t) {
+    public final int compareTo(@NotNull final NDFANode t) {
         if (!(t instanceof AbstractNDFANode ta)) {
             throw new UnsupportedOperationException("Not supported yet.");
         } else {

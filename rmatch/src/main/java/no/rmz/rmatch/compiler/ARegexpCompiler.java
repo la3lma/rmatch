@@ -82,7 +82,7 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
         // Produce a chain of nodes linked by the next character.
         // build the chain backwards from the last char in the string
         // back to the first character in the string.
-        NDFANode nextNode = result.getEndingNode();;
+        NDFANode nextNode = result.getEndingNode();
         for (int i = str.length() - 1; i >= 0; i--) {
             final Character myChar = str.charAt(i);
             nextNode = new CharNode(nextNode, myChar, regexp);
@@ -91,7 +91,6 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
         // Finally, hook the arrival node of the result up to
         // the first node in the chain representing the string.
         arrival.addEpsilonEdge(nextNode);
-
 
         // If there are no alternatives accumulated so far, or we've just
         // seen a newAlternative been set, start a new alternative;
