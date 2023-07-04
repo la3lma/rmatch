@@ -135,8 +135,8 @@ public final class MatchEngineImpl implements MatchEngine {
 
         // Then run through all the active match sets to see
         // if there are any
-        // matches that should be commited.  When a matchSet is fresh out
-        // of active matches it should be snuffed.
+        // matches that should be committed. When a matchSet is fresh out
+        // of active matches, it should be snuffed.
 
         for (final MatchSet ms : activeMatchSets) {
 
