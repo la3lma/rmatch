@@ -17,6 +17,7 @@
 package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.interfaces.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -105,38 +106,28 @@ public final class MatchEngineImpl implements MatchEngine {
         checkNotNull(currentChar, "currentChar can't be null");
         checkArgument(currentPos >= 0, "Pos in buf must be non-negative");
 
-        // Progress all the already active matches and collect
-        // the runnables.  The runnables may or may not be
-        // active when they run, but they must be final.
         final RunnableMatchesHolder runnableMatches =
-                new RunnableMatchesHolderImpl();
+                collectRunnableMatches(currentChar, currentPos, activeMatchSets);
 
-        if (!activeMatchSets.isEmpty()) {
-            final Set<MatchSet> setsToRemove = new HashSet<>();
-            for (final MatchSet ms : activeMatchSets) {
-                ms.progress(ns, currentChar, currentPos, runnableMatches);
-                if (!ms.hasMatches()) {
-                    setsToRemove.add(ms);
-                }
-            }
-            activeMatchSets.removeAll(setsToRemove);
-        }
+        createNewMatchesIfPossible(currentChar, currentPos, activeMatchSets);
 
-        // If the current input character opened up a possibility of new
-        // matches, then by all means make a new match set to represent
-        // that fact.
-        final DFANode currentNode = ns.getNext(currentChar);
-        if (currentNode != null) {
-            final MatchSet ms = new MatchSetImpl(currentPos, currentNode, currentChar);
-            if (ms.hasMatches()) {
-                activeMatchSets.add(ms);
-            }
-        }
+        commitMatchesThatCanBeCommitted(activeMatchSets, runnableMatches);
 
-        // Then run through all the active match sets to see
-        // if there are any
-        // matches that should be committed. When a matchSet is fresh out
-        // of active matches, it should be snuffed.
+        // Run through all the runnable matches and perform actions.
+        // (Don't be permissive by default, hence "false").
+        performMatches(b, runnableMatches.getMatches(), false);
+    }
+
+    /**
+     * In the set of active match sets, commit all the matches that can be
+     * committed, then remove them from the set of active matches
+     *
+     * @param activeMatchSets The set of active match sets.
+     * @param runnableMatches A set of runnable matches.
+     */
+    private static void commitMatchesThatCanBeCommitted(
+            final Set<MatchSet> activeMatchSets,
+            final RunnableMatchesHolder runnableMatches) {
 
         for (final MatchSet ms : activeMatchSets) {
 
@@ -150,10 +141,51 @@ public final class MatchEngineImpl implements MatchEngine {
                 activeMatchSets.remove(ms);
             }
         }
+    }
 
-        // Run through all the runnable matches and perform actions.
-        // (Don't be permissive by default, hence "false").
-        performMatches(b, runnableMatches.getMatches(), false);
+    private void createNewMatchesIfPossible(Character currentChar, int currentPos, Set<MatchSet> activeMatchSets) {
+        // If the current input character opened up a possibility of new
+        // matches, then by all means make a new match set to represent
+        // that fact.
+        final DFANode currentNode = ns.getNext(currentChar);
+        if (currentNode != null) {
+            final MatchSet ms = new MatchSetImpl(currentPos, currentNode, currentChar);
+            if (ms.hasMatches()) {
+                activeMatchSets.add(ms);
+            }
+        }
+    }
+
+    /**
+     * Collect all the runnable matches from the active match sets.
+     *  The runnables may or may not be active
+     *  when they run, but they must be final.
+     *
+     * @param currentChar The current character.
+     * @param currentPos The current position.
+     * @param activeMatchSets The set of active match sets.
+     * @return A RunnableMatchesHolder instance.
+     */
+    @NotNull
+    private RunnableMatchesHolder collectRunnableMatches(
+            final Character currentChar,
+            final int currentPos,
+            final Set<MatchSet> activeMatchSets) {
+
+        final RunnableMatchesHolder runnableMatches =
+                new RunnableMatchesHolderImpl();
+
+        if (!activeMatchSets.isEmpty()) {
+            final Set<MatchSet> setsToRemove = new HashSet<>();
+            for (final MatchSet ms : activeMatchSets) {
+                ms.progress(ns, currentChar, currentPos, runnableMatches);
+                if (!ms.hasMatches()) {
+                    setsToRemove.add(ms);
+                }
+            }
+            activeMatchSets.removeAll(setsToRemove);
+        }
+        return runnableMatches;
     }
 
     @Override
