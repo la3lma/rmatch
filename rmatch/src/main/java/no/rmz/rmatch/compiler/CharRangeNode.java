@@ -77,7 +77,7 @@ public final class CharRangeNode extends AbstractNDFANode {
             final CharRange range,
             final Regexp r,
             final NDFANode next) {
-        this(range.getStart(), range.getEnd(), r, next);
+        this(range.start(), range.end(), r, next);
     }
 
     @Override

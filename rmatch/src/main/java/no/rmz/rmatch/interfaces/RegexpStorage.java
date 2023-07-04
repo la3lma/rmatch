@@ -54,12 +54,12 @@ public interface RegexpStorage {
     /**
      * Add an action associated with a regular expression. If the regular
      * expression isn't represented by a Regexp representation prior to the
-     * invocation of the add method, a representation will be created by this
+     * invocation of the "add" method, a representation will be created by this
      * invocation.
      *
      * @param regexp A regular expression string.
      * @param a An action to be invoked when the regular expression matches.
-     * @throws RegexpParserException when the regexp has a syntax error.
+     * @throws RegexpParserException Thrown when the regexp has a syntax error.
      */
     void add(final String regexp, final Action a) throws RegexpParserException;
 

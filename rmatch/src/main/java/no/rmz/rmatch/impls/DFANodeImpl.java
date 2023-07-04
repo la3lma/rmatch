@@ -219,7 +219,7 @@ public final class DFANodeImpl implements DFANode {
      */
     private boolean baseIsFinalFor(final Regexp r) {
         return baseIsFinalCache.computeIfAbsent(r, key ->
-                basis.stream().anyMatch(n -> key.hasTerminalNdfaNode(n))
+                basis.stream().anyMatch(key::hasTerminalNdfaNode)
         );
     }
 

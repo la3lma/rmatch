@@ -53,8 +53,8 @@ public final class LifoSet<T> {
      * isn't added again, otherwise it is added.
      *
      * @param t the element to be added
-     * @return true iff the element was not already present and therefore was
-     * added by the add method, otherwise (obviously) false.
+     * @return true iff the element was not yet present and therefore was
+     * added by the "add" method, otherwise (obviously) false.
      */
     public boolean add(final T t) {
         synchronized (members) {

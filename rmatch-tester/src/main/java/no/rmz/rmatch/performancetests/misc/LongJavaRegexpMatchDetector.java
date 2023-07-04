@@ -1,27 +1,19 @@
 package no.rmz.rmatch.performancetests.misc;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.*;
-import java.util.regex.Pattern;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.performancetests.utils.*;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
 import static no.rmz.rmatch.performancetests.misc.MultiJavaRegexpMatchDetector.makeMatchPerformer;
-import no.rmz.rmatch.performancetests.utils.JavaRegexpTester;
-import no.rmz.rmatch.performancetests.utils.LineMatcher;
-import no.rmz.rmatch.performancetests.utils.LineSource;
-import no.rmz.rmatch.performancetests.utils.MatchDetector;
-import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
-import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 
 public class LongJavaRegexpMatchDetector implements MatchDetector {
 
@@ -43,7 +35,7 @@ public class LongJavaRegexpMatchDetector implements MatchDetector {
      * have enough threads to never run out of cores that can do stuff.
      */
     private final ExecutorService es;
-    private LineSource linesource;
+    private final LineSource linesource;
     /**
      * A state parameter for the class. When in matching state it is illegal to
      * add more regexp/action pairs.

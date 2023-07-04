@@ -97,54 +97,76 @@ public final class GraphDumper {
         checkNotNull(ndfaNodes);
         checkNotNull(out);
 
-        out.println("digraph nondeterminstic_finite_state_machine {");
+        printGraphPreamble(out, "digraph NDFAGraph {");
+
+        printTerminalNonfailingNodesAsDoubleCircles(ndfaNodes, out);
+
+        printTerminalFailingNodesAsOctagons(ndfaNodes, out);
+
+        printFailingNodesAsMCircles(ndfaNodes, out);
+
+        printTerminalNodesAsCircles(ndfaNodes, out);
+
+        printEdges(ndfaNodes, out);
+        out.println("}");
+    }
+
+    private static void printGraphPreamble(PrintStream out, String x) {
+        out.println(x);
         out.println("rankdir=LR");
         out.println("size=\"8,5\"");
+    }
 
-        out.println("node [shape = doublecircle ];");
+    private static void printEdges(Collection<NDFANode> ndfaNodes, PrintStream out) {
+        for (final NDFANode source : ndfaNodes) {
+            for (final PrintableEdge edge : source.getEdgesToPrint()) {
+                if (edge.label() == null) {
+                    printEpsilonEdge(out, source, edge.destination());
+                } else {
+                    printLabeledEdge(
+                            out,
+                            source,
+                            edge.destination(),
+                            edge.label());
+                }
+            }
+        }
+    }
+
+    private static void printTerminalNodesAsCircles(Collection<NDFANode> ndfaNodes, PrintStream out) {
+        out.println("node [shape = circle ];");
         for (final NDFANode ndfanode : ndfaNodes) {
-            if (ndfanode.isTerminal() && !ndfanode.isFailing()) {
+            if (!ndfanode.isTerminal()) {
                 out.printf("   %s\n", nodeName(ndfanode));
             }
         }
+    }
 
-        out.println("node [shape = doubleoctagon ];");
-        for (final NDFANode ndfanode : ndfaNodes) {
-            if (ndfanode.isTerminal() && ndfanode.isFailing()) {
-                out.printf("   %s\n", nodeName(ndfanode));
-            }
-        }
-
+    private static void printFailingNodesAsMCircles(Collection<NDFANode> ndfaNodes, PrintStream out) {
         out.println("node [shape = Mcircle ];");
         for (final NDFANode ndfanode : ndfaNodes) {
             if (ndfanode.isFailing()) {
                 out.printf("   %s\n", nodeName(ndfanode));
             }
         }
+    }
 
-        out.println("node [shape = circle ];");
-
+    private static void printTerminalFailingNodesAsOctagons(Collection<NDFANode> ndfaNodes, PrintStream out) {
+        out.println("node [shape = doubleoctagon ];");
         for (final NDFANode ndfanode : ndfaNodes) {
-            if (!ndfanode.isTerminal()) {
+            if (ndfanode.isTerminal() && ndfanode.isFailing()) {
                 out.printf("   %s\n", nodeName(ndfanode));
             }
         }
+    }
 
-        for (final NDFANode source : ndfaNodes) {
-            for (final PrintableEdge edge : source.getEdgesToPrint()) {
-                if (edge.getLabel() == null) {
-                    printEpsilonEdge(out, source, edge.getDestination());
-                } else {
-                    printLabeledEdge(
-                            out,
-                            source,
-                            edge.getDestination(),
-                            edge.getLabel());
-                }
+    private static void printTerminalNonfailingNodesAsDoubleCircles(Collection<NDFANode> ndfaNodes, PrintStream out) {
+        out.println("node [shape = doublecircle ];");
+        for (final NDFANode ndfanode : ndfaNodes) {
+            if (ndfanode.isTerminal() && !ndfanode.isFailing()) {
+                out.printf("   %s\n", nodeName(ndfanode));
             }
-
         }
-        out.println("}");
     }
 
     /**
@@ -298,9 +320,7 @@ public final class GraphDumper {
             final PrintStream out) {
         checkNotNull(dfaNodes);
         checkNotNull(out);
-        out.println("digraph determinstic_finite_state_machine {");
-        out.println("rankdir=LR");
-        out.println("size=\"8,5\"");
+        printGraphPreamble(out, "digraph determinstic_finite_state_machine {");
 
         out.println("node [shape = doublecircle ];");
         for (final DFANode dfanode : dfaNodes) {

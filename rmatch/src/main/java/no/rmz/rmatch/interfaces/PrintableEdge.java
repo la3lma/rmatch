@@ -24,24 +24,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * regular expression that triggers traversal, e.g. "[abc]", or "b" or
  * something. It will only be an expression representing a single character
  * though.
+ *
+ * @param label       A printable label, to be used by programs such as graphwiz to produce
+ *                    nice readable representations of the NDFAs used by the program.
+ * @param destination The target of the edge.
  */
-public final class PrintableEdge {
-
-    /**
-     * A printable label, to be used by programs such as graphwiz to produce
-     * nice readable representations of the NDFAs used by the program.
-     */
-    private final String label;
-    /**
-     * The target of the edge.
-     */
-    private final NDFANode destination;
+public record PrintableEdge(String label, NDFANode destination) {
 
     /**
      * A new printable edge, not used for matching but only for pretty printing
      * of the DNFA Graph.
      *
-     * @param label A printable label, or null for epsilon edges.
+     * @param label       A printable label, or null for epsilon edges.
      * @param destination The target for the edge.
      */
     public PrintableEdge(final String label, final NDFANode destination) {
@@ -54,7 +48,8 @@ public final class PrintableEdge {
      *
      * @return The target.
      */
-    public NDFANode getDestination() {
+    @Override
+    public NDFANode destination() {
         return destination;
     }
 
@@ -64,7 +59,8 @@ public final class PrintableEdge {
      *
      * @return a nice descriptive string.
      */
-    public String getLabel() {
+    @Override
+    public String label() {
         return label;
     }
 }

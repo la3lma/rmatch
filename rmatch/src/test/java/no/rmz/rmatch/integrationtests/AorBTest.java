@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
  * This is a test that checks that the regular expression "a+" can be run, and
  * eventually also compiled correctly.
  * <p>
- * (this is not AI's A* search algorithm. :-)
+ * (This is not AI's A* search algorithm. :-)
  */
 @ExtendWith(MockitoExtension.class)
 public final class AorBTest {

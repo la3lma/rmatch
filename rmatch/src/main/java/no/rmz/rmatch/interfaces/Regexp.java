@@ -121,7 +121,7 @@ public interface Regexp extends Comparable<Regexp> {
      * True if a node is active for this regexp.
      *
      * @param n a node
-     * @return true iff ithe node is active for the Regexp.
+     * @return true iff the node is active for the Regexp.
      */
     boolean isActiveFor(final Node n);
 
@@ -168,7 +168,7 @@ public interface Regexp extends Comparable<Regexp> {
     /**
      * Register a match with this regexp.
      *
-     * @param m a match that is registred with this regexp.
+     * @param m a match that is registered with this regexp.
      */
     void registerMatch(final Match m);
 

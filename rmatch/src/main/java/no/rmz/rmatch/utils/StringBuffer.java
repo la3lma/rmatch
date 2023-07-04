@@ -16,11 +16,12 @@
 
 package no.rmz.rmatch.utils;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import no.rmz.rmatch.interfaces.Buffer;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * An implementation of the Buffer interface, that holds all of the input as a
+ * An implementation of the Buffer interface, that holds all the input as a
  * String.
  */
 public final class StringBuffer implements Buffer, Cloneable {

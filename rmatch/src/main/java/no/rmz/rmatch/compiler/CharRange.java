@@ -19,28 +19,19 @@ package no.rmz.rmatch.compiler;
 /**
  * A intermidate structure used by the compiler to represent ranges of
  * characters.
+ *
+ * @param start The smallest character in the range.
+ * @param end   The largest character in the range.
  */
-public final class CharRange implements Comparable<CharRange> {
-
-    /**
-     * The smallest character in the range.
-     */
-    private final Character start;
-    /**
-     * The largest character in the range.
-     *
-     */
-    private final Character end;
+public record CharRange(Character start, Character end) implements Comparable<CharRange> {
 
     /**
      * Create a new character range.
      *
      * @param start The smallest character in the range.
-     * @param end The largest character in the range.
+     * @param end   The largest character in the range.
      */
-    public CharRange(final Character start, final Character end) {
-        this.start = start;
-        this.end = end;
+    public CharRange {
     }
 
     /**
@@ -48,7 +39,8 @@ public final class CharRange implements Comparable<CharRange> {
      *
      * @return the smallest char.
      */
-    public Character getStart() {
+    @Override
+    public Character start() {
         return start;
     }
 
@@ -57,25 +49,25 @@ public final class CharRange implements Comparable<CharRange> {
      *
      * @return the largest char.
      */
-    public Character getEnd() {
+    @Override
+    public Character end() {
         return end;
     }
 
     @Override
     public int compareTo(final CharRange that) {
 
-       int r = start.compareTo(that.start);
-       if (r != 0) {
-           return r;
-       }
+        int r = start.compareTo(that.start);
+        if (r != 0) {
+            return r;
+        }
 
-       return end.compareTo(that.end);
+        return end.compareTo(that.end);
     }
 
     @Override
     public boolean equals(final Object o) {
-        if (o instanceof CharRange) {
-            final CharRange that = (CharRange) o;
+        if (o instanceof CharRange that) {
             return (this.start.equals(that.start)
                     && this.end.equals(that.end));
         } else {
@@ -83,11 +75,4 @@ public final class CharRange implements Comparable<CharRange> {
         }
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 37 * hash + (this.start != null ? this.start.hashCode() : 0);
-        hash = 37 * hash + (this.end != null ? this.end.hashCode() : 0);
-        return hash;
-    }
 }

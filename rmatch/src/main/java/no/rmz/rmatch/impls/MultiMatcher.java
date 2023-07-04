@@ -31,9 +31,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A multithreaded matcher. It will keep an array of matchers, into which it
  * will partition the regular expressions. Addition/Removal goes to one of the
- * matchers, not all of them. When running matches, all of the matchers are run
+ * matchers, not all of them. When running matches, all the matchers are run
  * concurrently, and the MultiMatcher's implementation of the match method will
- * not complete until all of the matcher's match methods has completed.
+ * not complete until all the matcher's match methods have completed.
  */
 public final class MultiMatcher implements Matcher {
 
@@ -112,8 +112,8 @@ public final class MultiMatcher implements Matcher {
 
         executorService = Executors.newFixedThreadPool(noOfMatchers);
 
-        /**
-         * Set up a set of partition into which we can pour regexps.
+        /*
+          Set up a set of partition into which we can pour regexps.
          */
         matchers = IntStream.range(0, noOfMatchers)
                 .mapToObj(i -> new MatcherImpl(compiler, regexpFactory))
@@ -176,6 +176,7 @@ public final class MultiMatcher implements Matcher {
             matcher.shutdown();
         }
         executorService.shutdown();
+        //noinspection ResultOfMethodCallIgnored
         executorService.awaitTermination(3, TimeUnit.SECONDS);
     }
 

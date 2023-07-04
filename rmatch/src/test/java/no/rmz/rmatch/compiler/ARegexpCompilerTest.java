@@ -66,45 +66,41 @@ public class ARegexpCompilerTest {
      * A helper class that holds a matcher and a buffer, and
      * is consequently, and unimaginatively, called "MB".  Sorry folks,
      * but that' the truth.
+     *
+     * @param m The matcher.
+     * @param b The buffer.
      */
-    public static final class MB {
-
-        /**
-         * The matcher.
-         */
-        private final Matcher m;
-
-        /**
-         * The buffer.
-         */
-        private final Buffer b;
+        public record MB(Matcher m, Buffer b) {
 
         /**
          * Making the pair.
+         *
          * @param m matcher.
          * @param b buffer.
          */
-        public MB(final Matcher m, final Buffer b) {
-            this.m = m;
-            this.b = b;
+        public MB {
         }
 
-        /**
-         * Get the B.
-         * @return  the B.
-         */
-        public Buffer getB() {
-            return b;
-        }
+            /**
+             * Get the B.
+             *
+             * @return the B.
+             */
+            @Override
+            public Buffer b() {
+                return b;
+            }
 
-        /**
-         * get the M.
-         * @return the M.
-         */
-        public Matcher getM() {
-            return m;
+            /**
+             * get the M.
+             *
+             * @return the M.
+             */
+            @Override
+            public Matcher m() {
+                return m;
+            }
         }
-    }
 
     /**
      * Inject some content to the test article (a compiler instance),
@@ -160,7 +156,7 @@ public class ARegexpCompilerTest {
      */
     private void verifyPerformMatch(final MB mb, final String nameOfTest, final int start, final int stop) {
         GraphDumper.dump(nameOfTest,
-                mb.getM().getNodeStorage());
+                mb.m().getNodeStorage());
         verify(action).performMatch(any(Buffer.class), eq(start), eq(stop));
     }
 
