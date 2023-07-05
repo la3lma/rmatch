@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class MultiMatcher implements Matcher {
 
     /**
-     * A simple guard againt absolutely useless values of matchers. Now, 10K is
+     * A simple guard against absolutely useless values of matchers. Now, 10K is
      * probably way too high for present day architectures, but one has
      * ambitions.
      */

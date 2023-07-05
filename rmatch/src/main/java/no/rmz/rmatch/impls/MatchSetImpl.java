@@ -83,7 +83,7 @@ public final class MatchSetImpl implements MatchSet {
      */
     private final Set<Match> matches;
     /**
-     * The current determinstic node that is used when pushing the matches
+     * The current deterministic node that is used when pushing the matches
      * further.
      */
     private DFANode currentNode;
@@ -108,7 +108,7 @@ public final class MatchSetImpl implements MatchSet {
             final DFANode startNode,
             final Character peekedCharacter) {
         this.matches = new ConcurrentSkipListSet<>(Match.COMPARE_BY_OBJECT_ID);
-        checkNotNull(startNode, "Startnode can't be null");
+        checkNotNull(startNode, "startNode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");
         currentNode = startNode;
         start = startIndex;
@@ -156,7 +156,7 @@ public final class MatchSetImpl implements MatchSet {
      * runnableMatches too.
      *
      * @param ns A NodeStorage used to find new nodes.
-     * @param currentChar The currenc character.
+     * @param currentChar The current character.
      * @param currentPos The current position.
      * @param runnableMatches a container for runnable matches. Matches will
      *        be put here if they can be run, possibly, pending domination

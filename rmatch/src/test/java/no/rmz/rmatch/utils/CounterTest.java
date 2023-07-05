@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author rmz
  */
+@SuppressWarnings("SpellCheckingInspection")
 public class CounterTest {
 
     public CounterTest() {

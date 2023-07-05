@@ -64,7 +64,7 @@ public class DominationHeapTest {
 
     /**
      * A mocked comparator for matches.
-     * XXX Swhat does it do?
+     * TODO what does it do?
      */
     @Mock
     Comparator<Match> comparator;

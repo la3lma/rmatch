@@ -43,7 +43,7 @@ public final class HandleTheWutheringHeightsCorpus {
     @Deprecated // Use the method in Benchmark... instead.
     /**
      * Set up the test by inhaling the corpus, enabling the
-     * regexpss and running the match.
+     * regexps and running the match.
      * @param filename the location of the corpus.
      * @throws RegexpParserException when something goes wrong.
      */

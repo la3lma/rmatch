@@ -140,7 +140,7 @@ public final class MatchEngineImpl implements MatchEngine {
 
         for (final MatchSet ms : activeMatchSets) {
 
-            // Collect runnable matches into the runnableMathches
+            // Collect runnable matches into the runnableMatches
             // instance.
             ms.finalCommit(runnableMatches);
 

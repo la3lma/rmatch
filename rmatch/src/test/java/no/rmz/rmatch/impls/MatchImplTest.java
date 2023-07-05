@@ -101,6 +101,7 @@ public class MatchImplTest {
    /**
     * Test creation of a match instance.
     */
+    @SuppressWarnings("SpellCheckingInspection")
     @Test
     public void testCreation() {
         final MatchSet msx =
@@ -130,7 +131,7 @@ public class MatchImplTest {
      * compared using domination.
      */
     @Test
-    public final void testCompareOtherWithNonmatchingRegex() {
+    public final void testCompareOtherWithNonMatchingRegex() {
         final Match match2 = new MatchImpl(ms, regexpMocked);
         assertEquals(0, Match.COMPARE_BY_DOMINATION.compare(match, match2));
     }

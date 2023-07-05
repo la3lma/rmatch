@@ -27,8 +27,8 @@ import java.lang.management.OperatingSystemMXBean;
 
 /**
  * A factory instance that will generate matcher instances that
- * are optimized for the  urrent execution environment.  It's
- * all heuristic, but it it ment to represent the best guess, based
+ * are optimized for the current execution environment.  It's
+ * all heuristic, but it ment to represent the best guess, based
  * on the available empirical data as to what willl give the
  * best performance.
  */

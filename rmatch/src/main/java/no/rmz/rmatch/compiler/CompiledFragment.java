@@ -16,9 +16,10 @@
 
 package no.rmz.rmatch.compiler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Represent a compiled fragment of a regexp.   In general there will be
@@ -40,7 +41,7 @@ public final class CompiledFragment {
     private final NDFANode arrivalNode;
 
     /**
-     * If succesfull traversal of the NDFA, this node will be reached.
+     * If successful traversal of the NDFA, this node will be reached.
      */
     private final NDFANode endingNode;
 
@@ -48,9 +49,9 @@ public final class CompiledFragment {
      * Generate a new compiled fragment where all the components are
      * parameterized in the constructor.
      *
-     * @param r The regexp for which this is acompilation fragment.
+     * @param r The regexp for which this is a compilation fragment.
      * @param arrivalNode The entry-point for this fragment's NDFA.
-     * @param endingNode If succesfull traversal of the NDFA,
+     * @param endingNode If successful traversal of the NDFA,
      *                   this node will be reached.
      */
     public CompiledFragment(
@@ -63,7 +64,7 @@ public final class CompiledFragment {
     }
 
     /**
-     * Create a new CompiledFragemen.  The arrival and ending nodes will
+     * Create a new CompiledFragement.  The arrival and ending nodes will
      * be new PaddingNDFANode instances.
      * @param r  the regex this fragment represents.
      */

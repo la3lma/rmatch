@@ -53,7 +53,7 @@ public final class GraphDumper {
      * True iff the DFANOde in question is terminal for any
      * regexp.
      * @param dfanode a node
-     * @return true iff it's termial for some regexp.
+     * @return true iff it's terminal for some regexp.
      */
     private static boolean isTerminalForAnyRegexp(final DFANode dfanode) {
         // XXX This could be cached in the DFANOde, but is it worth it?
@@ -88,7 +88,7 @@ public final class GraphDumper {
 
     /**
      * Dump a collection of NDFA nodes to a PrintStream as GraphViz code.
-     * @param ndfaNodes the ndoes.
+     * @param ndfaNodes the nodes.
      * @param out the PrintStream to write GraphViz code to.
      */
     static void dumpNdfa(
