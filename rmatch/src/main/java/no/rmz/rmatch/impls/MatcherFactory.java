@@ -55,7 +55,7 @@ public class MatcherFactory {
 
         final int noOfPartitions;
         if (AVAILABLE_PROCESSORS > 2) {
-            noOfPartitions = AVAILABLE_PROCESSORS ;
+            noOfPartitions = (int)(AVAILABLE_PROCESSORS * 1.5);
         } else {
             noOfPartitions = 1;
         }
