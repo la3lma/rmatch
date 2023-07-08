@@ -22,7 +22,7 @@ public final class CSVAppender {
     private static final Object MONITOR = new Object();
 
     /**
-     * Append a logline to a file. If thefile on is trying to write to does not
+     * Append a logline to a file. If the file on is trying to write to does not
      * exist, one is crated, a line containing the text "secondsSinceEpoch,
      * millisDuration, memoryInMb" is written to it, and then a CSV line of
      * values is written.

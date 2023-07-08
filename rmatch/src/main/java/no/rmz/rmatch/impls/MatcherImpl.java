@@ -23,7 +23,7 @@ import no.rmz.rmatch.interfaces.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * An implementation ofthe Matcher interface that hooks together
+ * An implementation of the Matcher interface that hooks together
  * various component that together makes up a real matcher.
  */
 public final class MatcherImpl implements Matcher {
@@ -39,12 +39,12 @@ public final class MatcherImpl implements Matcher {
     private final RegexpStorage rs;
 
     /**
-     * Our prescious MatchEngine.
+     * Our precious MatchEngine.
      */
     private final MatchEngine me;
 
     /**
-     * Our equally prescious NodeStorage. Our preciousss.
+     * Our equally prescious NodeStorage. Our precioussss.
      */
     private final NodeStorage ns;
 

@@ -51,7 +51,7 @@ public interface Matcher {
     void match(final Buffer b);
 
     /**
-     * Get the NodeStorage intance used by this matcher.
+     * Get the NodeStorage instance used by this matcher.
      *
      * @return a NodeStorage instance.
      */

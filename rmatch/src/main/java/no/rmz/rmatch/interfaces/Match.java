@@ -77,7 +77,7 @@ public interface Match {
     /**
      * True iff the match is actively being developed.
      *
-     * @return acurrent activity state.
+     * @return a current activity state.
      */
     boolean isActive();
 
@@ -121,7 +121,7 @@ public interface Match {
     /**
      * Set the finality state to be whatever.
      *
-     * @param finalityState the new finality stae.
+     * @param finalityState the new finality state.
      */
     void setFinal(boolean finalityState);
     /**

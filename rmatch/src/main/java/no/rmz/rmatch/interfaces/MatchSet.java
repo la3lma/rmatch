@@ -60,8 +60,8 @@ public interface MatchSet {
     long getId();
 
     /**
-     * Will progress the match-set one charater ahead. All of the matches that
-     * can be contined will be continued, and those that can't will be aborted.
+     * Will progress the match-set one character ahead. All the matches that
+     * can be continued will be continued, and those that can't will be aborted.
      * The matches that can be correctly terminated will be added to the set of
      * runnable matches through the runnableMatches instance, but only those
      * matches that is the "dominant" one will eventually run, the others will

@@ -142,7 +142,7 @@ public final class BenchmarkLargeCorpus {
         analysis.printSummary(System.out);
 
         // TODO: Look at only the first mismatch, in the java set.  See where the match with the least
-        //       difference to the one not matching exists in the other set (the original set). Also seee which
+        //       difference to the one not matching exists in the other set (the original set). Also see which
         //       matches _do_ exist for the interval being covered by the mismatched element and report that.
         //       The hypotheses are that there is either an alignment problem, a dominance problem, or simply that
         //       the expression itself wasn't encoded in the (rmatch) matcher.  We need to eek out these issues
@@ -238,7 +238,7 @@ public final class BenchmarkLargeCorpus {
             noOfRegexps = allRegexps.size();
             System.out.println("Using all regexps: " + noOfRegexps);
         } else if (noOfRegexps < -1) {
-            System.out.println("Number of regexps must be nonegative (or -1 to indicate all)");
+            System.out.println("Number of regexps must be non-negative (or -1 to indicate all)");
             System.exit(1);
         } else if (noOfRegexps > allRegexps.size()) {
             System.out.println("max number of regexps is: " + noOfRegexps + ", using that");

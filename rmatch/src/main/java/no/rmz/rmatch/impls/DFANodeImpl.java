@@ -80,6 +80,7 @@ public final class DFANodeImpl implements DFANode {
      * @param ndfanodeset the set of NDFA nodes the new DFA node should
      * represent.
      */
+    @SuppressWarnings("SpellCheckingInspection")
     public DFANodeImpl(final Set<NDFANode> ndfanodeset) {
         basis.addAll(ndfanodeset);
         initialize(basis);

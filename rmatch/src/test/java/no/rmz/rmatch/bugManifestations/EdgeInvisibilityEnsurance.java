@@ -39,8 +39,8 @@ import static org.mockito.Mockito.*;
 
 /**
  * This test is intended to replicate the behavior that when running against the
- * dostoyevsky corpus, we don't seem to find any matches for "laden", which is weird.
- * This test is a mimimal replication of that error situation.
+ * dostoyevsky corpus, we don't seem to find any matches for "laden," which is weird.
+ * This test is a minimal replication of that error situation.
  */
 @ExtendWith(MockitoExtension.class)
 public class EdgeInvisibilityEnsurance {
