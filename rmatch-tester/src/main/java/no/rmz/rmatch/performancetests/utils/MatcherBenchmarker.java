@@ -219,16 +219,17 @@ public final class MatcherBenchmarker {
             final List<String> allRegexps,
             final Buffer buf) {
 
-        Object guard = new Object();
+        final Object guard = new Object();
 
-        final Collection<LoggedMatch> loggedMatches =
-               new TreeSet<LoggedMatch>(matchComparator);
+        final Collection<LoggedMatch> loggedMatches = new ArrayList<>();
 
-        for (String regex: allRegexps) {
-            Action action = new Action() {
+        // new TreeSet<LoggedMatch>(matchComparator);
+
+        for (final String regex: allRegexps) {
+            final Action action = new Action() {
                 @Override
                 public void performMatch(Buffer b, int start, int end) {
-                    LoggedMatch ob = new LoggedMatch(matcherTypeName, regex, start, end);
+                    final LoggedMatch ob = new LoggedMatch(matcherTypeName, regex, start, end);
                     synchronized (guard) {
                         loggedMatches.add(ob);
                     }
