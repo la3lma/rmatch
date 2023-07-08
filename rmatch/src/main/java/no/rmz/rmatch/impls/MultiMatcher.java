@@ -160,7 +160,7 @@ public final class MultiMatcher implements Matcher {
                 matcher.match(b.clone());
                 counter.countDown();
             };
-            // runnable.run();
+
             executorService.execute(runnable);
         }
         try {
