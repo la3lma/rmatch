@@ -127,7 +127,7 @@ public final class MatchEngineImpl implements MatchEngine {
         // that fact.
         final DFANode currentNode = ns.getNext(currentChar);
         if (currentNode != null) {
-            final MatchSet ms = new MatchSetImpl(currentPos, currentNode, currentChar);
+            final MatchSet ms = new MatchSetImpl(currentPos, currentNode);
             if (ms.hasMatches()) {
                 activeMatchSets.add(ms);
             }

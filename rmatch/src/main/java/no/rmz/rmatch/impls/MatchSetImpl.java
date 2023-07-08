@@ -105,8 +105,7 @@ public final class MatchSetImpl implements MatchSet {
      */
     public MatchSetImpl(
             final int startIndex,
-            final DFANode startNode,
-            final Character peekedCharacter) {
+            final DFANode startNode) {
         this.matches = new ConcurrentSkipListSet<>(Match.COMPARE_BY_OBJECT_ID);
         checkNotNull(startNode, "startNode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");

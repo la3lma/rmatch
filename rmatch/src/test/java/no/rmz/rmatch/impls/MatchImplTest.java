@@ -106,8 +106,7 @@ public class MatchImplTest {
     public void testCreation() {
         final MatchSet msx =
                 new MatchSetImpl(1,
-                new DFANodeImpl((Set<NDFANode>) Collections.EMPTY_SET),
-                        'K'); // TODO: Fix this kludge
+                    new DFANodeImpl((Set<NDFANode>) Collections.EMPTY_SET));
         final Regexp r = new RegexpImpl("Krasnji Octobr");
         assertFalse(r.hasMatches());
         final Match m = new MatchImpl(msx, r);
