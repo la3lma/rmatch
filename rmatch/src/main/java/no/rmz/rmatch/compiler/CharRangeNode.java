@@ -16,12 +16,14 @@
 
 package no.rmz.rmatch.compiler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
+
+import java.util.Collection;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A node representing a char range.
@@ -82,11 +84,15 @@ public final class CharRangeNode extends AbstractNDFANode {
 
     @Override
     public NDFANode getNextNDFA(final Character ch) {
-        if (start.compareTo(ch) <= 0 && ch.compareTo(end) <= 0) {
+        if (charIsInRange(ch)) {
             return next;
         } else {
             return null;
         }
+    }
+
+    private boolean charIsInRange(final Character ch) {
+        return start.compareTo(ch) <= 0 && ch.compareTo(end) <= 0;
     }
 
     @Override
@@ -98,5 +104,10 @@ public final class CharRangeNode extends AbstractNDFANode {
         final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
         result.add(printableEdge);
         return result;
+    }
+
+    @Override
+    public boolean cannotStartWith(final Character ch) {
+        return !this.charIsInRange(ch);
     }
 }

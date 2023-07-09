@@ -67,9 +67,6 @@ public final class StartNode extends AbstractNDFANode {
         this.ndfaOutMap = new HashMap<>();
     }
 
-    // XXX Since we already have the NodeStorage, why do we need
-    //     a parameter for it? This is almost certainly a bug. Fix.
-
     /**
      * Get the next DFA for a specific character.
      *
@@ -98,6 +95,19 @@ public final class StartNode extends AbstractNDFANode {
         }
 
         return result;
+    }
+
+    protected  void applySurgeryToResultNodes(final Character ch, final SortedSet<NDFANode> resultNodes) {
+        // Apply heuristic to remove nodes that can't be reached
+        final Collection<NDFANode> unreachableNodes = new ArrayList<>();
+        for (NDFANode n : resultNodes) {
+            if (n.getRegexp().possibleStartingChar(ch)) {
+                continue;
+            }
+            unreachableNodes.add(n);
+        }
+
+        resultNodes.removeAll(unreachableNodes);
     }
 
     /**

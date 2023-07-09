@@ -84,7 +84,7 @@ public interface Regexp extends Comparable<Regexp> {
      *
      * @return the node representing this regexp.
      */
-    NDFANode getMyNode();
+    NDFANode getMyNdfaNode();
 
     /**
      * A string representing the same regexp as the Regexp instance.

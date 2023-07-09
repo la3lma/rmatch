@@ -16,11 +16,12 @@
 
 package no.rmz.rmatch.compiler;
 
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
+
+import java.util.Collection;
 
 /**
  * A node that has an outgoing edge for a single, specific character.
@@ -84,5 +85,10 @@ public final class CharNode extends AbstractNDFANode {
             result.add(new PrintableEdge(String.valueOf(ch), nextNode));
             return result;
         }
+    }
+
+    @Override
+    public boolean cannotStartWith(final Character ch) {
+        return ch != this.ch;
     }
 }

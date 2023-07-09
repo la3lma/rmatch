@@ -158,7 +158,6 @@ public abstract class AbstractNDFANode implements NDFANode {
      */
     @Override
     public final SortedSet<NDFANode> getNextSet(final Character ch) {
-
         synchronized (monitor) {
             return getNextSetNonThreadsafe(ch);
         }
@@ -178,11 +177,11 @@ public abstract class AbstractNDFANode implements NDFANode {
             return cachedNext.get(ch);
         }
 
-        // Eventually the result we'll collect and return will go into this
+        // Eventually, the result we'll collect and return will go into this
         // set.
-        final SortedSet<NDFANode> resultNodes = new TreeSet<>();
+        SortedSet<NDFANode> resultNodes = new TreeSet<>();
 
-        // Meanwhile we'll have a set of unexplored nodes that we'll have to
+        // Meanwhile, we'll have a set of unexplored nodes that we'll have to
         // explore before we're done.
         final LifoSet<NDFANode> unexploredNodes = new LifoSet<>();
 
@@ -222,6 +221,9 @@ public abstract class AbstractNDFANode implements NDFANode {
 
         followEpsilonLinks(resultNodes);
 
+
+        applySurgeryToResultNodes(ch, resultNodes);
+
         // Updating the counter and the cache.
         cachedEdgesCounter.inc();
         cachedNext.put(ch, resultNodes);
@@ -229,6 +231,9 @@ public abstract class AbstractNDFANode implements NDFANode {
         // The set of NDFANode instances
         // representing the next DFA node.
         return resultNodes;
+    }
+
+    protected  void applySurgeryToResultNodes(final Character ch, final SortedSet<NDFANode> resultNodes) {
     }
 
     private static void removeDuplicates(

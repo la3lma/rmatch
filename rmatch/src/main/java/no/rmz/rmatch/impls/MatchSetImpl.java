@@ -110,9 +110,9 @@ public final class MatchSetImpl implements MatchSet {
         this.matches = new ConcurrentSkipListSet<>(Match.COMPARE_BY_OBJECT_ID);
         checkNotNull(startNode, "startNode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");
-        currentNode = startNode;
-        start = startIndex;
-        id = MY_COUNTER.inc();
+        this.currentNode = startNode;
+        this.start = startIndex;
+        this.id = MY_COUNTER.inc();
 
         // XXX This lines represents the most egregious
         //     bug in the whole regexp package, since it
@@ -124,7 +124,10 @@ public final class MatchSetImpl implements MatchSet {
         //     algorithm.  Clearly not logarithmic in the number
         //     of expressions, and thus a showstopper.
 
-        for (final Regexp r : currentNode.getRegexps()) {
+        // Note: When the current optimization works, make the StartNode
+        //       implement it even quicker.
+
+        for (final Regexp r : this.currentNode.getRegexps()) {  // TODO: Why isn't this the single startnode?
             if (r.possibleStartingChar(nextChar)) {
                 matches.add(startNode.newMatch(this, r));
             }

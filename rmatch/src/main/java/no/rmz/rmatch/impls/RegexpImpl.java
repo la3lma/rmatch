@@ -69,7 +69,7 @@ public final class RegexpImpl implements Regexp {
     /**
      * The starting node in the NDFA that represents this regular expression.
      */
-    private NDFANode myNode;
+    private NDFANode myNdfaNode;
     private Set<Character> nonStartingCharacters;
 
     /**
@@ -78,7 +78,7 @@ public final class RegexpImpl implements Regexp {
      * @param rexpString a string representation of the regular expression.
      */
     public RegexpImpl(final String rexpString) {
-        this.nonStartingCharacters = Collections.synchronizedSet(new HashSet<>());
+        this.nonStartingCharacters = Collections.synchronizedSet(new TreeSet<Character>());
         this.heaps = new HashMap<>();
         checkNotNull(rexpString, "regexpString can't be null");
         this.rexpString = rexpString;
@@ -86,18 +86,18 @@ public final class RegexpImpl implements Regexp {
 
     @Override
     public boolean isCompiled() {
-        return (myNode != null);
+        return (myNdfaNode != null);
     }
 
     @Override
     public void setMyNDFANode(final NDFANode myNode) {
         assert (!isCompiled());
-        this.myNode = myNode;
+        this.myNdfaNode = myNode;
     }
 
     @Override
-    public NDFANode getMyNode() {
-        return myNode;
+    public NDFANode getMyNdfaNode() {
+        return myNdfaNode;
     }
 
     @Override
@@ -137,12 +137,30 @@ public final class RegexpImpl implements Regexp {
 
     @Override
     public void registerNonStartingChar(final Character currentChar) {
-        this.nonStartingCharacters.add(currentChar);
+        final Set<Character> cs = this.nonStartingCharacters;
+        if (cs.contains(currentChar)) {
+            // TODO: Just for debugging purposes, remove later.
+            throw new IllegalStateException(
+                    "The character " + currentChar + " is already registered as a non-starting character for this regexp, double registration is not allowed");
+        }
+        if (!cs.add(currentChar)) {
+            throw new IllegalStateException(
+                    "The character " + currentChar + " is already registered as a non-starting character for this regexp, double registration is not allowed");
+        }
     }
 
     @Override
     public boolean possibleStartingChar(Character currentChar) {
-        return !this.nonStartingCharacters.contains(currentChar);
+        if (this.nonStartingCharacters.contains(currentChar)) {
+            return false;
+        }
+
+        if (this.myNdfaNode.cannotStartWith(currentChar)) {
+            this.registerNonStartingChar(currentChar);
+            return false;
+        }
+
+        return  true;
     }
 
 

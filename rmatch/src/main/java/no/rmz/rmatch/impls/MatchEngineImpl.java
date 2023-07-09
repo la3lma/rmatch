@@ -85,7 +85,6 @@ public final class MatchEngineImpl implements MatchEngine {
      */
     public MatchEngineImpl(final NodeStorage ns) {
         this.ns = checkNotNull(ns, "NodeStorage can't be null");
-
     }
 
     /**

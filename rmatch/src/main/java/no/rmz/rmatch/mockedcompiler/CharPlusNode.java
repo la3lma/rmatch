@@ -16,12 +16,14 @@
 
 package no.rmz.rmatch.mockedcompiler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
+
+import java.util.Collection;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A node, used for testing, that will recognize a single or more instances of a
@@ -66,5 +68,10 @@ public final class CharPlusNode extends AbstractNDFANode {
             result.add(new PrintableEdge(String.valueOf(myChar), this));
             return result;
         }
+    }
+
+    @Override
+    public boolean cannotStartWith(final Character ch) {
+        return ch != this.myChar;
     }
 }

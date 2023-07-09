@@ -26,7 +26,7 @@ import java.util.SortedSet;
 public interface NDFANode extends Node, Comparable<NDFANode> {
 
     /**
-     * Epsilon edges are edges that connects nodes withoutthe need to follow
+     * Epsilon edges are edges that connects nodes without sthe need to follow
      * any input. This method adds an epsilon edge from the  present node
      * to some other node.
      * @param n The node that will be the gtarget of the epsilon edge.
@@ -46,8 +46,6 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
      * @return All the nodes reachable by epsilon edges.
      */
     SortedSet<NDFANode> getEpsilons();
-
-
 
     /**
      * Give n that the nxt character is ch, what is the next
@@ -129,4 +127,12 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
      * this NDFANode's Regexp.
      */
     boolean isFailing();
+
+    default boolean cannotStartWith(Character ch) {
+        return false;
+    }
+
+    default boolean mayBeAbleToStartWith(Character ch) {
+        return !cannotStartWith(ch);
+    }
 }

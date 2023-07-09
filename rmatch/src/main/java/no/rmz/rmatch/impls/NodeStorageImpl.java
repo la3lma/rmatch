@@ -47,7 +47,7 @@ public final class NodeStorageImpl implements NodeStorage {
     /**
      * There is only one start node, and this is that node.
      */
-    private final StartNode sn;
+    private final StartNode startNode;
     /**
      * A map mapping sorted sets of NDFANodes into DFAnodes. Used to map sets of
      * NDFANodes to previously compiled DFAnodes representing that set of
@@ -60,7 +60,7 @@ public final class NodeStorageImpl implements NodeStorage {
      * Create a new instance of the node storage.
      */
     public NodeStorageImpl() {
-        sn = new StartNode(this);
+        startNode = new StartNode(this);
     }
 
     @Override
@@ -68,7 +68,7 @@ public final class NodeStorageImpl implements NodeStorage {
         synchronized (ndfamap) {
             final Set<NDFANode> result = new HashSet<>();
             final Set<NDFANode> unexplored = new ConcurrentSkipListSet<>();
-            unexplored.add(sn);
+            unexplored.add(startNode);
 
             while (!unexplored.isEmpty()) {
 
@@ -85,7 +85,7 @@ public final class NodeStorageImpl implements NodeStorage {
                     unexplored.addAll(connectedNodes);
                 }
             }
-            result.add(sn);
+            result.add(startNode);
             return result;
         }
     }
@@ -95,7 +95,7 @@ public final class NodeStorageImpl implements NodeStorage {
         synchronized (this.ndfamap) {
             final List<DFANode>  result = new ArrayList<>();
             result.addAll(this.ndfamap.values());
-            result.add(sn.asDfaNode());
+            result.add(startNode.asDfaNode());
             return result;
         }
     }
@@ -103,7 +103,7 @@ public final class NodeStorageImpl implements NodeStorage {
     @Override
     public void addToStartnode(final NDFANode n) {
         checkNotNull(n, "Illegal to add null NDFANode");
-        sn.add(n);
+        startNode.add(n);
     }
 
     /**
@@ -120,7 +120,7 @@ public final class NodeStorageImpl implements NodeStorage {
      */
     public boolean isConnectedToStartnode(final NDFANode n) {
         checkNotNull(n, "Illegal to look for null NDFANode");
-        return sn.getEpsilons().contains(n);
+        return startNode.getEpsilons().contains(n);
     }
 
     // XXX This is really startnode specific and shouldn't necessarily
@@ -128,7 +128,7 @@ public final class NodeStorageImpl implements NodeStorage {
     @Override
     public DFANode getNext(final Character ch) {
         checkNotNull(ch, "Illegal to use null char");
-        return sn.getNextDFA(ch, this);
+        return startNode.getNextDFA(ch, this);
     }
 
     @Override
