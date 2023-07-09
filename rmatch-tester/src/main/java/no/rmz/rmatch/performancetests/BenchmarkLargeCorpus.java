@@ -5,6 +5,7 @@ import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.TestRunResult;
+import no.rmz.rmatch.utils.AbandonStat;
 import no.rmz.rmatch.utils.StringBuffer;
 
 import java.io.BufferedReader;
@@ -106,6 +107,8 @@ public final class BenchmarkLargeCorpus {
 
         // Run the regex matcher
         TestRunResult rmatchResult = testACorpusNG("rmatch", m, regexps, buf);
+
+        AbandonStat.dump(); // Dump the abandon stats to stdout
 
 
         // Run the java regex matcher, but only after we've done a GC to free up memory.

@@ -18,10 +18,7 @@ package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.interfaces.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -73,6 +70,7 @@ public final class RegexpImpl implements Regexp {
      * The starting node in the NDFA that represents this regular expression.
      */
     private NDFANode myNode;
+    private Set<Character> nonStartingCharacters;
 
     /**
      * Make a new instance of Regexp representing a regular expression.
@@ -80,6 +78,7 @@ public final class RegexpImpl implements Regexp {
      * @param rexpString a string representation of the regular expression.
      */
     public RegexpImpl(final String rexpString) {
+        this.nonStartingCharacters = Collections.synchronizedSet(new HashSet<>());
         this.heaps = new HashMap<>();
         checkNotNull(rexpString, "regexpString can't be null");
         this.rexpString = rexpString;
@@ -135,6 +134,17 @@ public final class RegexpImpl implements Regexp {
         checkNotNull(a);
         actions.add(a);
     }
+
+    @Override
+    public void registerNonStartingChar(final Character currentChar) {
+        this.nonStartingCharacters.add(currentChar);
+    }
+
+    @Override
+    public boolean possibleStartingChar(Character currentChar) {
+        return !this.nonStartingCharacters.contains(currentChar);
+    }
+
 
     @Override
     public void remove(final Action a) {

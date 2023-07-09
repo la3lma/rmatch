@@ -127,7 +127,7 @@ public final class MatchEngineImpl implements MatchEngine {
         // that fact.
         final DFANode currentNode = ns.getNext(currentChar);
         if (currentNode != null) {
-            final MatchSet ms = new MatchSetImpl(currentPos, currentNode);
+            final MatchSet ms = new MatchSetImpl(currentPos, currentNode, currentChar);
             if (ms.hasMatches()) {
                 activeMatchSets.add(ms);
             }
@@ -158,6 +158,7 @@ public final class MatchEngineImpl implements MatchEngine {
 
     @Override
     public void match(final Buffer b) {
+        // TDOD: Maybe add a synchronized block here?
         checkNotNull(b, "Buffer can't be null");
 
         final Set<MatchSet> activeMatchSets;

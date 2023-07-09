@@ -105,7 +105,8 @@ public final class MatchSetImpl implements MatchSet {
      */
     public MatchSetImpl(
             final int startIndex,
-            final DFANode startNode) {
+            final DFANode startNode,
+            final Character nextChar) {
         this.matches = new ConcurrentSkipListSet<>(Match.COMPARE_BY_OBJECT_ID);
         checkNotNull(startNode, "startNode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");
@@ -124,7 +125,9 @@ public final class MatchSetImpl implements MatchSet {
         //     of expressions, and thus a showstopper.
 
         for (final Regexp r : currentNode.getRegexps()) {
-            matches.add(startNode.newMatch(this, r));
+            if (r.possibleStartingChar(nextChar)) {
+                matches.add(startNode.newMatch(this, r));
+            }
         }
 
         // This was necessary to nail the bug caused by the natural
@@ -208,7 +211,7 @@ public final class MatchSetImpl implements MatchSet {
             if (m.isFinal()) {
                 commitMatch(m, runnableMatches);
                 if (!m.isAbandoned()) {
-                    m.abandon(currentChar);
+                    abandon(currentChar, m);
                 }
             }
             removeMatch(m);
@@ -276,10 +279,17 @@ public final class MatchSetImpl implements MatchSet {
         }
 
         if (!m.isAbandoned()) {
-            m.abandon(currentChar);
+            abandon(currentChar, m);
         }
 
         removeMatch(m);
+    }
+
+    private static void abandon(Character currentChar, Match m) {
+        m.abandon(currentChar);
+        if (m.isZeroLength()) {
+            m.getRegexp().registerNonStartingChar(currentChar);
+        }
     }
 
     private void failMatchesThatCannotContinue(Character currentChar) {
@@ -288,7 +298,7 @@ public final class MatchSetImpl implements MatchSet {
         if (currentNode.failsSomeRegexps()) {
             for (final Match m : matches) {
                 if (currentNode.isFailingFor(m.getRegexp())) {
-                    m.abandon(currentChar);
+                    abandon(currentChar, m);
                     matches.remove(m);
                 }
             }

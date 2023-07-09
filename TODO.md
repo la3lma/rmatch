@@ -6,6 +6,18 @@
      where to make cutoffs.  If for instance, the most common cutoff is
      for length 1, then we can optimize for a length 1 cutoff using a
      lookup schem that is optimized for length 1.  If the most common case.
+             len = 0 ->  324949545 abandoned
+             len = 1 ->  24168688 abandoned
+             len = 2 ->  1269431 abandoned
+             len = 3 ->  89259 abandoned
+             len = 4 ->  14077 abandoned
+             len = 5 ->  3552 abandoned
+             len = 6 ->  968 abandoned
+             len = 7 ->  548 abandoned
+             len = 8 ->  132 abandoned
+             len = 9 ->  56 abandoned
+             len = 10 ->  9 abandoned
+             len = 11 ->  3 abandoned
 * Consider using assert instead of notnull, to ensure runtime efficiency.
 * Set up a GitHub action build for PRs (and main).
 * Set up code quality feedback for the builds.

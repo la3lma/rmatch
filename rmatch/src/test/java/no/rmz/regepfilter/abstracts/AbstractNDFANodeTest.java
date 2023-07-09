@@ -53,8 +53,7 @@ public class AbstractNDFANodeTest {
     /**
      * We need an NDFANode that is treated as an opaque object.
      */
-    @Mock
-            NDFANode ndfanode;
+    @Mock NDFANode ndfanode;
 
     /**
      * Make a new test article.

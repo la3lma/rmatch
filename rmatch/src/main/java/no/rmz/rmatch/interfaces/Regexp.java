@@ -196,4 +196,8 @@ public interface Regexp extends Comparable<Regexp> {
      * @return true iff the match is associated with this regexp.
      */
     boolean hasMatch(final Match m);
+
+    void registerNonStartingChar(Character currentChar);
+
+    boolean possibleStartingChar(Character currentChar);
 }

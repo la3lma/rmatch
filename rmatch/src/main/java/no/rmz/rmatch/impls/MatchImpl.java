@@ -19,6 +19,7 @@ package no.rmz.rmatch.impls;
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.MatchSet;
 import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.utils.AbandonStat;
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
 
@@ -98,8 +99,8 @@ public final class MatchImpl implements Match {
         return "[Match  regexpString = '"
                 + r.getRexpString() + "' start = "
                 + ms.getStart() + " end = "
-                + end + " isFinal = "
-                + isFinal + " isActive " + isActive + "]";
+                + this.end + " isFinal = "
+                + this.isFinal + " isActive " + this.isActive + "]";
     }
 
     @Override
@@ -112,6 +113,7 @@ public final class MatchImpl implements Match {
         checkState(!isAbandoned());
         r.abandonMatch(this, currentChar);
         isActive = false;
+        AbandonStat.record(this);
     }
 
     @Override
@@ -177,5 +179,9 @@ public final class MatchImpl implements Match {
     @Override
     public void setFinal(final boolean aFinal) {
         this.isFinal = aFinal;
+    }
+
+    public Integer getLength() {
+        return end - getStart();
     }
 }
