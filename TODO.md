@@ -1,4 +1,11 @@
 # Right now
+* Rethink where we can make huge cutoffs, and maybe get some more speed.
+   * Make some statistics. What I'm mostly interested in, is non-matching
+     matches.  Matches that are terminated without finding what they are looking for.
+     If this can be measured (and it can), then it can be used to determine
+     where to make cutoffs.  If for instance, the most common cutoff is
+     for length 1, then we can optimize for a length 1 cutoff using a
+     lookup schem that is optimized for length 1.  If the most common case.
 * Consider using assert instead of notnull, to ensure runtime efficiency.
 * Set up a GitHub action build for PRs (and main).
 * Set up code quality feedback for the builds.
