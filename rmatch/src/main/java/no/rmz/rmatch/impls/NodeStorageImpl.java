@@ -126,7 +126,7 @@ public final class NodeStorageImpl implements NodeStorage {
     // XXX This is really startnode specific and shouldn't necessarily
     //     be tightly coupled with the NodeStorage implementation.
     @Override
-    public DFANode getDfaForPossibleMatchesFromNextChar(final Character ch) {
+    public DFANode getDfaForPossibleNewMatchesFromNextChar(final Character ch) {
         checkNotNull(ch, "Illegal to use null char");
         return startNode.getNextDFA(ch, this);
     }

@@ -97,7 +97,7 @@ class NodeStorageImplTest {
     @Test
     public final void testGetNext() {
         // XXX Incomplete test
-        nsi.getDfaForPossibleMatchesFromNextChar(buffer.getNext());
+        nsi.getDfaForPossibleNewMatchesFromNextChar(buffer.getNext());
     }
 
     /**

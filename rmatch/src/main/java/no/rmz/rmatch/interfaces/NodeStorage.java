@@ -46,7 +46,7 @@ public interface NodeStorage {
      * @param ch an input character.
      * @return a relevant DFANode, or null if no node could be found.
      */
-    DFANode getDfaForPossibleMatchesFromNextChar(final Character ch);
+    DFANode getDfaForPossibleNewMatchesFromNextChar(final Character ch);
 
     /**
      * Given a set of NDFANodes, return a DFANode representing that set of

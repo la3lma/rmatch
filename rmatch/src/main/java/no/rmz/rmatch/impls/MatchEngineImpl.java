@@ -124,7 +124,7 @@ public final class MatchEngineImpl implements MatchEngine {
         // If the current input character opened up a possibility of new
         // matches, then by all means make a new match set to represent
         // that fact.
-        final DFANode currentNode = nodeStorage.getDfaForPossibleMatchesFromNextChar(currentChar);
+        final DFANode currentNode = nodeStorage.getDfaForPossibleNewMatchesFromNextChar(currentChar);
         if (currentNode != null) {
             final MatchSet ms = new MatchSetImpl(currentPos, currentNode, currentChar);
             if (ms.hasMatches()) {

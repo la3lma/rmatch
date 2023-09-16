@@ -78,13 +78,13 @@ public class EdgeInvisibilityEnsurance {
         for (var r : regexps) {
             switch (r) {
                 case "den":
-                    m.add("den", denAction);
+                    m.add(r, denAction);
                     break;
                 case "laden":
-                    m.add("laden", ladenAction);
+                    m.add(r, ladenAction);
                     break;
                 case "ll":
-                    m.add("ll", llAction);
+                    m.add(r, llAction);
                     break;
                 default:
                     m.add(r, defaultAction);
