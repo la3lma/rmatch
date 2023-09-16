@@ -1,5 +1,9 @@
 # Right now
 * Rethink where we can make huge cutoffs, and maybe get some more speed.
+   * Based on the statistics gathered below, i now believe that a limited (1-3 ish) lookahead to search 
+     for the first non-matching char, will be beneficial.  It will be a little more expensive, but it will
+     reduce later cost. There will probably be a sweet spot for the lookahead, and it will probably be
+     very low (in the 1-3 range, perhaps in the 0-1 range).
    * Make some statistics. What I'm mostly interested in, is non-matching
      matches.  Matches that are terminated without finding what they are looking for.
      If this can be measured (and it can), then it can be used to determine

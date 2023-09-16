@@ -113,7 +113,7 @@ public final class MatchImpl implements Match {
         checkState(!isAbandoned());
         r.abandonMatch(this, currentChar);
         isActive = false;
-        AbandonStat.record(this);
+        AbandonStat.record(this); // TODO: Remove when we no longer need this stat.
     }
 
     @Override

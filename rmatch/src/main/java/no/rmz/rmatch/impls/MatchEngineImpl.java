@@ -75,7 +75,7 @@ public final class MatchEngineImpl implements MatchEngine {
      * The instance that is used to map sets of NDFA nodes to NDFA nodes, and if
      * necessarily create new DFA nodes.
      */
-    private final NodeStorage ns;
+    private final NodeStorage nodeStorage;
 
     /**
      * Implements the MatchEngine interface, uses a particular NodeStorage
@@ -84,7 +84,7 @@ public final class MatchEngineImpl implements MatchEngine {
      * @param ns non null NodeStorage instance.
      */
     public MatchEngineImpl(final NodeStorage ns) {
-        this.ns = checkNotNull(ns, "NodeStorage can't be null");
+        this.nodeStorage = checkNotNull(ns, "NodeStorage can't be null");
     }
 
     /**
@@ -113,7 +113,7 @@ public final class MatchEngineImpl implements MatchEngine {
         if (!activeMatchSets.isEmpty()) {
             final Set<MatchSet> setsToRemove = new HashSet<>();
             for (final MatchSet ms : activeMatchSets) {
-                ms.progress(ns, currentChar, currentPos, runnableMatches);
+                ms.progress(nodeStorage, currentChar, currentPos, runnableMatches);
                 if (!ms.hasMatches()) {
                     setsToRemove.add(ms);
                 }
@@ -124,7 +124,7 @@ public final class MatchEngineImpl implements MatchEngine {
         // If the current input character opened up a possibility of new
         // matches, then by all means make a new match set to represent
         // that fact.
-        final DFANode currentNode = ns.getNext(currentChar);
+        final DFANode currentNode = nodeStorage.getDfaForPossibleMatchesFromNextChar(currentChar);
         if (currentNode != null) {
             final MatchSet ms = new MatchSetImpl(currentPos, currentNode, currentChar);
             if (ms.hasMatches()) {

@@ -197,7 +197,7 @@ public abstract class AbstractNDFANode implements NDFANode {
             visitedNodes.add(current);
 
             // By pursuing the current NDFA node through both
-            // character-specific and epsilon edges, we get a new
+            // character-specific and epsilon edges, we get
             // a new NDFA node that is reachble through this character.
             // If we  haven't expored this node, so we add it to the
             // set of unexplored nodes.
@@ -220,7 +220,6 @@ public abstract class AbstractNDFANode implements NDFANode {
         }
 
         followEpsilonLinks(resultNodes);
-
 
         applySurgeryToResultNodes(ch, resultNodes);
 

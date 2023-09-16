@@ -138,15 +138,12 @@ public final class RegexpImpl implements Regexp {
     @Override
     public void registerNonStartingChar(final Character currentChar) {
         final Set<Character> cs = this.nonStartingCharacters;
+        // TODO: COmmenting out just to see if it works. (It doesn't)
         if (cs.contains(currentChar)) {
-            // TODO: Just for debugging purposes, remove later.
-            throw new IllegalStateException(
+             throw new IllegalStateException(
                     "The character " + currentChar + " is already registered as a non-starting character for this regexp, double registration is not allowed");
         }
-        if (!cs.add(currentChar)) {
-            throw new IllegalStateException(
-                    "The character " + currentChar + " is already registered as a non-starting character for this regexp, double registration is not allowed");
-        }
+        cs.add(currentChar);
     }
 
     @Override

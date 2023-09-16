@@ -288,14 +288,16 @@ public final class MatchSetImpl implements MatchSet {
         removeMatch(m);
     }
 
-    private static void abandon(Character currentChar, Match m) {
+    private static void abandon(
+            final Character currentChar,
+            final Match m) {
         m.abandon(currentChar);
         if (m.isZeroLength()) {
             m.getRegexp().registerNonStartingChar(currentChar);
         }
     }
 
-    private void failMatchesThatCannotContinue(Character currentChar) {
+    private void failMatchesThatCannotContinue(final Character currentChar) {
         // Check if there are any regexps for which matches must fail
         // for this node, and fail them.
         if (currentNode.failsSomeRegexps()) {
