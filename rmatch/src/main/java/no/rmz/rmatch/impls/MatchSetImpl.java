@@ -128,9 +128,7 @@ public final class MatchSetImpl implements MatchSet {
         //       implement it even quicker.
 
         for (final Regexp r : this.currentNode.getRegexps()) {  // TODO: Why isn't this the single startnode?
-            if (r.possibleStartingChar(nextChar)) {
                 matches.add(startNode.newMatch(this, r));
-            }
         }
 
         // This was necessary to nail the bug caused by the natural
@@ -292,9 +290,6 @@ public final class MatchSetImpl implements MatchSet {
             final Character currentChar,
             final Match m) {
         m.abandon(currentChar);
-        if (m.isZeroLength()) {
-            m.getRegexp().registerNonStartingChar(currentChar);
-        }
     }
 
     private void failMatchesThatCannotContinue(final Character currentChar) {

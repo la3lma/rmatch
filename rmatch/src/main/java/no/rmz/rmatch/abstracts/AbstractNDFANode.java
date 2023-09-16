@@ -221,8 +221,6 @@ public abstract class AbstractNDFANode implements NDFANode {
 
         followEpsilonLinks(resultNodes);
 
-        applySurgeryToResultNodes(ch, resultNodes);
-
         // Updating the counter and the cache.
         cachedEdgesCounter.inc();
         cachedNext.put(ch, resultNodes);

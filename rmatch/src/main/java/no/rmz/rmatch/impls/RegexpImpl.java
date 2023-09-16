@@ -70,7 +70,6 @@ public final class RegexpImpl implements Regexp {
      * The starting node in the NDFA that represents this regular expression.
      */
     private NDFANode myNdfaNode;
-    private Set<Character> nonStartingCharacters;
 
     /**
      * Make a new instance of Regexp representing a regular expression.
@@ -78,7 +77,6 @@ public final class RegexpImpl implements Regexp {
      * @param rexpString a string representation of the regular expression.
      */
     public RegexpImpl(final String rexpString) {
-        this.nonStartingCharacters = Collections.synchronizedSet(new TreeSet<Character>());
         this.heaps = new HashMap<>();
         checkNotNull(rexpString, "regexpString can't be null");
         this.rexpString = rexpString;
@@ -133,31 +131,6 @@ public final class RegexpImpl implements Regexp {
     public void add(final Action a) {
         checkNotNull(a);
         actions.add(a);
-    }
-
-    @Override
-    public void registerNonStartingChar(final Character currentChar) {
-        final Set<Character> cs = this.nonStartingCharacters;
-        // TODO: COmmenting out just to see if it works. (It doesn't)
-        if (cs.contains(currentChar)) {
-             throw new IllegalStateException(
-                    "The character " + currentChar + " is already registered as a non-starting character for this regexp, double registration is not allowed");
-        }
-        cs.add(currentChar);
-    }
-
-    @Override
-    public boolean possibleStartingChar(Character currentChar) {
-        if (this.nonStartingCharacters.contains(currentChar)) {
-            return false;
-        }
-
-        if (this.myNdfaNode.cannotStartWith(currentChar)) {
-            this.registerNonStartingChar(currentChar);
-            return false;
-        }
-
-        return  true;
     }
 
 

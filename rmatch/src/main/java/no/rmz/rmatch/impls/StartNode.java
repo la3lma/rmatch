@@ -97,18 +97,6 @@ public final class StartNode extends AbstractNDFANode {
         return result;
     }
 
-    protected  void applySurgeryToResultNodes(final Character ch, final SortedSet<NDFANode> resultNodes) {
-        // Apply heuristic to remove nodes that can't be reached
-        final Collection<NDFANode> unreachableNodes = new ArrayList<>();
-        for (NDFANode n : resultNodes) {
-            if (n.getRegexp().possibleStartingChar(ch)) {
-                continue;
-            }
-            unreachableNodes.add(n);
-        }
-
-        resultNodes.removeAll(unreachableNodes);
-    }
 
     /**
      * Add a new NDFA Node to the startnode.
