@@ -80,10 +80,10 @@ public final class StartNode extends AbstractNDFANode {
     public DFANode getNextDFA(final Character ch, final NodeStorage ns) {
 
         synchronized (topDfaMonitor) {
-            if (topDFA == null) {
-                topDFA = new DFANodeImpl(Collections.EMPTY_SET);
-            } else if (topDFA.hasLinkFor(ch)) {
-                return topDFA.getNext(ch, ns);
+            if (this.topDFA == null) {
+                this.topDFA = new DFANodeImpl(Collections.EMPTY_SET);
+            } else if (this.topDFA.hasLinkFor(ch)) {
+                return this.topDFA.getNext(ch, ns);
             }
         }
 
@@ -92,7 +92,7 @@ public final class StartNode extends AbstractNDFANode {
         final DFANode result;
         if (!nextSet.isEmpty()) {
             result = ns.getDFANode(nextSet);
-            topDFA.addLink(ch, result);
+            this.topDFA.addLink(ch, result);
         } else {
             result = null;
         }

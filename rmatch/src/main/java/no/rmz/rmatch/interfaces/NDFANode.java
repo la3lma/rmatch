@@ -26,8 +26,8 @@ import java.util.SortedSet;
 public interface NDFANode extends Node, Comparable<NDFANode> {
 
     /**
-     * Epsilon edges are edges that connects nodes withoutthe need to follow
-     * any input. This method adds an epsilon edge from the  present node
+     * Epsilon edges are edges that connect nodes without the need to follow
+     * any input. This method adds an epsilon edge from the present node
      * to some other node.
      * @param n The node that will be the gtarget of the epsilon edge.
      */

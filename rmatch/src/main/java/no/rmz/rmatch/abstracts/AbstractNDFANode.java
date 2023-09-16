@@ -94,12 +94,29 @@ public abstract class AbstractNDFANode implements NDFANode {
         this.isTerminal = isTerminal;
         this.isFailing = isFailing;
 
-        index = COUNTER.inc();
+        this.index = COUNTER.inc();
 
         if (isTerminal) {
             r.addTerminalNode(this);
         }
     }
+
+    @Override
+    public int hashCode() {
+        return index.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o instanceof AbstractNDFANode) {
+            final AbstractNDFANode other = (AbstractNDFANode) o;
+            return index.equals(other.index);
+        } else {
+            return false;
+        }
+    }
+
+
 
     /**
      * Create a new AbstractNDFANode instance.
@@ -164,6 +181,7 @@ public abstract class AbstractNDFANode implements NDFANode {
         }
     }
 
+
     /**
      * Implement breadth first search through the set of nodes for NDFA nodes
      * that are valid successors to the current node, through the parameter
@@ -178,11 +196,11 @@ public abstract class AbstractNDFANode implements NDFANode {
             return cachedNext.get(ch);
         }
 
-        // Eventually the result we'll collect and return will go into this
+        // Eventually, the result we'll collect and return will go into this
         // set.
         final SortedSet<NDFANode> resultNodes = new TreeSet<>();
 
-        // Meanwhile we'll have a set of unexplored nodes that we'll have to
+        // Meanwhile, we'll have a set of unexplored nodes that we'll have to
         // explore before we're done.
         final LifoSet<NDFANode> unexploredNodes = new LifoSet<>();
 
@@ -198,7 +216,7 @@ public abstract class AbstractNDFANode implements NDFANode {
             visitedNodes.add(current);
 
             // By pursuing the current NDFA node through both
-            // character-specific and epsilon edges, we get a new
+            // character-specific and epsilon edges, we get
             // a new NDFA node that is reachble through this character.
             // If we  haven't expored this node, so we add it to the
             // set of unexplored nodes.

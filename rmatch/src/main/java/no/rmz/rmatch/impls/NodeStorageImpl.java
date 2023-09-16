@@ -23,6 +23,7 @@ import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.utils.SortedSetComparatorImpl;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -123,13 +124,19 @@ public final class NodeStorageImpl implements NodeStorage {
         return sn.getEpsilons().contains(n);
     }
 
+    private final ConcurrentHashMap<Character, DFANode> nextFromDFAMap =
+            new ConcurrentHashMap<>();
+
     // XXX This is really startnode specific and shouldn't necessarily
     //     be tightly coupled with the NodeStorage implementation.
     @Override
     public DFANode getNext(final Character ch) {
         checkNotNull(ch, "Illegal to use null char");
-        return sn.getNextDFA(ch, this);
+        return nextFromDFAMap.computeIfAbsent(ch, key -> {
+            return sn.getNextDFA(ch, this);
+        });
     }
+
 
     @Override
     public DFANode getDFANode(final SortedSet<NDFANode> ndfaset) {

@@ -176,9 +176,9 @@ public final class DFANodeImpl implements DFANode {
      * @return A set of NDFANodes that serves as basis for the next DFANode.
      */
     private SortedSet<NDFANode> getNextThroughBasis(final Character ch) {
-        TreeSet<NDFANode> result = new TreeSet<>();
+        final TreeSet<NDFANode> result = new TreeSet<>();
 
-        for (NDFANode n : basis) {
+        for (final NDFANode n : basis) {
             result.addAll(n.getNextSet(ch));
         }
 
