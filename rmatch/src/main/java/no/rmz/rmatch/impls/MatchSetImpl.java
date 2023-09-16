@@ -78,6 +78,21 @@ public final class MatchSetImpl implements MatchSet {
         }
     }
 
+    @Override
+    public int hashCode(){
+        return Long.hashCode(getId());
+    }
+
+    @Override
+    public boolean  equals(final Object o){
+        if (o instanceof MatchSet) {
+            final MatchSet ms = (MatchSet) o;
+            return ms.getId() == getId();
+        } else {
+            return false;
+        }
+    }
+
     /**
      * The set of matches being pursued through this MatchSetImpl.
      */
