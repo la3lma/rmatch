@@ -23,7 +23,6 @@ import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A representation of a match implementing the Match interface.
@@ -116,15 +115,15 @@ public final class MatchImpl implements Match {
     }
 
     @Override
-    public void abandon(Character currentChar) {
-        checkState(!isAbandoned());
-        r.abandonMatch(this, currentChar);
-        isActive = false;
+    public void abandon(final Character currentChar) {
+        // TODO: Make optional, only run when debugging. checkState(!isAbandoned());
+        this.r.abandonMatch(this, currentChar);
+        this.isActive = false;
     }
 
     @Override
     public boolean isAbandoned() {
-        return !isActive && (!r.hasMatches() || !r.hasMatch(this));
+        return !(isActive || r.hasMatch(this));
     }
 
     @Override

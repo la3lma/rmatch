@@ -20,6 +20,7 @@ import java.util.Set;
 
 /**
  * Implement the Node interface for deterministic finite automatas (DFA)s.
+ * Implement the Node interface for deterministic finite automatas (DFA)s.
  */
 public interface DFANode extends Node {
 
@@ -84,10 +85,6 @@ public interface DFANode extends Node {
      */
     void removeLink(final Character c);
 
-    /**
-     * Remove this DFA node entirely from the VM.
-     */
-    void removeNode();
 
     /**
      * True if this DFA node will fail some regexp.

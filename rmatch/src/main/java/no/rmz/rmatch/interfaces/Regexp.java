@@ -62,13 +62,15 @@ public interface Regexp extends Comparable<Regexp> {
      */
     void commitUndominated(final RunnableMatchesHolder runnableMatches);
 
+    DominationHeap getDominationHeap(MatchSet ms);
+
     /**
      * Get a domination heap for a MatchSet.
      *
      * @param ms the MatchSet
      * @return the corresponding DominationHeap.
      */
-    DominationHeap getDominationHeap(final MatchSet ms);
+    DominationHeap getDominationHeapCreateIfNotPresent(final MatchSet ms);
 
     /**
      * Remove all references to a particular MatchSet, and the matches within

@@ -23,8 +23,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Representation of a parsed regular expression.
@@ -163,9 +163,15 @@ public final class RegexpImpl implements Regexp {
         }
     }
 
+
     @Override
     public DominationHeap getDominationHeap(final MatchSet ms) {
-        DominationHeap dh = heaps.get(ms);
+        return heaps.get(ms);
+    }
+
+    @Override
+    public DominationHeap getDominationHeapCreateIfNotPresent(final MatchSet ms) {
+        DominationHeap dh = getDominationHeap(ms);
 
         if (dh == null) {
             dh = new DominationHeap();
@@ -182,14 +188,10 @@ public final class RegexpImpl implements Regexp {
     @Override
     public void registerMatch(final Match m) {
         assert (m != null);
-        getDominationHeap(m.getMatchSet()).addMatch(m);
+        getDominationHeapCreateIfNotPresent(m.getMatchSet()).addMatch(m);
         assert hasMatch(m);
     }
 
-    @Override
-    public boolean hasMatches() {
-        return (heaps != null) && (!heaps.isEmpty());
-    }
 
     /**
      * True iff m can never become dominating.
@@ -207,7 +209,7 @@ public final class RegexpImpl implements Regexp {
         if (m.getRegexp() != this) {
             return false;  // Can only dominate if regexp is the same
         }
-        final DominationHeap dm = getDominationHeap(m.getMatchSet());
+        final DominationHeap dm = getDominationHeapCreateIfNotPresent(m.getMatchSet());
         if (dm.isEmpty()) {
             // If we don't know anyting about the ms of the m, we can't dominate
             return false;
@@ -222,6 +224,7 @@ public final class RegexpImpl implements Regexp {
 
     @Override
     public void abandonMatch(final Match m, final Character currentChar) {
+        // TODO: All of those checks do take a significant amount of time.
         checkNotNull(m);
         checkArgument(this == m.getRegexp());
         checkArgument(hasMatches());
@@ -230,18 +233,14 @@ public final class RegexpImpl implements Regexp {
         final MatchSet ms = m.getMatchSet();
 
         final DominationHeap dh = getDominationHeap(ms);
-        // checkState(!dh.isEmpty());
+        if (dh == null) {
+            return;
+        }
 
         dh.remove(m);
         if (dh.isEmpty()) {
             heaps.remove(ms);
         }
-
-        // Postcondition, just in case
-        //
-        // checkState(heaps == null
-        //        || heaps.get(ms) == null
-        //        || !getDominationHeap(ms).containsMatch(m));
     }
 
     @Override
@@ -305,6 +304,12 @@ public final class RegexpImpl implements Regexp {
     public boolean hasMatch(final Match m) {
         checkNotNull(m);
         final MatchSet ms = m.getMatchSet();
-        return (heaps != null) && (heaps.get(ms) != null);
+        return (heaps != null) && heaps.containsKey(ms);
     }
+
+    @Override
+    public boolean hasMatches() {
+        return (heaps != null) && (!heaps.isEmpty());
+    }
+
 }

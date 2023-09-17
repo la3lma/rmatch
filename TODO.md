@@ -1,7 +1,6 @@
 # Right now
-* Maybe attach a domination heap to the match set. Right now we're looking it up, but if
-  we always need one for every matching set anyway, why not just add it and 
-  save the lookup?
+*  Make benchmarking code less of a mess: Only log when not profiling, also be able to switch of some of the argument checking
+   since that is mostly useful when debugging new code / making sure tests break when new things are added.
 * Rethink where we can make huge cutoffs, and maybe get some more speed.
    * Make some statistics. What I'm mostly interested in, is non-matching
      matches.  Matches that are terminated without finding what they are looking for.

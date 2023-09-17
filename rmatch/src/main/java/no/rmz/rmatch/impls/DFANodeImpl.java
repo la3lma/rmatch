@@ -203,13 +203,6 @@ public final class DFANodeImpl implements DFANode {
         nextMap.remove(c);
     }
 
-    @Override
-    public void removeNode() {
-        // XXX Iterate over all linkers, calling "removeLinkTo"
-        // XXX for the relevant characters.
-        // XXX Abstract?
-        throw new RuntimeException("Not implemented, perhaps not called?");
-    }
 
     /**
      * Calculate if the present DFANode is final for a particular regular

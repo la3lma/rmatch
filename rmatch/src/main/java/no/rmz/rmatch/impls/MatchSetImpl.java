@@ -301,7 +301,7 @@ public final class MatchSetImpl implements MatchSet {
 
     private void failMatchesThatCannotContinue(Character currentChar) {
         // Check if there are any regexps for which matches must fail
-        // for this node, and fail them.
+        // for this node, and then fail them.
         if (currentNode.failsSomeRegexps()) {
             for (final Match m : matches) {
                 if (currentNode.isFailingFor(m.getRegexp())) {
