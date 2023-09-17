@@ -116,15 +116,15 @@ public final class MatchSetImpl implements MatchSet {
      * Create a new MatchSetImpl.
      *
      * @param startIndex The start position in the input.
-     * @param startNode The deterministic start node to start with.
+     * @param newCurrentNode The deterministic start node to start with.
      */
     public MatchSetImpl(
             final int startIndex,
-            final DFANode startNode) {
+            final DFANode newCurrentNode) {
         this.matches = new ConcurrentSkipListSet<>(Match.COMPARE_BY_OBJECT_ID);
-        checkNotNull(startNode, "startNode can't be null");
+        checkNotNull(newCurrentNode, "newCurrentNode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");
-        currentNode = startNode;
+        this.currentNode = newCurrentNode; // TODO: Necessary?
         start = startIndex;
         id = MY_COUNTER.inc();
 
@@ -138,15 +138,17 @@ public final class MatchSetImpl implements MatchSet {
         //     algorithm.  Clearly not logarithmic in the number
         //     of expressions, and thus a showstopper.
 
-        for (final Regexp r : currentNode.getRegexps()) {
-            matches.add(startNode.newMatch(this, r));
-        }
+        // Maybe introduce a function "canStartwith" for a regexp, and traverse
+        // the regexps to find the ones that can start with the current char,
+        // and only add those to the match set.
+        // Also remember this for the next time, so that this calculation is
+        // only carried once per character, for all the regexps?
 
-        // This was necessary to nail the bug caused by the natural
-        // comparison for matches not being by id. Don't want to
-        // see that ever again, so I'm keeping the assertion.
-        // TODO: This no longer is true due to the optimizations being introduced above.
-        // assert (matches.size() == currentNode.getRegexps().size());
+        for (final Regexp r : newCurrentNode.getRegexps()) {
+            // TODO: We _must_ find some heuristic to optimize away most
+            // invocations of the next line.
+            matches.add(newCurrentNode.newMatch(this, r));
+        }
     }
 
     @Override
