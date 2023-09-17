@@ -83,6 +83,14 @@ public final class MatchImpl implements Match {
     }
 
     /**
+     * Implement hashing based on the unique ID.
+     */
+    @Override
+    public int hashCode() {
+        return (int) (this.id ^ (this.id >>> 32));
+    }
+
+    /**
      * Create a new Match implementation. Assumes that the match is not
      * initially final.
      *

@@ -125,10 +125,10 @@ public final class MatchEngineImpl implements MatchEngine {
         // If the current input character opened up a possibility of new
         // matches, then by all means make a new match set to represent
         // that fact.
-        final DFANode currentNode = ns.getNext(currentChar);
-        if (currentNode != null) {
+        final DFANode startOfNewMatches = ns.getNextFromStartNode(currentChar);
+        if (startOfNewMatches != null) {
             final MatchSet ms;
-            ms = new MatchSetImpl(currentPos, currentNode);
+            ms = new MatchSetImpl(currentPos, startOfNewMatches);
             if (ms.hasMatches()) {
                 activeMatchSets.add(ms);
             }

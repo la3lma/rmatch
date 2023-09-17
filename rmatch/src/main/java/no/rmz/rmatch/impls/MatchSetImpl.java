@@ -23,7 +23,7 @@ import no.rmz.rmatch.utils.Counters;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -121,7 +121,7 @@ public final class MatchSetImpl implements MatchSet {
     public MatchSetImpl(
             final int startIndex,
             final DFANode newCurrentNode) {
-        this.matches = new ConcurrentSkipListSet<>(Match.COMPARE_BY_OBJECT_ID);
+        this.matches = ConcurrentHashMap.newKeySet();
         checkNotNull(newCurrentNode, "newCurrentNode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");
         this.currentNode = newCurrentNode; // TODO: Necessary?
