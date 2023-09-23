@@ -46,7 +46,7 @@ public final class StartNode extends AbstractNDFANode {
     /**
      * The DFA that represents the StartNode instance.
      */
-    private DFANodeImpl topDFA = null;
+    private DFANodeImpl topDFA = new DFANodeImpl(Collections.EMPTY_SET);
     /**
      * A monitor that is used to synchronize access to the StartNode instance.
      */
@@ -79,12 +79,8 @@ public final class StartNode extends AbstractNDFANode {
      */
     public DFANode getNextDFA(final Character ch, final NodeStorage ns) {
 
-        synchronized (topDfaMonitor) {
-            if (this.topDFA == null) {
-                this.topDFA = new DFANodeImpl(Collections.EMPTY_SET);
-            } else if (this.topDFA.hasLinkFor(ch)) {
-                return this.topDFA.getNext(ch, ns);
-            }
+        if (this.topDFA.hasLinkFor(ch)) {
+            return this.topDFA.getNext(ch, ns);
         }
 
         final SortedSet<NDFANode> nextSet = getNextSet(ch);

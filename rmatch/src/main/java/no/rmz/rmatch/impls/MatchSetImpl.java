@@ -124,7 +124,7 @@ public final class MatchSetImpl implements MatchSet {
         this.matches = ConcurrentHashMap.newKeySet();
         checkNotNull(newCurrentNode, "newCurrentNode can't be null");
         checkArgument(startIndex >= 0, "Start index can't be negative");
-        this.currentNode = newCurrentNode; // TODO: Necessary?
+        this.currentNode = newCurrentNode;
         start = startIndex;
         id = MY_COUNTER.inc();
 
@@ -144,10 +144,10 @@ public final class MatchSetImpl implements MatchSet {
         // Also remember this for the next time, so that this calculation is
         // only carried once per character, for all the regexps?
 
-        for (final Regexp r : newCurrentNode.getRegexps()) {
+        for (final Regexp r : this.currentNode.getRegexps()) {
             // TODO: We _must_ find some heuristic to optimize away most
             // invocations of the next line.
-            matches.add(newCurrentNode.newMatch(this, r));
+            matches.add(this.currentNode.newMatch(this, r));
         }
     }
 
