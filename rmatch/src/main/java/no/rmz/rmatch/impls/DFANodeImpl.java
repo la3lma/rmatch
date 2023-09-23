@@ -73,6 +73,7 @@ public final class DFANodeImpl implements DFANode {
      * A cache used to memoize check for finality for particular regexps.
      */
     private final Map<Regexp, Boolean> baseIsFinalCache = new ConcurrentHashMap<>();
+    private final List<NDFANode> basisList;
 
     /**
      * Create a new DFA based representing a set of NDFA nodes.
@@ -84,6 +85,7 @@ public final class DFANodeImpl implements DFANode {
     public DFANodeImpl(final Set<NDFANode> ndfanodeset) {
         basis.addAll(ndfanodeset);
         initialize(basis);
+        this.basisList = new ArrayList<>(this.basis);
         id = COUNTER.inc();
     }
 
@@ -212,9 +214,7 @@ public final class DFANodeImpl implements DFANode {
      * @return true iff this node is final for r.
      */
     private boolean baseIsFinalFor(final Regexp r) {
-        return baseIsFinalCache.computeIfAbsent(r, key ->
-                basis.stream().anyMatch(n -> key.hasTerminalNdfaNode(n))
-        );
+        return baseIsFinalCache.computeIfAbsent(r, key -> basisList.parallelStream().anyMatch(key::hasTerminalNdfaNode));
     }
 
     @Override
