@@ -62,7 +62,6 @@ public interface Regexp extends Comparable<Regexp> {
      */
     void commitUndominated(final RunnableMatchesHolder runnableMatches);
 
-    DominationHeap getDominationHeap(MatchSet ms);
 
     /**
      * Get a domination heap for a MatchSet.

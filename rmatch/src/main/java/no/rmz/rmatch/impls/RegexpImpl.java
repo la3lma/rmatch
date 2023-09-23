@@ -18,13 +18,12 @@ package no.rmz.rmatch.impls;
 
 import no.rmz.rmatch.interfaces.*;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Representation of a parsed regular expression.
@@ -68,7 +67,7 @@ public final class RegexpImpl implements Regexp {
      * implementation. It may in fact be much saner to put it into the MatchSet,
      * however, the MatchSet doesn't use it itself.
      */
-    private final Map<MatchSet, DominationHeap> heaps;
+    private final ConcurrentHashMap<MatchSet, DominationHeap> heaps;
     /**
      * The starting node in the NDFA that represents this regular expression.
      */
@@ -80,7 +79,8 @@ public final class RegexpImpl implements Regexp {
      * @param rexpString a string representation of the regular expression.
      */
     public RegexpImpl(final String rexpString) {
-        this.heaps = new HashMap<>();
+        this.heaps = new ConcurrentHashMap<>();
+
         checkNotNull(rexpString, "regexpString can't be null");
         this.rexpString = rexpString;
     }
@@ -165,19 +165,8 @@ public final class RegexpImpl implements Regexp {
 
 
     @Override
-    public DominationHeap getDominationHeap(final MatchSet ms) {
-        return heaps.get(ms);
-    }
-
-    @Override
     public DominationHeap getDominationHeapCreateIfNotPresent(final MatchSet ms) {
-        DominationHeap dh = getDominationHeap(ms);
-
-        if (dh == null) {
-            dh = new DominationHeap();
-            heaps.put(ms, dh);
-        }
-        return dh;
+        return heaps.computeIfAbsent(ms, k -> new DominationHeap());
     }
 
     @Override
@@ -232,7 +221,7 @@ public final class RegexpImpl implements Regexp {
 
         final MatchSet ms = m.getMatchSet();
 
-        final DominationHeap dh = getDominationHeap(ms);
+        final DominationHeap dh = heaps.get(ms);
         if (dh == null) {
             return;
         }
