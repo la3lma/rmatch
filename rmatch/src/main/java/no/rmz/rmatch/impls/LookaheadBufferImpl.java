@@ -57,6 +57,7 @@ public class LookaheadBufferImpl implements LookaheadBuffer {
         }
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Buffer clone() {
         synchronized (lock) {

@@ -47,6 +47,7 @@ public final class DominationHeap {
     public void remove(final Match m) {
         checkNotNull(m);
         checkState(!isEmpty());
+        //noinspection ResultOfMethodCallIgnored
         heap.remove(m);
     }
 

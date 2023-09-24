@@ -16,8 +16,9 @@
 
 package no.rmz.rmatch.utils;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import no.rmz.rmatch.interfaces.Buffer;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An implementation of the Buffer interface, that holds all of the input as a
@@ -152,6 +153,7 @@ public final class StringBuffer implements Buffer, Cloneable {
         }
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Buffer clone() {
         return new StringBuffer(this);
