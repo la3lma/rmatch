@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>rmatch-tester</name>
-    <url>http://maven.apache.org</url>
+    <url>https://maven.apache.org</url>
 
     <dependencies>
         <dependency>
@@ -67,10 +67,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${mavenCompilerPlugin.version}</version>
 
-                <configuration>
+                <configuration mainClass="no.rmz.rmatch.performancetests.misc.BenchmarkTheWutheringHeightsCorpus">
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <mainClass>no.rmz.rmatch.performancetests.misc.BenchmarkTheWutheringHeightsCorpus</mainClass>
                 </configuration>
             </plugin>
 
@@ -124,6 +123,7 @@
                             <exclude>no/rmz/rmatch/**/*Test.class</exclude>
                         </excludes>
                     </instrumentation>
+                    <check/>
                 </configuration>
                 <executions>
                     <execution>
