@@ -125,8 +125,8 @@ public final class FileInhaler {
                     in.close();
                     fstream.close();
                 } catch (IOException ex) {
-                    System.err.println("This should never happen" + ex)
-                    exit(1)
+                    System.err.println("This should never happen" + ex);
+                    exit(1);
                 }
             }
         }
