@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.System.exit;
 
 
 /**
@@ -124,7 +125,8 @@ public final class FileInhaler {
                     in.close();
                     fstream.close();
                 } catch (IOException ex) {
-                    throw new RuntimeException(ex);
+                    System.err.println("This should never happen" + ex)
+                    exit(1)
                 }
             }
         }

@@ -74,7 +74,10 @@ public final class CSVAppender {
                                 + " resulted in a null pointer");
                     }
                 } catch (IOException ex) {
-                    throw new RuntimeException(ex);
+                    // This should never happen. Come on!
+                    // Also: This should be written to log!
+                    System.err.println("This should never happen");
+                    System.exit(1);
                 }
             }
         }
