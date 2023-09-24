@@ -214,7 +214,8 @@ public final class DFANodeImpl implements DFANode {
      * @return true iff this node is final for r.
      */
     private boolean baseIsFinalFor(final Regexp r) {
-        return baseIsFinalCache.computeIfAbsent(r, key -> basisList.parallelStream().anyMatch(key::hasTerminalNdfaNode));
+        return baseIsFinalCache.computeIfAbsent(r,
+                key -> basisList.parallelStream().anyMatch(key::hasTerminalNdfaNode));
     }
 
     @Override

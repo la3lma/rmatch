@@ -179,15 +179,20 @@ public class RegexpImplTest {
      * Mock up a match to use when testing the match registration
      * mechanism.
      */
+    // @Mock
+   //  Match match;
     @Mock
-    Match match;
+    MatchSet matchSet;
 
+    @Mock
+    Regexp otherRegex;
 
     /**
      * Test the match registration mechanism.
      */
     @Test
     public void testRegisterMatch() {
+        Match match = new MatchImpl(matchSet, otherRegex, false);
         assertFalse(re.hasMatch(match));
         re.registerMatch(match);
         assertTrue(re.hasMatch(match));

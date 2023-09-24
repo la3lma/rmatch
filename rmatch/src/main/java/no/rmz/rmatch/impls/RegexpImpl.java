@@ -29,14 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Representation of a parsed regular expression.
  */
 public final class RegexpImpl implements Regexp {
-    /**
-     * A nice little prime.
-     */
-    private static final int SMALLISH_PRIME = 5;
-    /**
-     * A nice two digit prime.
-     */
-    private static final int BIGISH_PRIME = 89;
+
 
     /**
      * The Regexp string represented by this Regexp.
@@ -267,9 +260,7 @@ public final class RegexpImpl implements Regexp {
 
     @Override
     public boolean equals(final Object o) {
-        if (o == null) {
-            return false;
-        } else if (o instanceof RegexpImpl) {
+        if (o instanceof RegexpImpl) {
             return compareTo((Regexp) o) == 0;
         } else {
             return false;
@@ -279,21 +270,14 @@ public final class RegexpImpl implements Regexp {
 
     @Override
     public int hashCode() {
-        final int hashFromString;
-        if (this.rexpString != null) {
-            hashFromString = this.rexpString.hashCode();
-        } else {
-            hashFromString = 0;
-        }
-        // XXX This looks stupid, probably is stupid.
-        return SMALLISH_PRIME * BIGISH_PRIME + hashFromString;
+        return this.rexpString.hashCode();
     }
 
     @Override
     public boolean hasMatch(final Match m) {
         checkNotNull(m);
         final MatchSet ms = m.getMatchSet();
-        return (heaps != null) && heaps.containsKey(ms);
+        return (this.heaps != null) && this.heaps.containsKey(ms);
     }
 
     @Override
