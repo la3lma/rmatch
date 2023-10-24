@@ -44,7 +44,7 @@
         <mavenCheckstylePlugin.version>3.3.0</mavenCheckstylePlugin.version>
         <mavenCoberturaPlugin.version>2.5.1</mavenCoberturaPlugin.version>
         <mavenCompilerPlugin.version>3.11.0</mavenCompilerPlugin.version>
-        <mavenDependencyPlugin.version>3.6.0</mavenDependencyPlugin.version>
+        <mavenDependencyPlugin.version>3.6.1</mavenDependencyPlugin.version>
         <mavenFindbugsPlugin.version>3.0.5</mavenFindbugsPlugin.version>
         <mavenJarPlugin.version>3.3.0</mavenJarPlugin.version>
         <mavenReleasePlugin.version>3.0.1</mavenReleasePlugin.version>
