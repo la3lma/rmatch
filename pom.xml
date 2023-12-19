@@ -43,7 +43,7 @@
         <junit.version>4.13.2</junit.version>
         <mavenCheckstylePlugin.version>3.3.0</mavenCheckstylePlugin.version>
         <mavenCoberturaPlugin.version>2.5.1</mavenCoberturaPlugin.version>
-        <mavenCompilerPlugin.version>3.11.0</mavenCompilerPlugin.version>
+        <mavenCompilerPlugin.version>3.12.0</mavenCompilerPlugin.version>
         <mavenDependencyPlugin.version>3.6.0</mavenDependencyPlugin.version>
         <mavenFindbugsPlugin.version>3.0.5</mavenFindbugsPlugin.version>
         <mavenJarPlugin.version>3.3.0</mavenJarPlugin.version>
