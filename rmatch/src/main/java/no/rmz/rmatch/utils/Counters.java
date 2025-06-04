@@ -11,7 +11,7 @@ import java.util.TreeMap;
 public final class Counters {
 
     /**
-     * We implement the singelton pattern, and this is the instance.
+     * We implement the singleton pattern, and this is the instance.
      */
     private static final Counters INSTANCE = new Counters();
 
@@ -20,7 +20,7 @@ public final class Counters {
      *
      * @param name the name of the counter to create.
      * @param canBeDecremented
-     * @return THe newly crated counter.
+     * @return The newly created counter.
      */
     public static Counter newCounter(final String name, final boolean canBeDecremented) {
         return INSTANCE.privateNewCounter(name, canBeDecremented);
@@ -47,7 +47,7 @@ public final class Counters {
     }
 
     /**
-     * A map mapping strings to countes.
+     * A map mapping strings to counters.
      */
     private final Map<String, Counter> counters =
  new TreeMap<>();
@@ -67,10 +67,10 @@ public final class Counters {
     }
 
     /**
-     * Generate a new counter and put it into the counters map. throws
-     * IllegalStateException if the name is already registred.
+     * Generate a new counter and put it into the counters map. Throws
+     * IllegalStateException if the name is already registered.
      *
-     * @param name The name fo the counter.
+     * @param name The name of the counter.
      * @return a counter.
      */
     private Counter privateNewCounter(final String name, boolean canBeDecremented) {
