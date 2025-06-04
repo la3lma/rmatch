@@ -54,6 +54,21 @@ public final class StringBuffer implements Buffer, Cloneable {
     }
 
     /**
+     * Create a new instance that starts at the specified position but shares
+     * the underlying string.
+     *
+     * @param str  the underlying string to wrap
+     * @param pos  the initial current position
+     */
+    public StringBuffer(final String str, final int pos) {
+        this.str = checkNotNull(str);
+        this.currentPos = pos;
+        if (pos >= 0 && pos < str.length()) {
+            this.currentChar = str.charAt(pos);
+        }
+    }
+
+    /**
      * Clone the other string buffer.
      * @param aThis the buffer to clone.
      */
@@ -116,6 +131,18 @@ public final class StringBuffer implements Buffer, Cloneable {
     public int getLength() {
         synchronized (monitor) {
             return str.length();
+        }
+    }
+
+    /**
+     * Expose the underlying immutable string so that multiple buffer instances
+     * can share it without additional copying.
+     *
+     * @return the raw string used by this buffer
+     */
+    public String getRawString() {
+        synchronized (monitor) {
+            return str;
         }
     }
 

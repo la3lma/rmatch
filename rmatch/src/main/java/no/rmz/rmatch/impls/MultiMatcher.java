@@ -152,12 +152,25 @@ public final class MultiMatcher implements Matcher {
     public void match(final Buffer b) {
         assert (matchers.length == noOfMatchers);
 
-        final CountDownLatch counter =
-                new CountDownLatch(matchers.length);
+        final String shared;
+        final int startPos = b.getCurrentPos();
+        if (b instanceof no.rmz.rmatch.utils.StringBuffer) {
+            shared = ((no.rmz.rmatch.utils.StringBuffer) b).getRawString();
+        } else {
+            final StringBuilder sb = new StringBuilder();
+            Buffer tmp = b.clone();
+            while (tmp.hasNext()) {
+                sb.append(tmp.getNext());
+            }
+            shared = sb.toString();
+        }
+
+        final CountDownLatch counter = new CountDownLatch(matchers.length);
         for (final Matcher matcher : matchers) {
+            final Buffer bufCopy = new no.rmz.rmatch.utils.StringBuffer(shared, startPos);
 
             final Runnable runnable = () -> {
-                matcher.match(b.clone());
+                matcher.match(bufCopy);
                 counter.countDown();
             };
 

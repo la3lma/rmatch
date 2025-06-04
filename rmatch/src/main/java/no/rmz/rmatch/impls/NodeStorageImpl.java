@@ -24,6 +24,7 @@ import no.rmz.rmatch.utils.SortedSetComparatorImpl;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -57,11 +58,62 @@ public final class NodeStorageImpl implements NodeStorage {
     private final Map<SortedSet<NDFANode>, DFANode> ndfamap =
                 new TreeMap<>(SORTED_NDFANODE_SET_COMPARATOR);
 
+    /** Index of first characters mapped to true if at least one regexp can
+     * start with the character. */
+    private final ConcurrentMap<Character, Boolean> startCharIndex =
+            new ConcurrentHashMap<>();
+
+    /** True if any regexp can start with any character. */
+    private volatile boolean matchAnyChar = false;
+
     /**
      * Create a new instance of the node storage.
      */
     public NodeStorageImpl() {
         sn = new StartNode(this);
+    }
+
+    /** Compute the set of initial characters that can start at this node. */
+    private static Set<Character> computeStartChars(final NDFANode n) {
+        final Set<Character> result = new HashSet<>();
+        final Set<NDFANode> visited = new HashSet<>();
+        final Deque<NDFANode> stack = new ArrayDeque<>();
+        stack.add(n);
+        visited.add(n);
+
+        while (!stack.isEmpty() && result.size() < 256) {
+            final NDFANode current = stack.pop();
+            final Collection<PrintableEdge> edges = current.getEdgesToPrint();
+            if (edges == null) {
+                continue;
+            }
+            for (final PrintableEdge edge : edges) {
+                final String label = edge.getLabel();
+                if (label == null) {
+                    final NDFANode dest = edge.getDestination();
+                    if (visited.add(dest)) {
+                        stack.add(dest);
+                    }
+                    continue;
+                }
+                if (".".equals(label)) {
+                    for (int i = 0; i < 256; i++) {
+                        result.add((char) i);
+                    }
+                    return result;
+                }
+                if (label.length() == 3 && label.charAt(1) == '-') {
+                    char start = label.charAt(0);
+                    char end = label.charAt(2);
+                    for (char c = start; c <= end && result.size() < 256; c++) {
+                        result.add(c);
+                    }
+                } else if (label.length() == 1) {
+                    result.add(label.charAt(0));
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -104,6 +156,14 @@ public final class NodeStorageImpl implements NodeStorage {
     public void addToStartnode(final NDFANode n) {
         checkNotNull(n, "Illegal to add null NDFANode");
         sn.add(n);
+        final Set<Character> chars = computeStartChars(n);
+        if (chars.size() >= 256) {
+            matchAnyChar = true;
+        } else {
+            for (final Character c : chars) {
+                startCharIndex.put(c, Boolean.TRUE);
+            }
+        }
     }
 
     /**
@@ -131,9 +191,10 @@ public final class NodeStorageImpl implements NodeStorage {
     @Override
     public DFANode getNextFromStartNode(final Character ch) {
         checkNotNull(ch, "Illegal to use null char");
-        return nextFromDFAMap.computeIfAbsent(ch, key -> {
-            return sn.getNextDFA(ch, this);
-        });
+        if (!matchAnyChar && !startCharIndex.containsKey(ch)) {
+            return null;
+        }
+        return nextFromDFAMap.computeIfAbsent(ch, key -> sn.getNextDFA(ch, this));
     }
 
 
