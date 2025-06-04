@@ -80,7 +80,7 @@ public final class LifoSet<T> {
                 throw new IllegalStateException(
                         "Attempt to remove something from an empty LifoSet");
             }
-            final T result = lifo.remove(0);
+            final T result = lifo.remove(lifo.size() - 1);
             members.remove(result);
             return result;
         }
