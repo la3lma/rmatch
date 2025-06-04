@@ -48,7 +48,7 @@ public final class DFANodeImpl implements DFANode {
     private final Set<Regexp> regexps = new HashSet<>();
     /**
      * A map of computed edges going out of this node. There may be more edges
-     * going out of this node, but these are the nodes that has been encountered
+     * going out of this node, but these are the nodes that have been encountered
      * so far during matching.
      */
     private final ConcurrentMap<Character, DFANode> nextMap = new ConcurrentHashMap<>();
@@ -76,7 +76,7 @@ public final class DFANodeImpl implements DFANode {
     private final List<NDFANode> basisList;
 
     /**
-     * Create a new DFA based representing a set of NDFA nodes.
+     * Create new DFA based representing a set of NDFA nodes.
      *
      * @param ndfanodeset the set of NDFA nodes the new DFA node should
      * represent.
@@ -113,7 +113,7 @@ public final class DFANodeImpl implements DFANode {
     }
 
     /**
-     * Return an unique (within this VM) id for this DFANode.
+     * Return a unique (within this VM) id for this DFANode.
      *
      * @return the id
      */
@@ -125,7 +125,7 @@ public final class DFANodeImpl implements DFANode {
     /**
      * Get the nextmap. This is a "backdoor" into the implementation, and should
      * only be used by those who know what they are doing. It is emphatically
-     * not intended to be used during matching. Currently it is only used to
+     * not intended to be used during matching. Currently, it is only used to
      * print graphs, and that is done when the matcher isn't running. Be
      * careful!
      *
@@ -175,7 +175,7 @@ public final class DFANodeImpl implements DFANode {
      * the character.
      *
      * @param ch the character to explore.
-     * @return A set of NDFANodes that serves as basis for the next DFANode.
+     * @return A set of NDFANodes that serves as the basis for the next DFANode.
      */
     private SortedSet<NDFANode> getNextThroughBasis(final Character ch) {
         final TreeSet<NDFANode> result = new TreeSet<>();
