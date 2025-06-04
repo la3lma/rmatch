@@ -16,9 +16,9 @@
 
 package no.rmz.rmatch.utils;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,9 +33,9 @@ public final class LifoSet<T> {
      */
     private final Set<T> members = new HashSet<>();
     /**
-     * A list that is used to represent the LIFO aspect of the LIFO set.
+     * A deque that is used to represent the LIFO aspect of the LIFO set.
      */
-    private final List<T> lifo = new ArrayList<>();
+    private final Deque<T> lifo = new ArrayDeque<>();
 
     /**
      * True iff there are no members.
@@ -60,7 +60,7 @@ public final class LifoSet<T> {
         synchronized (members) {
             if (!members.contains(t)) {
                 members.add(t);
-                lifo.add(t);
+                lifo.addLast(t);
                 return true;
             } else {
                 return false;
@@ -80,7 +80,7 @@ public final class LifoSet<T> {
                 throw new IllegalStateException(
                         "Attempt to remove something from an empty LifoSet");
             }
-            final T result = lifo.remove(lifo.size() - 1);
+            final T result = lifo.removeLast();
             members.remove(result);
             return result;
         }
