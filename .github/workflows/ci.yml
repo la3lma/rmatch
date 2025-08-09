@@ -35,6 +35,9 @@ jobs:
       - name: Build & test
         run: ./mvnw -q -B verify
 
+      - name: Macro test
+        run: make bench-macro
+
 ## TODO: Enable these later
 #      - name: Spotless check
 #        run: ./mvnw -q -B spotless:check
