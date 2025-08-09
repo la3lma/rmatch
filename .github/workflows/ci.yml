@@ -1,33 +1,50 @@
-# .github/workflows/ci.yml
 name: CI
 on:
   pull_request:
   push:
-    branches: [ "master" ]
+    branches:
+      - main
+      - master
+
 jobs:
   build:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
         java: [21]
-    runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
-        with: { distribution: 'temurin', java-version: ${{ matrix.java }} }
-      - name: Cache build
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      - name: Cache Maven repo
         uses: actions/cache@v4
         with:
           path: |
             ~/.m2/repository
-            ~/.gradle/caches
-          key: ${{ runner.os }}-${{ matrix.java }}-${{ hashFiles('**/pom.xml', '**/build.gradle*') }}
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
       - name: Build & test
-        run: ./mvnw -q -B verify || ./gradlew -q build
+        run: ./mvnw -q -B verify
+
       - name: Spotless check
-        run: ./mvnw -q -B spotless:check || ./gradlew -q spotlessCheck
+        run: ./mvnw -q -B spotless:check
+
       - name: SpotBugs
-        run: ./mvnw -q -B spotbugs:check || ./gradlew -q spotbugsMain
+        run: ./mvnw -q -B spotbugs:check
+
       - name: Upload reports
         uses: actions/upload-artifact@v4
-        with: { name: reports, path: "**/target/site/**, **/build/reports/**" }
+        with:
+          name: reports
+          path: |
+            **/target/site/**
+            **/build/reports/**
