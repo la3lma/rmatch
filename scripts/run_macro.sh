@@ -29,7 +29,24 @@ java_ver=$(java -version 2>&1 | tr '\n' ' ')
 os_name=$(uname -s)
 os_rel=$(uname -r)
 
-start_ns=$(date +%s%N)
+# --- portable ms clock ---
+ms_now() {
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - <<'PY'
+import time; print(int(time.time()*1000))
+PY
+  elif [[ -n "${EPOCHREALTIME:-}" ]]; then
+    # bash 5+: EPOCHREALTIME like "1723241885.123456"
+    awk -v t="$EPOCHREALTIME" 'BEGIN{split(t,a,"."); printf "%d", a[1]*1000 + substr(a[2]"000",1,3)}'
+  else
+    # fallback: seconds precision
+    date +%s | awk '{print $1*1000}'
+  fi
+}
+# --------------------------
+
+start_ms=$(ms_now)
+
 set +e
 $MVN -q -B -pl rmatch-tester -DskipTests \
   exec:java \
@@ -38,9 +55,8 @@ $MVN -q -B -pl rmatch-tester -DskipTests \
   | tee "$LOG_OUT"
 status=$?
 set -e
-end_ns=$(date +%s%N)
-
-dur_ms=$(( (end_ns - start_ns)/1000000 ))
+end_ms=$(ms_now)
+dur_ms=$(( end_ms - start_ms ))
 
 cat > "$JSON_OUT" <<EOF
 {
