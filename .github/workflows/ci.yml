@@ -32,8 +32,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
-      - name: Build & test
-        run: ./mvnw -q -B verify
+      - name: Build & install
+        run: ./mvnw -q -B install
 
       - name: Macro test
         run: make bench-macro
