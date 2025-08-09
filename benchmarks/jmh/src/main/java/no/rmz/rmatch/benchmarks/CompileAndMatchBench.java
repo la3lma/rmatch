@@ -44,5 +44,3 @@ public class CompileAndMatchBench {
   }
 }
 
-        // Replace the fabricated addPattern(byte[]) and match(byte[]) calls with the real API used
-        // in your codebase.

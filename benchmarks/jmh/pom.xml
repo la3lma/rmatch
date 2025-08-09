@@ -25,7 +25,7 @@
         <!-- Depend on core matching code; adjust artifactId/module as needed -->
         <dependency>
             <groupId>no.rmz</groupId>
-            <artifactId>rmatch-core</artifactId>
+            <artifactId>rmatch</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -58,25 +58,6 @@
                             <version>${jmh.version}</version>
                         </path>
                     </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.openjdk.jmh</groupId>
-                <artifactId>jmh-maven-plugin</artifactId>
-                <version>${jmh.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>jmh</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <include>no\.rmz\.rmatch\.benchmarks\..*</include>
-                    <forks>2</forks>
-                    <warmup>5s</warmup>
-                    <timeOnIteration>10s</timeOnIteration>
-                    <failOnError>true</failOnError>
                 </configuration>
             </plugin>
         </plugins>
