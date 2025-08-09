@@ -23,7 +23,7 @@ bench-macro:
 	MAX_REGEXPS=10000 scripts/run_macro.sh
 
 profile:
-	DUR?=30; ASYNC_PROFILER_HOME=$$ASYNC_PROFILER_HOME scripts/profile_async_profiler.sh $$DUR
+	DUR=30; scripts/profile_async_profiler.sh $$DUR
 
 fmt:
 	mvn -q -B spotless:apply

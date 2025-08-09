@@ -14,6 +14,13 @@ You need to install mvnw by doing:
       git commit -m "build: add Maven Wrapper (3.9.9)"
 
 
+Also install async profiler
+
+      brew tap qwwdfsad/tap
+      brew install async-profiler
+      asprof --version
+
+
 [![codebeat badge](https://codebeat.co/badges/0a25fe03-4371-4c5f-a125-ab524f477898)](https://codebeat.co/projects/github-com-la3lma-rmatch-master)
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/ecfba15253e7095438fb/maintainability)](https://codeclimate.com/repos/64a2ba4d1c8c821c92003b52/maintainability)
