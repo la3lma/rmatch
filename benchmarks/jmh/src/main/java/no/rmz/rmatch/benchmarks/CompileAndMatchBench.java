@@ -5,6 +5,13 @@ import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.StringBuffer;
+import no.rmz.rmatch.interfaces.Action;
+import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.interfaces.Matcher;
+import no.rmz.rmatch.utils.CounterAction;
+import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.utils.Counters;
+
 import org.openjdk.jmh.annotations.*;
 
 
@@ -32,14 +39,27 @@ public class CompileAndMatchBench {
 
     @Benchmark
     public Matcher buildMatcher() {
-        Matcher m = MatcherFactory.newMatcher();
-        for (String p : patterns) {
+        Matcher matcher = MatcherFactory.newMatcher();
+        for (String regex : patterns) {
             // TODO: replace with your actual API for adding patterns
             // m.addPattern(p.getBytes(StandardCharsets.UTF_8));
 
+                final Action action =
+                        new Action() {
+                            @Override
+                            public void performMatch(Buffer b, int start, int end) {
+                                   System.out.print("Match");
+                            }
+                        };
+                try {
+                    matcher.add(regex, action);
+                } catch (RegexpParserException e) {
+                    System.err.println("Could not add action for regex " + regex);
+                    System.exit(1);
+                }
+            }
 
-        }
-        return m;
+        return matcher;
     }
 
     @Benchmark
