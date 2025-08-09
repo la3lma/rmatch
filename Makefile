@@ -9,10 +9,18 @@ test:
 	mvn -q -B verify
 
 bench-micro:
-	scripts/run_jmh.sh
+	JMH_FORKS=1 \
+    JMH_WARMUP_IT=1 \
+    JMH_IT=2 \
+    JMH_WARMUP=1s \
+    JMH_MEASURE=1s \
+    JMH_THREADS=1 \
+    JMH_INCLUDE='no\.rmz\.rmatch\.benchmarks\.CompileAndMatchBench\.buildMatcher' \
+    scripts/run_jmh.sh -p patternCount=10
+    # scripts/run_jmh.sh
 
 bench-macro:
-	MAX_REGEXPS?=10000; MAX_REGEXPS=$$MAX_REGEXPS scripts/run_macro.sh
+	MAX_REGEXPS=10000 scripts/run_macro.sh
 
 profile:
 	DUR?=30; ASYNC_PROFILER_HOME=$$ASYNC_PROFILER_HOME scripts/profile_async_profiler.sh $$DUR

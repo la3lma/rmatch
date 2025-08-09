@@ -5,13 +5,14 @@ set -euo pipefail
 # Baseline files (choose whichever exists):
 #   benchmarks/baseline/jmh-baseline.json
 #   $BASELINE_JSON (env var)
-# If GITHUB_TOKEN and PR context are present, will try to post a PR comment.
+# If GITHUB_TOKEN and PR context are present, will try to post a PR comment using gh or curl.
 
 root_dir=$(git rev-parse --show-toplevel)
 cd "$root_dir"
 
 CURR_JSON=${1:-}
 if [[ -z "$CURR_JSON" ]]; then
+  # pick the latest result
   CURR_JSON=$(ls -t benchmarks/results/jmh-*.json | head -n1)
 fi
 
@@ -33,6 +34,7 @@ fi
 mkdir -p benchmarks/results
 OUT_MD=benchmarks/results/perf-summary.md
 
+# Build a map from benchmark name -> score for both files
 jq -r '.[] | [.benchmark, .primaryMetric.score] | @tsv' "$BASELINE_JSON" | sort > /tmp/baseline.tsv
 jq -r '.[] | [.benchmark, .primaryMetric.score] | @tsv' "$CURR_JSON" | sort > /tmp/current.tsv
 
@@ -48,6 +50,7 @@ printf "\n**Note**: positive Δ means higher score (slower if score=time). Verif
 
 echo "Wrote $OUT_MD"
 
+# Try to comment on PR if possible
 if [[ -n "${GITHUB_TOKEN:-}" && -n "${GITHUB_REPOSITORY:-}" && -f "${GITHUB_EVENT_PATH:-}" ]]; then
   pr_number=$(jq -r '.number // .pull_request.number // empty' "$GITHUB_EVENT_PATH" || true)
   if [[ -n "$pr_number" ]]; then
@@ -56,7 +59,10 @@ if [[ -n "${GITHUB_TOKEN:-}" && -n "${GITHUB_REPOSITORY:-}" && -f "${GITHUB_EVEN
       gh pr comment "$pr_number" --body "$body" || true
     else
       api_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${pr_number}/comments"
-      curl -sS -H "Authorization: Bearer ${GITHUB_TOKEN}"                -H "Accept: application/vnd.github+json"                -d "$(jq -Rn --arg b "$body" '{body: $b}')"                "$api_url" >/dev/null || true
+      curl -sS -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+           -H "Accept: application/vnd.github+json" \
+           -d "$(jq -Rn --arg b "$body" '{body: $b}')" \
+           "$api_url" >/dev/null || true
     fi
   fi
 fi

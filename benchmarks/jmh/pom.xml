@@ -21,12 +21,14 @@
   </properties>
 
   <dependencies>
+    <!-- Depend on core matching code -->
     <dependency>
       <groupId>no.rmz</groupId>
       <artifactId>rmatch</artifactId>
       <version>${project.version}</version>
     </dependency>
 
+    <!-- JMH runtime -->
     <dependency>
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-core</artifactId>
@@ -36,6 +38,7 @@
 
   <build>
     <plugins>
+      <!-- Compile with JMH annotation processor to generate harness classes -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -52,12 +55,14 @@
         </configuration>
       </plugin>
 
+      <!-- Run JMH via exec:java (pluginless approach) -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.5.1</version>
       </plugin>
 
+      <!-- Optional: build a self-contained jar so you can `java -jar` -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -65,7 +70,9 @@
         <executions>
           <execution>
             <phase>package</phase>
-            <goals><goal>shade</goal></goals>
+            <goals>
+              <goal>shade</goal>
+            </goals>
             <configuration>
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <transformers>

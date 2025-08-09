@@ -9,7 +9,10 @@ set -euo pipefail
 root_dir=$(git rev-parse --show-toplevel)
 cd "$root_dir"
 
-MVN="./mvnw"; [[ -x "$MVN" ]] || MVN="mvn"
+MVN="./mvnw"
+if [[ ! -x "$MVN" ]]; then
+  MVN="mvn"
+fi
 
 MAX_REGEXPS=${MAX_REGEXPS:-10000}
 mkdir -p benchmarks/results
@@ -28,7 +31,11 @@ os_rel=$(uname -r)
 
 start_ns=$(date +%s%N)
 set +e
-$MVN -q -B -pl rmatch-tester -DskipTests       exec:java       -Dexec.mainClass=no.rmz.rmatch.performancetests.BenchmarkTheWutheringHeightsCorpus       -Dexec.args="${MAX_REGEXPS} ${EXTRA_ARGS:-}"       | tee "$LOG_OUT"
+$MVN -q -B -pl rmatch-tester -DskipTests \
+  exec:java \
+  -Dexec.mainClass=no.rmz.rmatch.performancetests.BenchmarkTheWutheringHeightsCorpus \
+  -Dexec.args="${MAX_REGEXPS} ${EXTRA_ARGS:-}" \
+  | tee "$LOG_OUT"
 status=$?
 set -e
 end_ns=$(date +%s%N)

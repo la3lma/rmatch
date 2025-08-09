@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 @State(Scope.Thread)
 public class CompileAndMatchBench {
 
-    @Param({"10","100","1000"})
+    @Param({"10" }) // TODO: For now, just to make it run fast ,"100","1000"})
     public int patternCount;
 
     private List<String> patterns;
