@@ -1,63 +1,54 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run JMH in the benchmarks/jmh module and emit JSON & TXT results.
-# Usage: scripts/run_jmh.sh [extra jmh args]
+# Run the macro benchmark (Wuthering Heights) via maven-exec-plugin.
 # Env vars:
-#   JMH_INCLUDE   - regex for benchmark names to include
-#   JMH_WARMUP    - e.g. '5s'
-#   JMH_MEASURE   - e.g. '10s'
-#   JMH_FORKS     - e.g. '2'
-#   JMH_THREADS   - e.g. '1'
-#   JAVA_HOME     - optional override
+#   MAX_REGEXPS   - default 10000
+#   EXTRA_ARGS    - extra args to pass to the Java main, space-separated (optional)
 
 root_dir=$(git rev-parse --show-toplevel)
 cd "$root_dir"
 
-MVN="./mvnw"
-if [[ ! -x "$MVN" ]]; then
-  MVN="mvn"
-fi
+MVN="./mvnw"; [[ -x "$MVN" ]] || MVN="mvn"
 
+MAX_REGEXPS=${MAX_REGEXPS:-10000}
 mkdir -p benchmarks/results
 stamp=$(date -u +"%Y%m%dT%H%M%SZ")
-JSON_OUT="benchmarks/results/jmh-${stamp}.json"
-TXT_OUT="benchmarks/results/jmh-${stamp}.txt"
+LOG_OUT="benchmarks/results/macro-${stamp}.log"
+JSON_OUT="benchmarks/results/macro-${stamp}.json"
 
-# Build the module first to ensure dependencies are compiled.
-$MVN -q -B -pl benchmarks/jmh -am -DskipTests package
+# Build everything the tester depends on
+$MVN -q -B -DskipTests package
 
-# Construct JMH args
-JMH_ARGS=(
-  "-rf" "json"
-  "-rff" "$JSON_OUT"
-  "-o" "$TXT_OUT"
-)
+sha=$(git rev-parse HEAD)
+branch=$(git rev-parse --abbrev-ref HEAD)
+java_ver=$(java -version 2>&1 | tr '\n' ' ')
+os_name=$(uname -s)
+os_rel=$(uname -r)
 
-if [[ -n "${JMH_INCLUDE:-}" ]]; then
-  JMH_ARGS+=("-i" "$JMH_INCLUDE")
-fi
-if [[ -n "${JMH_WARMUP:-}" ]]; then
-  JMH_ARGS+=("-w" "$JMH_WARMUP")
-fi
-if [[ -n "${JMH_MEASURE:-}" ]]; then
-  JMH_ARGS+=("-r" "$JMH_MEASURE")
-fi
-if [[ -n "${JMH_FORKS:-}" ]]; then
-  JMH_ARGS+=("-f" "$JMH_FORKS")
-fi
-if [[ -n "${JMH_THREADS:-}" ]]; then
-  JMH_ARGS+=("-t" "$JMH_THREADS")
-fi
+start_ns=$(date +%s%N)
+set +e
+$MVN -q -B -pl rmatch-tester -DskipTests       exec:java       -Dexec.mainClass=no.rmz.rmatch.performancetests.BenchmarkTheWutheringHeightsCorpus       -Dexec.args="${MAX_REGEXPS} ${EXTRA_ARGS:-}"       | tee "$LOG_OUT"
+status=$?
+set -e
+end_ns=$(date +%s%N)
 
-# Run JMH via the plugin
-$MVN -q -B -pl benchmarks/jmh -DskipTests \
-  jmh:jmh -Djmh.failOnError=true \
-  -Djmh.result.format=json -Djmh.result.file="$JSON_OUT" \
-  -Djmh.output="$TXT_OUT" \
-  ${JMH_ARGS[@]} -- ${@:-}
+dur_ms=$(( (end_ns - start_ns)/1000000 ))
 
-# Emit friendly pointer
-echo "JMH JSON: $JSON_OUT"
-echo "JMH TXT : $TXT_OUT"
+cat > "$JSON_OUT" <<EOF
+{
+  "type": "macro",
+  "timestamp": "${stamp}",
+  "git": { "sha": "${sha}", "branch": "${branch}" },
+  "java": "${java_ver}",
+  "os": { "name": "${os_name}", "release": "${os_rel}" },
+  "args": { "max_regexps": ${MAX_REGEXPS} },
+  "duration_ms": ${dur_ms},
+  "exit_status": ${status},
+  "log": "${LOG_OUT}"
+}
+EOF
 
+echo "Macro log : $LOG_OUT"
+echo "Macro JSON: $JSON_OUT"
+exit $status

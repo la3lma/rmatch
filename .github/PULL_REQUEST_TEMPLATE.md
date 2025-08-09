@@ -1,5 +1,3 @@
-.github/PULL_REQUEST_TEMPLATE.md
-
 ## Summary
 
 - What changed and why?

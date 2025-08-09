@@ -17,4 +17,3 @@ Describe the proposed optimization and target hot paths.
 ### Acceptance criteria
 
 - % improvement on specific benchmarks without correctness regressions
-

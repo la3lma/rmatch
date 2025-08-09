@@ -1,12 +1,12 @@
-SHELL := /bin/bash
+ SHELL := /bin/bash
 
-.PHONY: build test ci bench-micro bench-macro profile fmt spotbugs
+ .PHONY: build test ci bench-micro bench-macro profile fmt spotbugs
 
 build:
-	./mvnw -q -B -DskipTests package || mvn -q -B -DskipTests package
+	mvn -U -q -B -DskipTests -Dspotbugs.skip=true package
 
 test:
-	./mvnw -q -B verify || mvn -q -B verify
+	mvn -q -B verify
 
 bench-micro:
 	scripts/run_jmh.sh
@@ -18,7 +18,7 @@ profile:
 	DUR?=30; ASYNC_PROFILER_HOME=$$ASYNC_PROFILER_HOME scripts/profile_async_profiler.sh $$DUR
 
 fmt:
-	./mvnw -q -B spotless:apply || mvn -q -B spotless:apply
+	mvn -q -B spotless:apply
 
 spotbugs:
-	./mvnw -q -B spotbugs:check || mvn -q -B spotbugs:check
+	mvn -q -B spotbugs:check

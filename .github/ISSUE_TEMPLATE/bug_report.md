@@ -1,20 +1,16 @@
 ---
-name: Performance improvement
-about: Propose an optimization with a measurement plan
-labels: [perf]
+name: Bug report
+about: Report a problem
+labels: [bug]
 ---
 
-### Idea
+### What happened?
 
-Describe the proposed optimization and target hot paths.
+### Expected vs actual
 
-### Measurement plan
+### Repro steps
 
-- Micro (JMH): benches to add/run
-- Macro: corpus / args
-- Profiling: async-profiler/JFR captures to collect
-
-### Acceptance criteria
-
-- % improvement on specific benchmarks without correctness regressions
-
+### Environment
+- OS:
+- Java:
+- Commit:

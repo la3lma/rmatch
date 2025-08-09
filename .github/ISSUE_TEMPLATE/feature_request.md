@@ -1,19 +1,13 @@
 ---
-name: Performance improvement
-about: Propose an optimization with a measurement plan
-labels: [perf]
+name: Feature request
+about: Suggest an idea
+labels: [enhancement]
 ---
-### Idea
 
-Describe the proposed optimization and target hot paths.
+### Problem
 
-### Measurement plan
+### Proposal
 
-- Micro (JMH): benches to add/run
-- Macro: corpus / args
-- Profiling: async-profiler/JFR captures to collect
+### Alternatives
 
-### Acceptance criteria
-
-- % improvement on specific benchmarks without correctness regressions
-
+### Impact on performance/correctness
