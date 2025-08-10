@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest] # Dropping macos latest
         java: [21]
 
     steps:
@@ -32,17 +32,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
-      - name: Build & install
-        run: ./mvnw -q -B package
-
-      - name: Macro test
-        run: make bench-macro
-  perf:
-    runs-on: self-hosted  # prefer; fall back to ubuntu-latest if needed
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with: { distribution: 'temurin', java-version: 21 }
       - name: Prepare runner (pin CPU governor)
         if: runner.os == 'Linux'
         run: |
@@ -59,6 +48,13 @@ jobs:
         run: ./scripts/compare_and_comment.sh  # uses GH_TOKEN to post PR comment
       - uses: actions/upload-artifact@v4
         with: { name: perf-artifacts, path: "jmh-result.json macro-result.json profiles/*.svg" }
+
+
+#      - name: Build & install
+#        run: ./mvnw -q -B package
+
+#      - name: Macro test
+#        run: make bench-macro
 
 ## TODO: Enable these later
 #      - name: Spotless check
