@@ -39,11 +39,11 @@ jobs:
       - name: Build
         run: ./mvnw -q -B -DskipTests package || ./gradlew -q build -x test
       - name: Run JMH
-        run: ./scripts/run_jmh.sh  # outputs jmh-result.json
+        run: make bench-micro # outputs jmh-result.json
       - name: Run Macro Benchmark
-        run: ./scripts/run_macro.sh  # outputs macro-result.json
+        run: make bench-macro # outputs macro-result.json
       - name: Profile hot path
-        run: ./scripts/profile_async_profiler.sh  # outputs *.svg
+        run: make profile  # outputs *.svg
       - name: Compare vs baseline and comment
         run: ./scripts/compare_and_comment.sh  # uses GH_TOKEN to post PR comment
       - uses: actions/upload-artifact@v4
