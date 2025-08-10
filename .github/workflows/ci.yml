@@ -33,10 +33,32 @@ jobs:
             ${{ runner.os }}-m2-
 
       - name: Build & install
-        run: ./mvnw -q -B install
+        run: ./mvnw -q -B package
 
       - name: Macro test
         run: make bench-macro
+  perf:
+    runs-on: self-hosted  # prefer; fall back to ubuntu-latest if needed
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: 'temurin', java-version: 21 }
+      - name: Prepare runner (pin CPU governor)
+        if: runner.os == 'Linux'
+        run: |
+          sudo bash -c 'for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > $c; done' || true
+      - name: Build
+        run: ./mvnw -q -B -DskipTests package || ./gradlew -q build -x test
+      - name: Run JMH
+        run: ./scripts/run_jmh.sh  # outputs jmh-result.json
+      - name: Run Macro Benchmark
+        run: ./scripts/run_macro.sh  # outputs macro-result.json
+      - name: Profile hot path
+        run: ./scripts/profile_async_profiler.sh  # outputs *.svg
+      - name: Compare vs baseline and comment
+        run: ./scripts/compare_and_comment.sh  # uses GH_TOKEN to post PR comment
+      - uses: actions/upload-artifact@v4
+        with: { name: perf-artifacts, path: "jmh-result.json macro-result.json profiles/*.svg" }
 
 ## TODO: Enable these later
 #      - name: Spotless check
