@@ -42,8 +42,11 @@ jobs:
         run: make bench-micro # outputs jmh-result.json
       - name: Run Macro Benchmark
         run: make bench-macro # outputs macro-result.json
-      - name: Profile hot path
-        run: make profile  # outputs *.svg
+
+# TODO: Make some steps to install asprof, then we can run this thing
+#      - name: Profile hot path
+#        run: make profile  # outputs *.svg
+
       - name: Compare vs baseline and comment
         run: ./scripts/compare_and_comment.sh  # uses GH_TOKEN to post PR comment
       - uses: actions/upload-artifact@v4
