@@ -49,8 +49,58 @@ jobs:
 
       - name: Compare vs baseline and comment
         run: ./scripts/compare_and_comment.sh  # uses GH_TOKEN to post PR comment
-      - uses: actions/upload-artifact@v4
-        with: { name: perf-artifacts, path: "jmh-result.json macro-result.json profiles/*.svg" }
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-artifacts
+          path: |
+            benchmarks/results/jmh-*.json
+            benchmarks/results/macro-*.json
+            benchmarks/results/*.txt
+            profiles/*.svg
+          retention-days: 14   # optional
+
+## Eventually get  to this too.
+#      # Install async-profiler and put asprof on PATH
+#      - name: Install async-profiler (asprof)
+#        run: |
+#          set -euxo pipefail
+#          curl -L -o /tmp/ap.tar.gz \
+#            https://github.com/async-profiler/async-profiler/releases/download/v${AP_VERSION}/async-profiler-${AP_VERSION}-linux-x64.tar.gz
+#          mkdir -p "$HOME/ap"
+#          tar -xzf /tmp/ap.tar.gz -C "$HOME/ap" --strip-components=1
+#          echo "$HOME/ap/bin" >> "$GITHUB_PATH"
+#          asprof --version
+#
+#      # Allow perf events from non-root & readable kernel symbols
+#      - name: Loosen perf permissions
+#        run: |
+#          echo 1 | sudo tee /proc/sys/kernel/perf_event_paranoid
+#          echo 0 | sudo tee /proc/sys/kernel/kptr_restrict
+#
+#      # Quick compile & tests (optional but recommended)
+#      - name: Build & test
+#        run: ./mvnw -q -B -Dspotbugs.skip=true verify
+#
+#      # Run the macro benchmark and profile it with async-profiler
+#      - name: Profile macro benchmark with async-profiler
+#        shell: bash
+#        run: |
+#          set -euo pipefail
+#          # Keep the run short for CI; adjust as you like
+#          export MAX_REGEXPS=5000
+#          export DUR=20
+#          scripts/profile_async_profiler.sh
+#
+#      - name: Upload profiles and logs
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: perf-artifacts
+#          path: |
+#            profiles/*.svg
+#            benchmarks/results/macro-*.json
+#            benchmarks/results/macro-*.log
+
 
 
 #      - name: Build & install
