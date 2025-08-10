@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -x
+#!/usr/bin/env bash
 set -euo pipefail
 
 # Prefer running JMH from the shaded JAR; fall back to exec:java in-process (-f 0)
