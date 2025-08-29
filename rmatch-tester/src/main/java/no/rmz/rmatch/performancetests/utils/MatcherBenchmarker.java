@@ -13,6 +13,7 @@ import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
+import no.rmz.rmatch.performancetests.PerformanceCriteriaEvaluator;
 import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.Counters;
 
@@ -26,6 +27,31 @@ public final class MatcherBenchmarker {
 
   /** Utility class. No public constructor for you! */
   private MatcherBenchmarker() {}
+
+  /**
+   * Load regular expressions from a file.
+   * 
+   * @param regexpPath Path to file containing regular expressions (one per line)
+   * @param maxRegexps Maximum number of regexps to load, or -1 for all
+   * @return List of regular expression strings
+   */
+  public static List<String> loadRegexpsFromFile(String regexpPath, int maxRegexps) {
+    final FileInhaler fh = new FileInhaler(new File(regexpPath));
+    final List<String> regexps = new ArrayList<>();
+    
+    int counter = maxRegexps > 0 ? maxRegexps : -1;
+    for (final String line : fh.inhaleAsListOfLines()) {
+      if (counter == 0) {
+        break;
+      }
+      regexps.add(line);
+      if (counter > 0) {
+        counter -= 1;
+      }
+    }
+    
+    return regexps;
+  }
 
   /** The location at which we pick up the corpus. */
   private static final String REGEXP_LOCATION =
@@ -111,7 +137,18 @@ public final class MatcherBenchmarker {
       String matcherTypeName,
       Collection<LoggedMatch> loggedMatches,
       long usedMemoryInMb,
-      long durationInMillis) {}
+      long durationInMillis) implements PerformanceCriteriaEvaluator.TestRunResult {
+    
+    @Override
+    public long getDurationInMillis() {
+      return durationInMillis;
+    }
+    
+    @Override
+    public long getUsedMemoryInMb() {
+      return usedMemoryInMb;
+    }
+  }
   ;
 
   public record TestPairSummary(
