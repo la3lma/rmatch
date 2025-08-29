@@ -1,12 +1,12 @@
 # Baseline performance data
-# Generated: 2025-08-29T14:21:26.552581795Z
+# Generated: 2025-08-29T14:23:46.165780659Z
 # Java: 17.0.16
 # OS: Linux 6.11.0-1018-azure
-# Git: 9e947a55604b549be0fb7d9a58da7f66414b902f (copilot/fix-110)
+# Git: 0f028e3a1ab371055865ef08f007f2f1f5b2a4ed (copilot/fix-110)
 # Format: matcherTypeName,usedMemoryInMb,durationInMillis
 
-rmatch,189,887
-rmatch,108,388
-rmatch,445,311
-rmatch,254,184
-rmatch,324,202
+rmatch,172,742
+rmatch,46,328
+rmatch,350,280
+rmatch,106,245
+rmatch,219,165
