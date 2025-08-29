@@ -30,7 +30,7 @@ public final class MatcherBenchmarker {
 
   /**
    * Load regular expressions from a file.
-   * 
+   *
    * @param regexpPath Path to file containing regular expressions (one per line)
    * @param maxRegexps Maximum number of regexps to load, or -1 for all
    * @return List of regular expression strings
@@ -38,7 +38,7 @@ public final class MatcherBenchmarker {
   public static List<String> loadRegexpsFromFile(String regexpPath, int maxRegexps) {
     final FileInhaler fh = new FileInhaler(new File(regexpPath));
     final List<String> regexps = new ArrayList<>();
-    
+
     int counter = maxRegexps > 0 ? maxRegexps : -1;
     for (final String line : fh.inhaleAsListOfLines()) {
       if (counter == 0) {
@@ -49,7 +49,7 @@ public final class MatcherBenchmarker {
         counter -= 1;
       }
     }
-    
+
     return regexps;
   }
 
@@ -137,13 +137,14 @@ public final class MatcherBenchmarker {
       String matcherTypeName,
       Collection<LoggedMatch> loggedMatches,
       long usedMemoryInMb,
-      long durationInMillis) implements PerformanceCriteriaEvaluator.TestRunResult {
-    
+      long durationInMillis)
+      implements PerformanceCriteriaEvaluator.TestRunResult {
+
     @Override
     public long getDurationInMillis() {
       return durationInMillis;
     }
-    
+
     @Override
     public long getUsedMemoryInMb() {
       return usedMemoryInMb;
