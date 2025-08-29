@@ -45,6 +45,34 @@ public final class GitHubActionPerformanceTestRunner {
 
       // Exit with appropriate code based on performance result
       PerformanceCriteriaEvaluator.Status status = result.getPerformanceResult().getStatus();
+      PerformanceCriteriaEvaluator.PerformanceResult perfResult = result.getPerformanceResult();
+
+      // Display detailed performance information for all cases
+      System.out.println("\n=== Performance Check Results ===");
+      System.out.println("Explanation: " + perfResult.getExplanation());
+      System.out.printf("Time improvement: %.1f%%\n", perfResult.getTimeImprovementPercent() * 100);
+      System.out.printf(
+          "Memory improvement: %.1f%%\n", perfResult.getMemoryImprovementPercent() * 100);
+      System.out.println(
+          "Statistically significant: " + (perfResult.isStatisticallySignificant() ? "Yes" : "No"));
+
+      if (!result.getRmatchResults().isEmpty()) {
+        double avgTime =
+            result.getRmatchResults().stream()
+                .mapToLong(r -> r.durationInMillis())
+                .average()
+                .orElse(0);
+        double avgMemory =
+            result.getRmatchResults().stream()
+                .mapToLong(r -> r.usedMemoryInMb())
+                .average()
+                .orElse(0);
+        System.out.printf(
+            "Current performance: %.0f ms, %.0f MB (avg of %d runs)\n",
+            avgTime, avgMemory, result.getRmatchResults().size());
+      }
+      System.out.println("==================================\n");
+
       switch (status) {
         case PASS:
           System.out.println("✅ Performance check PASSED");
