@@ -1,1 +1,12 @@
-java,100,45
+# Baseline performance data
+# Generated: 2025-08-29T14:21:26.564627525Z
+# Java: 17.0.16
+# OS: Linux 6.11.0-1018-azure
+# Git: 9e947a55604b549be0fb7d9a58da7f66414b902f (copilot/fix-110)
+# Format: matcherTypeName,usedMemoryInMb,durationInMillis
+
+java,191,168
+java,109,103
+java,447,70
+java,256,69
+java,325,68

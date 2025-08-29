@@ -24,10 +24,18 @@ public final class GitHubActionPerformanceTestRunner {
 
       // Load baseline results
       List<MatcherBenchmarker.TestRunResult> baselineResults = BaselineManager.loadRmatchBaseline();
+      boolean hadBaseline = !baselineResults.isEmpty();
 
       // Run performance comparison
       GitHubActionPerformanceTest.ComparisonResult result =
           GitHubActionPerformanceTest.runComparison(maxRegexps, baselineResults);
+
+      // Handle baseline initialization when none exists
+      if (!hadBaseline) {
+        LOG.info("No baseline data found - initializing baseline with current results");
+        initializeBaseline(result);
+        return;
+      }
 
       // Generate detailed performance report
       generatePerformanceReport(result);
@@ -39,8 +47,14 @@ public final class GitHubActionPerformanceTestRunner {
       String gitRef = System.getenv("GITHUB_REF");
       if (gitRef != null && (gitRef.endsWith("/main") || gitRef.endsWith("/master"))) {
         LOG.info("Updating baseline for main branch");
-        BaselineManager.saveRmatchBaseline("benchmarks/baseline", result.getRmatchResults());
-        BaselineManager.saveJavaBaseline("benchmarks/baseline", result.getJavaResults());
+        updateBaselineIfImproved(result);
+      } else {
+        // Check if baseline should be updated due to improvement
+        PerformanceCriteriaEvaluator.Status status = result.getPerformanceResult().getStatus();
+        if (status == PerformanceCriteriaEvaluator.Status.PASS) {
+          LOG.info("Performance improved - considering baseline update");
+          updateBaselineIfImproved(result);
+        }
       }
 
       // Exit with appropriate code based on performance result
@@ -72,6 +86,9 @@ public final class GitHubActionPerformanceTestRunner {
             avgTime, avgMemory, result.getRmatchResults().size());
       }
       System.out.println("==================================\n");
+
+      // Print baseline reset instructions if applicable
+      printBaselineInstructions(result.getPerformanceResult().getStatus());
 
       switch (status) {
         case PASS:
@@ -250,6 +267,90 @@ public final class GitHubActionPerformanceTestRunner {
 
     } catch (Exception e) {
       LOG.warning("Failed to generate PR summary: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Initialize baseline data when none exists.
+   *
+   * @param result Performance comparison result with current test runs
+   */
+  private static void initializeBaseline(GitHubActionPerformanceTest.ComparisonResult result) {
+    try {
+      LOG.info("Initializing baseline with current performance results");
+      BaselineManager.saveRmatchBaseline("benchmarks/baseline", result.getRmatchResults());
+      BaselineManager.saveJavaBaseline("benchmarks/baseline", result.getJavaResults());
+
+      // Calculate averages for display
+      double avgTime =
+          result.getRmatchResults().stream()
+              .mapToLong(r -> r.durationInMillis())
+              .average()
+              .orElse(0);
+      double avgMemory =
+          result.getRmatchResults().stream().mapToLong(r -> r.usedMemoryInMb()).average().orElse(0);
+
+      System.out.println("\n🎯 Baseline Initialized Successfully!");
+      System.out.printf(
+          "Established baseline: %.0f ms execution time, %.0f MB memory usage\n",
+          avgTime, avgMemory);
+      System.out.println("Future performance tests will compare against this baseline.");
+      System.exit(0);
+
+    } catch (Exception e) {
+      LOG.severe("Failed to initialize baseline: " + e.getMessage());
+      System.out.println("❌ Failed to initialize baseline data");
+      System.exit(1);
+    }
+  }
+
+  /**
+   * Update baseline data only if current performance is better (monotonic improvement).
+   *
+   * @param result Performance comparison result with current test runs
+   */
+  private static void updateBaselineIfImproved(
+      GitHubActionPerformanceTest.ComparisonResult result) {
+    try {
+      PerformanceCriteriaEvaluator.PerformanceResult perfResult = result.getPerformanceResult();
+
+      // Only update if we have meaningful improvement
+      boolean timeImproved = perfResult.getTimeImprovementPercent() >= 0.05; // 5%
+      boolean memoryImproved = perfResult.getMemoryImprovementPercent() >= 0.03; // 3%
+
+      if (timeImproved || memoryImproved) {
+        BaselineManager.saveRmatchBaseline("benchmarks/baseline", result.getRmatchResults());
+        BaselineManager.saveJavaBaseline("benchmarks/baseline", result.getJavaResults());
+
+        System.out.println("🎯 Baseline Updated!");
+        System.out.printf(
+            "New baseline established with %.1f%% time improvement and %.1f%% memory improvement\n",
+            perfResult.getTimeImprovementPercent() * 100,
+            perfResult.getMemoryImprovementPercent() * 100);
+        LOG.info("Baseline updated with improved performance");
+      } else {
+        LOG.info("Performance not improved enough to update baseline");
+      }
+
+    } catch (Exception e) {
+      LOG.warning("Failed to update baseline: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Print instructions for resetting baseline data when appropriate.
+   *
+   * @param status Current performance test status
+   */
+  private static void printBaselineInstructions(PerformanceCriteriaEvaluator.Status status) {
+    if (status == PerformanceCriteriaEvaluator.Status.FAIL) {
+      System.out.println("📋 Baseline Reset Instructions:");
+      System.out.println("If you believe the current performance is acceptable and should");
+      System.out.println("become the new baseline, you can reset it by:");
+      System.out.println("1. Delete files: rm benchmarks/baseline/*");
+      System.out.println("2. Re-run this test to establish new baseline");
+      System.out.println("3. Or manually edit baseline files if needed");
+      System.out.println();
     }
   }
 }

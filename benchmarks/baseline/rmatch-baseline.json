@@ -1,1 +1,12 @@
-rmatch,100,50
+# Baseline performance data
+# Generated: 2025-08-29T14:21:26.552581795Z
+# Java: 17.0.16
+# OS: Linux 6.11.0-1018-azure
+# Git: 9e947a55604b549be0fb7d9a58da7f66414b902f (copilot/fix-110)
+# Format: matcherTypeName,usedMemoryInMb,durationInMillis
+
+rmatch,189,887
+rmatch,108,388
+rmatch,445,311
+rmatch,254,184
+rmatch,324,202
