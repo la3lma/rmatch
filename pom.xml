@@ -41,7 +41,7 @@
         <guice.version>3.0</guice.version>
         <junit-jupiter.version>5.9.3</junit-jupiter.version>
         <junit.version>4.13.2</junit.version>
-        <mavenCheckstylePlugin.version>3.3.1</mavenCheckstylePlugin.version>
+        <mavenCheckstylePlugin.version>3.6.0</mavenCheckstylePlugin.version>
         <mavenCoberturaPlugin.version>2.5.1</mavenCoberturaPlugin.version>
         <mavenCompilerPlugin.version>3.12.1</mavenCompilerPlugin.version>
         <mavenDependencyPlugin.version>3.6.0</mavenDependencyPlugin.version>
