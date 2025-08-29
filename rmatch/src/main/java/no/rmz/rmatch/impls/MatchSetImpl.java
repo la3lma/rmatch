@@ -13,16 +13,17 @@
  */
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.utils.Counter;
+import no.rmz.rmatch.utils.Counters;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.utils.Counter;
-import no.rmz.rmatch.utils.Counters;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A an implementation of the MatchSet interface. A MatchSet keeps a set of matches which starts
@@ -93,14 +94,8 @@ public final class MatchSetImpl implements MatchSet {
   /** An identifier uniquely identifying this MatchSetImpl among other MatchSetImpl instances. */
   private final long id;
 
-  /**
-   * Create a new MatchSetImpl.
-   *
-   * @param startIndex The start position in the input.
-   * @param newCurrentNode The deterministic start node to start with.
-   */
-  public MatchSetImpl(final int startIndex, final DFANode newCurrentNode) {
-    this.matches = ConcurrentHashMap.newKeySet();
+
+  private void initialize(final int startIndex, final DFANode newCurrentNode, Set<Regexp> possibleRegexps) {
     checkNotNull(newCurrentNode, "newCurrentNode can't be null");
     checkArgument(startIndex >= 0, "Start index can't be negative");
     this.currentNode = newCurrentNode;
@@ -124,10 +119,26 @@ public final class MatchSetImpl implements MatchSet {
     // only carried once per character, for all the regexps?
 
     for (final Regexp r : this.currentNode.getRegexps()) {
-      // TODO: We _must_ find some heuristic to optimize away most
-      // invocations of the next line.
-      matches.add(this.currentNode.newMatch(this, r));
+      if (possibleRegexps.contains(r)) {
+        matches.add(this.currentNode.newMatch(this, r));
+      }
     }
+  }
+
+  public MatchSetImpl(final int startIndex, final DFANode newCurrentNode) {
+    this.matches = ConcurrentHashMap.newKeySet();
+    initialize(startIndex, newCurrentNode, null);
+  }
+
+  /**
+   * Create a new MatchSetImpl.
+   *
+   * @param startIndex The start position in the input.
+   * @param newCurrentNode The deterministic start node to start with.
+   */
+  public MatchSetImpl(final int startIndex, final DFANode newCurrentNode, Set<Regexp> possibleRegexps) {
+    this.matches = ConcurrentHashMap.newKeySet();
+    initialize(startIndex, newCurrentNode, possibleRegexps);
   }
 
   @Override

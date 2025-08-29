@@ -39,7 +39,9 @@ public interface NodeStorage {
    * Get the determinstic node that represents the beginning of all matches starting from the
    * startnode that begins with the character ch.
    *
-   * @param ch an input character.
+   * @param ch               an input character.
+   * @param hasLookahead
+   * @param lookaheadRegexps
    * @return a relevant DFANode, or null if no node could be found.
    */
   DFANode getNextFromStartNode(final Character ch);

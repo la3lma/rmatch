@@ -13,11 +13,12 @@
  */
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import no.rmz.rmatch.interfaces.*;
 
 import java.util.*;
-import no.rmz.rmatch.interfaces.*;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An implementation of a MatchEngine that can be used to match regular expressions against input.
@@ -91,7 +92,7 @@ public final class MatchEngineImpl implements MatchEngine {
       final Buffer b,
       final Character currentChar,
       final int currentPos,
-      final Set<MatchSet> activeMatchSets) {
+      final MatchSetHolder activeMatchSets) {
 
     checkNotNull(currentChar, "currentChar can't be null");
     checkArgument(currentPos >= 0, "Pos in buf must be non-negative");
@@ -101,9 +102,9 @@ public final class MatchEngineImpl implements MatchEngine {
     // active when they run, but they must be final.
     final RunnableMatchesHolder runnableMatches = new RunnableMatchesHolderImpl();
 
-    if (!activeMatchSets.isEmpty()) {
+    if (!activeMatchSets.getActiveMatchSets().isEmpty()) {
       final Set<MatchSet> setsToRemove = new HashSet<>();
-      for (final MatchSet ms : activeMatchSets) {
+      for (final MatchSet ms : activeMatchSets.getActiveMatchSets()) {
         ms.progress(ns, currentChar, currentPos, runnableMatches);
         if (!ms.hasMatches()) {
           setsToRemove.add(ms);
@@ -113,23 +114,48 @@ public final class MatchEngineImpl implements MatchEngine {
     }
 
     // If the current input character opened up a possibility of new
-    // matches, then by all means make a new match set to represent
-    // that fact.
-    final DFANode startOfNewMatches = ns.getNextFromStartNode(currentChar);
-    if (startOfNewMatches != null) {
-      final MatchSet ms;
-      ms = new MatchSetImpl(currentPos, startOfNewMatches);
-      if (ms.hasMatches()) {
-        activeMatchSets.add(ms);
+    // matches, then  make a new match set to represent that fact.
+    final int lookaheadAmount = activeMatchSets.getLookahedAmount();
+    final String lookaheadString = b.lookahead(lookaheadAmount);
+
+    final boolean hasLookahead = activeMatchSets.hasLookaheadRegexpsFor(lookaheadString);
+    final Set<Regexp> lookaheadRegexps;
+    if (hasLookahead) {
+      lookaheadRegexps = activeMatchSets.getLookaheadRegexps(lookaheadString);
+    } else {
+      lookaheadRegexps = (Set<Regexp>)Collections.EMPTY_SET;
+    }
+
+    if (!hasLookahead) {
+      final DFANode startofNewMatches = ns.getNextFromStartNode(currentChar);
+      if (startOfNewMatches != null) {
+        final MatchSet ms;
+        ms = new MatchSetImpl(currentPos, startOfNewMatches);
+        if (ms.hasMatches()) {
+          activeMatchSets.add(ms);
+        }
+      }
+    } else if (!lookaheadRegexps.isEmpty()) {
+      final DFANode startofNewMatches = ns.getNextFromStartNode(currentChar);
+      if (startOfNewMatches != null) {
+        final MatchSet ms;
+        ms = new MatchSetImpl(currentPos, startOfNewMatches, lookaheadRegexps);
+        if (ms.hasMatches()) {
+          activeMatchSets.add(ms);
+        }
       }
     }
 
+    // XXX  Now all we need  to do is to figure out which regexps
+    //      are relevant for the <ngram> last characters.
+
     // Then run through all the active match sets to see
     // if there are any
-    // matches that should be commited.  When a matchSet is fresh out
+    // matches that should be committed.
+    // When a matchSet is fresh out
     // of active matches it should be snuffed.
 
-    for (final MatchSet ms : activeMatchSets) {
+    for (final MatchSet ms : activeMatchSets.getActiveMatchSets()) {
 
       // Collect runnable matches into the runnableMatches
       // instance.
@@ -145,28 +171,74 @@ public final class MatchEngineImpl implements MatchEngine {
     // Run through all the runnable matches and perform actions.
     // (Don't be permissive by default, hence "false").
     performMatches(b, runnableMatches.getMatches(), false);
+
+    // Update lookahead
+    if (!hasLookahead) {
+      final String lookbackString = b.lookback(lookaheadAmount);
+      // Find the regexps that initiated a match lookaheadAmount steps ago,
+      // and either are still going, or successfully completed a match during the last lookaheadAmount steps
+      // and then create a new lookahead DFANode.
+      final Set<Regexp> lookaheadRegexps = getNgramSuccessfulRegexps(lookaheadAmount);
+      activeMatchSets.storeLookaheadNode(lookbackString, lookaheadRegexps);
+    }
+  }
+
+  static final class MatchSetHolder {
+    private final Set<MatchSet> activeMatchSets = Collections.synchronizedSet(new TreeSet<>(MatchSet.COMPARE_BY_ID));
+    private final Map<String, Set<Regexp>>  lookaheadRegexps = new HashMap<>();
+    private final int lookaheadAmount;
+
+    public MatchSetHolder(int i) {
+      if (i < 0 || i > 5) {
+        throw new IllegalArgumentException("ngram limit out of range");
+      }
+      this.lookaheadAmount = i;
+    }
+
+    final  Set<MatchSet> getActiveMatchSets() {
+      return this.activeMatchSets;
+    }
+
+    final void add(MatchSet ms) {
+      this.activeMatchSets.add(ms);
+    }
+
+    public void removeAll(Set<MatchSet> setsToRemove) {
+      this.activeMatchSets.removeAll(setsToRemove);
+    }
+
+    public int getLookahedAmount() {
+      return this.lookaheadAmount;
+    }
+
+    public bool hasLookaheadRegexpsFor(String lookaheadString) {
+      return this.lookaheadRegexps.containsKey(lookaheadString);
+    }
+
+    public Set<Regexp> getLookaheadRegexps(String lookaheadString) {
+      return this.lookaheadRegexps.get(lookaheadString);
+    }
   }
 
   @Override
   public void match(final Buffer b) {
     checkNotNull(b, "Buffer can't be null");
 
-    final Set<MatchSet> activeMatchSets;
-    activeMatchSets = Collections.synchronizedSet(new TreeSet<>(MatchSet.COMPARE_BY_ID));
+    final MatchSetHolder activeMatchesHolder = new MatchSetHolder(3); // 3 == current lookahead ngram limit
 
     // Advance all match sets forward one character.
     while (b.hasNext()) {
       final Character nextChar = b.getNext();
       final int currentPos = b.getCurrentPos();
-      matcherProgress(b, nextChar, currentPos, activeMatchSets);
+      matcherProgress(b, nextChar, currentPos, activeMatchesHolder);
     }
 
     // Handle the stragglers
-    for (final MatchSet ms : activeMatchSets) {
+    for (final MatchSet ms : activeMatchesHolder.getActiveMatchSets()) {
       // Be permissive when handling stragglers
       performMatches(b, ms.getMatches(), true);
     }
 
-    activeMatchSets.clear();
+    activeMatchesHolder.clear();
   }
 }

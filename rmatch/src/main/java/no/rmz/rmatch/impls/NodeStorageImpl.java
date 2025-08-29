@@ -13,16 +13,14 @@
  */
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.utils.SortedSetComparatorImpl;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.PrintableEdge;
-import no.rmz.rmatch.utils.SortedSetComparatorImpl;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Implement the subset construction mechanism, but also keep track of a "StartNode" NDFA node that
@@ -116,7 +114,7 @@ public final class NodeStorageImpl implements NodeStorage {
   // XXX This is really startnode specific and shouldn't necessarily
   //     be tightly coupled with the NodeStorage implementation.
   @Override
-  public DFANode getNextFromStartNode(final Character ch) {
+  public DFANode getNextFromStartNode(final Character ch, boolean hasLookahead, Set<Regexp> lookaheadRegexps) {
     checkNotNull(ch, "Illegal to use null char");
     return nextFromDFAMap.computeIfAbsent(
         ch,
