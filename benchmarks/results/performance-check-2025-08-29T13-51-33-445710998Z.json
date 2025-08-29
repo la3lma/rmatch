@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-08-29T13:51:33.443076697Z",
+  "performance_result": {
+    "status": "FAIL",
+    "explanation": "Performance regression detected: time 78.0%, memory -256.0%",
+    "time_improvement_percent": 0.7796000000000001,
+    "memory_improvement_percent": -2.56,
+    "statistically_significant": false
+  },
+  "current_results": {
+    "rmatch": {
+      "count": 5,
+      "avg_time_ms": 220.4,
+      "avg_memory_mb": 178.0
+    },
+    "java": {
+      "count": 5,
+      "avg_time_ms": 11.6,
+      "avg_memory_mb": 179.4
+    }
+  }
+}

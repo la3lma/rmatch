@@ -1,10 +1,1 @@
-# Baseline performance data
-# Generated: 2024-01-01T00:00:00Z
-# Java: 21.0.1
-# OS: Linux 5.15.0
-# Git: baseline-commit (main)
-# Format: matcherTypeName,usedMemoryInMb,durationInMillis
-
-rmatch,50,1000
-rmatch,52,1020
-rmatch,48,980
+rmatch_baseline,100,50
