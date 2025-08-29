@@ -1,0 +1,121 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{url}
+
+\title{Journal Submission Guide: Adapting rmatch Paper for Different Venues}
+\author{Submission Planning Document}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This document outlines specific adaptations needed to reformat the rmatch paper for submission to different computer science journals and conferences, particularly focusing on requirements that differ from the original Communications of the ACM submission.
+
+\section{Software (MDPI) Journal Adaptations}
+
+\subsection{Format Requirements}
+\begin{itemize}
+\item Open access journal with article processing charge (APC)
+\item Single-column format (different from ACM two-column)
+\item MDPI template required
+\item Maximum length: typically 20-25 pages
+\item Abstract: 150-200 words maximum
+\end{itemize}
+
+\subsection{Content Adaptations}
+\begin{itemize}
+\item \textbf{Emphasize software engineering aspects}: Highlight API design, software architecture, and practical usability
+\item \textbf{Add software availability section}: Include GitHub repository, license information, and installation instructions
+\item \textbf{Expand implementation details}: More focus on software engineering practices, testing methodology
+\item \textbf{Include reproducibility section}: Detailed instructions for reproducing benchmark results
+\item \textbf{Add software quality metrics}: Code coverage, static analysis results, performance regression testing
+\end{itemize}
+
+\subsection{Structure Changes}
+\begin{itemize}
+\item Add dedicated "Software Description" section
+\item Include "Installation and Usage" section with code examples  
+\item Expand "Testing and Quality Assurance" discussion
+\item Add "Community and Maintenance" section for open-source aspects
+\end{itemize}
+
+\section{IEEE Computer Society Journals}
+
+\subsection{IEEE Transactions on Software Engineering}
+\begin{itemize}
+\item \textbf{Methodology focus}: Emphasize empirical evaluation methodology
+\item \textbf{Threat to validity}: Add comprehensive threat to validity analysis
+\item \textbf{Replication package}: Must provide complete replication package
+\item \textbf{Statistical analysis}: Use appropriate statistical tests for performance comparisons
+\end{itemize}
+
+\subsection{IEEE Software}
+\begin{itemize}
+\item \textbf{Practitioner audience}: Focus on practical applications and industry relevance
+\item \textbf{Experience report style}: Structure as experience gained from building the system
+\item \textbf{Lessons learned}: Explicit section on lessons learned and best practices
+\end{itemize}
+
+\section{ACM Journals (Alternative Venues)}
+
+\subsection{ACM Transactions on Programming Languages and Systems}
+\begin{itemize}
+\item \textbf{Language implementation focus}: Emphasize integration with Java ecosystem
+\item \textbf{Formal analysis}: Add more theoretical analysis of automata construction
+\item \textbf{Language-specific optimizations}: Discuss Java-specific performance optimizations
+\end{itemize}
+
+\subsection{ACM Computing Surveys}
+\begin{itemize}
+\item \textbf{Survey component}: Add comprehensive survey of existing regex implementations
+\item \textbf{Taxonomy}: Develop taxonomy of regex matching approaches
+\item \textbf{Comparison framework}: Systematic comparison framework for different approaches
+\end{itemize}
+
+\section{Performance-Focused Venues}
+
+\subsection{Performance Evaluation (Elsevier)}
+\begin{itemize}
+\item \textbf{Detailed performance analysis}: Much more extensive performance evaluation
+\item \textbf{Mathematical modeling}: Performance models and analytical predictions
+\item \textbf{Scalability analysis}: Detailed scalability analysis with varying parameters
+\item \textbf{Workload characterization}: Comprehensive analysis of different workload types
+\end{itemize}
+
+\section{General Adaptation Guidelines}
+
+\subsection{Technical Content}
+\begin{itemize}
+\item \textbf{Expand related work}: Each venue may require different related work emphasis
+\item \textbf{Add complexity analysis}: Formal time/space complexity analysis
+\item \textbf{Include failure cases}: Discuss limitations and failure scenarios
+\item \textbf{Memory analysis}: Detailed memory usage patterns and optimization
+\end{itemize}
+
+\subsection{Presentation}
+\begin{itemize}
+\item \textbf{Code availability}: Ensure code is properly documented and available
+\item \textbf{Reproducible benchmarks}: All benchmarks must be easily reproducible
+\item \textbf{Data availability}: Performance data should be made available
+\item \textbf{Documentation quality}: High-quality documentation for software components
+\end{itemize}
+
+\subsection{Validation}
+\begin{itemize}
+\item \textbf{Multiple datasets}: Use diverse datasets beyond Wuthering Heights corpus
+\item \textbf{Real-world patterns}: Include patterns from actual applications
+\item \textbf{Comparison baselines}: Compare against multiple baseline implementations
+\item \textbf{Statistical significance}: Proper statistical analysis of results
+\end{itemize}
+
+\section{Conclusion}
+
+Each target venue requires careful adaptation of content, presentation, and evaluation methodology. The key is to align the paper's strengths with each venue's specific focus while maintaining scientific rigor and reproducibility.
+
+\end{document}
