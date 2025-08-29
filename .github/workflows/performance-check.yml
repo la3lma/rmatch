@@ -33,7 +33,7 @@ jobs:
           sudo bash -c 'for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > $c; done' || echo "Could not set CPU governor (expected on GitHub runners)"
       
       - name: Build and install project
-        run: ./mvnw -q -B -DskipTests clean package install
+        run: ./mvnw -q -B -DskipTests clean install
       
       - name: Run performance comparison
         id: perf-test
