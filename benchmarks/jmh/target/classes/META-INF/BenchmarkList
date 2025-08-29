@@ -1,0 +1,2 @@
+JMH S 45 no.rmz.rmatch.benchmarks.CompileAndMatchBench S 80 no.rmz.rmatch.benchmarks.jmh_generated.CompileAndMatchBench_buildMatcher_jmhTest S 12 buildMatcher S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E M 1 12 patternCount 1 8 xAAMAA== U 12 MICROSECONDS E E 
+JMH S 45 no.rmz.rmatch.benchmarks.CompileAndMatchBench S 77 no.rmz.rmatch.benchmarks.jmh_generated.CompileAndMatchBench_matchOnce_jmhTest S 9 matchOnce S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E M 1 12 patternCount 1 8 xAAMAA== U 12 MICROSECONDS E E 

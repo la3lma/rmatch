@@ -16,7 +16,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.release>17</maven.compiler.release>
     <jmh.version>1.37</jmh.version>
   </properties>
 
