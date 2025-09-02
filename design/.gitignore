@@ -1,0 +1,17 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+
+# Build directories
+build/
+output/
+
+# Generated PDFs (keep main output)
+# global-data-access-system-prd.pdf is kept as the main deliverable
