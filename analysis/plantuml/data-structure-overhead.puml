@@ -1,0 +1,56 @@
+@startuml
+!theme plain
+title Data Structure Performance Overhead
+
+package "Current Implementation" {
+  rectangle "MatchSetImpl Constructor" as MSI #ffcccc {
+    rectangle "for each Regexp r in currentNode.getRegexps()" as loop1 #ffaaaa
+    rectangle "matches.add(newMatch(r))" as action1 #ff8888
+    loop1 --> action1
+  }
+
+  rectangle "Per-Character Processing" as PCP #ffcccc {
+    rectangle "Synchronized Map Lookups" as sync #ffaaaa
+    rectangle "Set Operations on SortedSet<NDFANode>" as sets #ff8888  
+    rectangle "Match Object Allocation" as alloc #ff6666
+    sync --> sets
+    sets --> alloc
+  }
+
+  rectangle "State Management" as SM #ffcccc {
+    rectangle "TreeMap<SortedSet<NDFANode>, DFANode>" as tree #ffaaaa
+    rectangle "ConcurrentHashMap<Character, DFANode>" as cmap #ff8888
+    tree --> cmap
+  }
+}
+
+package "Performance Impact" <<Cloud>> {
+  note as impact1 #red
+    **O(m) overhead per position**
+    For text of length L with M patterns:
+    Total complexity: O(L × M)
+    
+    Example: 1000 patterns, 1MB text
+    = 1,000,000,000 Match objects created
+  end note
+
+  note as impact2 #red
+    **Synchronization Overhead**
+    - Lock contention on every character
+    - Cache line bouncing
+    - Context switching overhead
+  end note
+
+  note as impact3 #red
+    **Memory Allocation Storm**
+    - Constant GC pressure
+    - Poor cache locality
+    - Memory fragmentation
+  end note
+}
+
+MSI .. impact1
+PCP .. impact2  
+SM .. impact3
+
+@enduml

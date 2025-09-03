@@ -1,0 +1,89 @@
+@startuml
+!theme plain
+title SIMD Character Processing Optimization
+
+package "Sequential Processing (Current)" {
+  rectangle "Text: 'abcdefghijklmnop...'" as text1
+  rectangle "For each character c:" as loop1 #ffcccc
+  rectangle "  Check character classes" as check1 #ff8888
+  rectangle "  Update single state" as update1 #ff6666
+  rectangle "  Test against each pattern" as test1 #ff4444
+  
+  text1 --> loop1
+  loop1 --> check1
+  check1 --> update1
+  update1 --> test1
+  
+  note bottom of loop1 #red
+    Processing: 1 character per cycle
+    Character class check: O(k) per char
+    State updates: Sequential
+  end note
+}
+
+package "SIMD Processing (Optimized)" {
+  rectangle "Text: 'abcdefghijklmnop...'" as text2
+  rectangle "Load 16 characters into SIMD register" as load #ccffcc
+  rectangle "Parallel character class testing" as parallel #88ff88
+  rectangle "Vectorized comparisons" as vector #66ff66
+  rectangle "Bulk state updates" as bulk #44ff44
+  
+  text2 --> load
+  load --> parallel
+  parallel --> vector
+  vector --> bulk
+  
+  note bottom of load #green
+    Processing: 16 characters per cycle
+    Character class check: O(k/16) per char
+    State updates: Parallel
+  end note
+}
+
+package "SIMD Implementation Details" <<Cloud>> {
+  rectangle "Character Class Matching" as ccm #e8f5e8 {
+    rectangle "_mm_cmpeq_epi8(chars, class_vector)" as cmp
+    rectangle "Parallel byte comparison" as pbyte
+    ccm --> cmp
+    ccm --> pbyte
+  }
+  
+  rectangle "String Scanning" as ss #e8f5e8 {
+    rectangle "_mm_cmpestri for pattern search" as search
+    rectangle "Find first occurrence in 16 bytes" as find
+    ss --> search
+    ss --> find
+  }
+  
+  rectangle "State Vector Operations" as svo #e8f5e8 {
+    rectangle "256-bit state vectors" as state256
+    rectangle "Parallel bit manipulation" as bitmanip
+    svo --> state256
+    svo --> bitmanip
+  }
+}
+
+package "Performance Gains" <<Cloud>> {
+  note as gain1 #lightgreen
+    **Character Processing**: 8-16x speedup
+    Intel SSE4.2: 16 bytes per instruction
+    AVX2: 32 bytes per instruction
+    AVX-512: 64 bytes per instruction
+  end note
+  
+  note as gain2 #lightgreen
+    **Pattern Matching**: 4-8x speedup
+    Especially effective for:
+    - Character class heavy patterns
+    - Literal string patterns  
+    - Simple quantified patterns
+  end note
+}
+
+parallel .. ccm
+vector .. ss
+bulk .. svo
+load .. gain1
+bulk .. gain2
+
+@enduml
