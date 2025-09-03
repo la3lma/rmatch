@@ -1,0 +1,23 @@
+Performance Comparison: Current vs Optimized Approach
+=====================================================
+
+Current rmatch (O(m×l) complexity):
+Position:  0    1    2    3    4    5    ...
+Pattern 1: ●────●────●────●────●────●    (check ALL patterns)
+Pattern 2: ●────●────●────●────●────●    (at EVERY position)  
+Pattern 3: ●────●────●────●────●────●
+...
+Pattern m: ●────●────●────●────●────●
+Time:     m×l operations → SLOW ⚠️
+
+Optimized rmatch (first-char + Aho-Corasick):
+Position:  0    1    2    3    4    5    ...
+           a    b    c    x    y    z
+Pattern 1: ●                               (only if starts with 'a')
+Pattern 2:      ●                          (only if starts with 'b')
+Pattern 3:                ●                (only if starts with 'x')
+...
+AC Trie:   ●────●────●────●────●────●    (single pass for literals)
+Time:     O(n) operations → FAST ✅
+
+Expected Improvement: 10-50x faster

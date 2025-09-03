@@ -1,0 +1,27 @@
+rmatch Current Architecture
+==========================
+
+    ┌─────────────┐    ┌─────────────────┐    ┌──────────────────┐
+    │ MatcherImpl │───▶│ ARegexpCompiler │───▶│   Thompson NFA   │
+    └─────────────┘    └─────────────────┘    └──────────────────┘
+           │                                            │
+           │            ┌─────────────────┐            │
+           └───────────▶│ MatchEngineImpl │◀───────────┘
+                        └─────────────────┘
+                                 │
+                        ┌─────────────────┐    ┌─────────────────┐
+                        │ MatchSetImpl    │───▶│ NodeStorageImpl │
+                        │ ⚠️  O(m×l)       │    │ (Subset Const.) │
+                        │ BOTTLENECK      │    └─────────────────┘
+                        └─────────────────┘            │
+                                 │                     │
+                        ┌─────────────────┐    ┌─────────────────┐
+                        │ Match Objects   │◀───│ DFANodeImpl     │
+                        │ (Created for    │    │ Heavy Objects   │
+                        │ ALL patterns)   │    │ Sync Overhead   │
+                        └─────────────────┘    └─────────────────┘
+
+CRITICAL PERFORMANCE BOTTLENECKS:
+• O(m×l) complexity in MatchSetImpl constructor
+• Heavyweight synchronized data structures  
+• Missing modern regex optimizations
