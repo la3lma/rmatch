@@ -158,13 +158,13 @@ Bit-parallel approaches~\cite{baeza1992new,myers1999fast} use bitwise operations
 \begin{algorithm}
 \caption{Bit-Parallel NFA Simulation}
 \begin{algorithmic}[1]
-\STATE $D_0 \gets$ initial state bitvector
-\FOR{each character $c$ in text}
-    \STATE $D_{i+1} \gets (D_i \ll 1) \land T[c]$
-    \IF{$D_{i+1} \land F \neq 0$}
-        \STATE report match
-    \ENDIF
-\ENDFOR
+\State $D_0 \gets$ initial state bitvector
+\For{each character $c$ in text}
+    \State $D_{i+1} \gets (D_i \ll 1) \land T[c]$
+    \If{$D_{i+1} \land F \neq 0$}
+        \State report match
+    \EndIf
+\EndFor
 \end{algorithmic}
 \end{algorithm}
 
