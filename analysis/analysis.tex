@@ -12,6 +12,7 @@
 \usepackage{algpseudocode}
 \usepackage{booktabs}
 \usepackage{subfigure}
+\usepackage{hyperref}
 
 \geometry{margin=2.5cm}
 \pagestyle{fancy}
@@ -47,7 +48,8 @@ This report provides a comprehensive analysis of the rmatch regular expression m
 
 The rmatch library currently implements a classic Thompson NFA construction approach with on-the-fly DFA generation via subset construction. While algorithmically sound, the implementation suffers from several critical performance bottlenecks that limit its speed to approximately 10\% of Java's standard regex matcher.
 
-\textbf{Key Findings:}
+\subsection{Key Findings:}
+
 \begin{itemize}
 \item Critical O(m×l) complexity bottleneck in match initialization (where m = pattern count, l = text length)
 \item Inefficient data structures with excessive synchronization overhead
@@ -63,21 +65,26 @@ The rmatch system consists of several key components working together to provide
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\textwidth]{illustrations/current-architecture.png}
+\includegraphics[width=0.9\textwidth]{illustrations/current-architecture.png}
 \caption{Current rmatch Architecture}
 \label{fig:current-arch}
 \end{figure}
 
 \subsubsection{Core Components}
 
-\textbf{ARegexpCompiler:} Implements Thompson NFA construction~\cite{thompson1968programming}. Converts regular expression strings into non-deterministic finite automata using standard recursive descent parsing.
+\begin{itemize}
 
-\textbf{NodeStorageImpl:} Manages the subset construction algorithm~\cite{hopcroft2001introduction} for converting NFA states to DFA states on-demand. Uses synchronized maps to cache previously computed state transitions.
+\item \textbf{ARegexpCompiler:} Implements Thompson NFA construction~\cite{thompson1968programming}. Converts regular expression strings into non-deterministic finite automata using standard recursive descent parsing.
 
-\textbf{MatchEngineImpl:} The main matching engine that processes input text character by character, maintaining active match sets and progressing through the automaton.
+\item \textbf{NodeStorageImpl:} Manages the subset construction algorithm~\cite{hopcroft2001introduction} for converting NFA states to DFA states on-demand. Uses synchronized maps to cache previously computed state transitions.
 
-\textbf{MatchSetImpl:} Represents a collection of potential matches starting from the same input position. This is where the most critical performance bottleneck occurs.
+\item \textbf{MatchEngineImpl:} The main matching engine that processes input text character by character, maintaining active match sets and progressing through the automaton.
 
+\item \textbf{MatchSetImpl:} Represents a collection of potential matches starting from the same input position. This is where the most critical performance bottleneck occurs.
+
+
+\end{itemize}
+  
 \subsection{Critical Performance Bottleneck Analysis}
 
 \subsubsection{The O(m×l) Complexity Problem}
