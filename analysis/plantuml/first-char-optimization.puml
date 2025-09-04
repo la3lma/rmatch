@@ -1,0 +1,68 @@
+@startuml
+!theme plain
+title First-Character Optimization Strategy
+
+package "Current Approach" {
+  rectangle "Character 'x' at position i" as char1
+  rectangle "Create MatchSet for ALL patterns" as all1 #ffcccc
+  rectangle "Pattern 1: '^a.*'" as p1_1 #ff8888
+  rectangle "Pattern 2: '^b.*'" as p2_1 #ff8888
+  rectangle "Pattern 3: '^x.*'" as p3_1 #88ff88
+  rectangle "Pattern N: '^z.*'" as pn_1 #ff8888
+  
+  char1 --> all1
+  all1 --> p1_1
+  all1 --> p2_1
+  all1 --> p3_1
+  all1 --> pn_1
+  
+  note right of all1 #red
+    Waste: Creating matches for
+    patterns that can never match
+    'x' at this position
+  end note
+}
+
+package "Optimized Approach" {
+  rectangle "Character 'x' at position i" as char2
+  rectangle "Lookup first-character index" as lookup #ccffcc
+  rectangle "firstCharMap['x'] = {3, 15, 47, ...}" as map #ccffcc
+  rectangle "Create MatchSet ONLY for viable patterns" as viable #ccffcc
+  rectangle "Pattern 3: '^x.*'" as p3_2 #88ff88
+  rectangle "Pattern 15: '.*x.*'" as p15_2 #88ff88
+  rectangle "Pattern 47: 'x[0-9]+'" as p47_2 #88ff88
+  
+  char2 --> lookup
+  lookup --> map
+  map --> viable
+  viable --> p3_2
+  viable --> p15_2
+  viable --> p47_2
+  
+  note right of lookup #green
+    Optimization: Only consider
+    patterns that can actually
+    start with 'x'
+  end note
+}
+
+package "Implementation Details" <<Cloud>> {
+  rectangle "Preprocessing Phase" as prep #lightblue {
+    rectangle "For each pattern P:" as foreach
+    rectangle "Extract first possible characters" as extract
+    rectangle "Build firstCharMap[c] → pattern_set" as build
+    foreach --> extract
+    extract --> build
+  }
+  
+  rectangle "Runtime Optimization" as runtime #lightgreen {
+    rectangle "O(m) → O(k) where k << m" as complexity
+    rectangle "Typical k = 1-10, m = 100-10000" as typical
+    complexity --> typical
+  }
+}
+
+lookup .. prep
+viable .. runtime
+
+@enduml

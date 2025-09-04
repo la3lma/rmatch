@@ -1,0 +1,59 @@
+@startuml
+!theme plain
+title Aho-Corasick vs Current Approach Comparison
+
+package "Current rmatch Approach" {
+  rectangle "Input: 'abcdefg...'" as input1
+  rectangle "Position 0: Check ALL patterns" as pos0 #ffcccc
+  rectangle "Position 1: Check ALL patterns" as pos1 #ffcccc  
+  rectangle "Position 2: Check ALL patterns" as pos2 #ffcccc
+  rectangle "..." as dots1
+  rectangle "Complexity: O(n × m)" as complexity1 #ff8888
+
+  input1 --> pos0
+  pos0 --> pos1
+  pos1 --> pos2  
+  pos2 --> dots1
+  dots1 --> complexity1
+}
+
+package "Aho-Corasick Approach" {
+  rectangle "Input: 'abcdefg...'" as input2
+  rectangle "Precomputed Trie + Failure Function" as trie #ccffcc
+  rectangle "Single Pass Through Text" as pass #ccffcc
+  rectangle "Follow failure links on mismatch" as failure #ccffcc
+  rectangle "Complexity: O(n + m + z)" as complexity2 #88ff88
+
+  input2 --> trie
+  trie --> pass
+  pass --> failure
+  failure --> complexity2
+}
+
+package "Key Differences" <<Cloud>> {
+  note as diff1 #lightblue
+    **Pattern Preprocessing**
+    Aho-Corasick: Build trie once, O(m)
+    rmatch: No preprocessing, O(m) per position
+  end note
+
+  note as diff2 #lightblue
+    **Text Processing** 
+    Aho-Corasick: Single pass, O(n)
+    rmatch: Multiple pattern checks, O(n×m)
+  end note
+
+  note as diff3 #lightblue
+    **Memory Usage**
+    Aho-Corasick: O(m) trie storage
+    rmatch: O(n×m) active matches
+  end note
+}
+
+complexity1 .. diff1
+trie .. diff1
+complexity2 .. diff2
+pass .. diff2
+failure .. diff3
+
+@enduml
