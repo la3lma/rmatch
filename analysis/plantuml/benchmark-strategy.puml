@@ -34,28 +34,51 @@ package "Test Pattern Categories" {
   }
 }
 
-package "Test Data Sets" {
-  rectangle "Small: 1KB - 1MB" as small #e1f5fe
-  rectangle "Medium: 1MB - 100MB" as medium #e1f5fe
-  rectangle "Large: 100MB - 1GB" as large #e1f5fe
-  rectangle "Streaming: Continuous" as streaming #e1f5fe
+literals --> simple
+simple --> complex
+complex --> realworld
+
+package "Test Configuration Matrix" {
+  rectangle "Data Sets" as datasets #e1f5fe {
+    rectangle "Small: 1KB - 1MB" as small
+    rectangle "Medium: 1MB - 100MB" as medium
+    rectangle "Large: 100MB - 1GB" as large
+    rectangle "Streaming: Continuous" as streaming
+    datasets --> small
+    datasets --> medium
+    datasets --> large
+    datasets --> streaming
+  }
+  
+  rectangle "Performance Metrics" as metrics #c8e6c9 {
+    rectangle "Throughput (MB/s)" as throughput
+    rectangle "Latency Percentiles (p50, p95, p99)" as latency
+    rectangle "Memory Allocation Rate" as memory
+    rectangle "CPU Utilization & Cache Hits" as cpu
+    rectangle "Scalability with Pattern Count" as scalability
+    metrics --> throughput
+    metrics --> latency
+    metrics --> memory
+    metrics --> cpu
+    metrics --> scalability
+  }
+  
+  rectangle "Comparison Baselines" as baselines #fce4ec {
+    rectangle "Java java.util.regex" as java
+    rectangle "Google RE2 (JNI)" as re2
+    rectangle "PCRE (JNI)" as pcre
+    rectangle "Intel Hyperscan" as hyperscan
+    rectangle "Current rmatch" as current
+    baselines --> java
+    baselines --> re2
+    baselines --> pcre
+    baselines --> hyperscan
+    baselines --> current
+  }
 }
 
-package "Performance Metrics" {
-  rectangle "Throughput (MB/s)" as throughput #c8e6c9
-  rectangle "Latency Percentiles (p50, p95, p99)" as latency #c8e6c9
-  rectangle "Memory Allocation Rate" as memory #c8e6c9
-  rectangle "CPU Utilization & Cache Hits" as cpu #c8e6c9
-  rectangle "Scalability with Pattern Count" as scalability #c8e6c9
-}
-
-package "Comparison Baselines" {
-  rectangle "Java java.util.regex" as java #fce4ec
-  rectangle "Google RE2 (JNI)" as re2 #fce4ec
-  rectangle "PCRE (JNI)" as pcre #fce4ec
-  rectangle "Intel Hyperscan" as hyperscan #fce4ec
-  rectangle "Current rmatch" as current #fce4ec
-}
+datasets --> metrics
+metrics --> baselines
 
 package "Test Execution Framework" {
   rectangle "JMH Micro-benchmarks" as jmh #f9fbe7 {
@@ -86,19 +109,10 @@ package "Test Execution Framework" {
   }
 }
 
-literals --> small
-simple --> medium
-complex --> large
-realworld --> streaming
+jmh --> macro
+macro --> regression
 
-literals --> throughput
-simple --> latency
-complex --> memory
-realworld --> cpu
-streaming --> scalability
-
-jmh --> java
-macro --> re2
-regression --> pcre
+realworld --> datasets
+baselines --> jmh
 
 @enduml
