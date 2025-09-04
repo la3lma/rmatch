@@ -29,9 +29,7 @@ rectangle "Current Implementation" as impl #lightgray {
   PCP --> SM
 }
 
-impl ||
-||
-down
+impl -down-> perfimpact
 
 cloud "Performance Impact" as perfimpact {
   note as impact1 #red
