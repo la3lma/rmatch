@@ -24,7 +24,7 @@ package "Current Implementation" {
   }
 }
 
-package "Performance Impact" <<Cloud>> {
+cloud "Performance Impact" as perfimpact {
   note as impact1 #red
     **O(m) overhead per position**
     For text of length L with M patterns:

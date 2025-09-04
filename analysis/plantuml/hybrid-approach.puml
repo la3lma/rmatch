@@ -50,7 +50,7 @@ package "Optimized rmatch Architecture" {
   }
 }
 
-package "Performance Characteristics" <<Cloud>> {
+cloud "Performance Characteristics" as perfchars {
   note as perf1 #green
     **Literal Patterns**: O(n) via Aho-Corasick
     Example: "error", "warning", "fatal"

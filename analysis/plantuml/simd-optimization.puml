@@ -40,7 +40,7 @@ package "SIMD Processing (Optimized)" {
   end note
 }
 
-package "SIMD Implementation Details" <<Cloud>> {
+cloud "SIMD Implementation Details" as simddetails {
   rectangle "Character Class Matching" as ccm #e8f5e8 {
     rectangle "_mm_cmpeq_epi8(chars, class_vector)" as cmp
     rectangle "Parallel byte comparison" as pbyte
@@ -63,7 +63,7 @@ package "SIMD Implementation Details" <<Cloud>> {
   }
 }
 
-package "Performance Gains" <<Cloud>> {
+cloud "Performance Gains" as perfgains {
   note as gain1 #lightgreen
     **Character Processing**: 8-16x speedup
     Intel SSE4.2: 16 bytes per instruction

@@ -30,7 +30,7 @@ package "Aho-Corasick Approach" {
   failure --> complexity2
 }
 
-package "Key Differences" <<Cloud>> {
+cloud "Key Differences" as keydiffs {
   note as diff1 #lightblue
     **Pattern Preprocessing**
     Aho-Corasick: Build trie once, O(m)

@@ -46,7 +46,7 @@ package "Optimized Approach" {
   end note
 }
 
-package "Implementation Details" <<Cloud>> {
+cloud "Implementation Details" as impldetails {
   rectangle "Preprocessing Phase" as prep #lightblue {
     rectangle "For each pattern P:" as foreach
     rectangle "Extract first possible characters" as extract
