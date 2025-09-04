@@ -2,7 +2,9 @@
 !theme plain
 title Data Structure Performance Overhead
 
-package "Current Implementation" {
+top to bottom direction
+
+rectangle "Current Implementation" as impl #lightgray {
   rectangle "MatchSetImpl Constructor" as MSI #ffcccc {
     rectangle "for each Regexp r in currentNode.getRegexps()" as loop1 #ffaaaa
     rectangle "matches.add(newMatch(r))" as action1 #ff8888
@@ -22,7 +24,14 @@ package "Current Implementation" {
     rectangle "ConcurrentHashMap<Character, DFANode>" as cmap #ff8888
     tree --> cmap
   }
+
+  MSI --> PCP
+  PCP --> SM
 }
+
+impl ||
+||
+down
 
 cloud "Performance Impact" as perfimpact {
   note as impact1 #red
@@ -47,6 +56,9 @@ cloud "Performance Impact" as perfimpact {
     - Poor cache locality
     - Memory fragmentation
   end note
+
+  impact1 --> impact2
+  impact2 --> impact3
 }
 
 MSI .. impact1
