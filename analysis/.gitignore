@@ -13,6 +13,9 @@ analysis.synctex.gz
 analysis.toc
 analysis.pdf
 
+# Generated illustrations
+illustrations/*.png
+
 # General LaTeX auxiliary files
 *.aux
 *.log

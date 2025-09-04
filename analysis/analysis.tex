@@ -354,10 +354,13 @@ Phase 3 & 4-6 weeks & SIMD operations, advanced state management & 2-4x \\
 
 Compare performance against established regex engines:
 \begin{itemize}
-\item Java's standard \texttt{java.util.regex} package
-\item Google's RE2 engine (via JNI bindings)
-\item PCRE library performance characteristics
-\item Specialized multi-pattern matchers like Hyperscan
+\item \textbf{Java's standard \texttt{java.util.regex} package:} Implement direct comparison tests using identical pattern sets and test data, measuring both single-pattern performance via \texttt{Pattern.matcher()} and multi-pattern scenarios using multiple \texttt{Pattern} instances. Create JMH benchmarks that isolate compilation time from matching time, and compare memory allocation patterns using JVM profiling tools like JProfiler or async-profiler to identify where rmatch's object creation overhead becomes significant.
+
+\item \textbf{Google's RE2 engine (via JNI bindings):} Integrate RE2/J or similar JNI wrapper to enable direct performance comparisons with RE2's linear-time guarantees. Design test suites that specifically target RE2's strengths (complex patterns with potential exponential backtracking) and weaknesses (simple literal matching) to understand the performance trade-offs. Measure JNI call overhead separately to isolate pure algorithmic performance differences.
+
+\item \textbf{PCRE library performance characteristics:} Use PCRE4J or similar bindings to compare against PCRE's optimized backtracking engine, focusing on patterns where backtracking engines excel (complex lookaheads, backreferences). Document cases where rmatch's NFA approach provides better worst-case guarantees than PCRE's potentially exponential behavior, and quantify the performance differences across pattern complexity spectrums.
+
+\item \textbf{Specialized multi-pattern matchers like Hyperscan:} Establish baseline comparisons with Intel's Hyperscan library for scenarios involving hundreds to thousands of patterns, which represents rmatch's primary use case. Use Hyperscan's streaming API to compare against rmatch's buffer-based matching, measuring both throughput and memory usage. Focus on identifying the pattern count threshold where specialized multi-pattern engines begin to outperform general-purpose regex libraries significantly.
 \end{itemize}
 
 \section{Conclusion}
