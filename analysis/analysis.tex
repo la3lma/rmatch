@@ -228,10 +228,13 @@ for (int patternId : candidatePatterns) {
 \subsubsection{Replace Heavyweight Data Structures}
 
 \begin{itemize}
-\item Replace \texttt{SortedSet<NDFANode>} with compact \texttt{int[]} arrays
-\item Use lock-free data structures for multi-threading
-\item Implement object pooling for frequently allocated objects
-\item Replace string-based counters with primitive arrays
+\item \textbf{Replace \texttt{SortedSet<NDFANode>} with compact \texttt{int[]} arrays:} The current implementation uses heavyweight \texttt{SortedSet<NDFANode>} objects to represent DFA states, which incurs significant memory overhead and requires expensive set operations for comparisons. By mapping each \texttt{NDFANode} to a unique integer ID, we can represent state sets as compact integer arrays or bitsets, reducing memory usage by 80-90\% and enabling faster set operations through bitwise arithmetic.
+
+\item \textbf{Use lock-free data structures for multi-threading:} The pervasive use of \texttt{ConcurrentHashMap}, \texttt{Collections.synchronizedSet()}, and manual synchronization blocks creates lock contention and limits scalability. Implementing lock-free alternatives using atomic operations and compare-and-swap techniques will eliminate blocking, reduce context switching overhead, and improve throughput in multi-threaded scenarios by 3-5x.
+
+\item \textbf{Implement object pooling for frequently allocated objects:} The constant creation and destruction of \texttt{Match}, \texttt{MatchSet}, and intermediate collection objects generates excessive garbage collection pressure, particularly problematic for the O(m×l) bottleneck. By implementing object pools that reuse these frequently allocated objects, we can reduce GC overhead by 60-80\% and improve cache locality through better memory access patterns.
+
+\item \textbf{Replace string-based counters with primitive arrays:} The current performance monitoring system uses string-keyed synchronized maps for counters, adding unnecessary overhead to every operation. Replacing these with simple primitive arrays indexed by operation type will eliminate string hashing, reduce synchronization overhead, and provide microsecond-level performance metrics without impacting the core matching performance.
 \end{itemize}
 
 \subsection{Phase 2: Algorithmic Enhancements (Expected 2-3x improvement)}
