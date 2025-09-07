@@ -37,15 +37,16 @@ jobs:
       
       - name: Run performance comparison
         id: perf-test
+        timeout-minutes: 15  # Increased timeout for comprehensive testing (5000 regexps)
         run: |
-          echo "Running performance comparison with multiple iterations..."
+          echo "Running comprehensive performance comparison with full Wuthering Heights corpus..."
           
           # Create baseline directory
           mkdir -p benchmarks/baseline
           
-          # Run the performance test with our new GitHubActionPerformanceTest
-          MAX_REGEXPS=1000  # Limit for CI performance
-          NUM_RUNS=3       # Minimum for statistical significance
+          # Run the comprehensive performance test using full Wuthering Heights corpus
+          MAX_REGEXPS=5000  # Comprehensive scale for robust performance validation
+          NUM_RUNS=5        # Increased runs for better statistical significance
           
           ./mvnw -q -B -pl rmatch-tester exec:java \
             -Dexec.mainClass=no.rmz.rmatch.performancetests.GitHubActionPerformanceTestRunner \
