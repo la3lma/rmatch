@@ -69,10 +69,11 @@ def load_performance_data():
         for json_file in json_files:
             try:
                 with open(json_file, 'r') as f:
-                    data = pd.read_json(f)
+                    import json
+                    data = json.load(f)
                     
                 # Extract timestamp and performance data
-                timestamp = data.get('timestamp', [None])[0] if hasattr(data.get('timestamp', []), '__iter__') else data.get('timestamp')
+                timestamp = data.get('timestamp')
                 if timestamp:
                     # Create a row for this performance check
                     row_data = {
@@ -84,39 +85,27 @@ def load_performance_data():
                     # Extract performance metrics
                     if 'performance_result' in data:
                         perf_result = data['performance_result']
-                        if hasattr(perf_result, '__iter__') and len(perf_result) > 0:
-                            perf_result = perf_result.iloc[0] if hasattr(perf_result, 'iloc') else perf_result[0]
-                        
                         row_data.update({
-                            'status': perf_result.get('status') if hasattr(perf_result, 'get') else None,
-                            'time_improvement_percent': perf_result.get('time_improvement_percent') if hasattr(perf_result, 'get') else None,
-                            'memory_improvement_percent': perf_result.get('memory_improvement_percent') if hasattr(perf_result, 'get') else None,
-                            'statistically_significant': perf_result.get('statistically_significant') if hasattr(perf_result, 'get') else None
+                            'status': perf_result.get('status'),
+                            'time_improvement_percent': perf_result.get('time_improvement_percent'),
+                            'memory_improvement_percent': perf_result.get('memory_improvement_percent'),
+                            'statistically_significant': perf_result.get('statistically_significant')
                         })
                     
                     # Extract current results
                     if 'current_results' in data:
                         current_results = data['current_results']
-                        if hasattr(current_results, '__iter__') and len(current_results) > 0:
-                            current_results = current_results.iloc[0] if hasattr(current_results, 'iloc') else current_results[0]
+                        rmatch_results = current_results.get('rmatch', {})
+                        java_results = current_results.get('java', {})
                         
-                        if hasattr(current_results, 'get'):
-                            rmatch_results = current_results.get('rmatch', {})
-                            java_results = current_results.get('java', {})
-                            
-                            if hasattr(rmatch_results, 'get'):
-                                row_data.update({
-                                    'rmatch_avg_time_ms': rmatch_results.get('avg_time_ms'),
-                                    'rmatch_avg_memory_mb': rmatch_results.get('avg_memory_mb'),
-                                    'rmatch_count': rmatch_results.get('count')
-                                })
-                            
-                            if hasattr(java_results, 'get'):
-                                row_data.update({
-                                    'java_avg_time_ms': java_results.get('avg_time_ms'),
-                                    'java_avg_memory_mb': java_results.get('avg_memory_mb'),
-                                    'java_count': java_results.get('count')
-                                })
+                        row_data.update({
+                            'rmatch_avg_time_ms': rmatch_results.get('avg_time_ms'),
+                            'rmatch_avg_memory_mb': rmatch_results.get('avg_memory_mb'),
+                            'rmatch_count': rmatch_results.get('count'),
+                            'java_avg_time_ms': java_results.get('avg_time_ms'),
+                            'java_avg_memory_mb': java_results.get('avg_memory_mb'),
+                            'java_count': java_results.get('count')
+                        })
                     
                     # Create a DataFrame with this single row
                     df = pd.DataFrame([row_data])
