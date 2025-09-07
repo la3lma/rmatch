@@ -231,9 +231,11 @@ public final class ComprehensivePerformanceTest {
     long startTime = System.currentTimeMillis();
 
     try {
-      // Run the comparison using existing infrastructure, but ensure minimum runs for comprehensive test
-      int actualRuns = Math.max(config.getNumRuns(), 3); // GitHubActionPerformanceTest requires minimum 3 runs
-      
+      // Run the comparison using existing infrastructure, but ensure minimum runs for comprehensive
+      // test
+      int actualRuns =
+          Math.max(config.getNumRuns(), 3); // GitHubActionPerformanceTest requires minimum 3 runs
+
       GitHubActionPerformanceTest.ComparisonResult result =
           GitHubActionPerformanceTest.runComparison(
               config.getCorpusPath(),
