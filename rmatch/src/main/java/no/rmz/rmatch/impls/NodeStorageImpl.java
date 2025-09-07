@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
@@ -47,7 +48,7 @@ public final class NodeStorageImpl implements NodeStorage {
    * previously compiled DFAnodes representing that set of NDFANodes.
    */
   private final Map<SortedSet<NDFANode>, DFANode> ndfamap =
-      new TreeMap<>(SORTED_NDFANODE_SET_COMPARATOR);
+      new ConcurrentSkipListMap<>(SORTED_NDFANODE_SET_COMPARATOR);
 
   /** Create a new instance of the node storage. */
   public NodeStorageImpl() {
@@ -56,37 +57,33 @@ public final class NodeStorageImpl implements NodeStorage {
 
   @Override
   public Collection<NDFANode> getNDFANodes() {
-    synchronized (ndfamap) {
-      final Set<NDFANode> result = new HashSet<>();
-      final Set<NDFANode> unexplored = new ConcurrentSkipListSet<>();
-      unexplored.add(sn);
+    final Set<NDFANode> result = new HashSet<>();
+    final Set<NDFANode> unexplored = new ConcurrentSkipListSet<>();
+    unexplored.add(sn);
 
-      while (!unexplored.isEmpty()) {
+    while (!unexplored.isEmpty()) {
 
-        final NDFANode current = unexplored.iterator().next();
-        unexplored.remove(current);
-        if (!result.contains(current)) {
-          result.add(current);
-          final Set<NDFANode> connectedNodes = new HashSet<>(current.getEpsilons());
-          for (final PrintableEdge edge : current.getEdgesToPrint()) {
-            connectedNodes.add(edge.getDestination());
-          }
-          connectedNodes.removeAll(result);
-          unexplored.addAll(connectedNodes);
+      final NDFANode current = unexplored.iterator().next();
+      unexplored.remove(current);
+      if (!result.contains(current)) {
+        result.add(current);
+        final Set<NDFANode> connectedNodes = new HashSet<>(current.getEpsilons());
+        for (final PrintableEdge edge : current.getEdgesToPrint()) {
+          connectedNodes.add(edge.getDestination());
         }
+        connectedNodes.removeAll(result);
+        unexplored.addAll(connectedNodes);
       }
-      result.add(sn);
-      return result;
     }
+    result.add(sn);
+    return result;
   }
 
   @Override
   public Collection<DFANode> getDFANodes() {
-    synchronized (this.ndfamap) {
-      final List<DFANode> result = new ArrayList<>(this.ndfamap.values());
-      result.add(sn.asDfaNode());
-      return result;
-    }
+    final List<DFANode> result = new ArrayList<>(this.ndfamap.values());
+    result.add(sn.asDfaNode());
+    return result;
   }
 
   @Override
@@ -129,18 +126,22 @@ public final class NodeStorageImpl implements NodeStorage {
   public DFANode getDFANode(final SortedSet<NDFANode> ndfaset) {
     checkNotNull(ndfaset, "Illegal to use  null Set of NDFANodes");
 
-    synchronized (ndfamap) {
-      DFANode result = ndfamap.get(ndfaset);
+    DFANode result = ndfamap.get(ndfaset);
 
-      if (result == null) {
-        result = new DFANodeImpl(ndfaset);
-        ndfamap.put(ndfaset, result);
+    if (result == null) {
+      result = new DFANodeImpl(ndfaset);
+      DFANode existing = ndfamap.putIfAbsent(ndfaset, result);
 
+      if (existing == null) {
+        // We successfully added our new node
         updateFinalStatuses(result, ndfaset);
+      } else {
+        // Someone else added it first, use their version
+        result = existing;
       }
-
-      return result;
     }
+
+    return result;
   }
 
   /**

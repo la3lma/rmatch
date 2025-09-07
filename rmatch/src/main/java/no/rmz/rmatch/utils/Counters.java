@@ -3,7 +3,7 @@ package no.rmz.rmatch.utils;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Utility class to produce counters that are uniquely named (within the VM). */
 public final class Counters {
@@ -41,7 +41,7 @@ public final class Counters {
   }
 
   /** A map mapping strings to counters. */
-  private final Map<String, Counter> counters = new TreeMap<>();
+  private final Map<String, Counter> counters = new ConcurrentHashMap<>();
 
   /** Since this is an utility class we can't have public constructor. */
   private Counters() {}
@@ -59,15 +59,12 @@ public final class Counters {
    * @return a counter.
    */
   private Counter privateNewCounter(final String name, boolean canBeDecremented) {
-    synchronized (counters) {
-      if (counters.containsKey(name)) {
-        throw new IllegalStateException("Attempt to get two counters with name " + name);
-      } else {
-        final Counter result = new Counter(name, canBeDecremented);
-        counters.put(name, result);
-        return result;
-      }
+    final Counter newCounter = new Counter(name, canBeDecremented);
+    final Counter existing = counters.putIfAbsent(name, newCounter);
+    if (existing != null) {
+      throw new IllegalStateException("Attempt to get two counters with name " + name);
     }
+    return newCounter;
   }
 
   private Counter privateNewCounter(String name) {
@@ -80,8 +77,6 @@ public final class Counters {
    * @return a collection of counters.
    */
   private Collection<Counter> privateGetCounters() {
-    synchronized (counters) {
-      return counters.values();
-    }
+    return counters.values();
   }
 }

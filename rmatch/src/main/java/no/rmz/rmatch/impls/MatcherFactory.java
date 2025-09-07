@@ -52,5 +52,28 @@ public class MatcherFactory {
         noOfPartitions, new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
   }
 
+  /**
+   * Get the number of cores/threads that the default matcher would use. This is useful for
+   * performance reporting and debugging.
+   *
+   * @return the number of partitions/threads used by the default matcher
+   */
+  public static int getDefaultPartitionCount() {
+    if (AVAILABLE_PROCESSORS > 2) {
+      return (int) (AVAILABLE_PROCESSORS * 1.5);
+    } else {
+      return 1;
+    }
+  }
+
+  /**
+   * Get the number of available processors in the system.
+   *
+   * @return the number of available processors
+   */
+  public static int getAvailableProcessors() {
+    return AVAILABLE_PROCESSORS;
+  }
+
   private MatcherFactory() {}
 }
