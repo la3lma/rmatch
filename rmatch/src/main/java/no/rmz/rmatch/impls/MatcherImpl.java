@@ -1,106 +1,91 @@
 /**
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
- * <p>
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- * <p>
- *      http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ *
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ *
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package no.rmz.rmatch.impls;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * An implementation of the Matcher interface that hooks together
- * various component that together makes up a real matcher.
+ * An implementation of the Matcher interface that hooks together various component that together
+ * makes up a real matcher.
  */
 public final class MatcherImpl implements Matcher {
 
-    /**
-     * The compiler we will use.
-     */
-    private final NDFACompiler compiler;
+  /** The compiler we will use. */
+  private final NDFACompiler compiler;
 
-    /**
-     * The regexp storage we will use.
-     */
-    private final RegexpStorage rs;
+  /** The regexp storage we will use. */
+  private final RegexpStorage rs;
 
-    /**
-     * Our precious MatchEngine.
-     */
-    private final MatchEngine me;
+  /** Our precious MatchEngine. */
+  private final MatchEngine me;
 
-    /**
-     * Our equally prescious NodeStorage. Our precioussss.
-     */
-    private final NodeStorage ns;
+  /** Our equally prescious NodeStorage. Our precioussss. */
+  private final NodeStorage ns;
 
-    /**
-     * Create a new matcher using the default compiler and regexp
-     * factory.  This is usually a good choice for production use.
-     */
-    public MatcherImpl() {
-        this(new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
+  /**
+   * Create a new matcher using the default compiler and regexp factory. This is usually a good
+   * choice for production use.
+   */
+  public MatcherImpl() {
+    this(new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
+  }
+
+  /**
+   * This is useful for testing when we sometimes want to inject mocked compilers and regexp
+   * factories.
+   *
+   * @param compiler A compiler to use.
+   * @param regexpFactory A regexp factory to use.
+   */
+  public MatcherImpl(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
+    this.compiler = checkNotNull(compiler);
+    checkNotNull(regexpFactory);
+    ns = new NodeStorageImpl();
+    rs = new RegexpStorageImpl(ns, compiler, regexpFactory);
+    me = new MatchEngineImpl(ns);
+  }
+
+  @Override
+  public void add(final String r, final Action a) throws RegexpParserException {
+    synchronized (rs) {
+      rs.add(r, a);
     }
+  }
 
-    /**
-     * This is useful for testing when we sometimes want to
-     * inject mocked compilers and regexp factories.
-     *
-     * @param compiler A compiler to use.
-     * @param regexpFactory A regexp factory to use.
-     */
-    public MatcherImpl(
-            final NDFACompiler compiler,
-            final RegexpFactory regexpFactory) {
-        this.compiler = checkNotNull(compiler);
-        checkNotNull(regexpFactory);
-        ns = new NodeStorageImpl();
-        rs = new RegexpStorageImpl(ns, compiler, regexpFactory);
-        me = new MatchEngineImpl(ns);
+  @Override
+  public void remove(final String r, final Action a) {
+    synchronized (rs) {
+      rs.remove(r, a);
     }
+  }
 
-    @Override
-    public void add(final String r, final Action a)
-            throws RegexpParserException {
-        synchronized (rs) {
-            rs.add(r, a);
-        }
+  @Override
+  public void match(final Buffer b) {
+    synchronized (me) {
+      me.match(b);
     }
+  }
 
-    @Override
-    public void remove(final String r, final Action a) {
-        synchronized (rs) {
-            rs.remove(r, a);
-        }
-    }
+  @Override
+  public NodeStorage getNodeStorage() {
+    return ns;
+  }
 
-    @Override
-    public void match(final Buffer b) {
-        synchronized (me) {
-            me.match(b);
-        }
-    }
-
-    @Override
-    public NodeStorage getNodeStorage() {
-        return ns;
-    }
-
-    @Override
-    public void shutdown() throws InterruptedException {
-    }
+  @Override
+  public void shutdown() throws InterruptedException {}
 }

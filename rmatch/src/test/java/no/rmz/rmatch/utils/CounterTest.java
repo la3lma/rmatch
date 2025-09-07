@@ -15,77 +15,69 @@
  */
 package no.rmz.rmatch.utils;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
- *
  * @author rmz
  */
 @SuppressWarnings("SpellCheckingInspection")
 public class CounterTest {
 
-    public CounterTest() {
+  public CounterTest() {}
+
+  @BeforeAll
+  public static void setUpClass() {}
+
+  @AfterAll
+  public static void tearDownClass() {}
+
+  @BeforeEach
+  public void setUp() {}
+
+  @AfterEach
+  public void tearDown() {}
+
+  /** Test of inc method, of class Counter. */
+  @Test
+  public void testMultiThreadedCounterAccess() {
+    final Counter counter = new Counter("Sample counter");
+    final int noOfThreadsInPool = 10;
+    final int noOfIterationsInRunnable = 10000;
+    final int noOfRunnables = noOfThreadsInPool;
+    final int noOfIncrements = noOfRunnables * noOfIterationsInRunnable;
+    final ExecutorService executors = Executors.newFixedThreadPool(noOfThreadsInPool);
+    try {
+      final Collection<Callable<Object>> runnables = new ArrayList<>();
+
+      for (int j = 0; j < noOfRunnables; j++) {
+        final Callable<Object> runnable =
+            () -> {
+              for (int i = 0; i < noOfIterationsInRunnable; i++) {
+                counter.inc();
+              }
+              return null;
+            };
+        runnables.add(runnable);
+      }
+
+      executors.invokeAll(runnables);
+    } catch (InterruptedException ex) {
+      throw new RuntimeException(ex);
+    } finally {
+      executors.shutdown();
     }
 
-    @BeforeAll
-    public static void setUpClass() {
-    }
-
-    @AfterAll
-    public static void tearDownClass() {
-    }
-
-    @BeforeEach
-    public void setUp() {
-    }
-
-    @AfterEach
-    public void tearDown() {
-    }
-
-    /**
-     * Test of inc method, of class Counter.
-     */
-    @Test
-    public void testMultiThreadedCounterAccess() {
-        final Counter counter = new Counter("Sample counter");
-        final int noOfThreadsInPool = 10;
-        final int noOfIterationsInRunnable = 10000;
-        final int noOfRunnables = noOfThreadsInPool;
-        final int noOfIncrements = noOfRunnables * noOfIterationsInRunnable;
-        try (final ExecutorService executors =
-                        Executors.newFixedThreadPool(noOfThreadsInPool)) {
-
-            final Collection<Callable<Object>> runnables = new ArrayList<>();
-
-            for (int j = 0; j < noOfRunnables; j++) {
-                final Callable<Object> runnable = () -> {
-                    for (int i = 0; i < noOfIterationsInRunnable; i++) {
-                        counter.inc();
-                    }
-                    return null;
-                };
-                runnables.add(runnable);
-            }
-
-            executors.invokeAll(runnables);
-        } catch (InterruptedException ex) {
-            throw new RuntimeException(ex);
-        }
-
-        assertEquals(noOfIncrements, counter.inc() - 1);
-    }
+    assertEquals(noOfIncrements, counter.inc() - 1);
+  }
 }
