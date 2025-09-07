@@ -33,6 +33,21 @@ if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]] || [[ -n "${JENKINS_URL:
   rm -rf benchmarks/jmh/target/generated-sources || true
   rm -rf benchmarks/jmh/target/classes || true
   
+  # Verify JMH source file exists in CI
+  JMH_SOURCE_DIR="benchmarks/jmh/src/main/java/no/rmz/rmatch/benchmarks"
+  JMH_SOURCE_FILE="$JMH_SOURCE_DIR/CompileAndMatchBench.java"
+  
+  echo "CI: Checking for JMH source file at $JMH_SOURCE_FILE" >&2
+  if [[ ! -f "$JMH_SOURCE_FILE" ]]; then
+    echo "ERROR: JMH source file missing in CI environment: $JMH_SOURCE_FILE" >&2
+    echo "CI: Available files in benchmarks/jmh/:" >&2
+    find benchmarks/jmh/ -type f -name "*.java" 2>/dev/null | head -10 >&2 || true
+    echo "CI: Directory structure:" >&2
+    ls -la benchmarks/jmh/src/ 2>/dev/null >&2 || echo "CI: src directory doesn't exist" >&2
+    exit 1
+  fi
+  echo "CI: JMH source file confirmed: $JMH_SOURCE_FILE" >&2
+  
   # In CI, explicitly run annotation processing first, then package
   echo "CI: Step 1 - Running annotation processing..." >&2
   echo "CI: Java version and environment info:" >&2
