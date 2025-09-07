@@ -53,6 +53,16 @@ public interface DFANode extends Node {
   Set<Regexp> getRegexps();
 
   /**
+   * Get the set of regexps that can start with the given character.
+   * This optimizes the O(l*m) bottleneck by filtering regexps that cannot
+   * possibly match starting with the given character.
+   *
+   * @param ch the character to filter by
+   * @return a set of regexps that can start with the given character
+   */
+  Set<Regexp> getRegexpsThatCanStartWith(final Character ch);
+
+  /**
    * True iff there is an outgoing link for the character.
    *
    * @param c the character
