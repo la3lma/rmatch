@@ -19,7 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.Counter;
 import no.rmz.rmatch.utils.Counters;
@@ -113,7 +112,6 @@ public final class MatchSetImpl implements MatchSet {
    */
   public MatchSetImpl(
       final int startIndex, final DFANode newCurrentNode, final Character currentChar) {
-    this.matches = ConcurrentHashMap.newKeySet();
     checkNotNull(newCurrentNode, "newCurrentNode can't be null");
     checkArgument(startIndex >= 0, "Start index can't be negative");
     this.currentNode = newCurrentNode;
@@ -138,6 +136,15 @@ public final class MatchSetImpl implements MatchSet {
     } else {
       candidateRegexps = this.currentNode.getRegexps();
     }
+
+    // OPTIMIZATION: Early exit if no regexps can match
+    if (candidateRegexps.isEmpty()) {
+      this.matches = new HashSet<>(0);
+      return;
+    }
+
+    // Use HashSet with pre-sized capacity for better performance
+    this.matches = new HashSet<>(candidateRegexps.size());
 
     for (final Regexp r : candidateRegexps) {
       matches.add(this.currentNode.newMatch(this, r));
