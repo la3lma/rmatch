@@ -17,13 +17,13 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
-/**
- * JMH benchmark for rmatch compilation and matching performance.
- */
+/** JMH benchmark for rmatch compilation and matching performance. */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Benchmark)
-@Fork(value = 1, jvmArgs = {"-Xms1G", "-Xmx1G"})
+@Fork(
+    value = 1,
+    jvmArgs = {"-Xms1G", "-Xmx1G"})
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 public class CompileAndMatchBench {
@@ -41,7 +41,7 @@ public class CompileAndMatchBench {
     for (int i = 0; i < patternCount; i++) {
       patterns[i] = "pattern" + i + ".*";
     }
-    
+
     // Create test input that will match some patterns
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < 100; i++) {
@@ -72,14 +72,13 @@ public class CompileAndMatchBench {
       for (String pattern : patterns) {
         matcher.add(pattern, action);
       }
-      
+
       // Convert string to buffer-like interface that rmatch expects
-      no.rmz.rmatch.utils.StringBuffer buffer = 
-          new no.rmz.rmatch.utils.StringBuffer(testInput);
-      
+      no.rmz.rmatch.utils.StringBuffer buffer = new no.rmz.rmatch.utils.StringBuffer(testInput);
+
       matcher.match(buffer);
       bh.consume(buffer);
-      
+
       matcher.shutdown();
     } catch (Exception e) {
       throw new RuntimeException(e);
