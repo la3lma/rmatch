@@ -1,0 +1,85 @@
+@startuml
+!theme plain
+title Hybrid Aho-Corasick + NFA Architecture
+
+package "Optimized rmatch Architecture" {
+  
+  rectangle "Pattern Analysis Phase" as analysis #e1f5fe {
+    rectangle "Extract Literal Prefixes" as literals
+    rectangle "Identify Complex Patterns" as complex
+    rectangle "Build First-Char Index" as firstchar
+    analysis --> literals
+    analysis --> complex
+    analysis --> firstchar
+  }
+  
+  rectangle "Aho-Corasick Engine" as ac #c8e6c9 {
+    rectangle "Trie for Literal Patterns" as trie
+    rectangle "Failure Function" as failure
+    rectangle "O(n) String Scanning" as scan
+    ac --> trie
+    ac --> failure
+    ac --> scan
+  }
+  
+  rectangle "Optimized NFA Engine" as nfa #fff3e0 {
+    rectangle "Bit-Parallel Simulation" as bitpar
+    rectangle "Compact State Arrays" as compact
+    rectangle "Lock-Free Operations" as lockfree
+    nfa --> bitpar
+    nfa --> compact
+    nfa --> lockfree
+  }
+  
+  rectangle "Dispatch Logic" as dispatch #f3e5f5 {
+    rectangle "Route simple patterns → AC" as route1
+    rectangle "Route complex patterns → NFA" as route2  
+    rectangle "Merge results" as merge
+    dispatch --> route1
+    dispatch --> route2
+    dispatch --> merge
+  }
+  
+  rectangle "SIMD Accelerators" as simd #ffebee {
+    rectangle "Character Class Matching" as charclass
+    rectangle "Multi-byte Comparisons" as multibyte
+    rectangle "Parallel State Updates" as parallel
+    simd --> charclass
+    simd --> multibyte  
+    simd --> parallel
+  }
+}
+
+cloud "Performance Characteristics" as perfchars {
+  note as perf1 #green
+    **Literal Patterns**: O(n) via Aho-Corasick
+    Example: "error", "warning", "fatal"
+    → Direct trie traversal
+  end note
+  
+  note as perf2 #blue  
+    **Simple Regex**: O(n) via bit-parallel
+    Example: "[a-z]+", "\d{3,5}"
+    → SIMD-accelerated NFA simulation
+  end note
+  
+  note as perf3 #orange
+    **Complex Regex**: O(n×k) via optimized NFA  
+    Example: "^(a+b*|c{2,4})$"
+    → Fallback with all optimizations
+  end note
+}
+
+literals .. perf1
+route1 .. perf1
+bitpar .. perf2
+route2 .. perf3
+simd .. perf2
+
+analysis --> dispatch
+dispatch --> ac
+dispatch --> nfa
+simd --> ac
+simd --> nfa
+
+@enduml

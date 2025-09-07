@@ -1,0 +1,3 @@
+# Performance results generated during development
+benchmarks/results/performance-check-*.json
+benchmarks/results/pr-performance-summary.md
