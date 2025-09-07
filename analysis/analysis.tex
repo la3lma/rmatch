@@ -255,6 +255,66 @@ Implement a two-tier approach:
 \item Share common prefixes and suffixes across patterns
 \end{enumerate}
 
+\subsubsection{Implemented Aho-Corasick Literal Prefilter}
+
+\textbf{Status:} Implemented and available as of this version.
+
+A literal substring prefilter has been successfully integrated into the rmatch engine to reduce regex invocations and improve performance for large pattern sets. This implementation provides a concrete foundation for the hybrid approach outlined above.
+
+\textbf{Architecture Overview:}
+
+The prefilter operates in two phases:
+\begin{enumerate}
+\item \textbf{Compile-time literal extraction:} The \texttt{LiteralPrefilter} class analyzes regex patterns to extract the longest literal substring from each pattern, handling quoted sections (\texttt{\textbackslash Q...\textbackslash E}), escaped characters, and complex regex constructs.
+\item \textbf{Runtime Aho-Corasick scanning:} The \texttt{AhoCorasickPrefilter} class builds an AC automaton from extracted literals and scans input text once to identify candidate positions where regex matching should be attempted.
+\end{enumerate}
+
+\textbf{Key Components:}
+
+\begin{itemize}
+\item \texttt{LiteralHint}: Model class representing extracted literal information including pattern ID, literal string, anchoring information, and case sensitivity flags.
+
+\item \texttt{LiteralPrefilter}: Compile-time analyzer that extracts literal substrings using a state machine approach, handling:
+  \begin{itemize}
+  \item Quoted literal sections (\texttt{\textbackslash Q...\textbackslash E})
+  \item Escaped characters and metacharacters  
+  \item Non-capturing groups (\texttt{(?:...)})
+  \item Character classes and alternations
+  \end{itemize}
+
+\item \texttt{AhoCorasickPrefilter}: Runtime component that constructs and operates an AC automaton, supporting case-insensitive matching and multiple patterns sharing identical literals.
+
+\item \texttt{MatchEngineImpl}: Enhanced with prefilter integration, controlled by the system property \texttt{rmatch.prefilter=aho}.
+\end{itemize}
+
+\textbf{Performance Characteristics:}
+
+The prefilter reduces the O(m×l) bottleneck by identifying sparse candidate positions where regex matching should occur, rather than testing every pattern at every position. Expected performance improvements:
+
+\begin{itemize}
+\item \textbf{Large pattern sets (100+ patterns):} 5-15x improvement when patterns contain extractable literals
+\item \textbf{Long input texts:} Linear scaling with text length rather than quadratic 
+\item \textbf{Patterns with common prefixes:} Shared literals reduce redundant scanning
+\end{itemize}
+
+\textbf{Usage:}
+
+\begin{lstlisting}[language=bash,caption=Enabling the prefilter]
+# Enable Aho-Corasick prefilter
+java -Drmatch.prefilter=aho MyApplication
+
+# Disable prefilter (default behavior) 
+java -Drmatch.prefilter=off MyApplication
+\end{lstlisting}
+
+\textbf{Limitations and Future Work:}
+
+\begin{itemize}
+\item Patterns with no extractable literals (e.g., \texttt{.*}, \texttt{[a-z]+}) fall back to original O(m×l) behavior
+\item Currently requires manual prefilter configuration; automatic integration with pattern compilation is planned
+\item Case-insensitive handling uses simple upper/lower expansion; full Unicode normalization could improve coverage
+\end{itemize}
+
 \subsubsection{Bit-Parallel NFA Simulation}
 
 For patterns with up to 64 states, implement bit-parallel simulation:

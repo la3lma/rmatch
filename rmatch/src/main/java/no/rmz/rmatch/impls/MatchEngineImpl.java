@@ -17,6 +17,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.*;
+import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
+import no.rmz.rmatch.engine.prefilter.LiteralHint;
+import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
 import no.rmz.rmatch.interfaces.*;
 
 /**
@@ -70,6 +73,15 @@ public final class MatchEngineImpl implements MatchEngine {
    */
   private final NodeStorage ns;
 
+  /** Optional prefilter for reducing regex invocations (null if disabled). */
+  private AhoCorasickPrefilter prefilter;
+
+  /** Whether prefiltering is enabled via system property. */
+  private final boolean prefilterEnabled;
+
+  /** Set of positions where matches should be started (when using prefilter). */
+  private Set<Integer> candidatePositions;
+
   /**
    * Implements the MatchEngine interface, uses a particular NodeStorage instance.
    *
@@ -77,6 +89,43 @@ public final class MatchEngineImpl implements MatchEngine {
    */
   public MatchEngineImpl(final NodeStorage ns) {
     this.ns = checkNotNull(ns, "NodeStorage can't be null");
+    this.prefilterEnabled = "aho".equalsIgnoreCase(System.getProperty("rmatch.prefilter", "off"));
+  }
+
+  /**
+   * Configures the prefilter with pattern information.
+   *
+   * <p>This method should be called whenever patterns are added or changed to update the prefilter.
+   * If prefiltering is disabled via system property, this method does nothing.
+   *
+   * @param patterns map from pattern ID to pattern string
+   * @param flags map from pattern ID to regex flags
+   */
+  public void configurePrefilter(
+      final Map<Integer, String> patterns, final Map<Integer, Integer> flags) {
+    if (!prefilterEnabled || patterns.isEmpty()) {
+      prefilter = null;
+      return;
+    }
+
+    final List<LiteralHint> hints = new ArrayList<>();
+
+    for (final Map.Entry<Integer, String> entry : patterns.entrySet()) {
+      final int patternId = entry.getKey();
+      final String regex = entry.getValue();
+      final int regexFlags = flags.getOrDefault(patternId, 0);
+
+      final Optional<LiteralHint> hint = LiteralPrefilter.extract(patternId, regex, regexFlags);
+      if (hint.isPresent()) {
+        hints.add(hint.get());
+      }
+    }
+
+    if (!hints.isEmpty()) {
+      prefilter = new AhoCorasickPrefilter(hints);
+    } else {
+      prefilter = null;
+    }
   }
 
   /**
@@ -115,12 +164,22 @@ public final class MatchEngineImpl implements MatchEngine {
     // If the current input character opened up a possibility of new
     // matches, then by all means make a new match set to represent
     // that fact.
-    final DFANode startOfNewMatches = ns.getNextFromStartNode(currentChar);
-    if (startOfNewMatches != null) {
-      final MatchSet ms;
-      ms = new MatchSetImpl(currentPos, startOfNewMatches, currentChar);
-      if (ms.hasMatches()) {
-        activeMatchSets.add(ms);
+    boolean shouldStartMatch = true;
+
+    // Use prefilter to decide whether to start matches at this position
+    // Only check prefilter if it's enabled and configured
+    if (prefilterEnabled && prefilter != null && candidatePositions != null) {
+      shouldStartMatch = candidatePositions.contains(currentPos);
+    }
+
+    if (shouldStartMatch) {
+      final DFANode startOfNewMatches = ns.getNextFromStartNode(currentChar);
+      if (startOfNewMatches != null) {
+        final MatchSet ms;
+        ms = new MatchSetImpl(currentPos, startOfNewMatches, currentChar);
+        if (ms.hasMatches()) {
+          activeMatchSets.add(ms);
+        }
       }
     }
 
@@ -154,6 +213,18 @@ public final class MatchEngineImpl implements MatchEngine {
     final Set<MatchSet> activeMatchSets;
     activeMatchSets = Collections.synchronizedSet(new TreeSet<>(MatchSet.COMPARE_BY_ID));
 
+    // Only do prefiltering work if actually enabled and configured
+    if (prefilterEnabled && prefilter != null) {
+      final String fullText = collectBufferText(b);
+      if (fullText != null) {
+        runPrefilterScan(fullText);
+        // Reset buffer position to start
+        if (b instanceof no.rmz.rmatch.utils.StringBuffer) {
+          ((no.rmz.rmatch.utils.StringBuffer) b).setCurrentPos(-1);
+        }
+      }
+    }
+
     // Advance all match sets forward one character.
     while (b.hasNext()) {
       final Character nextChar = b.getNext();
@@ -168,5 +239,37 @@ public final class MatchEngineImpl implements MatchEngine {
     }
 
     activeMatchSets.clear();
+  }
+
+  /** Collects the full text from the buffer for prefilter scanning. */
+  private String collectBufferText(final Buffer b) {
+    // This method should only be called when prefilter is actually configured
+    assert prefilterEnabled && prefilter != null;
+
+    final StringBuilder sb = new StringBuilder();
+    while (b.hasNext()) {
+      sb.append(b.getNext());
+    }
+    return sb.toString();
+  }
+
+  /** Runs the prefilter scan to identify candidate positions. */
+  private void runPrefilterScan(final String text) {
+    if (text == null || prefilter == null) {
+      candidatePositions = null;
+      return;
+    }
+
+    // Run prefilter
+    final List<AhoCorasickPrefilter.Candidate> candidates = prefilter.scan(text);
+
+    // Convert to set of candidate positions
+    candidatePositions = new HashSet<>();
+    for (final AhoCorasickPrefilter.Candidate candidate : candidates) {
+      final int startPos = candidate.startIndexForMatch();
+      if (startPos >= 0) {
+        candidatePositions.add(startPos);
+      }
+    }
   }
 }
