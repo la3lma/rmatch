@@ -124,12 +124,14 @@ public class FastCounterTest {
   @Test
   public void testToString() {
     final FastCounter counter = FastCounters.newCounter(CounterType.MATCH_SET_IMPL);
+    final long initialValue = counter.get();
     counter.inc();
     counter.inc();
     counter.inc();
+    final long expectedValue = initialValue + 3;
     final String result = counter.toString();
     assertTrue(result.startsWith("#'MatchSetImpl'="));
-    assertTrue(result.endsWith("3"));
+    assertTrue(result.endsWith(String.valueOf(expectedValue)));
   }
 
   /** Test compatibility with legacy Counter system via getCounters(). */
