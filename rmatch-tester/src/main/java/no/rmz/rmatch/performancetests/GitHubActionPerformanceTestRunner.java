@@ -27,7 +27,12 @@ public final class GitHubActionPerformanceTestRunner {
 
       // Run performance comparison
       GitHubActionPerformanceTest.ComparisonResult result =
-          GitHubActionPerformanceTest.runComparison(maxRegexps, baselineResults);
+          GitHubActionPerformanceTest.runComparison(
+              "rmatch-tester/corpus/wuthr10.txt",
+              "rmatch-tester/corpus/real-words-in-wuthering-heights.txt",
+              maxRegexps,
+              numRuns,
+              baselineResults);
 
       // Generate detailed performance report
       generatePerformanceReport(result);
@@ -35,10 +40,17 @@ public final class GitHubActionPerformanceTestRunner {
       // Generate summary for PR comment
       generatePRSummary(result);
 
-      // Update baseline if this is a merge to main (detected via environment)
+      // Update baseline if this is a merge to main (detected via environment) OR if no baseline exists (bootstrap)
       String gitRef = System.getenv("GITHUB_REF");
-      if (gitRef != null && (gitRef.endsWith("/main") || gitRef.endsWith("/master"))) {
-        LOG.info("Updating baseline for main branch");
+      boolean isMainBranch = gitRef != null && (gitRef.endsWith("/main") || gitRef.endsWith("/master"));
+      boolean isBootstrapCase = baselineResults.isEmpty();
+      
+      if (isMainBranch || isBootstrapCase) {
+        if (isBootstrapCase) {
+          LOG.info("No baseline exists - establishing initial baseline from current results");
+        } else {
+          LOG.info("Updating baseline for main branch");
+        }
         BaselineManager.saveRmatchBaseline("benchmarks/baseline", result.getRmatchResults());
         BaselineManager.saveJavaBaseline("benchmarks/baseline", result.getJavaResults());
       }
