@@ -6,6 +6,24 @@ rmatch
 The project is getting closer to a state where it may be useful for others
 than myself, but it's not quite there yet.  Be patient ;)
 
+## Performance Evolution
+
+![Performance Trend](charts/performance_trend.png)
+
+*Historical performance evolution over time comparing rmatch vs Java regex. Lower values indicate better performance.*
+
+### Recent Performance Test Results
+
+![Performance Check Evolution](charts/performance_check_evolution.png)
+
+*Latest performance test results from automated testing infrastructure, showing execution time, memory usage, improvement percentages, and test status over time.*
+
+### Performance Summary
+
+![Performance Summary](charts/performance_summary.png)
+
+*Combined view of historical and recent performance data, providing a comprehensive overview of rmatch's performance evolution.*
+
 You need to install mvnw by doing:
 
       mvn -q -B wrapper:wrapper -Dmaven=3.9.10

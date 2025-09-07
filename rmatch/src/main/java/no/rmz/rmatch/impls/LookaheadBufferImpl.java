@@ -3,7 +3,7 @@ package no.rmz.rmatch.impls;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.LookaheadBuffer;
 
-public class LookaheadBufferImpl implements LookaheadBuffer {
+public class LookaheadBufferImpl implements LookaheadBuffer, Cloneable {
 
   private final Object lock = new Object();
   private final Buffer buffer;
