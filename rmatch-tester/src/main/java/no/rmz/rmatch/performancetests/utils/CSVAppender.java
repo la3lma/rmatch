@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /** Append CSV (Comma Separated Value) lines to files, thus making them CSV files. ;-) */
 public final class CSVAppender {
@@ -28,7 +29,7 @@ public final class CSVAppender {
       try {
         final File file = new File(filePath);
         final boolean exists = file.exists();
-        fileWriter = new FileWriter(file, exists); // Append if exists
+        fileWriter = new FileWriter(file, StandardCharsets.UTF_8, exists); // Append if exists
 
         final BufferedWriter bw = new BufferedWriter(fileWriter);
 

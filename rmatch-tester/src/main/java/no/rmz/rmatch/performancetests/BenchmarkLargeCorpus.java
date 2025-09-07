@@ -40,7 +40,8 @@ public final class BenchmarkLargeCorpus {
     Process process = Runtime.getRuntime().exec("git rev-parse --abbrev-ref HEAD");
     process.waitFor();
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    BufferedReader reader =
+        new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
 
     return reader.readLine();
   }
@@ -238,7 +239,7 @@ public final class BenchmarkLargeCorpus {
         System.err.println("Could not find digester algorithm '" + algorithm + "'");
         System.exit(1);
       }
-      regexMap.put(byteArrayToHexString(md.digest(r.getBytes())), r);
+      regexMap.put(byteArrayToHexString(md.digest(r.getBytes(StandardCharsets.UTF_8))), r);
     }
 
     allRegexps = regexMap.values().stream().toList();
