@@ -52,6 +52,14 @@ jobs:
             -Dexec.args="${MAX_REGEXPS} ${NUM_RUNS}" \
             || exit 1
       
+      - name: Generate performance charts
+        run: |
+          # Install Python dependencies for chart generation
+          python3 -m pip install --user -r requirements.txt
+          
+          # Generate performance evolution charts
+          python3 scripts/generate_performance_charts.py
+      
       - name: Compare and comment
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,4 +90,5 @@ jobs:
             benchmarks/results/*.json
             benchmarks/results/*.log
             benchmarks/results/*.md
+            charts/*.png
           retention-days: 30
