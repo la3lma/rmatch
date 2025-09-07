@@ -118,7 +118,7 @@ public final class MatchEngineImpl implements MatchEngine {
     final DFANode startOfNewMatches = ns.getNextFromStartNode(currentChar);
     if (startOfNewMatches != null) {
       final MatchSet ms;
-      ms = new MatchSetImpl(currentPos, startOfNewMatches);
+      ms = new MatchSetImpl(currentPos, startOfNewMatches, currentChar);
       if (ms.hasMatches()) {
         activeMatchSets.add(ms);
       }

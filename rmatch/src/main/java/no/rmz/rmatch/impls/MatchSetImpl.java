@@ -100,6 +100,19 @@ public final class MatchSetImpl implements MatchSet {
    * @param newCurrentNode The deterministic start node to start with.
    */
   public MatchSetImpl(final int startIndex, final DFANode newCurrentNode) {
+    this(startIndex, newCurrentNode, null);
+  }
+
+  /**
+   * Create a new MatchSetImpl with character-based optimization.
+   *
+   * @param startIndex The start position in the input.
+   * @param newCurrentNode The deterministic start node to start with.
+   * @param currentChar The current character being processed (for optimization). If null, all
+   *     regexps will be considered.
+   */
+  public MatchSetImpl(
+      final int startIndex, final DFANode newCurrentNode, final Character currentChar) {
     this.matches = ConcurrentHashMap.newKeySet();
     checkNotNull(newCurrentNode, "newCurrentNode can't be null");
     checkArgument(startIndex >= 0, "Start index can't be negative");
@@ -117,15 +130,16 @@ public final class MatchSetImpl implements MatchSet {
     //     algorithm.  Clearly not logarithmic in the number
     //     of expressions, and thus a showstopper.
 
-    // Maybe introduce a function "canStartwith" for a regexp, and traverse
-    // the regexps to find the ones that can start with the current char,
-    // and only add those to the match set.
-    // Also remember this for the next time, so that this calculation is
-    // only carried once per character, for all the regexps?
+    // OPTIMIZATION: Use first-character heuristic to filter regexps
+    // that cannot possibly match starting with the current character.
+    final Set<Regexp> candidateRegexps;
+    if (currentChar != null) {
+      candidateRegexps = this.currentNode.getRegexpsThatCanStartWith(currentChar);
+    } else {
+      candidateRegexps = this.currentNode.getRegexps();
+    }
 
-    for (final Regexp r : this.currentNode.getRegexps()) {
-      // TODO: We _must_ find some heuristic to optimize away most
-      // invocations of the next line.
+    for (final Regexp r : candidateRegexps) {
       matches.add(this.currentNode.newMatch(this, r));
     }
   }

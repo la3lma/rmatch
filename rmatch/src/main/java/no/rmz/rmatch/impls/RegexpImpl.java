@@ -54,6 +54,10 @@ public final class RegexpImpl implements Regexp {
   /** The starting node in the NDFA that represents this regular expression. */
   private NDFANode myNode;
 
+  /** Cache for first-character matching results to optimize O(l*m) bottleneck. */
+  private final ConcurrentHashMap<Character, Boolean> firstCharacterCache =
+      new ConcurrentHashMap<>();
+
   /**
    * Make a new instance of Regexp representing a regular expression.
    *
@@ -263,5 +267,39 @@ public final class RegexpImpl implements Regexp {
   @Override
   public boolean hasMatches() {
     return (heaps != null) && (!heaps.isEmpty());
+  }
+
+  @Override
+  public boolean canStartWith(final Character ch) {
+    checkNotNull(ch, "Character cannot be null");
+
+    // Return cached result if available
+    Boolean cachedResult = firstCharacterCache.get(ch);
+    if (cachedResult != null) {
+      return cachedResult;
+    }
+
+    // Compute and cache the result
+    boolean result = computeCanStartWith(ch);
+    firstCharacterCache.put(ch, result);
+    return result;
+  }
+
+  /**
+   * Compute whether this regexp can start with the given character by examining the NDFA starting
+   * from the root node, considering epsilon transitions.
+   *
+   * @param ch the character to check
+   * @return true if the regexp can start with the given character
+   */
+  private boolean computeCanStartWith(final Character ch) {
+    if (myNode == null) {
+      return false; // Not compiled yet
+    }
+
+    // Use the NDFA's getNextSet method to see if there are any valid next states
+    // from the starting node when consuming this character
+    final Set<NDFANode> nextStates = myNode.getNextSet(ch);
+    return !nextStates.isEmpty();
   }
 }
