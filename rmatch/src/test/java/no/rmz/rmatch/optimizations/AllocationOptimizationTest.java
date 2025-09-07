@@ -44,9 +44,7 @@ public class AllocationOptimizationTest {
     assertEquals(false, ms.hasMatches(), "Should report no matches");
   }
 
-  /**
-   * Test that MatchSetImpl correctly pre-sizes HashSet based on candidate regexps count.
-   */
+  /** Test that MatchSetImpl correctly pre-sizes HashSet based on candidate regexps count. */
   @Test
   public void testHashSetPresizing() throws Exception {
     // Create a DFANode with no regexps to ensure empty candidate set
