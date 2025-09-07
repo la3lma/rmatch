@@ -62,11 +62,11 @@ public final class LiteralPrefilter {
   public static Optional<LiteralHint> extract(
       final int patternId, final String regex, final int flags) {
     final List<String> literals = extractAllLiterals(regex);
-    
+
     if (literals.isEmpty()) {
       return Optional.empty();
     }
-    
+
     // Find the longest literal
     String bestLiteral = "";
     for (final String literal : literals) {
@@ -74,34 +74,32 @@ public final class LiteralPrefilter {
         bestLiteral = literal;
       }
     }
-    
+
     // Require at least length >= 2 to be useful
     if (bestLiteral.length() < 2) {
       return Optional.empty();
     }
-    
+
     final int bestStart = regex.indexOf(bestLiteral);
     final boolean anchored = regex.startsWith("^") && bestStart <= 1;
     final boolean ci = ((flags & java.util.regex.Pattern.CASE_INSENSITIVE) != 0);
     final int literalOffsetInMatch = anchored ? 0 : 0;
-    
+
     return Optional.of(
         new LiteralHint(patternId, bestLiteral, bestStart, anchored, ci, literalOffsetInMatch));
   }
 
-  /**
-   * Extracts all possible literal substrings from a regex using simple heuristics.
-   */
+  /** Extracts all possible literal substrings from a regex using simple heuristics. */
   private static List<String> extractAllLiterals(final String regex) {
     final List<String> literals = new ArrayList<>();
     final StringBuilder current = new StringBuilder();
     boolean escaped = false;
     boolean inClass = false;
     boolean inQuote = false;
-    
+
     for (int i = 0; i < regex.length(); i++) {
       final char c = regex.charAt(i);
-      
+
       if (inQuote) {
         // Handle quoted literals \Q...\E
         if (c == '\\' && i + 1 < regex.length() && regex.charAt(i + 1) == 'E') {
@@ -119,7 +117,7 @@ public final class LiteralPrefilter {
           continue;
         }
       }
-      
+
       if (escaped) {
         // Handle escaped characters
         if (c == 'Q') {
@@ -142,12 +140,12 @@ public final class LiteralPrefilter {
         escaped = false;
         continue;
       }
-      
+
       if (c == '\\') {
         escaped = true;
         continue;
       }
-      
+
       if (inClass) {
         if (c == ']') {
           inClass = false;
@@ -159,9 +157,12 @@ public final class LiteralPrefilter {
         }
         continue;
       }
-      
+
       // Handle special sequences like (?:
-      if (c == '(' && i + 2 < regex.length() && regex.charAt(i + 1) == '?' && regex.charAt(i + 2) == ':') {
+      if (c == '('
+          && i + 2 < regex.length()
+          && regex.charAt(i + 1) == '?'
+          && regex.charAt(i + 2) == ':') {
         // Non-capturing group (?:
         if (current.length() > 0) {
           literals.add(current.toString());
@@ -170,7 +171,7 @@ public final class LiteralPrefilter {
         i += 2; // skip ?:
         continue;
       }
-      
+
       switch (c) {
         case '[':
           inClass = true;
@@ -202,12 +203,12 @@ public final class LiteralPrefilter {
           break;
       }
     }
-    
+
     // Add final literal if any
     if (current.length() > 0) {
       literals.add(current.toString());
     }
-    
+
     return literals;
   }
 
