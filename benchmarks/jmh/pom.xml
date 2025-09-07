@@ -53,6 +53,11 @@
           <compilerArgs>
             <arg>-Xlint:all</arg>
             <arg>-proc:full</arg>
+            <arg>-AaddExports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+            <arg>-AaddExports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+            <arg>-AaddExports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+            <arg>-AaddExports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+            <arg>-AaddExports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
           </compilerArgs>
           <annotationProcessorPaths>
             <path>
@@ -62,6 +67,9 @@
             </path>
           </annotationProcessorPaths>
           <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
+          <proc>full</proc>
+          <forceJavacCompilerUse>true</forceJavacCompilerUse>
+          <verbose>true</verbose>
         </configuration>
       </plugin>
       

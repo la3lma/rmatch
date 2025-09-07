@@ -32,9 +32,24 @@ if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]] || [[ -n "${JENKINS_URL:
   # Remove any potential stale generated sources
   rm -rf benchmarks/jmh/target/generated-sources || true
   rm -rf benchmarks/jmh/target/classes || true
+  
+  # In CI, explicitly run annotation processing first, then package
+  echo "CI: Step 1 - Running annotation processing..." >&2
+  $MVN -U -q -B -f benchmarks/jmh/pom.xml -am -DskipTests compile
+  
+  # Verify annotation processing succeeded before proceeding
+  if [[ ! -f "benchmarks/jmh/target/classes/META-INF/BenchmarkList" ]]; then
+    echo "ERROR: CI annotation processing failed to generate BenchmarkList" >&2
+    exit 1
+  fi
+  echo "CI: Step 1 complete - BenchmarkList generated" >&2
+  
+  echo "CI: Step 2 - Packaging with pre-generated annotations..." >&2
+  $MVN -U -q -B -f benchmarks/jmh/pom.xml -am -DskipTests package
+else
+  # Local development - use single command
+  $MVN -U -q -B -f benchmarks/jmh/pom.xml -am -DskipTests clean package
 fi
-
-$MVN -U -q -B -f benchmarks/jmh/pom.xml -am -DskipTests clean package
 
 # Verify annotation processing succeeded by checking for BenchmarkList
 BENCHMARK_LIST="benchmarks/jmh/target/classes/META-INF/BenchmarkList"
