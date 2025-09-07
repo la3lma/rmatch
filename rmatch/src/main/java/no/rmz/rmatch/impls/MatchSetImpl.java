@@ -21,8 +21,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.utils.Counter;
-import no.rmz.rmatch.utils.Counters;
+import no.rmz.rmatch.utils.CounterType;
+import no.rmz.rmatch.utils.FastCounter;
+import no.rmz.rmatch.utils.FastCounters;
 
 /**
  * A an implementation of the MatchSet interface. A MatchSet keeps a set of matches which starts
@@ -33,7 +34,7 @@ import no.rmz.rmatch.utils.Counters;
  */
 public final class MatchSetImpl implements MatchSet {
   /** A counter for MatchSetImpls. */
-  private static final Counter MY_COUNTER = Counters.newCounter("MatchSetImpl");
+  private static final FastCounter MY_COUNTER = FastCounters.newCounter(CounterType.MATCH_SET_IMPL);
 
   /**
    * Commit this match relative to a bunch of other matches.
