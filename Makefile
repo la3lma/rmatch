@@ -1,11 +1,13 @@
  SHELL := /bin/bash
 
- .PHONY: build test ci bench-micro bench-macro profile fmt spotbugs
+ .PHONY: build test ci bench-micro bench-macro profile fmt spotless spotbugs
 
 build:
+	mvn -q -B spotless:apply
 	mvn -U -q -B -DskipTests -Dspotbugs.skip=true package
 
 test:
+	mvn -q -B spotless:apply
 	mvn -q -B verify
 
 bench-micro:
@@ -26,6 +28,9 @@ profile:
 	DUR=30; scripts/profile_async_profiler.sh $$DUR
 
 fmt:
+	mvn -q -B spotless:apply
+
+spotless:
 	mvn -q -B spotless:apply
 
 spotbugs:
