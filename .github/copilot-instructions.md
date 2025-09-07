@@ -6,10 +6,22 @@ You are assisting on **rmatch**, a Java library for matching many regular expres
 # Coding standards
 - **Language & tooling:** Use the Java version declared in `pom.xml`. If unsure, parse it and state assumptions before proceeding. Use Maven conventions for sources, tests, and shading if applicable.
 - **Style:** Prefer clear, allocation-light code. Avoid hidden allocations in hot loops (boxing, streams in tight paths, regex backtracking helpers). Prefer `final` for fields and locals when helpful.
+- **Code formatting:** All Java code MUST follow Google Java Format style as enforced by Spotless. Always run `mvn spotless:apply` after making code changes to ensure compliance. Never commit code that would fail `mvn spotless:check`.
 - **Data structures:** Use compact arrays/bitsets/IntLists over generic collections on hot paths. Prefer contiguous memory layouts and branch-predictable code.
 - **Concurrency:** All public entry points must document thread-safety. If an object isn’t thread-safe, provide a builder/factory for per-thread instances or immutable compiled automata with thread-safe `match()` calls.
 - **Errors:** No checked exceptions in hot paths. Validate inputs at construction/compile time; fail fast with clear messages.
 - **Logging:** Avoid logging in inner loops. Expose optional counters/metrics instead.
+
+# Code formatting and spotlessness
+- **Always maintain Spotless compliance:** Run `mvn spotless:apply` (or `make fmt`) after any Java code changes to ensure Google Java Format compliance.
+- **Pre-compilation formatting:** Before running compilation or tests, automatically apply Spotless formatting to avoid build failures.
+- **Code generation guidelines:** When generating new Java code, follow these specific formatting patterns observed in the existing codebase:
+  - Use Google Java Format indentation (2 spaces)
+  - Place opening braces on same line
+  - Use proper Javadoc formatting with `<p>` tags for paragraph breaks
+  - Import organization: static imports first, then regular imports, alphabetically sorted
+  - Line length limit of 100 characters
+  - Use `final` modifier for parameters and local variables where appropriate
 
 # API design
 - Keep the API minimal: “compile patterns” → “run match/scan” → “report matches (pattern id, start, end)”.
@@ -56,6 +68,7 @@ You are assisting on **rmatch**, a Java library for matching many regular expres
 
 # When generating code or answers
 - First, **summarize** how you inferred versions, constraints, and whether code touches hot paths.
+- **Always run `mvn spotless:apply`** after generating or modifying Java code to ensure Google Java Format compliance.
 - If asked for new features, propose the smallest API surface and show a tiny example plus tests.
 - If touching hot paths, generate a matching JMH benchmark and mention expected effects.
 - If you must choose between simplicity and speed, offer both versions and explain the trade-offs.

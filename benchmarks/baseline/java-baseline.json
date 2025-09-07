@@ -1,0 +1,10 @@
+# Baseline performance data
+# Generated: 2025-09-07T10:50:23.801127Z
+# Java: 21.0.2
+# OS: Mac OS X 15.6.1
+# Git: db23ae88fe9fe8de8e855dde7c29f967ca56d5ae (copilot/fix-116)
+# Format: matcherTypeName,usedMemoryInMb,durationInMillis
+
+java,740,77
+java,127,12
+java,1251,13

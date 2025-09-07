@@ -1,0 +1,11 @@
+{
+  "type": "macro",
+  "timestamp": "20250907T193503Z",
+  "git": { "sha": "af645f6ff93d3fb2252323fcf5b188e6878a2387", "branch": "master" },
+  "java": "openjdk version "21.0.2" 2024-01-16 OpenJDK Runtime Environment (build 21.0.2+13-58) OpenJDK 64-Bit Server VM (build 21.0.2+13-58, mixed mode, sharing) ",
+  "os": { "name": "Darwin", "release": "24.6.0" },
+  "args": { "max_regexps": 10000 },
+  "duration_ms": 20864,
+  "exit_status": 0,
+  "log": "benchmarks/results/macro-20250907T193503Z.log"
+}

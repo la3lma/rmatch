@@ -1,0 +1,11 @@
+{
+  "type": "macro",
+  "timestamp": "20250907T194234Z",
+  "git": { "sha": "f3e85d71d5669169c03b7ae64221a3eace9d7cca", "branch": "copilot/fix-133" },
+  "java": "openjdk version "21.0.2" 2024-01-16 OpenJDK Runtime Environment (build 21.0.2+13-58) OpenJDK 64-Bit Server VM (build 21.0.2+13-58, mixed mode, sharing) ",
+  "os": { "name": "Darwin", "release": "24.6.0" },
+  "args": { "max_regexps": 10000 },
+  "duration_ms": 17784,
+  "exit_status": 0,
+  "log": "benchmarks/results/macro-20250907T194234Z.log"
+}
