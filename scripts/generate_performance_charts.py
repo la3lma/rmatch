@@ -175,7 +175,7 @@ def create_performance_check_chart(df, output_dir):
             ax1.set_ylabel('Time (milliseconds)')
             ax1.legend()
             ax1.grid(True, alpha=0.3)
-            format_time_axis(ax1)
+            format_recent_time_axis(ax1)
     
     # 2. Memory usage comparison
     if 'rmatch_avg_memory_mb' in df.columns and 'java_avg_memory_mb' in df.columns:
@@ -189,7 +189,7 @@ def create_performance_check_chart(df, output_dir):
             ax2.set_ylabel('Memory (MB)')
             ax2.legend()
             ax2.grid(True, alpha=0.3)
-            format_time_axis(ax2)
+            format_recent_time_axis(ax2)
     
     # 3. Performance improvement percentages
     if 'time_improvement_percent' in df.columns and 'memory_improvement_percent' in df.columns:
@@ -208,7 +208,7 @@ def create_performance_check_chart(df, output_dir):
             ax3.set_ylabel('Improvement (%)')
             ax3.legend()
             ax3.grid(True, alpha=0.3)
-            format_time_axis(ax3)
+            format_recent_time_axis(ax3)
     
     # 4. Test status over time
     if 'status' in df.columns:
@@ -227,7 +227,7 @@ def create_performance_check_chart(df, output_dir):
             ax4.set_yticks([-1, 0, 1])
             ax4.set_yticklabels(['FAIL', 'WARNING', 'PASS'])
             ax4.grid(True, alpha=0.3)
-            format_time_axis(ax4)
+            format_recent_time_axis(ax4)
     
     plt.tight_layout()
     
@@ -292,7 +292,7 @@ def create_comparison_overview_chart(df, output_dir):
             ax.set_ylabel('Performance Ratio (lower is better)', fontsize=12)
             ax.legend(['Trend', 'Parity', 'PASS', 'WARNING', 'FAIL'], fontsize=11)
             ax.grid(True, alpha=0.3)
-            format_time_axis(ax)
+            format_recent_time_axis(ax)
             
             # Add some styling
             ax.spines['top'].set_visible(False)
@@ -478,6 +478,16 @@ def format_time_axis(ax):
     ax.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
 
+def format_recent_time_axis(ax):
+    """Format time axis for recent performance data with date and time information."""
+    # For recent performance data, show date and time for better granularity
+    # Use a more detailed format that includes both date and time
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:%M'))
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    ax.xaxis.set_minor_locator(mdates.AutoDateLocator(interval_multiples=False))
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
+    ax.grid(True, alpha=0.3, which='both')
+
 def main():
     """Main function to generate performance charts."""
     print("Starting performance chart generation...")
@@ -585,7 +595,7 @@ def create_combined_summary_chart(comprehensive_df, performance_check_df, output
             ax2.set_ylabel('Performance Ratio')
             ax2.legend()
             ax2.grid(True, alpha=0.3)
-            format_time_axis(ax2)
+            format_recent_time_axis(ax2)
     
     plt.tight_layout()
     
