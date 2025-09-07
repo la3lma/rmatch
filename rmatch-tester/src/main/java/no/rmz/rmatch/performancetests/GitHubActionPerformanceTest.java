@@ -96,6 +96,10 @@ public final class GitHubActionPerformanceTest {
 
     LOG.info("Starting performance comparison with " + numRuns + " runs");
     LOG.info("Corpus: " + corpusPath + ", Regexps: " + regexpPath + ", Max regexps: " + maxRegexps);
+    
+    int availableCores = MatcherFactory.getAvailableProcessors();
+    int rmatchThreads = MatcherFactory.getDefaultPartitionCount();
+    LOG.info("System cores: " + availableCores + ", rmatch threads: " + rmatchThreads);
 
     try {
       // Load test data
@@ -128,7 +132,10 @@ public final class GitHubActionPerformanceTest {
                 + rmatchResult.durationInMillis()
                 + "ms, java: "
                 + javaResult.durationInMillis()
-                + "ms");
+                + "ms, cores: "
+                + availableCores
+                + ", threads: "
+                + rmatchThreads);
       }
 
       // Separate baseline results by matcher type
