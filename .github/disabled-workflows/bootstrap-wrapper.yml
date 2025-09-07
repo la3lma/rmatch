@@ -1,0 +1,24 @@
+name: Bootstrap Maven Wrapper
+on: { workflow_dispatch: {} }
+permissions:
+  contents: write
+jobs:
+  add-wrapper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - name: Generate wrapper
+        run: mvn -q -B wrapper:wrapper -Dmaven=3.9.10
+      - name: Commit wrapper
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b chore/add-maven-wrapper
+          git add mvnw mvnw.cmd .mvn/wrapper/*
+          git commit -m "build: add Maven Wrapper (3.9.10)"
+          git push -u origin chore/add-maven-wrapper
+      - name: Open PR
+        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        run: gh pr create -t "Add Maven Wrapper (3.9.10)" -b "Adds mvnw/mvnw.cmd and .mvn/wrapper." || true
