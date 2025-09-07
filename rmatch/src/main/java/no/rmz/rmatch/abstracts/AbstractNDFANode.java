@@ -20,8 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.utils.Counter;
-import no.rmz.rmatch.utils.Counters;
+import no.rmz.rmatch.utils.CounterType;
+import no.rmz.rmatch.utils.FastCounter;
+import no.rmz.rmatch.utils.FastCounters;
 import no.rmz.rmatch.utils.LifoSet;
 
 /**
@@ -34,11 +35,11 @@ public abstract class AbstractNDFANode implements NDFANode {
    * for instrumentation. It is also used to generate graphviz graphs and uniquely identify NDFAs in
    * various contexts.
    */
-  static final Counter COUNTER = Counters.newCounter("AbstractNDFANodes");
+  static final FastCounter COUNTER = FastCounters.newCounter(CounterType.ABSTRACT_NDFA_NODES);
 
   /** A counter that keeps track of how many edges that has been observed out of this NDFA. */
-  private static final Counter cachedEdgesCounter =
-      Counters.newCounter("Cached edges going to an NDFA.");
+  private static final FastCounter cachedEdgesCounter =
+      FastCounters.newCounter(CounterType.CACHED_NDFA_EDGES);
 
   /**
    * A cache of the next sets. This is a cache that is used to avoid recomputing the next set for a
