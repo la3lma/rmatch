@@ -1,0 +1,69 @@
+@startuml
+!theme plain
+title Comprehensive Benchmarking Strategy
+
+rectangle "Test Pattern Categories" as patterns #e8f5e8 {
+  rectangle "Literal: 'error', 'warning'" as literals
+  rectangle "Simple: '[a-z]+', '\d{3,6}'" as simple  
+  rectangle "Complex: '^(https?://[^/]+).*'" as complex
+  rectangle "Real-World: Logs, Genomics" as realworld
+}
+
+literals --> simple
+simple --> complex  
+complex --> realworld
+
+rectangle "Test Data Sizes" as datasizes #e1f5fe {
+  rectangle "Small: 1KB - 1MB" as small
+  rectangle "Medium: 1MB - 100MB" as medium
+  rectangle "Large: 100MB - 1GB" as large
+  rectangle "Streaming: Continuous" as streaming
+}
+
+small --> medium
+medium --> large
+large --> streaming
+
+rectangle "Performance Metrics" as metrics #c8e6c9 {
+  rectangle "Throughput (MB/s)" as throughput
+  rectangle "Latency Percentiles" as latency
+  rectangle "Memory Allocation Rate" as memory
+  rectangle "CPU & Cache Utilization" as cpu
+  rectangle "Pattern Count Scalability" as scalability
+}
+
+throughput --> latency
+latency --> memory
+memory --> cpu
+cpu --> scalability
+
+rectangle "Comparison Baselines" as baselines #fce4ec {
+  rectangle "Java java.util.regex" as java
+  rectangle "Google RE2 (JNI)" as re2
+  rectangle "PCRE (JNI)" as pcre
+  rectangle "Intel Hyperscan" as hyperscan
+  rectangle "Current rmatch" as current
+}
+
+java --> re2
+re2 --> pcre
+pcre --> hyperscan
+hyperscan --> current
+
+rectangle "Test Execution" as execution #f9fbe7 {
+  rectangle "JMH Micro-benchmarks" as jmh
+  rectangle "Macro-benchmarks" as macro
+  rectangle "Regression Testing" as regression
+  rectangle "CI Integration" as ci
+}
+
+jmh --> macro
+macro --> regression
+regression --> ci
+
+patterns --> datasizes
+datasizes --> metrics
+metrics --> baselines
+baselines --> execution
+
+@enduml
