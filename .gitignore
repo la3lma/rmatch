@@ -13,3 +13,4 @@ measurements.sqlite
 benchmarks/results/performance-check-*.json
 benchmarks/results/pr-performance-summary.md
 **/target/
+scripts/__pycache__/
