@@ -1,0 +1,87 @@
+@startuml
+!theme plain
+title Current rmatch Architecture
+
+package "rmatch Core" {
+  class MatcherImpl {
+    -NDFACompiler compiler
+    -RegexpStorage rs
+    -MatchEngine me
+    -NodeStorage ns
+    +add(String regex, Action action)
+    +match(Buffer buffer)
+  }
+
+  class ARegexpCompiler {
+    -AlternativesBuilder alternativesBuilder
+    -CharSetBuilder charSetStringBuilder
+    +compile(Regexp regexp)
+    +getResult(): NDFANode
+  }
+
+  class MatchEngineImpl {
+    -NodeStorage ns
+    +match(Buffer b)
+    -matcherProgress()
+    -performMatches()
+  }
+
+  class NodeStorageImpl {
+    -Map<SortedSet<NDFANode>, DFANode> ndfamap
+    -StartNode sn
+    +getDFANode(Set<NDFANode>): DFANode
+    +getNextFromStartNode(Character): DFANode
+  }
+
+  class MatchSetImpl {
+    -Set<Match> matches
+    -DFANode currentNode
+    -int start
+    +progress(NodeStorage, Character, int, RunnableMatchesHolder)
+  }
+
+  class DFANodeImpl {
+    -SortedSet<NDFANode> basis
+    -ConcurrentMap<Character, DFANode> nextMap
+    -Set<Regexp> regexps
+    +getNext(Character, NodeStorage): DFANode
+  }
+}
+
+package "Performance Bottlenecks" <<Cloud>> {
+  note as N1 #ffaaaa
+    **Critical O(m×l) Bottleneck**
+    Every MatchSetImpl creates Match
+    objects for ALL regexes at 
+    EVERY starting position
+  end note
+
+  note as N2 #ffaaaa
+    **Heavyweight Data Structures**
+    - SortedSet<NDFANode> for states
+    - ConcurrentHashMap everywhere
+    - Synchronized collections
+    - String-based counters
+  end note
+
+  note as N3 #ffaaaa
+    **Missing Optimizations**
+    - No first-character heuristics
+    - No Boyer-Moore skip tables
+    - No bit-parallel operations
+    - No state minimization
+  end note
+}
+
+MatcherImpl --> ARegexpCompiler
+MatcherImpl --> MatchEngineImpl
+MatcherImpl --> NodeStorageImpl
+MatchEngineImpl --> MatchSetImpl
+MatchSetImpl --> DFANodeImpl
+NodeStorageImpl --> DFANodeImpl
+
+MatchSetImpl .. N1
+DFANodeImpl .. N2
+MatchEngineImpl .. N3
+
+@enduml
