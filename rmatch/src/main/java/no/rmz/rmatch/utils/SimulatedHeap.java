@@ -17,7 +17,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Comparator;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Simulating a heap using a TreeMap.
@@ -26,8 +26,8 @@ import java.util.TreeMap;
  */
 public final class SimulatedHeap<T> {
 
-  /** We use a TreeMap to represent the heap. */
-  private final TreeMap<T, T> tm;
+  /** We use a ConcurrentSkipListMap to represent the heap. */
+  private final ConcurrentSkipListMap<T, T> tm;
 
   /**
    * Create a new simulated heap using the comparator c.
@@ -36,7 +36,7 @@ public final class SimulatedHeap<T> {
    */
   public SimulatedHeap(final Comparator<T> c) {
     checkNotNull(c);
-    tm = new TreeMap<>(c);
+    tm = new ConcurrentSkipListMap<>(c);
   }
 
   /**
@@ -46,9 +46,7 @@ public final class SimulatedHeap<T> {
    */
   public void add(final T m) {
     checkNotNull(m);
-    synchronized (tm) {
-      tm.put(m, m);
-    }
+    tm.put(m, m);
   }
 
   /**
@@ -59,18 +57,15 @@ public final class SimulatedHeap<T> {
    */
   public void remove(final T m) {
     checkNotNull(m);
-    synchronized (tm) {
-      if (!tm.containsKey(m)) {
-        throw new RuntimeException(
-            "Attempt to remove nonexisting " + "content from a SimulatedHeap");
-      }
-
-      checkArgument(true);
-      checkArgument(tm.containsKey(m));
-      final int size = tm.size();
-      tm.remove(m);
-      assert (size - 1 == tm.size());
+    if (!tm.containsKey(m)) {
+      throw new RuntimeException("Attempt to remove nonexisting " + "content from a SimulatedHeap");
     }
+
+    checkArgument(true);
+    checkArgument(tm.containsKey(m));
+    final int size = tm.size();
+    tm.remove(m);
+    assert (size - 1 == tm.size());
   }
 
   /**
@@ -79,9 +74,7 @@ public final class SimulatedHeap<T> {
    * @return the smallest element of the heap.
    */
   public T getFirst() {
-    synchronized (tm) {
-      return tm.get(tm.firstKey());
-    }
+    return tm.get(tm.firstKey());
   }
 
   /**
@@ -90,16 +83,12 @@ public final class SimulatedHeap<T> {
    * @return true iff empty.
    */
   public boolean isEmpty() {
-    synchronized (tm) {
-      return tm.isEmpty();
-    }
+    return tm.isEmpty();
   }
 
   @Override
   public String toString() {
-    synchronized (tm) {
-      return "SimulatedHeap{" + "tm=" + tm + '}';
-    }
+    return "SimulatedHeap{" + "tm=" + tm + '}';
   }
 
   /**
@@ -109,9 +98,7 @@ public final class SimulatedHeap<T> {
    * @return True iff the element is there.
    */
   public boolean contains(final T m) {
-    synchronized (tm) {
-      return tm.containsKey(m);
-    }
+    return tm.containsKey(m);
   }
 
   /**
@@ -120,8 +107,6 @@ public final class SimulatedHeap<T> {
    * @return no of elements in the heap.
    */
   public int size() {
-    synchronized (tm) {
-      return tm.size();
-    }
+    return tm.size();
   }
 }
