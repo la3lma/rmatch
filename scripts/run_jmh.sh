@@ -25,8 +25,11 @@ TXT_OUT="benchmarks/results/jmh-${stamp}.txt"
 # Build shaded jar for the JMH module
 $MVN -U -q -B -f benchmarks/jmh/pom.xml -am -DskipTests clean package
 
-# Locate the shaded jar
-JAR=$(ls -t benchmarks/jmh/target/rmatch-benchmarks-jmh-*.jar 2>/dev/null | head -n1 || true)
+# Locate the shaded jar (prefer the benchmarks jar)
+JAR=$(ls -t benchmarks/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar 2>/dev/null | head -n1 || true)
+if [[ -z "$JAR" ]]; then
+  JAR=$(ls -t benchmarks/jmh/target/rmatch-benchmarks-jmh-*.jar 2>/dev/null | head -n1 || true)
+fi
 if [[ -z "$JAR" ]]; then
   echo "ERROR: Could not find shaded JAR under benchmarks/jmh/target/" >&2
   exit 1
@@ -51,9 +54,25 @@ set -e
 
 if [[ $status -ne 0 ]]; then
   echo "Shaded jar run failed (status=$status). Falling back to exec:java (-f 0)." >&2
+  # Remove any existing -f flag and add -f 0 for the fallback
+  fallback_args=()
+  skip_next=false
+  for arg in "${args[@]}"; do
+    if [[ $skip_next == true ]]; then
+      skip_next=false
+      continue
+    fi
+    if [[ $arg == "-f" ]]; then
+      skip_next=true
+      continue
+    fi
+    fallback_args+=("$arg")
+  done
+  fallback_args+=("-f" "0")
+  
   $MVN -q -B -f benchmarks/jmh/pom.xml -am -DskipTests \
     exec:java -Dexec.mainClass=org.openjdk.jmh.Main \
-    -Dexec.args="$(printf '%s ' "${args[@]}") -f 0 \"$include\" ${*:-}"
+    -Dexec.args="$(printf '%s ' "${fallback_args[@]}") \"$include\" ${*:-}"
 fi
 
 # Emit friendly pointer
