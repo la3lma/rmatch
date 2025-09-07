@@ -1,11 +1,12 @@
 # Baseline performance data
-# Generated: 2025-09-07T21:00:00.000000Z
-# Java: 21.0.2
-# OS: Mac OS X 15.6.1
-# Git: copilot/fix-116
+# Generated: 2025-09-07T22:07:00.174379122Z
+# Java: 17.0.16
+# OS: Linux 6.11.0-1018-azure
+# Git: 95a42a8e3b1457837ac55ebf36a92785743d28ce (copilot/fix-147)
 # Format: matcherTypeName,usedMemoryInMb,durationInMillis
-# Reset to current performance levels to fix invalid baseline
 
-rmatch,154,1713
-rmatch,134,720
-rmatch,714,594
+rmatch,294,15123
+rmatch,1168,13664
+rmatch,659,13768
+rmatch,950,13499
+rmatch,1872,13424
