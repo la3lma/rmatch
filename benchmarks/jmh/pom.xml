@@ -29,6 +29,7 @@
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-generator-annprocess</artifactId>
       <version>${jmh.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>no.rmz</groupId>
@@ -47,8 +48,11 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.12.1</version>
         <configuration>
+          <source>21</source>
+          <target>21</target>
           <compilerArgs>
             <arg>-Xlint:all</arg>
+            <arg>-proc:full</arg>
           </compilerArgs>
           <annotationProcessorPaths>
             <path>
@@ -57,7 +61,34 @@
               <version>${jmh.version}</version>
             </path>
           </annotationProcessorPaths>
+          <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
         </configuration>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.build.directory}/generated-sources/annotations</directory>
+                  <includes>
+                    <include>META-INF/**</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       
       <plugin>
