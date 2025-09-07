@@ -96,7 +96,7 @@ public final class GitHubActionPerformanceTest {
 
     LOG.info("Starting performance comparison with " + numRuns + " runs");
     LOG.info("Corpus: " + corpusPath + ", Regexps: " + regexpPath + ", Max regexps: " + maxRegexps);
-    
+
     int availableCores = MatcherFactory.getAvailableProcessors();
     int rmatchThreads = MatcherFactory.getDefaultPartitionCount();
     LOG.info("System cores: " + availableCores + ", rmatch threads: " + rmatchThreads);

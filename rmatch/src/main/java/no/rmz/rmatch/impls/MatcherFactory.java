@@ -53,8 +53,8 @@ public class MatcherFactory {
   }
 
   /**
-   * Get the number of cores/threads that the default matcher would use.
-   * This is useful for performance reporting and debugging.
+   * Get the number of cores/threads that the default matcher would use. This is useful for
+   * performance reporting and debugging.
    *
    * @return the number of partitions/threads used by the default matcher
    */
