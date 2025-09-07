@@ -1,0 +1,94 @@
+# .github/workflows/performance-check.yml
+name: Performance Check
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, master]
+
+jobs:
+  performance-check:
+    runs-on: ubuntu-latest  # Use GitHub runners for consistency
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed for baseline comparison
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+      
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+      
+      - name: Prepare runner (pin CPU governor)
+        if: runner.os == 'Linux'
+        run: |
+          # Try to set performance governor, but don't fail if not possible
+          sudo bash -c 'for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > $c; done' || echo "Could not set CPU governor (expected on GitHub runners)"
+      
+      - name: Build and install project
+        run: ./mvnw -q -B -DskipTests clean install
+      
+      - name: Run performance comparison
+        id: perf-test
+        run: |
+          echo "Running performance comparison with multiple iterations..."
+          
+          # Create baseline directory
+          mkdir -p benchmarks/baseline
+          
+          # Run the performance test with our new GitHubActionPerformanceTest
+          MAX_REGEXPS=1000  # Limit for CI performance
+          NUM_RUNS=3       # Minimum for statistical significance
+          
+          ./mvnw -q -B -pl rmatch-tester exec:java \
+            -Dexec.mainClass=no.rmz.rmatch.performancetests.GitHubActionPerformanceTestRunner \
+            -Dexec.args="${MAX_REGEXPS} ${NUM_RUNS}" \
+            || exit 1
+      
+      - name: Generate performance charts
+        run: |
+          # Install Python dependencies for chart generation
+          python3 -m pip install --user -r requirements.txt
+          
+          # Generate performance evolution charts
+          python3 scripts/generate_performance_charts.py
+      
+      - name: Compare and comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Enhanced compare and comment script with pass/fail logic
+          ./scripts/compare_and_comment.sh
+          exit_code=$?
+          
+          # Set job status based on performance criteria
+          if [ $exit_code -eq 0 ]; then
+            echo "Performance check PASSED"
+          elif [ $exit_code -eq 1 ]; then
+            echo "Performance check FAILED - regression detected"
+            exit 1
+          elif [ $exit_code -eq 2 ]; then
+            echo "Performance check WARNING - within noise threshold"
+          else
+            echo "Performance check encountered error"
+            exit 1
+          fi
+      
+      - name: Upload performance artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-results
+          path: |
+            benchmarks/results/*.json
+            benchmarks/results/*.log
+            benchmarks/results/*.md
+            charts/*.png
+          retention-days: 30
