@@ -47,10 +47,9 @@
         <mavenDependencyPlugin.version>3.6.0</mavenDependencyPlugin.version>
         <mavenFindbugsPlugin.version>3.0.5</mavenFindbugsPlugin.version>
         <mavenJarPlugin.version>3.3.0</mavenJarPlugin.version>
-        <mavenReleasePlugin.version>3.0.1</mavenReleasePlugin.version>
+        <mavenReleasePlugin.version>3.1.1</mavenReleasePlugin.version>
         <mavenSourcePlugin.version>3.3.1</mavenSourcePlugin.version>
         <mavenSurefire.version>3.5.3</mavenSurefire.version>
-        <mavenSurefire.version>3.2.3</mavenSurefire.version>
         <mockitoCore.version>5.8.0</mockitoCore.version>
         <mockitoJunitJupiter.version>5.13.4</mockitoJunitJupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
