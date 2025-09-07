@@ -59,7 +59,8 @@ public final class DFANodeImpl implements DFANode {
   private final Map<Regexp, Boolean> baseIsFinalCache = new ConcurrentHashMap<>();
 
   /** Cache for first-character filtering to optimize O(l*m) bottleneck. */
-  private final ConcurrentHashMap<Character, Set<Regexp>> firstCharRegexpCache = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Character, Set<Regexp>> firstCharRegexpCache =
+      new ConcurrentHashMap<>();
 
   private final List<NDFANode> basisList;
 
@@ -148,13 +149,13 @@ public final class DFANodeImpl implements DFANode {
   @Override
   public Set<Regexp> getRegexpsThatCanStartWith(final Character ch) {
     checkNotNull(ch, "Character cannot be null");
-    
+
     // Return cached result if available
     Set<Regexp> cachedResult = firstCharRegexpCache.get(ch);
     if (cachedResult != null) {
       return cachedResult;
     }
-    
+
     // Compute filtered regexps
     Set<Regexp> filteredRegexps = new HashSet<>();
     for (final Regexp r : regexps) {
@@ -162,7 +163,7 @@ public final class DFANodeImpl implements DFANode {
         filteredRegexps.add(r);
       }
     }
-    
+
     // Cache and return the result
     Set<Regexp> unmodifiableResult = Collections.unmodifiableSet(filteredRegexps);
     firstCharRegexpCache.put(ch, unmodifiableResult);

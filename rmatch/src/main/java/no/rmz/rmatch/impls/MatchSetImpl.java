@@ -108,10 +108,11 @@ public final class MatchSetImpl implements MatchSet {
    *
    * @param startIndex The start position in the input.
    * @param newCurrentNode The deterministic start node to start with.
-   * @param currentChar The current character being processed (for optimization).
-   *                   If null, all regexps will be considered.
+   * @param currentChar The current character being processed (for optimization). If null, all
+   *     regexps will be considered.
    */
-  public MatchSetImpl(final int startIndex, final DFANode newCurrentNode, final Character currentChar) {
+  public MatchSetImpl(
+      final int startIndex, final DFANode newCurrentNode, final Character currentChar) {
     this.matches = ConcurrentHashMap.newKeySet();
     checkNotNull(newCurrentNode, "newCurrentNode can't be null");
     checkArgument(startIndex >= 0, "Start index can't be negative");

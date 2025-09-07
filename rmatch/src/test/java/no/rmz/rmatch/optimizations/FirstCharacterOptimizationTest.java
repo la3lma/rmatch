@@ -15,6 +15,7 @@ package no.rmz.rmatch.optimizations;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.HashSet;
 import java.util.Set;
 import no.rmz.rmatch.compiler.ARegexpCompiler;
 import no.rmz.rmatch.impls.DFANodeImpl;
@@ -24,7 +25,6 @@ import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 import org.junit.jupiter.api.Test;
-import java.util.HashSet;
 
 /** Test the first-character optimization for fixing O(l*m) complexity. */
 public class FirstCharacterOptimizationTest {
@@ -71,10 +71,10 @@ public class FirstCharacterOptimizationTest {
 
     // First call should compute and cache
     assertTrue(regexp.canStartWith('t'));
-    
+
     // Second call should use cache (testing the same result)
     assertTrue(regexp.canStartWith('t'));
-    
+
     // Different character
     assertFalse(regexp.canStartWith('x'));
     assertFalse(regexp.canStartWith('x')); // Should use cached result
@@ -96,7 +96,7 @@ public class FirstCharacterOptimizationTest {
     ndfaNodes.add(regexpA.getMyNode());
     ndfaNodes.add(regexpB.getMyNode());
     ndfaNodes.add(regexpC.getMyNode());
-    
+
     final DFANode dfaNode = new DFANodeImpl(ndfaNodes);
 
     // Test that filtering works correctly
@@ -132,29 +132,31 @@ public class FirstCharacterOptimizationTest {
     ndfaNodes.add(regexpA.getMyNode());
     ndfaNodes.add(regexpB.getMyNode());
     ndfaNodes.add(regexpC.getMyNode());
-    
+
     final DFANode dfaNode = new DFANodeImpl(ndfaNodes);
 
     // Create MatchSetImpl with character 'a' - should only create matches for regexpA
     final MatchSetImpl matchSetWithA = new MatchSetImpl(0, dfaNode, 'a');
-    assertEquals(1, matchSetWithA.getMatches().size(), 
-        "Should create only 1 match for character 'a'");
+    assertEquals(
+        1, matchSetWithA.getMatches().size(), "Should create only 1 match for character 'a'");
 
     // Create MatchSetImpl with character 'b' - should only create matches for regexpB
     final MatchSetImpl matchSetWithB = new MatchSetImpl(0, dfaNode, 'b');
-    assertEquals(1, matchSetWithB.getMatches().size(), 
-        "Should create only 1 match for character 'b'");
+    assertEquals(
+        1, matchSetWithB.getMatches().size(), "Should create only 1 match for character 'b'");
 
     // Create MatchSetImpl without character optimization - should create matches for all regexps
     final MatchSetImpl matchSetWithoutOptim = new MatchSetImpl(0, dfaNode);
-    assertEquals(3, matchSetWithoutOptim.getMatches().size(), 
+    assertEquals(
+        3,
+        matchSetWithoutOptim.getMatches().size(),
         "Should create 3 matches without optimization");
   }
 
   /** Helper method to compile a regexp using ARegexpCompiler directly. */
   private void compileRegexp(final Regexp regexp) throws Exception {
     final ARegexpCompiler compiler = new ARegexpCompiler(regexp);
-    
+
     // Parse the regexp string character by character
     final String regexpString = regexp.getRexpString();
     for (int i = 0; i < regexpString.length(); i++) {
@@ -165,7 +167,7 @@ public class FirstCharacterOptimizationTest {
         compiler.addString(String.valueOf(ch));
       }
     }
-    
+
     final NDFANode compiledNode = compiler.getResult();
     regexp.setMyNDFANode(compiledNode);
   }

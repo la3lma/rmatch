@@ -190,9 +190,8 @@ public interface Regexp extends Comparable<Regexp> {
   boolean hasMatch(final Match m);
 
   /**
-   * Check if this regexp can start with the given character.
-   * This method considers both direct character matches and epsilon transitions
-   * from the start node.
+   * Check if this regexp can start with the given character. This method considers both direct
+   * character matches and epsilon transitions from the start node.
    *
    * @param ch the character to check
    * @return true if the regexp can start with the given character
