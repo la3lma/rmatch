@@ -481,8 +481,8 @@ def format_time_axis(ax):
 def format_recent_time_axis(ax):
     """Format time axis for recent performance data with date and time information."""
     # For recent performance data, show date and time for better granularity
-    # Use a more detailed format that includes both date and time
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:%M'))
+    # Use a more detailed format that includes year, date and time for clarity
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M'))
     ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_minor_locator(mdates.AutoDateLocator(interval_multiples=False))
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)

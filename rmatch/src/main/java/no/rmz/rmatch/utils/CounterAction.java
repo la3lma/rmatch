@@ -38,7 +38,7 @@ public final class CounterAction implements Action {
 
         // Collecting a report from the known counters
         final StringBuilder sb = new StringBuilder();
-        for (final Counter c : Counters.getCounters()) {
+        for (final Counter c : FastCounters.getCounters()) {
           sb.append("  ").append(c.toString()).append(", ");
         }
 
