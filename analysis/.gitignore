@@ -1,0 +1,28 @@
+# Java Maven files
+java-maven-files.tgz
+
+# LaTeX generated files
+analysis.aux
+analysis.bbl
+analysis.blg
+analysis.fdb_latexmk
+analysis.fls
+analysis.log
+analysis.out
+analysis.synctex.gz
+analysis.toc
+analysis.pdf
+
+# Generated illustrations
+illustrations/*.png
+
+# General LaTeX auxiliary files
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
