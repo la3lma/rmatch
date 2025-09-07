@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -170,7 +171,7 @@ public final class MatcherBenchmarker {
   public static void writeSummaryToFile(String filePath, TestPairSummary summary) {
     final File csvOutputFile = new File(filePath);
     final boolean writeHeader = !csvOutputFile.exists();
-    try (FileWriter fw = new FileWriter(csvOutputFile, !writeHeader)) {
+    try (FileWriter fw = new FileWriter(csvOutputFile, StandardCharsets.UTF_8, !writeHeader)) {
       PrintWriter pw = new PrintWriter(fw);
       if (writeHeader) {
         pw.println(

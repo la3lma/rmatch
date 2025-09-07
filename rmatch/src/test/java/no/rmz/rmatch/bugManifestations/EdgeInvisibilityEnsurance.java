@@ -18,8 +18,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import no.rmz.rmatch.compiler.RegexpParserException;
@@ -99,9 +100,13 @@ public class EdgeInvisibilityEnsurance {
     try {
       GraphDumper.dump(
           mi.getNodeStorage(),
-          new PrintStream(new File(String.format("graphs/ladenPostRunningNdfa-%d.gv", index))),
-          new PrintStream(new File(String.format("graphs/ladenPostRunningDfa-%d.gv", index))));
-    } catch (FileNotFoundException e) {
+          new PrintStream(
+              new File(String.format("graphs/ladenPostRunningNdfa-%d.gv", index)),
+              StandardCharsets.UTF_8),
+          new PrintStream(
+              new File(String.format("graphs/ladenPostRunningDfa-%d.gv", index)),
+              StandardCharsets.UTF_8));
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }

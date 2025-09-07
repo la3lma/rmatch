@@ -16,8 +16,9 @@ package no.rmz.rmatch.performancetests.utils;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -201,9 +202,9 @@ public final class GraphDumper {
     final PrintStream psForNdfa;
     final PrintStream psForDfa;
     try {
-      psForNdfa = new PrintStream(dumpFileForNdfa);
-      psForDfa = new PrintStream(dumpFileForDfa);
-    } catch (FileNotFoundException ex) {
+      psForNdfa = new PrintStream(dumpFileForNdfa, StandardCharsets.UTF_8);
+      psForDfa = new PrintStream(dumpFileForDfa, StandardCharsets.UTF_8);
+    } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
 

@@ -1,6 +1,7 @@
 package no.rmz.rmatch.performancetests;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.Instant;
 import java.util.*;
@@ -268,7 +269,8 @@ public final class BaselineManager {
       Process process = new ProcessBuilder(fullCommand).redirectErrorStream(true).start();
 
       try (BufferedReader reader =
-          new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+          new BufferedReader(
+              new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
         String result = reader.readLine();
         return result != null ? result.trim() : "unknown";
       }

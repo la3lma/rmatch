@@ -12,3 +12,4 @@ measurements.sqlite
 # Performance test artifacts (usually generated during CI)
 benchmarks/results/performance-check-*.json
 benchmarks/results/pr-performance-summary.md
+**/target/

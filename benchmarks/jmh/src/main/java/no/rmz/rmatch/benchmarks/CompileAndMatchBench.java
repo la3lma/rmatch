@@ -1,67 +1,87 @@
 package no.rmz.rmatch.benchmarks;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
-import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.utils.StringBuffer;
-import org.openjdk.jmh.annotations.*;
+import no.rmz.rmatch.utils.CounterAction;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.infra.Blackhole;
 
+/** JMH benchmark for rmatch compilation and matching performance. */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
-@State(Scope.Thread)
+@State(Scope.Benchmark)
+@Fork(
+    value = 1,
+    jvmArgs = {"-Xms1G", "-Xmx1G"})
+@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 public class CompileAndMatchBench {
 
-  @Param({"10"}) // TODO: For now, just to make it run fast ,"100","1000"})
+  @Param({"1", "10", "100", "1000"})
   public int patternCount;
 
-  private List<String> patterns;
-  private String haystack;
+  private String[] patterns;
+  private String testInput;
 
   @Setup
   public void setup() {
-    patterns = IntStream.range(0, patternCount).mapToObj(i -> "a.*b" + i).toList();
-    haystack = "aaa bbb ccc a---b999 end";
+    // Generate test patterns
+    patterns = new String[patternCount];
+    for (int i = 0; i < patternCount; i++) {
+      patterns[i] = "pattern" + i + ".*";
+    }
+
+    // Create test input that will match some patterns
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < 100; i++) {
+      sb.append("pattern").append(i % patternCount).append("_test_data_");
+    }
+    testInput = sb.toString();
   }
 
   @Benchmark
-  public Matcher buildMatcher() {
-    Matcher matcher = MatcherFactory.newMatcher();
-    for (String regex : patterns) {
-      // TODO: replace with your actual API for adding patterns
-      // m.addPattern(p.getBytes(StandardCharsets.UTF_8));
-
-      final Action action =
-          new Action() {
-            @Override
-            public void performMatch(Buffer b, int start, int end) {
-              System.out.print("Match");
-            }
-          };
-      try {
-        matcher.add(regex, action);
-      } catch (RegexpParserException e) {
-        System.err.println("Could not add action for regex " + regex);
-        System.exit(1);
+  public void buildMatcher(Blackhole bh) {
+    try {
+      Matcher matcher = MatcherFactory.newMatcher();
+      CounterAction action = new CounterAction();
+      for (String pattern : patterns) {
+        matcher.add(pattern, action);
       }
+      bh.consume(matcher);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
-
-    return matcher;
   }
 
   @Benchmark
-  public void matchOnce() {
-    Matcher m = MatcherFactory.newMatcher();
-    for (String p : patterns) {
-      // m.addPattern(p.getBytes(StandardCharsets.UTF_8));
+  public void matchOnce(Blackhole bh) {
+    try {
+      Matcher matcher = MatcherFactory.newMatcher();
+      CounterAction action = new CounterAction();
+      for (String pattern : patterns) {
+        matcher.add(pattern, action);
+      }
+
+      // Convert string to buffer-like interface that rmatch expects
+      no.rmz.rmatch.utils.StringBuffer buffer = new no.rmz.rmatch.utils.StringBuffer(testInput);
+
+      matcher.match(buffer);
+      bh.consume(buffer);
+
+      matcher.shutdown();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
-    // TODO: replace with your actual match method returning a count or status
-    haystack = "banana";
-    Buffer buf = new StringBuffer(haystack);
-    m.match(buf);
   }
 }

@@ -130,7 +130,11 @@ public final class PerformanceCriteriaEvaluator {
 
     if (baselineResults.isEmpty()) {
       return new PerformanceResult(
-          0, 0, Status.WARNING, "No baseline data available for comparison", false);
+          0,
+          0,
+          Status.PASS,
+          "No baseline data available - this run establishes the initial baseline",
+          false);
     }
 
     // Calculate statistics for current and baseline runs

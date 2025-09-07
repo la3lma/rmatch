@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.exit;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,8 @@ public final class FileInhaler {
       final FileInputStream fstream = getFileInputStream();
       // Get the object of DataInputStream
       final DataInputStream in = new DataInputStream(fstream);
-      final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+      final BufferedReader br =
+          new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
       final StringBuilder sbuilder = new StringBuilder();
       try {
         String strLine;
@@ -110,7 +112,8 @@ public final class FileInhaler {
       final FileInputStream fstream = getFileInputStream();
       // Get the object of DataInputStream
       final DataInputStream in = new DataInputStream(fstream);
-      final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+      final BufferedReader br =
+          new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
       try {
         String strLine;
         // Read File Line By Line
