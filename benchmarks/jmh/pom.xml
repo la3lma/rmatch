@@ -29,7 +29,6 @@
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-generator-annprocess</artifactId>
       <version>${jmh.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>no.rmz</groupId>
@@ -43,6 +42,24 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.12.1</version>
+        <configuration>
+          <compilerArgs>
+            <arg>-Xlint:all</arg>
+          </compilerArgs>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.openjdk.jmh</groupId>
+              <artifactId>jmh-generator-annprocess</artifactId>
+              <version>${jmh.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -60,6 +77,9 @@
                   <mainClass>org.openjdk.jmh.Main</mainClass>
                 </transformer>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>META-INF/BenchmarkList</resource>
+                </transformer>
               </transformers>
               <filters>
                 <filter>
