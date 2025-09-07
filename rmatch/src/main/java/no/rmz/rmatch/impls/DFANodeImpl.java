@@ -19,8 +19,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.utils.Counter;
-import no.rmz.rmatch.utils.Counters;
+import no.rmz.rmatch.utils.CounterType;
+import no.rmz.rmatch.utils.FastCounter;
+import no.rmz.rmatch.utils.FastCounters;
 
 /** An implementation of deterministic finite automata nodes DFA. */
 public final class DFANodeImpl implements DFANode {
@@ -29,10 +30,11 @@ public final class DFANodeImpl implements DFANode {
    * Counter used to figure out both how many DFA nodes are allocated, and to generate unique IDs
    * for the nodes (put in the "id" variable).
    */
-  private static final Counter COUNTER = Counters.newCounter("DFANodeImpl");
+  private static final FastCounter COUNTER = FastCounters.newCounter(CounterType.DFA_NODE_IMPL);
 
   /** A counter for known edges going to other DFAs. */
-  private static final Counter KNOWN_DFA_EDGES_COUNTER = Counters.newCounter("Known DFA Edges");
+  private static final FastCounter KNOWN_DFA_EDGES_COUNTER =
+      FastCounters.newCounter(CounterType.KNOWN_DFA_EDGES);
 
   /** The set of regular expression this node represents. */
   private final Set<Regexp> regexps = new HashSet<>();

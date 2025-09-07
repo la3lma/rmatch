@@ -18,8 +18,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.MatchSet;
 import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.utils.Counter;
-import no.rmz.rmatch.utils.Counters;
+import no.rmz.rmatch.utils.CounterType;
+import no.rmz.rmatch.utils.FastCounter;
+import no.rmz.rmatch.utils.FastCounters;
 
 /** A representation of a match implementing the Match interface. */
 public final class MatchImpl implements Match {
@@ -27,7 +28,7 @@ public final class MatchImpl implements Match {
    * A counter that is increased every time a new MatchImpl is generated. Used for logging and
    * benchmarking.
    */
-  private static final Counter counter = Counters.newCounter("MatchImpl");
+  private static final FastCounter counter = FastCounters.newCounter(CounterType.MATCH_IMPL);
 
   /**
    * True iff the match is final, in the sense that its current state represents a legal termination

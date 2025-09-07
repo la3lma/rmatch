@@ -103,9 +103,9 @@ This generates files in `benchmarks/results/performance-check-*.json` format.
 Performance charts use different time axis formats depending on the data type:
 
 - **Historical Charts (CSV data)**: Display year-month format (e.g., "2023-05") suitable for long-term trends
-- **Recent Performance Charts (JSON data)**: Display month-day hour:minute format (e.g., "01-24 15:30") providing precise timing for recent test results
+- **Recent Performance Charts (JSON data)**: Display year-month-day hour:minute format (e.g., "2025-01-24 15:30") providing precise timing with full date context for recent test results
 
-This dual formatting approach ensures historical data remains readable across long time periods while recent performance data shows the precise timing needed to correlate performance changes with specific test runs.
+This dual formatting approach ensures historical data remains readable across long time periods while recent performance data shows the precise timing with full year context needed to correlate performance changes with specific test runs.
 
 ### Status Colors in Recent Performance Charts
 - 🟢 **Green**: PASS - Performance meets criteria
