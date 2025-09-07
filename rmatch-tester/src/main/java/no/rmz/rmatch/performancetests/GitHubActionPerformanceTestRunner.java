@@ -40,11 +40,13 @@ public final class GitHubActionPerformanceTestRunner {
       // Generate summary for PR comment
       generatePRSummary(result);
 
-      // Update baseline if this is a merge to main (detected via environment) OR if no baseline exists (bootstrap)
+      // Update baseline if this is a merge to main (detected via environment) OR if no baseline
+      // exists (bootstrap)
       String gitRef = System.getenv("GITHUB_REF");
-      boolean isMainBranch = gitRef != null && (gitRef.endsWith("/main") || gitRef.endsWith("/master"));
+      boolean isMainBranch =
+          gitRef != null && (gitRef.endsWith("/main") || gitRef.endsWith("/master"));
       boolean isBootstrapCase = baselineResults.isEmpty();
-      
+
       if (isMainBranch || isBootstrapCase) {
         if (isBootstrapCase) {
           LOG.info("No baseline exists - establishing initial baseline from current results");
