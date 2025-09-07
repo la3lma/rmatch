@@ -167,7 +167,8 @@ public final class MatchEngineImpl implements MatchEngine {
     boolean shouldStartMatch = true;
 
     // Use prefilter to decide whether to start matches at this position
-    if (prefilterEnabled && candidatePositions != null) {
+    // Only check prefilter if it's enabled and configured
+    if (prefilterEnabled && prefilter != null && candidatePositions != null) {
       shouldStartMatch = candidatePositions.contains(currentPos);
     }
 
@@ -212,16 +213,16 @@ public final class MatchEngineImpl implements MatchEngine {
     final Set<MatchSet> activeMatchSets;
     activeMatchSets = Collections.synchronizedSet(new TreeSet<>(MatchSet.COMPARE_BY_ID));
 
-    // If prefiltering is enabled, we need to collect the input first
-    final String fullText = prefilterEnabled ? collectBufferText(b) : null;
-    if (prefilterEnabled && prefilter != null && fullText != null) {
-      runPrefilterScan(fullText);
-    }
-
-    // Reset buffer position to start
-    // NOTE: This assumes we can reset the buffer position, which works with StringBuffer
-    if (fullText != null && b instanceof no.rmz.rmatch.utils.StringBuffer) {
-      ((no.rmz.rmatch.utils.StringBuffer) b).setCurrentPos(-1);
+    // Only do prefiltering work if actually enabled and configured
+    if (prefilterEnabled && prefilter != null) {
+      final String fullText = collectBufferText(b);
+      if (fullText != null) {
+        runPrefilterScan(fullText);
+        // Reset buffer position to start
+        if (b instanceof no.rmz.rmatch.utils.StringBuffer) {
+          ((no.rmz.rmatch.utils.StringBuffer) b).setCurrentPos(-1);
+        }
+      }
     }
 
     // Advance all match sets forward one character.
@@ -242,9 +243,8 @@ public final class MatchEngineImpl implements MatchEngine {
 
   /** Collects the full text from the buffer for prefilter scanning. */
   private String collectBufferText(final Buffer b) {
-    if (!prefilterEnabled || prefilter == null) {
-      return null;
-    }
+    // This method should only be called when prefilter is actually configured
+    assert prefilterEnabled && prefilter != null;
 
     final StringBuilder sb = new StringBuilder();
     while (b.hasNext()) {
