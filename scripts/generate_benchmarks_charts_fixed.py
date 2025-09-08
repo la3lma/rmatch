@@ -41,8 +41,8 @@ def load_jmh_data(results_dir="benchmarks/results"):
             with open(jmh_file, 'r') as f:
                 data = json.load(f)
             
-            # Extract timestamp from filename (format: jmh-20250907T121845Z.json or jmh-20250907T121845Z-sample.json)
-            timestamp_str = jmh_file.stem.replace('jmh-', '').replace('-sample', '')
+            # Extract timestamp from filename (format: jmh-20250907T121845Z.json)
+            timestamp_str = jmh_file.stem.replace('jmh-', '')
             timestamp = datetime.strptime(timestamp_str, '%Y%m%dT%H%M%SZ')
             
             # Process each benchmark result
@@ -102,7 +102,7 @@ def load_macro_data(results_dir="benchmarks/results"):
                 data = json.loads(content)
             
             # Extract timestamp from filename
-            timestamp_str = macro_file.stem.replace('macro-', '').replace('-sample', '')
+            timestamp_str = macro_file.stem.replace('macro-', '')
             timestamp = datetime.strptime(timestamp_str, '%Y%m%dT%H%M%SZ')
             
             macro_record = {
