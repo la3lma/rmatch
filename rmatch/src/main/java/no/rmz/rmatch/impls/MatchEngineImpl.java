@@ -273,12 +273,12 @@ public final class MatchEngineImpl implements MatchEngine {
     // Convert to set of candidate positions and map positions to regexps
     candidatePositions = new HashSet<>();
     positionToRegexps = new HashMap<>();
-    
+
     for (final AhoCorasickPrefilter.Candidate candidate : candidates) {
       final int startPos = candidate.startIndexForMatch();
       if (startPos >= 0) {
         candidatePositions.add(startPos);
-        
+
         // Store pattern ID for this position for future regexp lookup
         // Note: We'll need to map pattern IDs to regexps when this information is used
         positionToRegexps.computeIfAbsent(startPos, k -> new HashSet<>()).add(null); // placeholder

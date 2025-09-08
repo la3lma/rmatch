@@ -144,11 +144,10 @@ public final class MatchSetImpl implements MatchSet {
       this.matches = ConcurrentHashMap.newKeySet(0);
       return;
     }
-    
+
     // OPTIMIZATION: For very small regexp sets, use ArrayList for better performance
     final int regexpCount = candidateRegexps.size();
     final boolean useSmallOptimization = regexpCount <= 50;
-
 
     // Use ConcurrentHashMap.newKeySet for thread-safe access
     this.matches = ConcurrentHashMap.newKeySet(candidateRegexps.size());
