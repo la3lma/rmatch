@@ -27,9 +27,6 @@ public final class Counter {
   /** Name of the counter. Lives in a global address space so all counter names has to be unique. */
   private final String name;
 
-  /** A monitor used to regulate access to the counter. */
-  private final Object monitor = new Object();
-
   private final AtomicInteger atomicInt = new AtomicInteger(0);
 
   /**
@@ -73,8 +70,6 @@ public final class Counter {
 
   @Override
   public String toString() {
-    synchronized (monitor) {
-      return "#'" + name + "'=" + atomicInt;
-    }
+    return "#'" + name + "'=" + atomicInt;
   }
 }
