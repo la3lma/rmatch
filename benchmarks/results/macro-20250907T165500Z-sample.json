@@ -1,0 +1,19 @@
+{
+  "type": "macro",
+  "timestamp": "20250907T165500Z",
+  "git": {
+    "sha": "sample123",
+    "branch": "main"
+  },
+  "java_version": "openjdk-21.0.2",
+  "os": {
+    "name": "Linux",
+    "release": "6.8.0"
+  },
+  "args": {
+    "max_regexps": 5000
+  },
+  "duration_ms": 15417,
+  "exit_status": 0,
+  "log": "benchmarks/results/macro-20250907T165500Z-sample.log"
+}
