@@ -87,10 +87,15 @@ Despite implementing major optimizations, performance gains are "only a few perc
 ### Phase 1 Remaining Items (Expected 2-4x improvement)
 
 **1.2 Data Structure Optimization** (NOT YET IMPLEMENTED)
-- Replace `SortedSet<NDFANode>` with primitive `int[]` arrays
-- Replace `ConcurrentHashMap` with lock-free alternatives  
-- Implement Match object pooling
-- Remove synchronized counter system overhead
+- ⚠️ **Replace `ConcurrentHashMap` with lock-free alternatives** - Current use creates lock contention
+- ⚠️ **Replace `SortedSet<NDFANode>` with primitive `int[]` arrays** - 80-90% memory reduction possible
+- ⚠️ **Implement object pooling** for `Match`, `MatchSet`, and intermediate collection objects - reduce GC pressure by 60-80%
+- ⚠️ **Replace string-based counters with primitive arrays** - eliminate string hashing overhead
+
+**1.3 Synchronization Overhead Elimination** (NOT YET IMPLEMENTED)  
+- ⚠️ **Remove `Collections.synchronizedSet()` usage** throughout codebase
+- ⚠️ **Eliminate manual synchronization blocks** that create lock contention
+- ⚠️ **Use atomic operations** and compare-and-swap techniques for thread safety
 
 ### Phase 2: Algorithmic Enhancements (Expected 2-3x improvement)
 
@@ -264,3 +269,32 @@ The focus should be on **enabling existing optimizations** before implementing n
 The rmatch library has enormous potential for performance improvement through systematic optimization. The identified O(m×l) bottleneck has been addressed, and Aho-Corasick prefiltering is implemented but disabled. The immediate opportunity is to enable these optimizations properly, which could achieve 15-25x total improvement, making rmatch significantly faster than Java's standard regex engine.
 
 **Key insight:** The bottleneck is not missing implementations but rather configuration and integration issues preventing the realization of implemented optimizations.
+
+## NEW OPTIMIZATION TARGETS - Summary
+
+Based on this comprehensive analysis, the updated priority optimization targets are:
+
+### 🚨 IMMEDIATE (Expected 10-50x improvement)
+1. **Enable Aho-Corasick prefilter by default** for patterns with extractable literals
+2. **Automatic pattern analysis** to determine optimal matching strategy per pattern
+3. **Fix prefilter integration issues** - investigate why current activation shows minimal gains
+
+### HIGH PRIORITY (Expected 2-5x improvement) 
+1. **Lock-free data structures** - Replace `ConcurrentHashMap`, `Collections.synchronizedSet()`
+2. **Object pooling** - Pool `Match`, `MatchSet`, and intermediate collection objects
+3. **Memory layout optimization** - Replace `SortedSet<NDFANode>` with `int[]` arrays
+4. **Eliminate synchronization overhead** - Remove manual synchronization blocks
+
+### INVESTIGATION NEEDED (TBD improvement)
+1. **Deep profiling** with async-profiler to identify true current bottlenecks
+2. **Pattern-specific benchmarking** to understand where optimizations are effective
+3. **Why first-character optimization doesn't show expected 3-5x gains**
+4. **Alternative algorithmic approaches** for patterns that don't benefit from current optimizations
+
+### FUTURE WORK (Expected 2-4x improvement)
+1. **Bit-parallel NFA simulation** for simple patterns
+2. **SIMD vectorization** using Java Vector API
+3. **Advanced state management** - DFA minimization, compressed states
+4. **CPU cache optimization** and memory access pattern improvements
+
+The critical insight is that **configuration and integration issues** are preventing realization of already-implemented optimizations, making this a higher priority than implementing new algorithmic approaches.
