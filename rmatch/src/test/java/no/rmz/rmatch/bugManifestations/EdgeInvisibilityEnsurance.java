@@ -54,7 +54,8 @@ public class EdgeInvisibilityEnsurance {
   public final void minimalReplicatingTest() throws RegexpParserException {
 
     // Prepare
-    final String origString = """
+    final String origString =
+        """
                 ll
                 laden""";
 
