@@ -9,6 +9,7 @@ PLANTUML_DIR := plantuml
 PYTHON_DIR := python
 ILLUSTRATIONS_DIR := illustrations
 BUILD_DIR := build
+VENV_DIR := .venv
 
 # Files
 TEX_FILE := proposal.tex
@@ -32,6 +33,8 @@ PLANTUML_URL := https://github.com/plantuml/plantuml/releases/download/v1.2023.1
 PDFLATEX := pdflatex
 BIBTEX := bibtex
 PYTHON := python3
+VENV_PYTHON := $(VENV_DIR)/bin/python
+VENV_PIP := $(VENV_DIR)/bin/pip
 
 # Default target
 .PHONY: all
@@ -47,6 +50,29 @@ $(PDF_FILE): $(TEX_FILE) $(BIB_FILE) $(PLANTUML_PNGS) $(PYTHON_CHARTS)
 	$(PDFLATEX) -output-directory=$(BUILD_DIR) $(TEX_FILE)
 	@cp $(BUILD_DIR)/$(PDF_FILE) .
 	@echo "✓ PDF generated: $(PDF_FILE)"
+
+# Virtual environment management
+$(VENV_DIR):
+	@echo "Creating Python virtual environment..."
+	@$(PYTHON) -m venv $(VENV_DIR)
+	@echo "✓ Virtual environment created in $(VENV_DIR)"
+
+# Install Python dependencies in virtual environment
+$(VENV_DIR)/installed: $(VENV_DIR) requirements.txt
+	@echo "Installing Python dependencies..."
+	@$(VENV_PIP) install --upgrade pip
+	@$(VENV_PIP) install -r requirements.txt
+	@touch $(VENV_DIR)/installed
+	@echo "✓ Python dependencies installed"
+
+.PHONY: venv
+venv: $(VENV_DIR)/installed
+
+.PHONY: venv-clean
+venv-clean:
+	@echo "Removing virtual environment..."
+	@rm -rf $(VENV_DIR)
+	@echo "✓ Virtual environment removed"
 
 # Create illustrations directory
 $(ILLUSTRATIONS_DIR):
@@ -68,18 +94,18 @@ $(ILLUSTRATIONS_DIR)/%.png: $(PLANTUML_DIR)/%.puml $(PLANTUML_JAR) | $(ILLUSTRAT
 .PHONY: diagrams
 diagrams: $(PLANTUML_PNGS)
 
-# Check if Python dependencies are available
+# Check if Python dependencies are available in virtual environment
 .PHONY: check-python-deps
-check-python-deps:
-	@echo "Checking Python dependencies..."
-	@$(PYTHON) -c "import matplotlib.pyplot; import numpy; import seaborn" 2>/dev/null || \
-		(echo "❌ Missing Python dependencies. Install with: pip install matplotlib numpy seaborn" && exit 1)
-	@echo "✓ Python dependencies available"
+check-python-deps: $(VENV_DIR)/installed
+	@echo "Checking Python dependencies in virtual environment..."
+	@$(VENV_PYTHON) -c "import matplotlib.pyplot; import numpy; import seaborn" 2>/dev/null || \
+		(echo "❌ Missing Python dependencies in virtual environment" && exit 1)
+	@echo "✓ Python dependencies available in virtual environment"
 
 # Generate Python charts
 $(PYTHON_CHARTS): $(PYTHON_SCRIPT) | $(ILLUSTRATIONS_DIR) check-python-deps
 	@echo "Generating performance charts..."
-	@cd $(PYTHON_DIR) && $(PYTHON) generate_charts.py
+	@cd $(PYTHON_DIR) && $(VENV_PYTHON) generate_charts.py
 	@echo "✓ Performance charts generated"
 
 # Generate all Python charts
@@ -100,7 +126,7 @@ clean:
 
 # Clean all generated files including illustrations
 .PHONY: distclean
-distclean: clean
+distclean: clean venv-clean
 	@echo "Cleaning all generated files..."
 	@rm -rf $(ILLUSTRATIONS_DIR)
 	@rm -f $(PLANTUML_JAR)
@@ -112,19 +138,22 @@ help:
 	@echo "DFA State Minimization Proposal Build System"
 	@echo ""
 	@echo "Available targets:"
-	@echo "  all          - Build complete PDF document (default)"
-	@echo "  diagrams     - Generate PlantUML diagrams only"
-	@echo "  charts       - Generate Python performance charts only"
-	@echo "  illustrations- Generate all illustrations (diagrams + charts)"
-	@echo "  clean        - Clean build artifacts (keep illustrations)"
-	@echo "  distclean    - Clean everything including illustrations"
-	@echo "  check-deps   - Check if all required tools are available"
-	@echo "  help         - Show this help message"
+	@echo "  all              - Build complete PDF document (default)"
+	@echo "  diagrams         - Generate PlantUML diagrams only"
+	@echo "  charts           - Generate Python performance charts only"
+	@echo "  illustrations    - Generate all illustrations (diagrams + charts)"
+	@echo "  venv             - Create Python virtual environment and install dependencies"
+	@echo "  venv-clean       - Remove Python virtual environment"
+	@echo "  clean            - Clean build artifacts (keep illustrations and venv)"
+	@echo "  distclean        - Clean everything including illustrations and venv"
+	@echo "  check-deps       - Check if all required tools are available"
+	@echo "  install-python-deps - Install Python dependencies (same as venv)"
+	@echo "  help             - Show this help message"
 	@echo ""
 	@echo "Requirements:"
 	@echo "  - LaTeX distribution (pdflatex, bibtex)"
 	@echo "  - Java (for PlantUML)"
-	@echo "  - Python 3 with matplotlib, numpy, seaborn"
+	@echo "  - Python 3.13+ (virtual environment will be created automatically)"
 	@echo "  - curl (for downloading PlantUML)"
 
 # Check dependencies
@@ -139,12 +168,9 @@ check-deps:
 	@$(MAKE) check-python-deps
 	@echo "✓ All dependencies available"
 
-# Install Python dependencies
+# Install Python dependencies (alias for venv target)
 .PHONY: install-python-deps
-install-python-deps:
-	@echo "Installing Python dependencies..."
-	@$(PYTHON) -m pip install matplotlib numpy seaborn
-	@echo "✓ Python dependencies installed"
+install-python-deps: venv
 
 # Development target - watch for changes and rebuild
 .PHONY: watch
