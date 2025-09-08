@@ -165,7 +165,7 @@ public class CompressedDFAStateTest {
     // Test that we can convert back - don't use TreeSet due to mock compareTo issues
     // Just verify the mapping function works
     assertEquals(node1, mapper.apply(10));
-    assertEquals(node2, mapper.apply(20)); 
+    assertEquals(node2, mapper.apply(20));
     assertEquals(node3, mapper.apply(30));
     assertEquals(node5, mapper.apply(50));
     assertNull(mapper.apply(999));

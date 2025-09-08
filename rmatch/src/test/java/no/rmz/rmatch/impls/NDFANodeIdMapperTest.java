@@ -104,7 +104,7 @@ public class NDFANodeIdMapperTest {
     // Use unique node IDs to ensure they're actually added
     NDFANode uniqueNode1 = mock(NDFANode.class);
     when(uniqueNode1.getId()).thenReturn(900001L);
-    
+
     NDFANode uniqueNode2 = mock(NDFANode.class);
     when(uniqueNode2.getId()).thenReturn(900002L);
 
@@ -139,7 +139,7 @@ public class NDFANodeIdMapperTest {
     // Use unique IDs to avoid conflicts with singleton state
     NDFANode uniqueNode1 = mock(NDFANode.class);
     when(uniqueNode1.getId()).thenReturn(800001L);
-    
+
     NDFANode duplicateNode = mock(NDFANode.class);
     when(duplicateNode.getId()).thenReturn(800001L); // Same ID as uniqueNode1
 
