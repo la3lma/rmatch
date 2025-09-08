@@ -159,8 +159,8 @@ def create_performance_check_chart(df, output_dir):
     # Sort by date
     df = df.sort_values('datetime')
     
-    # Create figure with subplots
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
+    # Create figure with 6 subplots (2x3) to include the requested new panels
+    fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2, 3, figsize=(20, 12))
     fig.suptitle('Performance Check Results Evolution', fontsize=16, fontweight='bold')
     
     # 1. Execution time comparison
@@ -210,7 +210,59 @@ def create_performance_check_chart(df, output_dir):
             ax3.grid(True, alpha=0.3)
             format_recent_time_axis(ax3)
     
-    # 4. Test status over time
+    # 4. NEW: Dedicated Native Java Matcher Performance Panel
+    if 'java_avg_time_ms' in df.columns and 'java_avg_memory_mb' in df.columns:
+        valid_data = df.dropna(subset=['java_avg_time_ms', 'java_avg_memory_mb'])
+        if not valid_data.empty:
+            # Create secondary y-axis for memory
+            ax4_mem = ax4.twinx()
+            
+            # Time on left axis (red theme for Java)
+            line1 = ax4.plot(valid_data['datetime'], valid_data['java_avg_time_ms'], 
+                    'o-', label='Execution Time', linewidth=3, markersize=8, color='#DC143C')
+            ax4.set_ylabel('Execution Time (ms)', color='#DC143C', fontweight='bold')
+            ax4.tick_params(axis='y', labelcolor='#DC143C', labelsize=10)
+            
+            # Memory on right axis (orange theme)  
+            line2 = ax4_mem.plot(valid_data['datetime'], valid_data['java_avg_memory_mb'],
+                    's-', label='Memory Usage', linewidth=3, markersize=8, color='#FF8C00')
+            ax4_mem.set_ylabel('Memory Usage (MB)', color='#FF8C00', fontweight='bold')
+            ax4_mem.tick_params(axis='y', labelcolor='#FF8C00', labelsize=10)
+            
+            ax4.set_title('Native Java Matcher Performance', fontweight='bold', color='#8B0000', fontsize=12)
+            ax4.grid(True, alpha=0.3)
+            format_recent_time_axis(ax4)
+            
+            # Add legend combining both lines
+            lines1, labels1 = ax4.get_legend_handles_labels()
+            lines2, labels2 = ax4_mem.get_legend_handles_labels()
+            ax4.legend(lines1 + lines2, labels1 + labels2, loc='upper left', framealpha=0.9)
+    
+    # 5. NEW: Relative Performance Ratios Panel  
+    if 'rmatch_avg_time_ms' in df.columns and 'java_avg_time_ms' in df.columns and 'rmatch_avg_memory_mb' in df.columns and 'java_avg_memory_mb' in df.columns:
+        valid_data = df.dropna(subset=['rmatch_avg_time_ms', 'java_avg_time_ms', 'rmatch_avg_memory_mb', 'java_avg_memory_mb'])
+        if not valid_data.empty:
+            # Calculate ratios (rmatch / java)
+            time_ratio = valid_data['rmatch_avg_time_ms'] / valid_data['java_avg_time_ms']
+            memory_ratio = valid_data['rmatch_avg_memory_mb'] / valid_data['java_avg_memory_mb']
+            
+            ax5.plot(valid_data['datetime'], time_ratio, 'o-', 
+                    label='Time Ratio (rmatch/java)', linewidth=3, markersize=8, color='#4B0082')
+            ax5.plot(valid_data['datetime'], memory_ratio, 's-', 
+                    label='Memory Ratio (rmatch/java)', linewidth=3, markersize=8, color='#008B8B')
+            ax5.axhline(y=1.0, color='gray', linestyle='--', alpha=0.7, linewidth=2, label='Parity (1.0x)')
+            ax5.set_title('Relative Performance (rmatch vs Java)', fontweight='bold', color='#191970', fontsize=12)
+            ax5.set_ylabel('Ratio (lower is better for rmatch)', fontweight='bold')
+            ax5.legend(framealpha=0.9)
+            ax5.grid(True, alpha=0.3)
+            format_recent_time_axis(ax5)
+            
+            # Add annotations for better understanding with improved styling
+            ax5.text(0.02, 0.98, '< 1.0 = rmatch faster/less memory\n> 1.0 = Java faster/less memory', 
+                    transform=ax5.transAxes, fontsize=9, verticalalignment='top',
+                    bbox=dict(boxstyle='round,pad=0.3', facecolor='lightblue', alpha=0.8, edgecolor='navy'))
+    
+    # 6. Test status over time
     if 'status' in df.columns:
         valid_data = df.dropna(subset=['status'])
         if not valid_data.empty:
@@ -221,13 +273,13 @@ def create_performance_check_chart(df, output_dir):
             # Create scatter plot with colors
             colors = ['red' if s == 'FAIL' else 'orange' if s == 'WARNING' else 'green' 
                      for s in valid_data['status']]
-            ax4.scatter(valid_data['datetime'], status_numeric, c=colors, s=100, alpha=0.7)
-            ax4.set_title('Performance Test Status')
-            ax4.set_ylabel('Status')
-            ax4.set_yticks([-1, 0, 1])
-            ax4.set_yticklabels(['FAIL', 'WARNING', 'PASS'])
-            ax4.grid(True, alpha=0.3)
-            format_recent_time_axis(ax4)
+            ax6.scatter(valid_data['datetime'], status_numeric, c=colors, s=100, alpha=0.7)
+            ax6.set_title('Performance Test Status')
+            ax6.set_ylabel('Status')
+            ax6.set_yticks([-1, 0, 1])
+            ax6.set_yticklabels(['FAIL', 'WARNING', 'PASS'])
+            ax6.grid(True, alpha=0.3)
+            format_recent_time_axis(ax6)
     
     plt.tight_layout()
     
