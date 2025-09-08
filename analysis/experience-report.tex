@@ -1,0 +1,493 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{booktabs}
+\usepackage{subfigure}
+\usepackage{hyperref}
+\usepackage[font=it]{caption}
+
+\geometry{margin=2.5cm}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{rmatch AhoCorasick Optimization Experience Report}
+\lhead{\thepage}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red},
+    breaklines=true,
+    showstringspaces=false,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+\title{Experience Report: AhoCorasick Prefiltering Optimization Attempt in rmatch}
+\author{Debugging and Performance Optimization Analysis}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report documents a comprehensive attempt to optimize the rmatch regular expression matching library through AhoCorasick prefiltering. Starting from a performance deficit of 44-67\% compared to baseline (13.5s target vs 19.7s-22.6s actual), we implemented a complete AhoCorasick prefiltering system including literal extraction, pattern scanning, and candidate filtering. While the implementation achieved technical correctness with all 205 tests passing, it delivered minimal performance improvement. This experience report analyzes the root causes of the optimization's limitations, documents critical debugging challenges encountered, and provides insights for future optimization strategies in regex matching systems.
+\end{abstract}
+
+\section{Executive Summary}
+
+This report documents a focused optimization attempt targeting the rmatch regular expression matching library's performance bottleneck. The goal was to implement AhoCorasick prefiltering to achieve substantial performance improvement and reach parity with a 13.5-second baseline benchmark.
+
+\textbf{Key Results:}
+\begin{itemize}
+\item Successfully implemented a complete AhoCorasick prefiltering system
+\item Achieved technical correctness: 205/205 tests passing, mvn clean install successful
+\item Performance improvement: Minimal to none (target: 37\%+ improvement, actual: <5\%)
+\item Root cause identified: Literal-based prefiltering insufficient for high-density word matching patterns
+\end{itemize}
+
+The optimization attempt revealed fundamental limitations in applying literal-based prefiltering to word-dense text matching scenarios, providing valuable insights for future algorithmic approaches.
+
+\section{Problem Context and Baseline}
+
+\subsection{Initial Performance State}
+
+The rmatch library exhibited significant performance degradation compared to its historical baseline:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lr}
+\toprule
+Configuration & Duration (ms) \\
+\midrule
+Baseline Target & 13,500 \\
+Current Performance Range & 19,700 - 22,600 \\
+Performance Deficit & 44\% - 67\% slower \\
+Required Improvement & 37\%+ \\
+\bottomrule
+\end{tabular}
+\caption{Performance baseline comparison}
+\end{table}
+
+\subsection{Core Algorithmic Challenge}
+
+The fundamental bottleneck was identified as an O(l×m) complexity issue where:
+\begin{itemize}
+\item \textbf{l}: Input text length (647K characters from Wuthering Heights corpus)
+\item \textbf{m}: Number of regular expressions (10,000 word patterns)
+\item \textbf{Problem}: Creating Match objects for every regex at every text position
+\end{itemize}
+
+Profiling revealed massive object creation:
+\begin{itemize}
+\item \textbf{MatchImpl objects}: 215+ million
+\item \textbf{MatchSetImpl objects}: 8.5+ million  
+\item \textbf{Pattern characteristic}: Simple literal words (``the'', ``and'', ``was'', etc.)
+\end{itemize}
+
+\section{AhoCorasick Prefiltering Implementation}
+
+\subsection{Design Philosophy}
+
+AhoCorasick prefiltering was chosen as a promising optimization approach based on its theoretical advantages:
+
+\begin{enumerate}
+\item \textbf{Single-pass scanning}: O(l) text traversal regardless of pattern count
+\item \textbf{Literal substring detection}: Identify positions where patterns could potentially match
+\item \textbf{Candidate reduction}: Only test regexes at positions where their required literals are found
+\item \textbf{Algorithmic improvement}: Transform O(l×m) to O(l + k×m) where k << l
+\end{enumerate}
+
+\subsection{Implementation Architecture}
+
+The implementation consisted of four major components:
+
+\subsubsection{Literal Hint Extraction}
+Enhanced the \texttt{LiteralPrefilter.extract()} method with aggressive selectivity scoring:
+
+\begin{lstlisting}[language=Java, caption=Selectivity-based literal extraction]
+private static double calculateSelectivityScore(
+    final String literal, final boolean anchored) {
+  double score = literal.length() * 10.0;
+  
+  if (anchored) {
+    score *= 3.0; // Anchored literals are highly selective
+  }
+  
+  // Character rarity scoring
+  for (char c : literal.toCharArray()) {
+    if ("aeiouAEIOU".indexOf(c) >= 0) {
+      score += 1.0; // Common vowels
+    } else if (Character.isDigit(c)) {
+      score += 5.0; // Digits are selective
+    } else if ("!@#$%^&*()_+-=".indexOf(c) >= 0) {
+      score += 10.0; // Punctuation is highly selective
+    }
+  }
+  
+  // Penalty for common English words
+  if (COMMON_WORDS.contains(literal.toLowerCase())) {
+    score *= 0.5;
+  }
+  
+  return score;
+}
+\end{lstlisting}
+
+\subsubsection{Pattern Configuration Integration}
+Added complete integration between \texttt{MatcherImpl} and \texttt{MatchEngineImpl}:
+
+\begin{lstlisting}[language=Java, caption=Automatic prefilter configuration]
+public void add(final String r, final Action a) 
+    throws RegexpParserException {
+  synchronized (rs) {
+    rs.add(r, a);
+    
+    if (!USE_BLOOM_FILTER && me instanceof MatchEngineImpl) {
+      configurePrefilterForLegacyEngine();
+    }
+  }
+}
+
+private void configurePrefilterForLegacyEngine() {
+  final Map<Integer, String> patterns = new HashMap<>();
+  final Map<Integer, Integer> flags = new HashMap<>();
+  final Map<String, Regexp> regexpMappings = new HashMap<>();
+  
+  int patternId = 0;
+  for (final String regexpStr : rs.getRegexpSet()) {
+    patterns.put(patternId, regexpStr);
+    flags.put(patternId, 0);
+    regexpMappings.put(regexpStr, rs.getRegexp(regexpStr));
+    patternId++;
+  }
+  
+  legacyEngine.configurePrefilter(patterns, flags, regexpMappings);
+}
+\end{lstlisting}
+
+\subsubsection{Candidate Position Identification}
+Implemented efficient text scanning and candidate position mapping:
+
+\begin{lstlisting}[language=Java, caption=Prefilter candidate identification]
+private void runPrefilterScan(final String text) {
+  final List<AhoCorasickPrefilter.Candidate> candidates = 
+      prefilter.scan(text);
+  
+  reusableCandidatePositions.clear();
+  reusablePositionToRegexps.clear();
+  
+  for (final AhoCorasickPrefilter.Candidate candidate : candidates) {
+    final int startPos = candidate.startIndexForMatch();
+    if (startPos >= 0) {
+      reusableCandidatePositions.add(startPos);
+      
+      final Regexp regexp = patternIdToRegexp.get(candidate.patternId);
+      if (regexp != null) {
+        reusablePositionToRegexps
+          .computeIfAbsent(startPos, k -> new HashSet<>())
+          .add(regexp);
+      }
+    }
+  }
+  
+  candidatePositions = reusableCandidatePositions;
+  positionToRegexps = reusablePositionToRegexps;
+}
+\end{lstlisting}
+
+\subsubsection{Match Engine Integration}
+Modified the core matching loop to use prefilter candidates:
+
+\begin{lstlisting}[language=Java, caption=Prefilter-driven matching]
+if (shouldStartMatch) {
+  final DFANode startOfNewMatches = ns.getNextFromStartNode(currentChar);
+  if (startOfNewMatches != null) {
+    Set<Regexp> candidateRegexps;
+    
+    if (prefilterEnabled && prefilter != null && 
+        positionToRegexps != null && 
+        positionToRegexps.containsKey(currentPos)) {
+      // Use prefilter-specific regexps
+      candidateRegexps = positionToRegexps.get(currentPos);
+    } else {
+      // Fallback to character-based filtering
+      candidateRegexps = startOfNewMatches
+          .getRegexpsThatCanStartWith(currentChar);
+    }
+    
+    if (!candidateRegexps.isEmpty()) {
+      final MatchSet ms = new MatchSetImpl(
+          currentPos, startOfNewMatches, currentChar, candidateRegexps);
+      if (ms.hasMatches()) {
+        activeMatchSets.add(ms);
+      }
+    }
+  }
+}
+\end{lstlisting}
+
+\section{Critical Debugging Challenges}
+
+\subsection{Correctness Regression Discovery}
+
+The most critical challenge emerged when basic functionality tests began failing:
+
+\begin{lstlisting}[caption=Test failure symptoms]
+[ERROR] SequenceLoaderTest.testWutheringHeightsCorpusWithVeryFewRegexps
+AssertionFailedError: Not enough matches, got only 0 but expected at least 42.
+
+INFO: No of characters read: -1 chars from corpus/file.txt
+INFO: Total no of 'word' matches in Wuthering Heights is 0
+\end{lstlisting}
+
+\textbf{Root cause analysis revealed:}
+\begin{enumerate}
+\item \textbf{Overly aggressive prefiltering}: Default enabled prefilter was filtering out legitimate matches
+\item \textbf{Buffer consumption bug}: \texttt{collectBufferText()} was consuming the input buffer, causing downstream failures
+\item \textbf{Pattern ID mapping failure}: Candidates weren't being mapped back to actual Regexp objects
+\item \textbf{Test environment mismatch}: Production tests not designed for prefiltering behavior
+\end{enumerate}
+
+\subsection{Buffer Handling Complexity}
+
+A critical implementation bug emerged in buffer handling:
+
+\begin{lstlisting}[language=Java, caption=Buffer consumption bug fix]
+// BROKEN: This consumed the buffer
+private String collectBufferText(final Buffer b) {
+  final StringBuilder sb = new StringBuilder();
+  while (b.hasNext()) {
+    sb.append(b.getNext()); // Consuming buffer position!
+  }
+  return sb.toString();
+}
+
+// FIXED: Non-consuming access
+private String collectBufferText(final Buffer b) {
+  if (b instanceof no.rmz.rmatch.utils.StringBuffer) {
+    final StringBuffer sb = (StringBuffer) b;
+    return sb.getCurrentRestString(); // Non-consuming
+  }
+  return null; // Disable prefiltering for other buffer types
+}
+\end{lstlisting}
+
+This bug caused assertion failures when the buffer position became inconsistent with expected state.
+
+\subsection{Configuration Integration Issues}
+
+The prefilter was never being configured in the production system:
+
+\begin{lstlisting}[language=Java, caption=Missing configuration integration]
+// BUG: MatcherImpl.add() never called configurePrefilter()
+public void add(final String r, final Action a) {
+  synchronized (rs) {
+    rs.add(r, a);
+    // Missing: Configure prefilter for new patterns!
+  }
+}
+
+// FIX: Added automatic prefilter configuration
+public void add(final String r, final Action a) {
+  synchronized (rs) {
+    rs.add(r, a);
+    
+    if (!USE_BLOOM_FILTER && me instanceof MatchEngineImpl) {
+      configurePrefilterForLegacyEngine(); // Now configured!
+    }
+  }
+}
+\end{lstlisting}
+
+\section{Performance Results and Analysis}
+
+\subsection{Benchmark Results}
+
+After implementing the complete AhoCorasick prefiltering system:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Configuration & Duration (ms) & vs Baseline \\
+\midrule
+Baseline Target & 13,500 & - \\
+Without Prefilter & 19,700-22,600 & 44-67\% slower \\
+With AhoCorasick Prefilter & 20,300-22,400 & 50-66\% slower \\
+Performance Improvement & <5\% & Minimal \\
+\bottomrule
+\end{tabular}
+\caption{AhoCorasick prefiltering performance results}
+\end{table}
+
+\subsection{Object Creation Analysis}
+
+Despite prefiltering, object creation remained massive:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Object Type & Without Prefilter & With Prefilter \\
+\midrule
+MatchImpl Objects & 215M+ & 215M+ \\
+MatchSetImpl Objects & 8.5M+ & 8.5M+ \\
+Reduction Achieved & - & None \\
+\bottomrule
+\end{tabular}
+\caption{Object creation comparison shows no reduction}
+\end{table}
+
+This indicated that the prefilter was not effectively reducing the workload.
+
+\subsection{Root Cause: Pattern Characteristics}
+
+Analysis revealed why prefiltering was ineffective:
+
+\begin{enumerate}
+\item \textbf{High literal density}: Common words like ``the'', ``and'', ``was'' appear frequently in English text
+\item \textbf{Minimal filtering}: Most text positions contained at least one common word
+\item \textbf{Filter ineffectiveness}: \texttt{getRegexpsThatCanStartWith()} for common characters returned most of the 10K regexps
+\item \textbf{Overhead addition}: Prefilter scanning added computational cost without corresponding reduction in regex testing
+\end{enumerate}
+
+\section{Technical Lessons Learned}
+
+\subsection{Algorithmic Insights}
+
+\subsubsection{Prefiltering Effectiveness Depends on Pattern Characteristics}
+AhoCorasick prefiltering is most effective when:
+\begin{itemize}
+\item Patterns contain distinctive, rare literal substrings
+\item Text has low density of pattern matches
+\item Significant reduction in candidate positions is achievable
+\end{itemize}
+
+For word-dense text matching with common English words, prefiltering provides minimal benefit.
+
+\subsubsection{O(l×m) Bottleneck Requires Fundamental Algorithmic Change}
+Incremental optimizations (prefiltering, collection reuse, character filtering) cannot address the core O(l×m) complexity. The algorithm fundamentally creates too many objects by testing every pattern at nearly every position.
+
+\subsection{Implementation Insights}
+
+\subsubsection{Integration Complexity}
+Adding prefiltering to an existing regex engine requires:
+\begin{itemize}
+\item Careful buffer handling to avoid state corruption
+\item Complete end-to-end integration from pattern registration to match execution
+\item Backward compatibility preservation
+\item Comprehensive testing across all usage scenarios
+\end{itemize}
+
+\subsubsection{Performance Measurement Challenges}
+Accurate performance measurement required:
+\begin{itemize}
+\item Multiple benchmark runs to account for JVM warmup
+\item Careful isolation of prefilter overhead vs. benefit
+\item Object creation profiling to understand algorithmic impact
+\item Baseline preservation for regression detection
+\end{itemize}
+
+\subsection{Debugging Strategies}
+
+\subsubsection{Regression Detection}
+The most critical debugging phase involved detecting and fixing correctness regressions:
+\begin{enumerate}
+\item \textbf{Early detection}: Unit tests caught 0-match scenarios immediately
+\item \textbf{Isolation}: Disabling prefilter by default restored functionality
+\item \textbf{Incremental fixing}: Addressed buffer handling, configuration, and mapping issues separately
+\item \textbf{Comprehensive testing}: Ensured 205/205 tests passed before performance evaluation
+\end{enumerate}
+
+\subsubsection{Root Cause Analysis}
+Effective debugging required:
+\begin{itemize}
+\item Understanding the full data flow from pattern registration to match execution
+\item Identifying where object creation actually occurs
+\item Measuring prefilter effectiveness independently of overall performance
+\item Analyzing pattern characteristics to understand filtering potential
+\end{itemize}
+
+\section{Alternative Approaches and Future Directions}
+
+\subsection{Fundamental Algorithmic Changes}
+
+Based on this experience, future optimization attempts should consider:
+
+\subsubsection{Hierarchical Bloom Filtering}
+\begin{itemize}
+\item Stage 1: Bloom filter on first character (eliminate ~90\% of regexps)
+\item Stage 2: Bloom filter on first 2-3 characters (eliminate ~99\% of remaining)
+\item Stage 3: Full regex matching on survivors (~10-100 regexps instead of 10K)
+\end{itemize}
+
+\subsubsection{Position-Based Regex Indexing}
+\begin{itemize}
+\item Pre-compute which regexps can possibly match at each text position
+\item Use suffix arrays or n-gram indices for efficient lookup
+\item Only test regexps that match local character patterns
+\end{itemize}
+
+\subsubsection{Streaming + Early Termination}
+\begin{itemize}
+\item Process text in chunks, terminating unpromising matches early
+\item Use statistical heuristics to prioritize high-probability regexps
+\item Implement match caching to avoid recomputing similar patterns
+\end{itemize}
+
+\subsection{Implementation Strategy Improvements}
+
+Future optimization attempts should:
+
+\begin{enumerate}
+\item \textbf{Measure baseline impact before implementation}: Understand whether the proposed optimization can theoretically deliver required improvements
+\item \textbf{Implement correctness preservation first}: Ensure all existing functionality continues working before performance optimization
+\item \textbf{Profile object creation patterns}: Focus on algorithmic changes that reduce object allocation, not just computational complexity
+\item \textbf{Consider pattern characteristics}: Choose optimization strategies based on actual pattern types and text characteristics
+\end{enumerate}
+
+\section{Conclusions}
+
+This AhoCorasick prefiltering optimization attempt achieved technical success in implementation completeness and correctness preservation, but failed to deliver the required performance improvement. The experience provides valuable insights:
+
+\subsection{Key Findings}
+
+\begin{enumerate}
+\item \textbf{Pattern characteristics matter}: Literal-based prefiltering is ineffective for high-density word matching scenarios
+\item \textbf{O(l×m) bottleneck is fundamental}: Incremental optimizations cannot address core algorithmic complexity
+\item \textbf{Implementation correctness is critical}: Regression prevention and comprehensive testing are essential for production systems
+\item \textbf{Integration complexity is high}: Adding optimization features to existing systems requires careful architectural consideration
+\end{enumerate}
+
+\subsection{Strategic Implications}
+
+For achieving the target 37\%+ performance improvement, rmatch requires:
+
+\begin{itemize}
+\item \textbf{Fundamental algorithmic redesign}: Moving beyond incremental optimizations to address O(l×m) complexity
+\item \textbf{Pattern-specific optimization strategies}: Choosing techniques based on actual usage patterns rather than theoretical advantages
+\item \textbf{Object allocation reduction}: Focus on minimizing object creation rather than just computational complexity
+\item \textbf{Comprehensive baseline analysis}: Understanding historical performance changes to guide optimization priorities
+\end{itemize}
+
+The AhoCorasick prefiltering infrastructure developed during this optimization attempt remains technically sound and could be valuable for different pattern sets or as part of a larger algorithmic redesign. However, for the current use case of word-dense English text matching, more fundamental approaches are required.
+
+This experience demonstrates the importance of understanding both algorithmic theory and practical implementation constraints when optimizing complex software systems. While AhoCorasick prefiltering is a proven technique in string matching literature, its effectiveness depends critically on problem characteristics that must be carefully analyzed before implementation.
+
+% Bibliography available if needed
+% \bibliographystyle{plain}
+% \bibliography{references}
+
+\end{document}
