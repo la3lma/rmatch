@@ -155,6 +155,15 @@
           </execution>
         </executions>
       </plugin>
+      
+      <!-- Override parent SpotBugs config to exclude JMH generated files -->
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <configuration>
+          <onlyAnalyze>no.rmz.rmatch.benchmarks.*</onlyAnalyze>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

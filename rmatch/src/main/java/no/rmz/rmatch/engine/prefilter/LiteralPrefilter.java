@@ -51,8 +51,10 @@ public final class LiteralPrefilter {
   /**
    * Extracts the best literal substring from a regex pattern.
    *
-   * <p>Prefers anchored prefixes if they exist, otherwise returns the globally longest literal run.
-   * Requires at least 2 characters to be considered useful.
+   * <p>Uses aggressive heuristics to find the most selective literal: 1. Prefers anchored prefixes
+   * (most selective) 2. Prefers longer literals (more selective than shorter ones) 3. Prefers
+   * literals with rare characters (more selective than common ones) 4. Requires at least 2
+   * characters to be considered useful
    *
    * @param patternId stable identifier for this pattern
    * @param regex the regular expression pattern string
@@ -67,11 +69,26 @@ public final class LiteralPrefilter {
       return Optional.empty();
     }
 
-    // Find the longest literal
+    // Find the best literal using selectivity heuristics
     String bestLiteral = "";
+    double bestScore = 0.0;
+    int bestStart = -1;
+
     for (final String literal : literals) {
-      if (literal.length() > bestLiteral.length()) {
+      if (literal.length() < 2) {
+        continue; // Skip too-short literals
+      }
+
+      final int start = regex.indexOf(literal);
+      final boolean anchored = regex.startsWith("^") && start <= 1;
+
+      // Calculate selectivity score
+      double score = calculateSelectivityScore(literal, anchored);
+
+      if (score > bestScore) {
+        bestScore = score;
         bestLiteral = literal;
+        bestStart = start;
       }
     }
 
@@ -80,13 +97,57 @@ public final class LiteralPrefilter {
       return Optional.empty();
     }
 
-    final int bestStart = regex.indexOf(bestLiteral);
     final boolean anchored = regex.startsWith("^") && bestStart <= 1;
     final boolean ci = ((flags & java.util.regex.Pattern.CASE_INSENSITIVE) != 0);
-    final int literalOffsetInMatch = anchored ? 0 : 0;
+    final int literalOffsetInMatch = anchored ? bestStart : 0;
 
     return Optional.of(
         new LiteralHint(patternId, bestLiteral, bestStart, anchored, ci, literalOffsetInMatch));
+  }
+
+  /**
+   * Calculates a selectivity score for a literal substring. Higher scores indicate more selective
+   * (less common) literals.
+   *
+   * @param literal the literal substring
+   * @param anchored whether the literal is anchored at the start
+   * @return selectivity score (higher = more selective)
+   */
+  private static double calculateSelectivityScore(final String literal, final boolean anchored) {
+    // Base score from length (longer is more selective)
+    double score = literal.length() * 10.0;
+
+    // Bonus for anchored literals (much more selective)
+    if (anchored) {
+      score *= 3.0;
+    }
+
+    // Bonus for rare characters (case-sensitive scoring)
+    for (int i = 0; i < literal.length(); i++) {
+      final char c = literal.charAt(i);
+
+      // Common vowels and consonants are less selective
+      if ("aeiouAEIOU".indexOf(c) >= 0) {
+        score += 1.0; // vowels are common
+      } else if ("thnrsldcmpfgywbvkjxqzTHNRSLDCMPFGYWBVKJXQZ".indexOf(c) >= 0) {
+        score += 2.0; // consonants vary in frequency
+      } else if (Character.isDigit(c)) {
+        score += 5.0; // digits are fairly selective
+      } else if ("!@#$%^&*()_+-=[]{}|;':,.<>?/~`".indexOf(c) >= 0) {
+        score += 10.0; // punctuation is very selective
+      } else {
+        score += 3.0; // other characters
+      }
+    }
+
+    // Penalty for very common short words in English text
+    final String lowerLiteral = literal.toLowerCase();
+    if ("the and for are but not you all can had has was were said from they have with this that what there when where who will more time very first well way may down day much use than more come some could out many write would like into over think also back after their just where those only new know take year good work three never before end through last right old see too any same another much while should still such make need life little world public hand big group system small number part way even place case work week government company right way good first time life work way back right over take state without much work need may think know never still much"
+        .contains(lowerLiteral)) {
+      score *= 0.5; // penalty for very common English words
+    }
+
+    return score;
   }
 
   /** Extracts all possible literal substrings from a regex using simple heuristics. */

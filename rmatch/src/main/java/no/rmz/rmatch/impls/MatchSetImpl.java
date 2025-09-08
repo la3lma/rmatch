@@ -19,7 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.CounterType;
 import no.rmz.rmatch.utils.FastCounter;
@@ -114,6 +113,23 @@ public final class MatchSetImpl implements MatchSet {
    */
   public MatchSetImpl(
       final int startIndex, final DFANode newCurrentNode, final Character currentChar) {
+    this(startIndex, newCurrentNode, currentChar, null);
+  }
+
+  /**
+   * Create a new MatchSetImpl with pre-computed candidate regexps (performance optimization).
+   *
+   * @param startIndex The start position in the input.
+   * @param newCurrentNode The deterministic start node to start with.
+   * @param currentChar The current character being processed.
+   * @param preComputedCandidates Pre-filtered regexps that can start with currentChar. If null,
+   *     filtering will be computed.
+   */
+  public MatchSetImpl(
+      final int startIndex,
+      final DFANode newCurrentNode,
+      final Character currentChar,
+      final Set<Regexp> preComputedCandidates) {
     checkNotNull(newCurrentNode, "newCurrentNode can't be null");
     checkArgument(startIndex >= 0, "Start index can't be negative");
     this.currentNode = newCurrentNode;
@@ -130,10 +146,11 @@ public final class MatchSetImpl implements MatchSet {
     //     algorithm.  Clearly not logarithmic in the number
     //     of expressions, and thus a showstopper.
 
-    // OPTIMIZATION: Use first-character heuristic to filter regexps
-    // that cannot possibly match starting with the current character.
+    // OPTIMIZATION: Use pre-computed candidates if available, otherwise compute
     final Set<Regexp> candidateRegexps;
-    if (currentChar != null) {
+    if (preComputedCandidates != null) {
+      candidateRegexps = preComputedCandidates;
+    } else if (currentChar != null) {
       candidateRegexps = this.currentNode.getRegexpsThatCanStartWith(currentChar);
     } else {
       candidateRegexps = this.currentNode.getRegexps();
@@ -141,7 +158,7 @@ public final class MatchSetImpl implements MatchSet {
 
     // OPTIMIZATION: Early exit if no regexps can match
     if (candidateRegexps.isEmpty()) {
-      this.matches = ConcurrentHashMap.newKeySet(0);
+      this.matches = new HashSet<>(0);
       return;
     }
 
@@ -149,8 +166,8 @@ public final class MatchSetImpl implements MatchSet {
     final int regexpCount = candidateRegexps.size();
     final boolean useSmallOptimization = regexpCount <= 50;
 
-    // Use ConcurrentHashMap.newKeySet for thread-safe access
-    this.matches = ConcurrentHashMap.newKeySet(candidateRegexps.size());
+    // Use regular HashSet for better performance in single-threaded case
+    this.matches = new HashSet<>(candidateRegexps.size());
 
     for (final Regexp r : candidateRegexps) {
       matches.add(this.currentNode.newMatch(this, r));
@@ -164,12 +181,16 @@ public final class MatchSetImpl implements MatchSet {
 
   @Override
   public Set<Match> getMatches() {
-    return Collections.unmodifiableSet(matches);
+    synchronized (matches) {
+      return Collections.unmodifiableSet(new HashSet<>(matches));
+    }
   }
 
   @Override
   public boolean hasMatches() {
-    return !matches.isEmpty();
+    synchronized (matches) {
+      return !matches.isEmpty();
+    }
   }
 
   /**
@@ -224,10 +245,16 @@ public final class MatchSetImpl implements MatchSet {
     // destruction, but we won't do anything more about that fact
     // from within this loop.
 
+    // Create snapshot to avoid ConcurrentModificationException
+    final Set<Match> matchSnapshot;
+    synchronized (matches) {
+      matchSnapshot = new HashSet<>(matches);
+    }
+
     // Collect matches to remove to avoid ConcurrentModificationException
     final Set<Match> matchesToRemove = new HashSet<>();
 
-    for (final Match m : matches) {
+    for (final Match m : matchSnapshot) {
       m.setInactive();
       if (m.isFinal()) {
         commitMatch(m, runnableMatches);
@@ -239,8 +266,10 @@ public final class MatchSetImpl implements MatchSet {
     }
 
     // Remove matches after iteration is complete
-    for (final Match m : matchesToRemove) {
-      removeMatch(m);
+    synchronized (matches) {
+      for (final Match m : matchesToRemove) {
+        removeMatch(m);
+      }
     }
   }
 
@@ -251,10 +280,16 @@ public final class MatchSetImpl implements MatchSet {
     // got a current  node, so we'll se what we can do to progress
     // the matches we've got.
 
+    // Create snapshot to avoid ConcurrentModificationException
+    final Set<Match> matchSnapshot;
+    synchronized (matches) {
+      matchSnapshot = new HashSet<>(matches);
+    }
+
     // Collect matches to remove to avoid ConcurrentModificationException
     final Set<Match> matchesToRemove = new HashSet<>();
 
-    for (final Match m : matches) {
+    for (final Match m : matchSnapshot) {
 
       // Get the regexp associated with the
       // match we're currently processing.
@@ -282,8 +317,10 @@ public final class MatchSetImpl implements MatchSet {
     }
 
     // Remove matches after iteration is complete
-    for (final Match m : matchesToRemove) {
-      removeMatch(m);
+    synchronized (matches) {
+      for (final Match m : matchesToRemove) {
+        removeMatch(m);
+      }
     }
   }
 
@@ -331,10 +368,16 @@ public final class MatchSetImpl implements MatchSet {
     // Check if there are any regexps for which matches must fail
     // for this node, and then fail them.
     if (currentNode.failsSomeRegexps()) {
+      // Create snapshot to avoid ConcurrentModificationException
+      final Set<Match> matchSnapshot;
+      synchronized (matches) {
+        matchSnapshot = new HashSet<>(matches);
+      }
+
       // Collect matches to remove to avoid ConcurrentModificationException
       final Set<Match> matchesToRemove = new HashSet<>();
 
-      for (final Match m : matches) {
+      for (final Match m : matchSnapshot) {
         if (currentNode.isFailingFor(m.getRegexp())) {
           m.abandon(currentChar);
           matchesToRemove.add(m);
@@ -342,8 +385,10 @@ public final class MatchSetImpl implements MatchSet {
       }
 
       // Remove matches after iteration is complete
-      for (final Match m : matchesToRemove) {
-        removeMatch(m);
+      synchronized (matches) {
+        for (final Match m : matchesToRemove) {
+          removeMatch(m);
+        }
       }
     }
   }
@@ -352,16 +397,25 @@ public final class MatchSetImpl implements MatchSet {
   public void removeMatch(final Match m) {
     checkNotNull(m);
     m.getRegexp().abandonMatchSet(this);
-    matches.remove(m);
+    synchronized (matches) {
+      matches.remove(m);
+    }
   }
 
   @Override
   public void finalCommit(final RunnableMatchesHolder runnableMatches) {
     checkNotNull(runnableMatches, "Target can't be null");
 
-    final Set<Regexp> visitedRegexps = new HashSet<>();
+    // Create snapshot to avoid ConcurrentModificationException
+    final Set<Match> matchSnapshot;
+    synchronized (matches) {
+      matchSnapshot = new HashSet<>(matches);
+    }
 
-    for (final Match m : matches) {
+    final Set<Regexp> visitedRegexps = new HashSet<>();
+    final Set<Match> matchesToRemove = new HashSet<>();
+
+    for (final Match m : matchSnapshot) {
       if (m.notReadyForCommit()) {
         continue;
       }
@@ -370,7 +424,14 @@ public final class MatchSetImpl implements MatchSet {
         visitedRegexps.add(r);
         r.commitUndominated(runnableMatches);
       }
-      removeMatch(m);
+      matchesToRemove.add(m);
+    }
+
+    // Remove matches after iteration is complete
+    synchronized (matches) {
+      for (final Match m : matchesToRemove) {
+        removeMatch(m);
+      }
     }
   }
 

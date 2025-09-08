@@ -16,8 +16,8 @@ package no.rmz.rmatch.impls;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.RunnableMatchesHolder;
 
@@ -27,7 +27,8 @@ public final class RunnableMatchesHolderImpl implements RunnableMatchesHolder {
   private final Set<Match> matches;
 
   public RunnableMatchesHolderImpl() {
-    this.matches = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    // Use regular HashSet since MatchEngine is single-threaded
+    this.matches = new HashSet<>();
   }
 
   /**
@@ -58,6 +59,11 @@ public final class RunnableMatchesHolderImpl implements RunnableMatchesHolder {
    */
   boolean hasMatches() {
     return !matches.isEmpty();
+  }
+
+  /** Clear all matches from this holder for reuse. */
+  public void clear() {
+    matches.clear();
   }
 
   @Override

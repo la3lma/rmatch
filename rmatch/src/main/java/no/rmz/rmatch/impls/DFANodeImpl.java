@@ -55,8 +55,7 @@ public final class DFANodeImpl implements DFANode {
   private final Map<Regexp, Boolean> baseIsFinalCache = new ConcurrentHashMap<>();
 
   /** Cache for first-character filtering to optimize O(l*m) bottleneck. */
-  private final ConcurrentHashMap<Character, Set<Regexp>> firstCharRegexpCache =
-      new ConcurrentHashMap<>();
+  private final Map<Character, Set<Regexp>> firstCharRegexpCache = new HashMap<>();
 
   /** Compressed representation of the basis set for memory efficiency and faster operations. */
   private final CompressedDFAState compressedBasis;
@@ -153,7 +152,7 @@ public final class DFANodeImpl implements DFANode {
   }
 
   @Override
-  public Set<Regexp> getRegexpsThatCanStartWith(final Character ch) {
+  public synchronized Set<Regexp> getRegexpsThatCanStartWith(final Character ch) {
     checkNotNull(ch, "Character cannot be null");
 
     // Return cached result if available
