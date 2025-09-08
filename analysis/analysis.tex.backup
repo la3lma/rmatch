@@ -47,12 +47,12 @@ This report provides a comprehensive analysis of the rmatch regular expression m
 
 \section{Executive Summary}
 
-The rmatch library implements a classic Thompson NFA construction approach with on-the-fly DFA generation via subset construction. Since the original analysis, major algorithmic optimizations have been implemented, including first-character optimization (fixing the critical O(m$\times$l) bottleneck) and Aho-Corasick prefiltering. However, performance remains limited to approximately 10\% of Java's standard regex matcher due to several key optimizations being disabled by default and remaining data structure inefficiencies.
+The rmatch library implements a classic Thompson NFA construction approach with on-the-fly DFA generation via subset construction. Since the original analysis, major algorithmic optimizations have been implemented, including first-character optimization (fixing the critical O(m×l) bottleneck) and Aho-Corasick prefiltering. However, performance remains limited to approximately 10\% of Java's standard regex matcher due to several key optimizations being disabled by default and remaining data structure inefficiencies.
 
 \subsection{Key Findings:}
 
 \begin{itemize}
-\item \textbf{RESOLVED:} Critical O(m$\times$l) complexity bottleneck has been fixed with first-character optimization, now O(m$\times$k) where k is the average number of patterns that can start with each character
+\item \textbf{RESOLVED:} Critical O(m×l) complexity bottleneck has been fixed with first-character optimization, now O(m×k) where k is the average number of patterns that can start with each character
 \item \textbf{IMPLEMENTED:} Aho-Corasick prefilter algorithm for literal pattern acceleration (disabled by default)
 \item \textbf{PENDING:} Data structure inefficiencies with excessive synchronization overhead remain
 \item \textbf{CRITICAL FINDING:} Major optimizations implemented but not enabled by default, limiting realized performance gains to only a few percent rather than expected 10-50x improvements
@@ -88,7 +88,7 @@ The rmatch system consists of several key components working together to provide
   
 \subsection{Critical Performance Bottleneck Analysis}
 
-\subsubsection{RESOLVED: The O(m$\times$l) Complexity Problem}
+\subsubsection{RESOLVED: The O(m×l) Complexity Problem}
 
 \textbf{Status: FIXED via First-Character Optimization}
 
@@ -106,11 +106,11 @@ The most severe performance issue that previously existed in the \texttt{MatchSe
 //     algorithm.
 
 for (final Regexp r : this.currentNode.getRegexps()) {
-    matches.add(this.currentNode.newMatch(this, r));  // O(m$\times$l) complexity
+    matches.add(this.currentNode.newMatch(this, r));  // O(m×l) complexity
 }
 \end{lstlisting}
 
-\textbf{Solution Implemented:} First-character optimization now filters patterns based on the current character being processed, reducing complexity from O(m$\times$l) to O(m$\times$k) where k is the average number of patterns that can start with each character (typically k << m).
+\textbf{Solution Implemented:} First-character optimization now filters patterns based on the current character being processed, reducing complexity from O(m×l) to O(m×k) where k is the average number of patterns that can start with each character (typically k << m).
 
 \subsubsection{Data Structure Inefficiencies}
 
@@ -206,7 +206,7 @@ Google's RE2 engine~\cite{cox2007regular} demonstrates several key optimizations
 
 \subsection{Phase 1: Eliminate Critical Bottlenecks (Expected 3-5x improvement)}
 
-\subsubsection{COMPLETED: Fix O(m$\times$l) Complexity}
+\subsubsection{COMPLETED: Fix O(m×l) Complexity}
 
 \textbf{Status: IMPLEMENTED AND ACTIVE}
 
@@ -259,7 +259,7 @@ public MatchSetImpl(final int startIndex, final DFANode newCurrentNode,
 
 \item \textbf{Use lock-free data structures for multi-threading:} The pervasive use of \texttt{ConcurrentHashMap}, \texttt{Collections.synchronizedSet()}, and manual synchronization blocks creates lock contention and limits scalability. Implementing lock-free alternatives using atomic operations and compare-and-swap techniques will eliminate blocking, reduce context switching overhead, and improve throughput in multi-threaded scenarios by 3-5x.
 
-\item \textbf{Implement object pooling for frequently allocated objects:} The constant creation and destruction of \texttt{Match}, \texttt{MatchSet}, and intermediate collection objects generates excessive garbage collection pressure, particularly problematic for the O(m$\times$l) bottleneck. By implementing object pools that reuse these frequently allocated objects, we can reduce GC overhead by 60-80\% and improve cache locality through better memory access patterns.
+\item \textbf{Implement object pooling for frequently allocated objects:} The constant creation and destruction of \texttt{Match}, \texttt{MatchSet}, and intermediate collection objects generates excessive garbage collection pressure, particularly problematic for the O(m×l) bottleneck. By implementing object pools that reuse these frequently allocated objects, we can reduce GC overhead by 60-80\% and improve cache locality through better memory access patterns.
 
 \item \textbf{Replace string-based counters with primitive arrays:} The current performance monitoring system uses string-keyed synchronized maps for counters, adding unnecessary overhead to every operation. Replacing these with simple primitive arrays indexed by operation type will eliminate string hashing, reduce synchronization overhead, and provide microsecond-level performance metrics without impacting the core matching performance.
 \end{itemize}
@@ -318,7 +318,7 @@ The prefilter operates in two phases:
 
 \textbf{Performance Characteristics:}
 
-The prefilter reduces the O(m$\times$l) bottleneck by identifying sparse candidate positions where regex matching should occur, rather than testing every pattern at every position. Expected performance improvements:
+The prefilter reduces the O(m×l) bottleneck by identifying sparse candidate positions where regex matching should occur, rather than testing every pattern at every position. Expected performance improvements:
 
 \begin{itemize}
 \item \textbf{Large pattern sets (100+ patterns):} 5-15x improvement when patterns contain extractable literals
@@ -341,7 +341,7 @@ java -Drmatch.prefilter=off MyApplication
 \begin{itemize}
 \item \textbf{CRITICAL ISSUE:} Prefilter is disabled by default, requiring manual configuration via \texttt{-Drmatch.prefilter=aho}
 \item \textbf{Performance Impact:} This explains why implemented optimizations provide "only a few percent" improvement rather than expected 10-50x gains
-\item Patterns with no extractable literals (e.g., \texttt{.*}, \texttt{[a-z]+}) fall back to original O(m$\times$l) behavior
+\item Patterns with no extractable literals (e.g., \texttt{.*}, \texttt{[a-z]+}) fall back to original O(m×l) behavior
 \item Currently requires manual prefilter configuration; automatic integration with pattern compilation is planned
 \item Case-insensitive handling uses simple upper/lower expansion; full Unicode normalization could improve coverage
 \end{itemize}
@@ -514,11 +514,11 @@ Based on current analysis, additional opportunities include:
 
 \section{Conclusion}
 
-The rmatch library has undergone significant optimization since the original analysis, with major algorithmic improvements successfully implemented. The critical O(m$\times$l) complexity bottleneck has been resolved through first-character optimization, transforming the complexity to O(m$\times$k) where k represents the average number of patterns that can start with each character. Additionally, a comprehensive Aho-Corasick prefilter system has been implemented and integrated.
+The rmatch library has undergone significant optimization since the original analysis, with major algorithmic improvements successfully implemented. The critical O(m×l) complexity bottleneck has been resolved through first-character optimization, transforming the complexity to O(m×k) where k represents the average number of patterns that can start with each character. Additionally, a comprehensive Aho-Corasick prefilter system has been implemented and integrated.
 
 \textbf{Current Status Summary:}
 \begin{itemize}
-\item \textbf{Resolved:} Critical O(m$\times$l) bottleneck through first-character optimization
+\item \textbf{Resolved:} Critical O(m×l) bottleneck through first-character optimization
 \item \textbf{Implemented:} Full Aho-Corasick prefilter system with literal pattern extraction
 \item \textbf{Critical Issue:} Major optimizations disabled by default, limiting performance gains to <5\% rather than expected 10-50x
 \item \textbf{Remaining:} Data structure inefficiencies and synchronization overhead
