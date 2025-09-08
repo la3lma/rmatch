@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.CounterType;
 import no.rmz.rmatch.utils.FastCounter;
@@ -140,12 +141,12 @@ public final class MatchSetImpl implements MatchSet {
 
     // OPTIMIZATION: Early exit if no regexps can match
     if (candidateRegexps.isEmpty()) {
-      this.matches = new HashSet<>(0);
+      this.matches = ConcurrentHashMap.newKeySet(0);
       return;
     }
 
-    // Use HashSet with pre-sized capacity for better performance
-    this.matches = new HashSet<>(candidateRegexps.size());
+    // Use ConcurrentHashMap.newKeySet for thread-safe access
+    this.matches = ConcurrentHashMap.newKeySet(candidateRegexps.size());
 
     for (final Regexp r : candidateRegexps) {
       matches.add(this.currentNode.newMatch(this, r));
@@ -219,6 +220,9 @@ public final class MatchSetImpl implements MatchSet {
     // destruction, but we won't do anything more about that fact
     // from within this loop.
 
+    // Collect matches to remove to avoid ConcurrentModificationException
+    final Set<Match> matchesToRemove = new HashSet<>();
+
     for (final Match m : matches) {
       m.setInactive();
       if (m.isFinal()) {
@@ -227,6 +231,11 @@ public final class MatchSetImpl implements MatchSet {
           m.abandon(currentChar);
         }
       }
+      matchesToRemove.add(m);
+    }
+
+    // Remove matches after iteration is complete
+    for (final Match m : matchesToRemove) {
       removeMatch(m);
     }
   }
@@ -237,6 +246,10 @@ public final class MatchSetImpl implements MatchSet {
       final RunnableMatchesHolder runnableMatches) {
     // got a current  node, so we'll se what we can do to progress
     // the matches we've got.
+
+    // Collect matches to remove to avoid ConcurrentModificationException
+    final Set<Match> matchesToRemove = new HashSet<>();
+
     for (final Match m : matches) {
 
       // Get the regexp associated with the
@@ -251,8 +264,22 @@ public final class MatchSetImpl implements MatchSet {
       if (isActive) {
         processActiveMatch(currentPos, m, regexp);
       } else {
-        progressInactiveMatch(currentChar, runnableMatches, m);
+        // Process inactive match but don't remove yet
+        if (m.isFinal()) {
+          commitMatch(m, runnableMatches);
+        }
+
+        if (!m.isAbandoned()) {
+          m.abandon(currentChar);
+        }
+
+        matchesToRemove.add(m);
       }
+    }
+
+    // Remove matches after iteration is complete
+    for (final Match m : matchesToRemove) {
+      removeMatch(m);
     }
   }
 
@@ -300,11 +327,19 @@ public final class MatchSetImpl implements MatchSet {
     // Check if there are any regexps for which matches must fail
     // for this node, and then fail them.
     if (currentNode.failsSomeRegexps()) {
+      // Collect matches to remove to avoid ConcurrentModificationException
+      final Set<Match> matchesToRemove = new HashSet<>();
+
       for (final Match m : matches) {
         if (currentNode.isFailingFor(m.getRegexp())) {
           m.abandon(currentChar);
-          matches.remove(m);
+          matchesToRemove.add(m);
         }
+      }
+
+      // Remove matches after iteration is complete
+      for (final Match m : matchesToRemove) {
+        removeMatch(m);
       }
     }
   }
