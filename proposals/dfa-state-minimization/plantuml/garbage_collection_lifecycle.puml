@@ -1,0 +1,58 @@
+@startuml garbage_collection_lifecycle
+!theme plain
+
+title State Garbage Collection Lifecycle
+
+participant "Matcher Engine" as Engine
+participant "State Cache" as Cache
+participant "GC Coordinator" as GC
+participant "State Minimizer" as Minimizer
+
+activate Engine
+
+Engine -> Cache: Request DFA State
+activate Cache
+Cache -> Cache: Check reference count
+Cache --> Engine: Return state (increment ref)
+deactivate Cache
+
+Engine -> Engine: Process input
+Engine -> Engine: Match operations
+
+note over Engine
+  During long-running matches,
+  many states may be created
+  but become unreachable
+end note
+
+Engine -> Cache: Release state reference
+activate Cache
+Cache -> Cache: Decrement ref count
+Cache -> GC: Trigger GC if threshold reached
+deactivate Cache
+
+activate GC
+GC -> GC: Mark unreachable states
+GC -> GC: Sweep unreferenced states
+GC -> Minimizer: Request minimization of remaining states
+activate Minimizer
+Minimizer -> Minimizer: Apply Hopcroft's algorithm
+Minimizer -> Minimizer: Merge equivalent states
+Minimizer --> GC: Return minimized state set
+deactivate Minimizer
+GC -> Cache: Update cache with minimized states
+GC -> GC: Compact memory
+deactivate GC
+
+Engine -> Cache: Continue processing...
+deactivate Engine
+
+note over GC
+  Garbage collection triggers:
+  1. Memory threshold exceeded
+  2. State count threshold exceeded  
+  3. Periodic cleanup intervals
+  4. End of processing segments
+end note
+
+@enduml
