@@ -42,7 +42,7 @@ $(PDF_FILE): $(TEX_FILE) $(BIB_FILE) $(PLANTUML_PNGS) $(PYTHON_CHARTS)
 	@echo "Building LaTeX document..."
 	@mkdir -p $(BUILD_DIR)
 	$(PDFLATEX) -output-directory=$(BUILD_DIR) $(TEX_FILE)
-	cd $(BUILD_DIR) && $(BIBTEX) $(basename $(TEX_FILE))
+	cd $(BUILD_DIR) && cp ../$(BIB_FILE) . && $(BIBTEX) $(basename $(TEX_FILE))
 	$(PDFLATEX) -output-directory=$(BUILD_DIR) $(TEX_FILE)
 	$(PDFLATEX) -output-directory=$(BUILD_DIR) $(TEX_FILE)
 	@cp $(BUILD_DIR)/$(PDF_FILE) .
