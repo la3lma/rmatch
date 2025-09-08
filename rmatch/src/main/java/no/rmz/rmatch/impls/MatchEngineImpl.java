@@ -89,7 +89,7 @@ public final class MatchEngineImpl implements MatchEngine {
    */
   public MatchEngineImpl(final NodeStorage ns) {
     this.ns = checkNotNull(ns, "NodeStorage can't be null");
-    this.prefilterEnabled = "aho".equalsIgnoreCase(System.getProperty("rmatch.prefilter", "off"));
+    this.prefilterEnabled = "aho".equalsIgnoreCase(System.getProperty("rmatch.prefilter", "aho"));
   }
 
   /**
