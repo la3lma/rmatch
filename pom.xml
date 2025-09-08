@@ -53,7 +53,7 @@
         <mavenReleasePlugin.version>3.1.1</mavenReleasePlugin.version>
         <mavenSourcePlugin.version>3.3.1</mavenSourcePlugin.version>
         <mavenSurefire.version>3.5.3</mavenSurefire.version>
-        <mockitoCore.version>5.8.0</mockitoCore.version>
+        <mockitoCore.version>5.19.0</mockitoCore.version>
         <mockitoJunitJupiter.version>5.13.4</mockitoJunitJupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -115,7 +115,7 @@
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
-                    <version>2.43.0</version>
+                    <version>2.46.1</version>
                 </plugin>
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
