@@ -45,12 +45,6 @@ public final class DFANodeImpl implements DFANode {
    */
   private final ConcurrentMap<Character, DFANode> nextMap = new ConcurrentHashMap<>();
 
-  /**
-   * The set of NDFANodes that this DFA node is representing. It is immutable! TODO: Make this into
-   * an immutable set.
-   */
-  private final SortedSet<NDFANode> basis = new TreeSet<>();
-
   /** The set of regular expressions for which this node will make a match fail. */
   private final Set<Regexp> isFailingSet = ConcurrentHashMap.newKeySet();
 
@@ -64,10 +58,14 @@ public final class DFANodeImpl implements DFANode {
   private final ConcurrentHashMap<Character, Set<Regexp>> firstCharRegexpCache =
       new ConcurrentHashMap<>();
 
-  private final List<NDFANode> basisList;
-
   /** Compressed representation of the basis set for memory efficiency and faster operations. */
   private final CompressedDFAState compressedBasis;
+
+  /**
+   * Cache for reconstructed basis list - only created when needed. This provides the old interface
+   * while using compressed storage internally.
+   */
+  private volatile List<NDFANode> basisList;
 
   /**
    * Create new DFA based representing a set of NDFA nodes.
@@ -76,13 +74,11 @@ public final class DFANodeImpl implements DFANode {
    */
   @SuppressWarnings("SpellCheckingInspection")
   public DFANodeImpl(final Set<NDFANode> ndfanodeset) {
-    basis.addAll(ndfanodeset);
-    initialize(basis);
-    this.basisList = new ArrayList<>(this.basis);
-
-    // Register nodes and create compressed representation
+    // Register nodes and create compressed representation FIRST
     NDFANodeIdMapper.getInstance().registerNodes(ndfanodeset);
     this.compressedBasis = new CompressedDFAState(ndfanodeset);
+
+    initialize(ndfanodeset);
 
     id = COUNTER.inc();
   }
@@ -191,7 +187,8 @@ public final class DFANodeImpl implements DFANode {
   }
 
   /**
-   * Get the next basis for a DFANode by pursuing the current basis through the character.
+   * Get the next basis for a DFANode by pursuing the current basis through the character. Now uses
+   * compressed representation for better performance.
    *
    * @param ch the character to explore.
    * @return A set of NDFANodes that serves as the basis for the next DFANode.
@@ -199,7 +196,9 @@ public final class DFANodeImpl implements DFANode {
   private SortedSet<NDFANode> getNextThroughBasis(final Character ch) {
     final TreeSet<NDFANode> result = new TreeSet<>();
 
-    for (final NDFANode n : basis) {
+    // Use compressed representation for better memory efficiency
+    final List<NDFANode> basisNodes = getBasisList();
+    for (final NDFANode n : basisNodes) {
       result.addAll(n.getNextSet(ch));
     }
 
@@ -234,7 +233,7 @@ public final class DFANodeImpl implements DFANode {
    */
   private boolean baseIsFinalFor(final Regexp r) {
     return baseIsFinalCache.computeIfAbsent(
-        r, key -> basisList.parallelStream().anyMatch(key::hasTerminalNdfaNode));
+        r, key -> getBasisList().parallelStream().anyMatch(key::hasTerminalNdfaNode));
   }
 
   @Override
@@ -255,5 +254,31 @@ public final class DFANodeImpl implements DFANode {
    */
   CompressedDFAState getCompressedBasis() {
     return compressedBasis;
+  }
+
+  /**
+   * Get the basis nodes as a list, reconstructed from compressed storage. Uses double-checked
+   * locking for thread-safe lazy initialization.
+   *
+   * @return list of NDFANode objects that form this DFA node's basis
+   */
+  private List<NDFANode> getBasisList() {
+    if (basisList == null) {
+      synchronized (this) {
+        if (basisList == null) {
+          // Reconstruct from compressed state
+          final NDFANodeIdMapper mapper = NDFANodeIdMapper.getInstance();
+          final List<NDFANode> reconstructed = new ArrayList<>();
+          for (final int nodeId : compressedBasis.getNodeIds()) {
+            final NDFANode node = mapper.getNodeById(nodeId);
+            if (node != null) {
+              reconstructed.add(node);
+            }
+          }
+          this.basisList = reconstructed;
+        }
+      }
+    }
+    return basisList;
   }
 }
