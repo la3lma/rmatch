@@ -82,6 +82,9 @@ public final class MatchEngineImpl implements MatchEngine {
   /** Set of positions where matches should be started (when using prefilter). */
   private Set<Integer> candidatePositions;
 
+  /** Map from positions to specific regexps that should be tested at those positions. */
+  private Map<Integer, Set<Regexp>> positionToRegexps;
+
   /**
    * Implements the MatchEngine interface, uses a particular NodeStorage instance.
    *
@@ -170,6 +173,9 @@ public final class MatchEngineImpl implements MatchEngine {
     // Only check prefilter if it's enabled and configured
     if (prefilterEnabled && prefilter != null && candidatePositions != null) {
       shouldStartMatch = candidatePositions.contains(currentPos);
+    } else if (prefilterEnabled && prefilter != null) {
+      // If prefilter is configured but no candidates found, don't start matches
+      shouldStartMatch = false;
     }
 
     if (shouldStartMatch) {
@@ -257,18 +263,25 @@ public final class MatchEngineImpl implements MatchEngine {
   private void runPrefilterScan(final String text) {
     if (text == null || prefilter == null) {
       candidatePositions = null;
+      positionToRegexps = null;
       return;
     }
 
     // Run prefilter
     final List<AhoCorasickPrefilter.Candidate> candidates = prefilter.scan(text);
 
-    // Convert to set of candidate positions
+    // Convert to set of candidate positions and map positions to regexps
     candidatePositions = new HashSet<>();
+    positionToRegexps = new HashMap<>();
+    
     for (final AhoCorasickPrefilter.Candidate candidate : candidates) {
       final int startPos = candidate.startIndexForMatch();
       if (startPos >= 0) {
         candidatePositions.add(startPos);
+        
+        // Store pattern ID for this position for future regexp lookup
+        // Note: We'll need to map pattern IDs to regexps when this information is used
+        positionToRegexps.computeIfAbsent(startPos, k -> new HashSet<>()).add(null); // placeholder
       }
     }
   }
