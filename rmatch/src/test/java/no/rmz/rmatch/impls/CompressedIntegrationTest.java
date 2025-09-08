@@ -77,26 +77,32 @@ public class CompressedIntegrationTest {
   void testNodeStorageImplUsesCompressedLookup() {
     NodeStorageImpl storage = new NodeStorageImpl();
 
-    // Create first DFA node
-    var dfaNode1 = storage.getDFANode(new TreeSet<>(testNodeSet));
+    // Create first DFA node with a three-node set
+    TreeSet<NDFANode> firstSet = new TreeSet<>(Comparator.comparing(NDFANode::getId));
+    firstSet.addAll(testNodeSet);
+    var dfaNode1 = storage.getDFANode(firstSet);
     assertNotNull(dfaNode1, "First DFA node should not be null");
 
-    // Request same set again - should return same instance due to compressed lookup
-    var dfaNode2 = storage.getDFANode(new TreeSet<>(testNodeSet));
+    // Request same set again - should return same instance due to caching
+    TreeSet<NDFANode> sameSet = new TreeSet<>(Comparator.comparing(NDFANode::getId));
+    sameSet.addAll(testNodeSet);
+    var dfaNode2 = storage.getDFANode(sameSet);
     assertSame(dfaNode1, dfaNode2, "Should return same DFA node instance from cache");
 
-    // Create different set with only node1 (different content)
+    // Create different set with only node1 (different content from first set)
     SortedSet<NDFANode> differentSet = new TreeSet<>(Comparator.comparing(NDFANode::getId));
     differentSet.add(node1); // Only one node instead of three
     var dfaNode3 = storage.getDFANode(differentSet);
 
     assertNotSame(dfaNode1, dfaNode3, "Different node sets should produce different DFA nodes");
     assertNotNull(dfaNode3, "Different DFA node should not be null");
-    
+
     // Verify the different node has different compressed state
     DFANodeImpl impl1 = (DFANodeImpl) dfaNode1;
     DFANodeImpl impl3 = (DFANodeImpl) dfaNode3;
-    assertNotEquals(impl1.getCompressedBasis(), impl3.getCompressedBasis(), 
+    assertNotEquals(
+        impl1.getCompressedBasis(),
+        impl3.getCompressedBasis(),
         "Different DFA nodes should have different compressed basis");
   }
 
