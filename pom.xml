@@ -49,7 +49,7 @@
         <mavenDependencyPlugin.version>3.8.1</mavenDependencyPlugin.version>
 
         <mavenFindbugsPlugin.version>3.0.5</mavenFindbugsPlugin.version>
-        <mavenJarPlugin.version>3.3.0</mavenJarPlugin.version>
+        <mavenJarPlugin.version>3.4.2</mavenJarPlugin.version>
         <mavenReleasePlugin.version>3.1.1</mavenReleasePlugin.version>
         <mavenSourcePlugin.version>3.3.1</mavenSourcePlugin.version>
         <mavenSurefire.version>3.5.3</mavenSurefire.version>
