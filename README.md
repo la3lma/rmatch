@@ -6,23 +6,29 @@ rmatch
 The project is getting closer to a state where it may be useful for others
 than myself, but it's not quite there yet.  Be patient ;)
 
-## Performance Evolution
+## Performance Analytics
 
-![Performance Trend](charts/performance_trend.png)
+### Benchmark Overview
 
-*Historical performance evolution over time comparing rmatch vs Java regex. Lower values indicate better performance.*
+![Performance Overview](charts/performance_overview.png)
 
-### Recent Performance Test Results
+*Comprehensive performance tracking based on automated benchmark results from JMH microbenchmarks and macro-scale testing.*
 
-![Performance Check Evolution](charts/performance_check_evolution.png)
+### Detailed JMH Performance Evolution
 
-*Latest performance test results from automated testing infrastructure, showing execution time, memory usage, improvement percentages, and test status over time.*
+![JMH Performance Evolution](charts/jmh_performance_evolution.png)
 
-### Performance Summary
+*Detailed analysis of JMH benchmark results showing build performance trends over time and performance distribution statistics.*
 
-![Performance Summary](charts/performance_summary.png)
+### Key Performance Metrics
 
-*Combined view of historical and recent performance data, providing a comprehensive overview of rmatch's performance evolution.*
+- **Benchmark Data Sources**: All performance data is sourced from `benchmarks/results/`
+- **JMH Microbenchmarks**: Precise timing measurements with statistical confidence intervals  
+- **Macro Benchmarks**: End-to-end performance testing with real workloads
+- **Automated Tracking**: Performance evolution tracked continuously via GitHub Actions
+
+> 📊 **Performance Data**: Charts are automatically generated from benchmark results stored in `benchmarks/results/`. 
+> See [PERFORMANCE_CHARTS.md](PERFORMANCE_CHARTS.md) for detailed documentation on benchmark data formats and chart generation.
 
 You need to install mvnw by doing:
 
