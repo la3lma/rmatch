@@ -196,10 +196,10 @@ public final class GitHubActionPerformanceTestRunner {
 
       markdown.append("**Result**: ").append(perfResult.getExplanation()).append("\n\n");
 
-      // Performance metrics table
-      markdown.append("### 📊 Performance Metrics\n\n");
-      markdown.append("| Metric | Current (rmatch) | Baseline | Δ |\n");
-      markdown.append("|--------|------------------|----------|---|\n");
+      // Performance metrics table for rmatch
+      markdown.append("### 📊 rmatch Performance Metrics\n\n");
+      markdown.append("| Metric | Current | Baseline | Δ |\n");
+      markdown.append("|--------|---------|----------|---|\n");
 
       if (!result.getRmatchResults().isEmpty()) {
         double currentAvgTime =
@@ -234,6 +234,124 @@ public final class GitHubActionPerformanceTestRunner {
             .append("| **Statistical Significance** | ")
             .append(perfResult.isStatisticallySignificant() ? "✅ Yes" : "⚠️ Low")
             .append(" | - | - |\n");
+      }
+
+      // NEW: Native Java Matcher Performance Panel
+      markdown.append("\n### 🔴 Native Java Matcher Performance\n\n");
+      markdown.append("| Metric | Current Value |\n");
+      markdown.append("|--------|---------------|\n");
+
+      if (!result.getJavaResults().isEmpty()) {
+        double javaAvgTime =
+            result.getJavaResults().stream()
+                .mapToLong(r -> r.durationInMillis())
+                .average()
+                .orElse(0);
+        double javaAvgMemory =
+            result.getJavaResults().stream().mapToLong(r -> r.usedMemoryInMb()).average().orElse(0);
+
+        markdown
+            .append("| **Execution Time** | ")
+            .append(String.format("%.0f ms", javaAvgTime))
+            .append(" |\n");
+        markdown
+            .append("| **Memory Usage** | ")
+            .append(String.format("%.0f MB", javaAvgMemory))
+            .append(" |\n");
+        markdown
+            .append("| **Test Runs** | ")
+            .append(result.getJavaResults().size())
+            .append(" iterations |\n");
+      } else {
+        markdown.append("| No Java performance data available | - |\n");
+      }
+
+      // NEW: Relative Performance Comparison Panel
+      markdown.append("\n### ⚖️ Relative Performance (rmatch vs Java)\n\n");
+      markdown.append("| Comparison | Ratio | Interpretation |\n");
+      markdown.append("|------------|-------|----------------|\n");
+
+      if (!result.getRmatchResults().isEmpty() && !result.getJavaResults().isEmpty()) {
+        double rmatchAvgTime =
+            result.getRmatchResults().stream()
+                .mapToLong(r -> r.durationInMillis())
+                .average()
+                .orElse(0);
+        double rmatchAvgMemory =
+            result.getRmatchResults().stream()
+                .mapToLong(r -> r.usedMemoryInMb())
+                .average()
+                .orElse(0);
+        double javaAvgTime =
+            result.getJavaResults().stream()
+                .mapToLong(r -> r.durationInMillis())
+                .average()
+                .orElse(0);
+        double javaAvgMemory =
+            result.getJavaResults().stream().mapToLong(r -> r.usedMemoryInMb()).average().orElse(0);
+
+        // Calculate ratios
+        double timeRatio = javaAvgTime > 0 ? rmatchAvgTime / javaAvgTime : 0;
+        double memoryRatio = javaAvgMemory > 0 ? rmatchAvgMemory / javaAvgMemory : 0;
+
+        String timeInterpretation;
+        String timeEmoji;
+        if (timeRatio < 0.8) {
+          timeInterpretation = "rmatch significantly faster";
+          timeEmoji = "🟢";
+        } else if (timeRatio < 1.2) {
+          timeInterpretation = "comparable performance";
+          timeEmoji = "🟡";
+        } else {
+          timeInterpretation = "Java regex faster";
+          timeEmoji = "🔴";
+        }
+
+        String memoryInterpretation;
+        String memoryEmoji;
+        if (memoryRatio < 0.8) {
+          memoryInterpretation = "rmatch uses less memory";
+          memoryEmoji = "🟢";
+        } else if (memoryRatio < 1.2) {
+          memoryInterpretation = "comparable memory usage";
+          memoryEmoji = "🟡";
+        } else {
+          memoryInterpretation = "Java regex uses less memory";
+          memoryEmoji = "🔴";
+        }
+
+        markdown
+            .append("| **Time Ratio (rmatch/java)** | ")
+            .append(String.format("%.2fx", timeRatio))
+            .append(" | ")
+            .append(timeEmoji)
+            .append(" ")
+            .append(timeInterpretation)
+            .append(" |\n");
+        markdown
+            .append("| **Memory Ratio (rmatch/java)** | ")
+            .append(String.format("%.2fx", memoryRatio))
+            .append(" | ")
+            .append(memoryEmoji)
+            .append(" ")
+            .append(memoryInterpretation)
+            .append(" |\n");
+
+        // Add overall summary
+        boolean timeWin = timeRatio < 1.0;
+        boolean memoryWin = memoryRatio < 1.0;
+        String overallSummary;
+        if (timeWin && memoryWin) {
+          overallSummary = "🏆 rmatch outperforms Java regex in both time and memory";
+        } else if (timeWin || memoryWin) {
+          overallSummary =
+              "⚖️ Mixed performance: rmatch better in " + (timeWin ? "time" : "memory");
+        } else {
+          overallSummary = "❌ Java regex outperforms rmatch in both metrics";
+        }
+        markdown.append("| **Overall Assessment** | - | ").append(overallSummary).append(" |\n");
+      } else {
+        markdown.append("| No comparative data available | - | - |\n");
       }
 
       markdown.append("\n### 🔬 Test Configuration\n");

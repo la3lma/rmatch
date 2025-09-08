@@ -4,7 +4,7 @@ This document explains the performance visualization system in rmatch, which aut
 
 ## Overview
 
-The performance charting system supports multiple data sources and generates different types of visualizations to track rmatch's performance evolution over time.
+The performance charting system supports multiple data sources and generates different types of visualizations to track rmatch's performance evolution over time. Enhanced with dedicated native Java performance panels and relative performance comparison displays.
 
 ## Chart Types
 
@@ -20,10 +20,12 @@ The performance charting system supports multiple data sources and generates dif
 - **Source**: `benchmarks/results/performance-check-*.json`
 - **Data Period**: Recent automated performance tests
 - **Charts Generated**:
-  - `performance_check_evolution.png` - Detailed 4-panel view showing:
+  - `performance_check_evolution.png` - Enhanced 6-panel view showing:
     - Execution time comparison (rmatch vs Java regex)
-    - Memory usage comparison
-    - Performance improvement percentages
+    - Memory usage comparison (rmatch vs Java regex)
+    - Performance improvement percentages over time
+    - **NEW: Native Java Matcher Performance** - Dedicated panel showing Java execution time and memory usage
+    - **NEW: Relative Performance Ratios** - Panel showing rmatch/Java ratios for time and memory with interpretations
     - Test status evolution (PASS/WARNING/FAIL)
   - `performance_check_overview.png` - Simplified scatter plot for recent results
 
