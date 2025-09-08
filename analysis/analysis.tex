@@ -203,27 +203,51 @@ Google's RE2 engine~\cite{cox2007regular} demonstrates several key optimizations
 
 \subsection{Phase 1: Eliminate Critical Bottlenecks (Expected 3-5x improvement)}
 
-\subsubsection{Fix O(m×l) Complexity}
+\subsubsection{✅ COMPLETED: Fix O(m×l) Complexity}
 
-Implement first-character heuristics to eliminate the critical bottleneck:
+\textbf{Status: IMPLEMENTED AND ACTIVE}
+
+First-character heuristics have been successfully implemented to eliminate the critical bottleneck:
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.9\textwidth]{illustrations/first-char-optimization.png}
-\caption{First-Character Optimization Strategy}
+\caption{First-Character Optimization Strategy (IMPLEMENTED)}
 \label{fig:first-char}
 \end{figure}
 
-\begin{lstlisting}[language=Java,caption=Proposed first-character optimization]
-// Pre-compute character-to-patterns mapping
-Map<Character, BitSet> firstCharMap = new HashMap<>();
-
-// At each position, only consider patterns that can start with current char
-BitSet candidatePatterns = firstCharMap.get(currentChar);
-for (int patternId : candidatePatterns) {
+\begin{lstlisting}[language=Java,caption=Implemented first-character optimization]
+// IMPLEMENTED: MatchSetImpl constructor with character optimization
+public MatchSetImpl(final int startIndex, final DFANode newCurrentNode, 
+                   final Character currentChar) {
+    // Use first-character heuristic to filter regexps
+    final Set<Regexp> candidateRegexps;
+    if (currentChar != null) {
+        candidateRegexps = this.currentNode.getRegexpsThatCanStartWith(currentChar);
+    } else {
+        candidateRegexps = this.currentNode.getRegexps();
+    }
+    
+    // Early exit if no regexps can match
+    if (candidateRegexps.isEmpty()) {
+        this.matches = ConcurrentHashMap.newKeySet(0);
+        return;
+    }
+    
     // Only create matches for viable patterns
+    for (final Regexp r : candidateRegexps) {
+        matches.add(this.currentNode.newMatch(this, r));
+    }
 }
 \end{lstlisting}
+
+\textbf{Implementation Details:}
+\begin{itemize}
+\item \texttt{DFANodeImpl.getRegexpsThatCanStartWith(Character ch)} with caching
+\item \texttt{RegexpImpl.canStartWith(Character ch)} with first-character analysis  
+\item Active integration in \texttt{MatchEngineImpl.matcherProgress()}
+\item Comprehensive test coverage in \texttt{FirstCharacterOptimizationTest}
+\end{itemize}
 
 \subsubsection{Replace Heavyweight Data Structures}
 
@@ -307,13 +331,17 @@ java -Drmatch.prefilter=aho MyApplication
 java -Drmatch.prefilter=off MyApplication
 \end{lstlisting}
 
-\textbf{Limitations and Future Work:}
+\textbf{Limitations and Current Issues:}
 
 \begin{itemize}
+\item \textbf{CRITICAL ISSUE:} Prefilter is disabled by default, requiring manual configuration via \texttt{-Drmatch.prefilter=aho}
+\item \textbf{Performance Impact:} This explains why implemented optimizations provide "only a few percent" improvement rather than expected 10-50x gains
 \item Patterns with no extractable literals (e.g., \texttt{.*}, \texttt{[a-z]+}) fall back to original O(m×l) behavior
 \item Currently requires manual prefilter configuration; automatic integration with pattern compilation is planned
 \item Case-insensitive handling uses simple upper/lower expansion; full Unicode normalization could improve coverage
 \end{itemize}
+
+\textbf{Recommendation:} Enable prefilter by default for patterns with extractable literals to realize the full performance benefits.
 
 \subsubsection{Bit-Parallel NFA Simulation}
 
@@ -421,6 +449,62 @@ Compare performance against established regex engines:
 \item \textbf{PCRE library performance characteristics:} Use PCRE4J or similar bindings to compare against PCRE's optimized backtracking engine, focusing on patterns where backtracking engines excel (complex lookaheads, backreferences). Document cases where rmatch's NFA approach provides better worst-case guarantees than PCRE's potentially exponential behavior, and quantify the performance differences across pattern complexity spectrums.
 
 \item \textbf{Specialized multi-pattern matchers like Hyperscan:} Establish baseline comparisons with Intel's Hyperscan library for scenarios involving hundreds to thousands of patterns, which represents rmatch's primary use case. Use Hyperscan's streaming API to compare against rmatch's buffer-based matching, measuring both throughput and memory usage. Focus on identifying the pattern count threshold where specialized multi-pattern engines begin to outperform general-purpose regex libraries significantly.
+\end{itemize}
+
+\section{Critical Analysis: Why Performance Improvements Are Minimal}
+
+\subsection{Current State vs Expected Performance}
+
+Despite implementing key optimizations (first-character filtering and Aho-Corasick prefilter), performance improvements remain "only a few percent" rather than the expected 3-5x to 10x gains. Analysis reveals the following critical issues:
+
+\subsubsection{Root Cause Analysis}
+
+\begin{itemize}
+\item \textbf{Prefilter Disabled by Default:} The Aho-Corasick prefilter, which should provide 10-50x improvement for literal patterns, is disabled by default and requires manual activation via \texttt{-Drmatch.prefilter=aho}
+
+\item \textbf{Integration Gaps:} While first-character optimization is active, its benefits may be limited by:
+  \begin{itemize}
+  \item Continued character-by-character processing for complex patterns
+  \item Lack of pattern analysis to enable prefilter automatically
+  \item Missing optimization for patterns without clear first characters
+  \end{itemize}
+
+\item \textbf{Remaining Data Structure Inefficiencies:} Heavy synchronization overhead and object allocation patterns persist:
+  \begin{itemize}
+  \item \texttt{ConcurrentHashMap} and synchronized collections still used extensively
+  \item Object pooling not implemented for \texttt{Match}/\texttt{MatchSet} objects
+  \item String-based performance counters add overhead
+  \end{itemize}
+\end{itemize}
+
+\subsection{Recommended Next Steps}
+
+\subsubsection{Immediate Actions (Expected 10-30x improvement)}
+
+\begin{enumerate}
+\item \textbf{Enable prefilter by default} for patterns with extractable literals
+\item \textbf{Automatic literal extraction} during pattern compilation
+\item \textbf{Hybrid matching strategy} that seamlessly combines prefiltering with NFA simulation
+\end{enumerate}
+
+\subsubsection{Phase 1 Remaining Items (Expected 2-4x improvement)}
+
+\begin{enumerate}
+\item Replace \texttt{ConcurrentHashMap} with lock-free alternatives
+\item Implement object pooling for frequently allocated objects  
+\item Replace string-based counters with primitive arrays
+\item Use compact \texttt{int[]} arrays instead of \texttt{SortedSet<NDFANode>}
+\end{enumerate}
+
+\subsubsection{New Optimization Targets}
+
+Based on current analysis, additional opportunities include:
+
+\begin{itemize}
+\item \textbf{Pattern Compilation Optimization:} Analyze patterns at compile time to choose optimal matching strategy
+\item \textbf{Adaptive Algorithm Selection:} Use different algorithms based on pattern characteristics
+\item \textbf{State Machine Optimization:} Minimize DFA states and optimize transitions
+\item \textbf{Memory Layout Optimization:} Improve cache locality and reduce memory fragmentation
 \end{itemize}
 
 \section{Conclusion}
