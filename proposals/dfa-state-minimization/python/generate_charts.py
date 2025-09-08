@@ -34,7 +34,7 @@ def generate_memory_usage_comparison():
     # Rotate x-axis labels for better readability
     plt.xticks(rotation=15, ha='right')
     plt.tight_layout()
-    plt.savefig('illustrations/memory_usage_comparison.png', dpi=300, bbox_inches='tight')
+    plt.savefig('../illustrations/memory_usage_comparison.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def generate_performance_scaling():
@@ -64,7 +64,7 @@ def generate_performance_scaling():
     ax.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('illustrations/performance_scaling.png', dpi=300, bbox_inches='tight')
+    plt.savefig('../illustrations/performance_scaling.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def generate_minimization_benefits():
@@ -108,7 +108,7 @@ def generate_minimization_benefits():
                 f'{value:.1f}%', ha='center', va='bottom', fontweight='bold')
     
     plt.tight_layout()
-    plt.savefig('illustrations/minimization_benefits.png', dpi=300, bbox_inches='tight')
+    plt.savefig('../illustrations/minimization_benefits.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def generate_gc_impact():
@@ -150,7 +150,7 @@ def generate_gc_impact():
                 fontsize=10, color='green', fontweight='bold')
     
     plt.tight_layout()
-    plt.savefig('illustrations/gc_impact.png', dpi=300, bbox_inches='tight')
+    plt.savefig('../illustrations/gc_impact.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 if __name__ == '__main__':
