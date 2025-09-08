@@ -32,12 +32,24 @@ The performance charting system supports multiple data sources and generates dif
 ### Combined Charts
 - **`performance_summary.png`** - Two-panel view combining historical CSV data (top) with recent JSON data (bottom)
 
+### Large-Scale Java Performance Charts (NEW)
+- **`java_regex_performance_dashboard.png`** - Comprehensive dashboard showcasing pure Java regex performance across 5K and 10K pattern scales
+- **`pure_java_performance_large_scale.png`** - Detailed analysis of Java regex performance with execution time, memory usage, and throughput metrics
+- **`large_scale_comparison_5k_10k.png`** - Direct comparison between 5K and 10K pattern performance for both rmatch and Java regex
+
 ## Usage
 
 ### Generating Charts Manually
 ```bash
 # Generate all charts from available data
 python3 scripts/generate_performance_charts.py
+
+# Generate large-scale Java performance charts (NEW)
+python3 scripts/generate_large_scale_performance_charts.py
+python3 scripts/generate_java_performance_dashboard.py
+
+# Generate all performance data and charts in one command (NEW)
+./scripts/generate_all_performance_charts.sh
 
 # Generate sample performance data for demonstration
 ./scripts/generate_sample_performance_data.sh
