@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import no.rmz.rmatch.interfaces.DFANode;
@@ -49,6 +50,13 @@ public final class NodeStorageImpl implements NodeStorage {
    */
   private final Map<SortedSet<NDFANode>, DFANode> ndfamap =
       new ConcurrentSkipListMap<>(SORTED_NDFANODE_SET_COMPARATOR);
+
+  /**
+   * A compressed map using CompressedDFAState as keys for faster lookups and reduced memory usage.
+   * This is used in parallel with ndfamap for performance optimization.
+   */
+  private final ConcurrentMap<CompressedDFAState, DFANode> compressedNdfaMap =
+      new ConcurrentHashMap<>();
 
   /** Create a new instance of the node storage. */
   public NodeStorageImpl() {
@@ -126,19 +134,38 @@ public final class NodeStorageImpl implements NodeStorage {
   public DFANode getDFANode(final SortedSet<NDFANode> ndfaset) {
     checkNotNull(ndfaset, "Illegal to use  null Set of NDFANodes");
 
-    DFANode result = ndfamap.get(ndfaset);
+    // First try compressed lookup for better performance
+    NDFANodeIdMapper.getInstance().registerNodes(ndfaset);
+    CompressedDFAState compressedKey = new CompressedDFAState(ndfaset);
+    DFANode result = compressedNdfaMap.get(compressedKey);
+
+    if (result != null) {
+      return result;
+    }
+
+    // Fall back to original lookup if not in compressed map
+    result = ndfamap.get(ndfaset);
 
     if (result == null) {
       result = new DFANodeImpl(ndfaset);
-      DFANode existing = ndfamap.putIfAbsent(ndfaset, result);
 
-      if (existing == null) {
-        // We successfully added our new node
+      // Store in both maps for future lookups
+      DFANode existingOriginal = ndfamap.putIfAbsent(ndfaset, result);
+      DFANode existingCompressed = compressedNdfaMap.putIfAbsent(compressedKey, result);
+
+      if (existingOriginal == null && existingCompressed == null) {
+        // We successfully added our new node to both maps
         updateFinalStatuses(result, ndfaset);
       } else {
-        // Someone else added it first, use their version
-        result = existing;
+        // Someone else added it first, use their version and ensure both maps are consistent
+        result = existingOriginal != null ? existingOriginal : existingCompressed;
+        // Ensure the result is in both maps
+        compressedNdfaMap.putIfAbsent(compressedKey, result);
+        ndfamap.putIfAbsent(ndfaset, result);
       }
+    } else {
+      // Found in original map, add to compressed map for future performance
+      compressedNdfaMap.putIfAbsent(compressedKey, result);
     }
 
     return result;

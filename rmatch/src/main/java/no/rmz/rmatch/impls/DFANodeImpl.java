@@ -66,6 +66,9 @@ public final class DFANodeImpl implements DFANode {
 
   private final List<NDFANode> basisList;
 
+  /** Compressed representation of the basis set for memory efficiency and faster operations. */
+  private final CompressedDFAState compressedBasis;
+
   /**
    * Create new DFA based representing a set of NDFA nodes.
    *
@@ -76,6 +79,11 @@ public final class DFANodeImpl implements DFANode {
     basis.addAll(ndfanodeset);
     initialize(basis);
     this.basisList = new ArrayList<>(this.basis);
+
+    // Register nodes and create compressed representation
+    NDFANodeIdMapper.getInstance().registerNodes(ndfanodeset);
+    this.compressedBasis = new CompressedDFAState(ndfanodeset);
+
     id = COUNTER.inc();
   }
 
@@ -237,5 +245,15 @@ public final class DFANodeImpl implements DFANode {
   @Override
   public boolean isFailingFor(final Regexp regexp) {
     return isFailingSet.contains(regexp);
+  }
+
+  /**
+   * Get the compressed representation of this DFA node's basis set. Package-private for use by
+   * NodeStorageImpl.
+   *
+   * @return the compressed DFA state representation
+   */
+  CompressedDFAState getCompressedBasis() {
+    return compressedBasis;
   }
 }
