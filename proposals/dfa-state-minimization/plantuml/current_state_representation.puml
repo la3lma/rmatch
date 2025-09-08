@@ -1,0 +1,56 @@
+@startuml current_state_representation
+!theme plain
+
+title Current DFA State Representation in rmatch
+
+class DFANodeImpl {
+  - SortedSet<NDFANode> basis
+  - ConcurrentMap<Character, DFANode> nextMap
+  - Set<Regexp> isFailingSet
+  - Map<Regexp, Boolean> baseIsFinalCache
+  - ConcurrentHashMap<Character, Set<Regexp>> firstCharRegexpCache
+  - long id
+  - List<NDFANode> basisList
+  --
+  + DFANodeImpl(Set<NDFANode> ndfanodeset)
+  + getNext(Character c, NodeStorage ns)
+  + isFinal(Regexp regexp)
+}
+
+class NDFANode {
+  - Regexp regexp
+  - boolean terminal
+  - boolean failing
+  --
+  + getNext(Character c)
+  + getEpsilons()
+}
+
+class NodeStorageImpl {
+  - Map<SortedSet<NDFANode>, DFANode> ndfamap
+  - ConcurrentHashMap<Character, DFANode> nextFromDFAMap
+  - StartNode sn
+  --
+  + getDFANode(SortedSet<NDFANode> ndfaset)
+  + getNextFromStartNode(Character ch)
+}
+
+DFANodeImpl --> NDFANode : basis
+NodeStorageImpl --> DFANodeImpl : creates/caches
+DFANodeImpl --> DFANodeImpl : nextMap
+
+note right of DFANodeImpl
+  Heavy-weight SortedSet<NDFANode>
+  - Expensive set operations
+  - High memory overhead
+  - O(log n) lookup/comparison
+end note
+
+note bottom of NodeStorageImpl
+  Uses SortedSet<NDFANode> as key
+  - Expensive hash computation  
+  - Complex equality checks
+  - Memory fragmentation
+end note
+
+@enduml

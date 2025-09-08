@@ -1,0 +1,78 @@
+@startuml proposed_compressed_states
+!theme plain
+
+title Proposed Compressed State Representation
+
+class CompressedDFAState {
+  - int[] ndfaStateIds
+  - long stateBitset
+  - int stateHash
+  - byte[] transitionTable
+  - int finalMask
+  - int failingMask
+  --
+  + CompressedDFAState(int[] stateIds)
+  + getNext(char c)
+  + isFinal(int regexpId)
+  + equals(Object other)
+  + hashCode()
+}
+
+class BitsetStateManager {
+  - long[] stateBitsets
+  - int nextStateId
+  - TIntIntHashMap stateIdMap
+  --
+  + int allocateStateId(long bitset)
+  + long getStateBitset(int stateId)
+  + boolean isEquivalent(int state1, int state2)
+}
+
+class StateMinimizer {
+  - int[][] partitions
+  - boolean[] marked
+  - TIntIntHashMap equivalenceClasses
+  --
+  + minimize(Collection<CompressedDFAState> states)
+  + computePartitions()
+  + mergeEquivalentStates()
+}
+
+class CompressedNodeStorage {
+  - TIntObjectHashMap<CompressedDFAState> stateCache
+  - BitsetStateManager bitsetManager
+  - StateMinimizer minimizer
+  - int[] garbageCollectionCandidates
+  --
+  + getOrCreateState(int[] ndfaIds)
+  + performMinimization()
+  + garbageCollect()
+}
+
+CompressedNodeStorage --> CompressedDFAState : manages
+CompressedNodeStorage --> BitsetStateManager : uses
+CompressedNodeStorage --> StateMinimizer : uses
+BitsetStateManager --> CompressedDFAState : creates
+
+note right of CompressedDFAState::ndfaStateIds
+  Compact int[] array instead of SortedSet
+  - O(1) access by index
+  - 80-90% memory reduction
+  - Cache-friendly sequential access
+end note
+
+note right of BitsetStateManager::stateBitsets
+  64-bit bitsets for states ≤64
+  - Bitwise operations for transitions
+  - Parallel state updates
+  - Hardware-optimized operations
+end note
+
+note bottom of StateMinimizer
+  Hopcroft's algorithm implementation
+  - O(n log n) minimization
+  - Partition refinement
+  - Incremental updates
+end note
+
+@enduml
