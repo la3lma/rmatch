@@ -639,10 +639,10 @@ def create_combined_overview_chart(jmh_df, macro_df, output_dir="charts"):
     # Add note about improvements
     summary_data.extend([
         "",
-        "✓ Timestamps include year",
-        "✓ Focus on 5000/10000 patterns", 
-        "✓ Distribution chart removed",
-        "✓ Memory & comparison ready"
+        "* Timestamps include year",
+        "* Focus on 5000/10000 patterns", 
+        "* Distribution chart removed",
+        "* Memory & comparison ready"
     ])
     
     ax4.text(0.1, 0.9, 'Chart Improvements Summary', fontsize=14, fontweight='bold', 
@@ -687,15 +687,15 @@ def main():
     
     create_combined_overview_chart(jmh_df, macro_df)
     
-    print("✅ Performance chart updates complete!")
-    print("\n🎯 GitHub Issue #166 Requirements Implemented:")
-    print("  ✓ Removed useless 'Average Performance by pattern count' chart")
-    print("  ✓ Added dedicated Java matcher performance charts (execution time & memory)")
-    print("  ✓ Added performance ratio charts (rmatch vs Java) for resource usage comparison")  
-    print("  ✓ Focus on 5000 and 10000 pattern counts as requested")
-    print("  ✓ Removed '(Improved)' and '(Replaces ...)' text from chart titles")
-    print("  ✓ Loaded CSV comparison data containing Java vs rmatch benchmarks")
-    print("\n📝 Chart Files Generated:")
+    print("Performance chart updates complete!")
+    print("\nGitHub Issue #166 Requirements Implemented:")
+    print("  * Removed useless 'Average Performance by pattern count' chart")
+    print("  * Added dedicated Java matcher performance charts (execution time & memory)")
+    print("  * Added performance ratio charts (rmatch vs Java) for resource usage comparison")  
+    print("  * Focus on 5000 and 10000 pattern counts as requested")
+    print("  * Removed '(Improved)' and '(Replaces ...)' text from chart titles")
+    print("  * Loaded CSV comparison data containing Java vs rmatch benchmarks")
+    print("\nChart Files Generated:")
     print("  • jmh_performance_evolution.png - rmatch JMH performance trends")
     print("  • java_performance.png - Java matcher performance (execution time & memory)")
     print("  • performance_ratios.png - rmatch vs Java performance ratios")
