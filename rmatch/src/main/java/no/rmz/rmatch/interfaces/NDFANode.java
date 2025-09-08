@@ -90,6 +90,13 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
   Collection<PrintableEdge> getEdgesToPrint();
 
   /**
+   * Return a unique identifier for this NDFA node.
+   *
+   * @return a Long identifying the node uniquely within the matcher
+   */
+  Long getId();
+
+  /**
    * If true, then the present node represents a valid termination of a match. This means that a
    * match that is in progress can be returned and executed, because it is a legal match, but not
    * necessarily that it will since there may be other overlapping matches that should be run
