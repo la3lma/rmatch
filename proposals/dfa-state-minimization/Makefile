@@ -1,0 +1,175 @@
+# Makefile for DFA State Minimization Proposal
+# Generates LaTeX document with PlantUML diagrams and Python illustrations
+
+SHELL := /bin/bash
+
+# Directories
+SRC_DIR := .
+PLANTUML_DIR := plantuml
+PYTHON_DIR := python
+ILLUSTRATIONS_DIR := illustrations
+BUILD_DIR := build
+
+# Files
+TEX_FILE := proposal.tex
+BIB_FILE := references.bib
+PDF_FILE := proposal.pdf
+
+# PlantUML files
+PLANTUML_FILES := $(wildcard $(PLANTUML_DIR)/*.puml)
+PLANTUML_PNGS := $(PLANTUML_FILES:$(PLANTUML_DIR)/%.puml=$(ILLUSTRATIONS_DIR)/%.png)
+
+# Python chart generation
+PYTHON_SCRIPT := $(PYTHON_DIR)/generate_charts.py
+PYTHON_CHARTS := $(ILLUSTRATIONS_DIR)/memory_usage_comparison.png \
+                 $(ILLUSTRATIONS_DIR)/performance_scaling.png \
+                 $(ILLUSTRATIONS_DIR)/minimization_benefits.png \
+                 $(ILLUSTRATIONS_DIR)/gc_impact.png
+
+# Tools
+PLANTUML_JAR := plantuml.jar
+PLANTUML_URL := https://github.com/plantuml/plantuml/releases/download/v1.2023.12/plantuml-1.2023.12.jar
+PDFLATEX := pdflatex
+BIBTEX := bibtex
+PYTHON := python3
+
+# Default target
+.PHONY: all
+all: $(PDF_FILE)
+
+# Main PDF generation rule
+$(PDF_FILE): $(TEX_FILE) $(BIB_FILE) $(PLANTUML_PNGS) $(PYTHON_CHARTS)
+	@echo "Building LaTeX document..."
+	@mkdir -p $(BUILD_DIR)
+	$(PDFLATEX) -output-directory=$(BUILD_DIR) $(TEX_FILE)
+	cd $(BUILD_DIR) && cp ../$(BIB_FILE) . && $(BIBTEX) $(basename $(TEX_FILE))
+	$(PDFLATEX) -output-directory=$(BUILD_DIR) $(TEX_FILE)
+	$(PDFLATEX) -output-directory=$(BUILD_DIR) $(TEX_FILE)
+	@cp $(BUILD_DIR)/$(PDF_FILE) .
+	@echo "✓ PDF generated: $(PDF_FILE)"
+
+# Create illustrations directory
+$(ILLUSTRATIONS_DIR):
+	@mkdir -p $(ILLUSTRATIONS_DIR)
+
+# Download PlantUML jar if not present
+$(PLANTUML_JAR):
+	@echo "Downloading PlantUML..."
+	@curl -L -o $(PLANTUML_JAR) $(PLANTUML_URL)
+	@echo "✓ PlantUML downloaded"
+
+# Generate PNG from PlantUML files
+$(ILLUSTRATIONS_DIR)/%.png: $(PLANTUML_DIR)/%.puml $(PLANTUML_JAR) | $(ILLUSTRATIONS_DIR)
+	@echo "Generating diagram: $@"
+	@java -jar $(PLANTUML_JAR) -tpng -o ../$(ILLUSTRATIONS_DIR) $<
+	@echo "✓ Generated: $@"
+
+# Generate all PlantUML diagrams
+.PHONY: diagrams
+diagrams: $(PLANTUML_PNGS)
+
+# Check if Python dependencies are available
+.PHONY: check-python-deps
+check-python-deps:
+	@echo "Checking Python dependencies..."
+	@$(PYTHON) -c "import matplotlib.pyplot; import numpy; import seaborn" 2>/dev/null || \
+		(echo "❌ Missing Python dependencies. Install with: pip install matplotlib numpy seaborn" && exit 1)
+	@echo "✓ Python dependencies available"
+
+# Generate Python charts
+$(PYTHON_CHARTS): $(PYTHON_SCRIPT) | $(ILLUSTRATIONS_DIR) check-python-deps
+	@echo "Generating performance charts..."
+	@cd $(PYTHON_DIR) && $(PYTHON) generate_charts.py
+	@echo "✓ Performance charts generated"
+
+# Generate all Python charts
+.PHONY: charts
+charts: $(PYTHON_CHARTS)
+
+# Generate all illustrations
+.PHONY: illustrations  
+illustrations: diagrams charts
+
+# Clean build artifacts
+.PHONY: clean
+clean:
+	@echo "Cleaning build artifacts..."
+	@rm -rf $(BUILD_DIR)
+	@rm -f $(PDF_FILE)
+	@echo "✓ Build artifacts cleaned"
+
+# Clean all generated files including illustrations
+.PHONY: distclean
+distclean: clean
+	@echo "Cleaning all generated files..."
+	@rm -rf $(ILLUSTRATIONS_DIR)
+	@rm -f $(PLANTUML_JAR)
+	@echo "✓ All generated files cleaned"
+
+# Show help
+.PHONY: help
+help:
+	@echo "DFA State Minimization Proposal Build System"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  all          - Build complete PDF document (default)"
+	@echo "  diagrams     - Generate PlantUML diagrams only"
+	@echo "  charts       - Generate Python performance charts only"
+	@echo "  illustrations- Generate all illustrations (diagrams + charts)"
+	@echo "  clean        - Clean build artifacts (keep illustrations)"
+	@echo "  distclean    - Clean everything including illustrations"
+	@echo "  check-deps   - Check if all required tools are available"
+	@echo "  help         - Show this help message"
+	@echo ""
+	@echo "Requirements:"
+	@echo "  - LaTeX distribution (pdflatex, bibtex)"
+	@echo "  - Java (for PlantUML)"
+	@echo "  - Python 3 with matplotlib, numpy, seaborn"
+	@echo "  - curl (for downloading PlantUML)"
+
+# Check dependencies
+.PHONY: check-deps
+check-deps:
+	@echo "Checking build dependencies..."
+	@command -v $(PDFLATEX) >/dev/null 2>&1 || (echo "❌ pdflatex not found" && exit 1)
+	@command -v $(BIBTEX) >/dev/null 2>&1 || (echo "❌ bibtex not found" && exit 1)
+	@command -v java >/dev/null 2>&1 || (echo "❌ java not found" && exit 1)
+	@command -v $(PYTHON) >/dev/null 2>&1 || (echo "❌ python3 not found" && exit 1)
+	@command -v curl >/dev/null 2>&1 || (echo "❌ curl not found" && exit 1)
+	@$(MAKE) check-python-deps
+	@echo "✓ All dependencies available"
+
+# Install Python dependencies
+.PHONY: install-python-deps
+install-python-deps:
+	@echo "Installing Python dependencies..."
+	@$(PYTHON) -m pip install matplotlib numpy seaborn
+	@echo "✓ Python dependencies installed"
+
+# Development target - watch for changes and rebuild
+.PHONY: watch
+watch:
+	@echo "Watching for changes... (Ctrl+C to stop)"
+	@while true; do \
+		inotifywait -e modify $(TEX_FILE) $(BIB_FILE) $(PLANTUML_FILES) $(PYTHON_SCRIPT) 2>/dev/null && \
+		$(MAKE) all; \
+	done
+
+# Quick build without running Python (uses cached charts)
+.PHONY: quick
+quick: $(TEX_FILE) $(BIB_FILE) $(PLANTUML_PNGS)
+	@echo "Quick build (using cached charts)..."
+	@mkdir -p $(BUILD_DIR)
+	$(PDFLATEX) -output-directory=$(BUILD_DIR) $(TEX_FILE)
+	cd $(BUILD_DIR) && $(BIBTEX) $(basename $(TEX_FILE))
+	$(PDFLATEX) -output-directory=$(BUILD_DIR) $(TEX_FILE)
+	$(PDFLATEX) -output-directory=$(BUILD_DIR) $(TEX_FILE)
+	@cp $(BUILD_DIR)/$(PDF_FILE) .
+	@echo "✓ Quick build complete: $(PDF_FILE)"
+
+# Validate LaTeX syntax
+.PHONY: validate
+validate:
+	@echo "Validating LaTeX syntax..."
+	@$(PDFLATEX) -output-directory=$(BUILD_DIR) -draftmode $(TEX_FILE)
+	@echo "✓ LaTeX syntax valid"

@@ -1,0 +1,62 @@
+@startuml state_minimization_algorithm
+!theme plain
+
+title DFA State Minimization Process
+
+!define PROCESS_COLOR #E1F5FE
+!define DECISION_COLOR #FFF3E0
+!define DATA_COLOR #F3E5F5
+
+start
+
+:Initial DFA States;
+note right: Set of all constructed DFA states
+
+:Create Initial Partition;
+note right
+  Partition states into:
+  - Final states (by regexp)
+  - Non-final states
+end note
+
+:Initialize Worklist;
+note right: Add all partition pairs to worklist
+
+while (Worklist not empty?) is (yes)
+  :Remove partition pair (A, B);
+  
+  :For each symbol c;
+  
+  :Find states that transition to A on c;
+  note right: δ⁻¹(A,c) = {s | δ(s,c) ∈ A}
+  
+  :Split partitions based on transitions;
+  note right
+    If some states in partition P
+    go to A on c and others don't,
+    split P into two partitions
+  end note
+  
+  :Update worklist if partitions were split;
+  
+endwhile (no)
+
+:Merge equivalent states;
+note right
+  States in same partition
+  are equivalent and can
+  be merged
+end note
+
+:Generate minimized DFA;
+note right
+  Each partition becomes
+  one state in minimized DFA
+end note
+
+:Update state mappings;
+note right: Map original states to minimized states
+
+stop
+
+@enduml
