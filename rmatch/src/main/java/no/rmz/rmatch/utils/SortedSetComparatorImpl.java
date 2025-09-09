@@ -34,6 +34,8 @@ public final class SortedSetComparatorImpl<T extends Comparable>
     final Iterator<T> t1i = t1.iterator();
 
     while (ti.hasNext() && t1i.hasNext()) {
+      //noinspection unchecked
+      @SuppressWarnings("unchecked")
       int r = ti.next().compareTo(t1i.next());
       if (r != 0) {
         return r;

@@ -434,9 +434,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
     // Handle simple cases - for complex regex, return first literal char
     final char first = pattern.charAt(0);
-    if (Character.isLetterOrDigit(first)) {
-      return first;
-    }
+    Character.isLetterOrDigit(first);
 
     // For now, just return first character - could be enhanced for complex patterns
     return first;

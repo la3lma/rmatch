@@ -172,12 +172,11 @@ public final class LiteralPrefilter {
           }
           inQuote = false;
           i++; // skip the 'E'
-          continue;
         } else {
           // Inside quoted section, everything is literal
           current.append(c);
-          continue;
         }
+        continue;
       }
 
       if (escaped) {

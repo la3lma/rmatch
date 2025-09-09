@@ -32,9 +32,11 @@ public final class RegexpDominationProtocolTest {
   private DFANodeImpl sn; // StartNode
 
   /** Give us a regexp impleentation and a dfanode representing no NDFAnodes (the empty set). */
+  @SuppressWarnings("unchecked")
   @BeforeEach
   public void setUp() {
     re = new RegexpImpl("Fnord");
+    //noinspection unchecked
     sn = new DFANodeImpl(Collections.EMPTY_SET);
   }
 

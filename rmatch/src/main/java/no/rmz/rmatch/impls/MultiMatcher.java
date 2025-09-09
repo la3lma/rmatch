@@ -45,8 +45,7 @@ public final class MultiMatcher implements Matcher {
    * @return the number of partitions to use
    */
   private static int divineOptimalNumberOfMatchers() {
-    final int cores = Runtime.getRuntime().availableProcessors();
-    return cores;
+    return Runtime.getRuntime().availableProcessors();
   }
 
   /** An array of matchers that are used when matching. */
