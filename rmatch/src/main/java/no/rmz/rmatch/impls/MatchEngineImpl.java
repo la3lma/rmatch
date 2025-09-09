@@ -13,15 +13,14 @@
  */
 package no.rmz.rmatch.impls;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.*;
 import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
 import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
 import no.rmz.rmatch.interfaces.*;
-
-import java.util.*;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An implementation of a MatchEngine that can be used to match regular expressions against input.
