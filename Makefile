@@ -1,6 +1,6 @@
  SHELL := /bin/bash
 
- .PHONY: build test ci bench-micro bench-macro profile fmt spotless spotbugs
+ .PHONY: build test ci bench-micro bench-macro bench-java profile fmt spotless spotbugs
 
 build:
 	mvn -q -B spotless:apply
@@ -23,6 +23,9 @@ bench-micro:
 
 bench-macro:
 	MAX_REGEXPS=10000 scripts/run_macro_with_memory.sh
+
+bench-java:
+	MAX_REGEXPS=10000 scripts/run_java_benchmark_with_memory.sh
 
 profile:
 	DUR=30; scripts/profile_async_profiler.sh $$DUR
