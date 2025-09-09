@@ -1,6 +1,34 @@
 rmatch
 ======
 
+## Current Performance Comparison
+
+| Metric | rmatch | Java Regex | Ratio (rmatch/java) |
+|--------|--------|------------|---------------------|
+| **1000 patterns** | 2.2s | 1.6s | 1.4x slower |
+| **Peak Memory** | 30MB | 15MB | 2.0x more memory |
+| **Pattern Loading** | 4MB | 1MB | 4.0x more memory |
+| **Matching Phase** | 12MB | 0MB | 0.0x less memory |
+
+*Latest benchmark comparison between rmatch and native Java regex (java.util.regex.Pattern) on 1000 regex patterns against Wuthering Heights corpus. Updated: 2025-09-09 16:40 UTC*
+
+---
+
+## Performance Timeline Charts
+
+### rmatch Performance History
+![rmatch Benchmark Performance](performance_timeline.png)
+
+### Java Regex Performance History  
+![Java Regex Benchmark Performance](java_performance_timeline.png)
+
+### Performance Comparison (rmatch vs Java Regex)
+![Performance Comparison](performance_comparison.png)
+
+*Live performance tracking from macro benchmarks. Individual charts show execution time and memory usage patterns over time, while the comparison chart shows rmatch performance ratios relative to Java regex (values > 1.0 mean rmatch is slower/uses more memory).*
+
+---
+
 rmatch
 
 The project is getting closer to a state where it may be useful for others
