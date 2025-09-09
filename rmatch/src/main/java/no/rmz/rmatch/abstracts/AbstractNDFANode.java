@@ -91,8 +91,7 @@ public abstract class AbstractNDFANode implements NDFANode {
 
   @Override
   public boolean equals(final Object o) {
-    if (o instanceof AbstractNDFANode) {
-      final AbstractNDFANode other = (AbstractNDFANode) o;
+    if (o instanceof AbstractNDFANode other) {
       return index.equals(other.index);
     } else {
       return false;
@@ -281,10 +280,9 @@ public abstract class AbstractNDFANode implements NDFANode {
 
   @Override
   public final int compareTo(final NDFANode t) {
-    if (!(t instanceof AbstractNDFANode)) {
+    if (!(t instanceof AbstractNDFANode ta)) {
       throw new UnsupportedOperationException("Not supported yet.");
     } else {
-      final AbstractNDFANode ta = (AbstractNDFANode) t;
 
       return index.compareTo(ta.index);
     }

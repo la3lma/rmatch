@@ -117,10 +117,10 @@ public final class GraphDumper {
 
     for (final NDFANode source : ndfaNodes) {
       for (final PrintableEdge edge : source.getEdgesToPrint()) {
-        if (edge.getLabel() == null) {
-          printEpsilonEdge(out, source, edge.getDestination());
+        if (edge.label() == null) {
+          printEpsilonEdge(out, source, edge.destination());
         } else {
-          printLabeledEdge(out, source, edge.getDestination(), edge.getLabel());
+          printLabeledEdge(out, source, edge.destination(), edge.label());
         }
       }
     }

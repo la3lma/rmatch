@@ -37,20 +37,16 @@ import org.ahocorasick.trie.Trie;
  */
 public final class AhoCorasickPrefilter {
 
-  /** Represents a candidate position where regex matching should be attempted. */
-  public static final class Candidate {
-    /** The pattern ID that this candidate corresponds to. */
-    public final int patternId;
-
-    /** End position of literal in the text (exclusive). */
-    public final int endIndexExclusive;
-
-    /** Length of the matched literal. */
-    public final int literalLength;
-
-    /** Offset of the literal within the expected match. */
-    public final int literalOffsetInMatch;
-
+  /**
+   * Represents a candidate position where regex matching should be attempted.
+   *
+   * @param patternId The pattern ID that this candidate corresponds to.
+   * @param endIndexExclusive End position of literal in the text (exclusive).
+   * @param literalLength Length of the matched literal.
+   * @param literalOffsetInMatch Offset of the literal within the expected match.
+   */
+  public record Candidate(
+      int patternId, int endIndexExclusive, int literalLength, int literalOffsetInMatch) {
     /**
      * Creates a new candidate.
      *
@@ -59,16 +55,7 @@ public final class AhoCorasickPrefilter {
      * @param literalLength length of the matched literal
      * @param literalOffsetInMatch offset of literal within the expected match
      */
-    public Candidate(
-        final int patternId,
-        final int endIndexExclusive,
-        final int literalLength,
-        final int literalOffsetInMatch) {
-      this.patternId = patternId;
-      this.endIndexExclusive = endIndexExclusive;
-      this.literalLength = literalLength;
-      this.literalOffsetInMatch = literalOffsetInMatch;
-    }
+    public Candidate {}
 
     /**
      * Calculates the start index for regex matching.
@@ -130,13 +117,13 @@ public final class AhoCorasickPrefilter {
    * @return list of literal variants to add to the trie
    */
   private static List<String> keyedLiterals(final LiteralHint hint) {
-    if (!hint.caseInsensitive) {
-      return List.of(hint.literal);
+    if (!hint.caseInsensitive()) {
+      return List.of(hint.literal());
     }
     // naive CI expansion: add lower and upper; Java case rules are locale-sensitive—use ROOT if
     // you normalize upstream
-    final String lower = hint.literal.toLowerCase(Locale.ROOT);
-    final String upper = hint.literal.toUpperCase(Locale.ROOT);
+    final String lower = hint.literal().toLowerCase(Locale.ROOT);
+    final String upper = hint.literal().toUpperCase(Locale.ROOT);
     if (lower.equals(upper)) {
       return List.of(lower);
     }
@@ -166,7 +153,7 @@ public final class AhoCorasickPrefilter {
       for (final LiteralHint hint : hints) {
         out.add(
             new Candidate(
-                hint.patternId, endIdxExclusive, lit.length(), hint.literalOffsetInMatch));
+                hint.patternId(), endIdxExclusive, lit.length(), hint.literalOffsetInMatch()));
       }
     }
     return out;

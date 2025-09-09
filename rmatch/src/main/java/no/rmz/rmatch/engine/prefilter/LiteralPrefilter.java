@@ -33,12 +33,13 @@ import java.util.Optional;
  */
 public final class LiteralPrefilter {
 
-  /** Result wrapper for literal extraction. */
-  public static final class Result {
-    /** The extracted literal hint, if any. */
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public final Optional<LiteralHint> hint;
-
+  /**
+   * Result wrapper for literal extraction.
+   *
+   * @param hint The extracted literal hint, if any.
+   */
+  public record Result(
+      @SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<LiteralHint> hint) {
     /**
      * Creates a result with the given hint.
      *

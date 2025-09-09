@@ -75,8 +75,7 @@ public final class MatcherImpl implements Matcher {
       rs.add(r, a);
 
       // Initialize engine-specific optimizations
-      if (USE_BLOOM_FILTER && me instanceof BloomFilterMatchEngine) {
-        final BloomFilterMatchEngine bfEngine = (BloomFilterMatchEngine) me;
+      if (USE_BLOOM_FILTER && me instanceof BloomFilterMatchEngine bfEngine) {
         final java.util.Set<Regexp> regexps = new java.util.HashSet<>();
         for (final String regexpStr : rs.getRegexpSet()) {
           regexps.add(rs.getRegexp(regexpStr));
@@ -141,5 +140,5 @@ public final class MatcherImpl implements Matcher {
   }
 
   @Override
-  public void shutdown() throws InterruptedException {}
+  public void shutdown() {}
 }
