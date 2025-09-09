@@ -13,9 +13,9 @@
  */
 package no.rmz.rmatch.utils;
 
-import no.rmz.rmatch.interfaces.Buffer;
-
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import no.rmz.rmatch.interfaces.Buffer;
 
 /** An implementation of the Buffer interface that holds all inputs as a String. */
 public final class StringBuffer implements Buffer, Cloneable {
