@@ -1,6 +1,14 @@
 rmatch
 ======
 
+## Macro Performance Timeline
+
+![Macro Benchmark Performance](performance_timeline.png)
+
+*Live performance tracking from macro benchmarks (10,000 regex patterns on Wuthering Heights corpus). Latest results show consistent sub-20 second performance.*
+
+---
+
 rmatch
 
 The project is getting closer to a state where it may be useful for others

@@ -21,9 +21,15 @@ jobs:
         run: ./scripts/run_jmh.sh  # outputs jmh-result.json
       - name: Run Macro Benchmark
         run: ./scripts/run_macro.sh  # outputs macro-result.json
+      - name: Generate macro performance timeline
+        run: |
+          # Install Python dependencies if needed
+          python3 -m pip install --user matplotlib pandas numpy || true
+          # Generate timeline chart
+          python3 scripts/generate_macro_performance_plot.py || echo "Chart generation skipped"
       - name: Profile hot path
         run: ./scripts/profile_async_profiler.sh  # outputs *.svg
       - name: Compare vs baseline and comment
         run: ./scripts/compare_and_comment.sh  # uses GH_TOKEN to post PR comment
       - uses: actions/upload-artifact@v4
-        with: { name: perf-artifacts, path: "jmh-result.json macro-result.json profiles/*.svg" }
+        with: { name: perf-artifacts, path: "jmh-result.json macro-result.json profiles/*.svg performance_timeline.png" }

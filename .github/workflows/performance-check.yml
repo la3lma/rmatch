@@ -60,6 +60,39 @@ jobs:
           
           # Generate performance evolution charts
           python3 scripts/generate_performance_charts.py
+          
+          # Generate macro performance timeline chart
+          echo "Generating macro performance timeline chart..."
+          python3 scripts/generate_macro_performance_plot.py
+      
+      - name: Commit updated performance timeline
+        if: github.event_name == 'pull_request'
+        run: |
+          # Configure git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Check if performance_timeline.png was updated
+          if [ -f "performance_timeline.png" ]; then
+            git add performance_timeline.png
+            
+            # Only commit if there are changes
+            if ! git diff --staged --quiet; then
+              git commit -m "chore: update macro performance timeline chart
+              
+              Auto-generated after running performance benchmarks
+              
+              [skip ci]"
+              
+              # Push the changes back to the PR branch
+              git push origin HEAD:${{ github.head_ref }}
+              echo "✅ Updated performance timeline chart committed to PR"
+            else
+              echo "ℹ️  No changes to performance timeline chart"
+            fi
+          else
+            echo "⚠️  Performance timeline chart not found"
+          fi
       
       - name: Compare and comment
         env:
@@ -92,4 +125,5 @@ jobs:
             benchmarks/results/*.log
             benchmarks/results/*.md
             charts/*.png
+            performance_timeline.png
           retention-days: 30
