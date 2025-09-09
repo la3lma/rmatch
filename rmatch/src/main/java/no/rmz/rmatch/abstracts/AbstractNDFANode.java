@@ -17,6 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import no.rmz.rmatch.impls.NDFANodeIdMapper;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
@@ -24,6 +25,8 @@ import no.rmz.rmatch.utils.CounterType;
 import no.rmz.rmatch.utils.FastCounter;
 import no.rmz.rmatch.utils.FastCounters;
 import no.rmz.rmatch.utils.LifoSet;
+import no.rmz.rmatch.utils.OptimizedEpsilonSet;
+import no.rmz.rmatch.utils.OptimizedNDFASet;
 
 /**
  * An abstract implementation of the NDANode interface. In fact, this implementation is designed so
@@ -48,7 +51,7 @@ public abstract class AbstractNDFANode implements NDFANode {
   final ConcurrentHashMap<Character, SortedSet<NDFANode>> nextSetCache = new ConcurrentHashMap<>();
 
   /** The set of epsilon-edges going out of this node. */
-  private final SortedSet<NDFANode> epsilonSet = new TreeSet<>();
+  private final OptimizedEpsilonSet epsilonSet = new OptimizedEpsilonSet();
 
   /** The regular expression associated with this NDFA. */
   private final Regexp regexp;
@@ -165,9 +168,8 @@ public abstract class AbstractNDFANode implements NDFANode {
    */
   private SortedSet<NDFANode> getNextSetNonThreadsafe(final Character ch) {
 
-    // Eventually, the result we'll collect and return will go into this
-    // set.
-    final SortedSet<NDFANode> resultNodes = new TreeSet<>();
+    // Use optimized set for much better memory efficiency and performance
+    final OptimizedNDFASet resultNodes = new OptimizedNDFASet();
 
     // Meanwhile, we'll have a set of unexplored nodes that we'll have to
     // explore before we're done.
@@ -211,15 +213,14 @@ public abstract class AbstractNDFANode implements NDFANode {
     // Updating the counter.
     cachedEdgesCounter.inc();
 
-    // The set of NDFANode instances
-    // representing the next DFA node.
-    return resultNodes;
+    // Convert back to SortedSet for API compatibility
+    return resultNodes.toSortedSet();
   }
 
   private static void removeDuplicates(
-      final Set<NDFANode> newNodes, final SortedSet<NDFANode> resultNodes) {
+      final Set<NDFANode> newNodes, final OptimizedNDFASet resultNodes) {
     if (!newNodes.isEmpty() && !resultNodes.isEmpty()) {
-      newNodes.removeAll(resultNodes);
+      newNodes.removeIf(resultNodes::contains);
     }
   }
 
@@ -241,10 +242,13 @@ public abstract class AbstractNDFANode implements NDFANode {
    * Then follow all epsilon links for the nodes in the resultNodes set (transitively reflexive
    * closure of epsilon links) and add all of those to the result set.
    */
-  private static void followEpsilonLinks(final SortedSet<NDFANode> resultNodes) {
-
+  private static void followEpsilonLinks(final OptimizedNDFASet resultNodes) {
     final Set<NDFANode> epsilonClosure = new HashSet<>();
-    for (final NDFANode r : resultNodes) {
+    final NDFANodeIdMapper mapper = NDFANodeIdMapper.getInstance();
+
+    // Convert current result nodes back to NDFANode objects to get their epsilons
+    final SortedSet<NDFANode> currentNodes = resultNodes.toSortedSet();
+    for (final NDFANode r : currentNodes) {
       epsilonClosure.addAll(r.getEpsilons());
     }
 
@@ -260,7 +264,8 @@ public abstract class AbstractNDFANode implements NDFANode {
   @Override
   public final SortedSet<NDFANode> getEpsilons() {
     synchronized (monitor) {
-      return Collections.unmodifiableSortedSet(epsilonSet);
+      return Collections.unmodifiableSortedSet(
+          epsilonSet.toSortedSet(NDFANodeIdMapper.getInstance()::getNode));
     }
   }
 
@@ -298,7 +303,7 @@ public abstract class AbstractNDFANode implements NDFANode {
   public final void addEpsilonReachableNodes(final Collection<NDFANode> alternatives) {
     synchronized (monitor) {
       for (final NDFANode n : alternatives) {
-        addEpsilonEdge(n);
+        epsilonSet.add(n);
       }
     }
   }
@@ -313,7 +318,9 @@ public abstract class AbstractNDFANode implements NDFANode {
   public final Collection<PrintableEdge> getEpsilonEdgesToPrint() {
     final Collection<PrintableEdge> result = new ArrayList<>();
     synchronized (monitor) {
-      for (final NDFANode n : epsilonSet) {
+      final SortedSet<NDFANode> epsilons =
+          epsilonSet.toSortedSet(NDFANodeIdMapper.getInstance()::getNode);
+      for (final NDFANode n : epsilons) {
         result.add(new PrintableEdge(null, n));
       }
     }

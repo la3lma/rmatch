@@ -75,6 +75,16 @@ public final class NDFANodeIdMapper {
   }
 
   /**
+   * Get an NDFANode by its ID (alias for getNodeById for compatibility).
+   *
+   * @param id the node ID
+   * @return the NDFANode with the given ID, or null if not found
+   */
+  public NDFANode getNode(final int id) {
+    return getNodeById(id);
+  }
+
+  /**
    * Create a compressed DFA state from a collection of NDFANodes, automatically registering them.
    *
    * @param ndfaNodes the NDFANodes to compress

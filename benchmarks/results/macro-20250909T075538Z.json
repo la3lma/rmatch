@@ -1,0 +1,11 @@
+{
+  "type": "macro",
+  "timestamp": "20250909T075538Z",
+  "git": { "sha": "fc827470b6ef3c20dca0b295f34787be237b99a0", "branch": "copilot/optimize-state-storage-implementation" },
+  "java": "openjdk version "17.0.16" 2025-07-15 OpenJDK Runtime Environment Temurin-17.0.16+8 (build 17.0.16+8) OpenJDK 64-Bit Server VM Temurin-17.0.16+8 (build 17.0.16+8, mixed mode, sharing) ",
+  "os": { "name": "Linux", "release": "6.11.0-1018-azure" },
+  "args": { "max_regexps": 10000 },
+  "duration_ms": 44789,
+  "exit_status": 0,
+  "log": "benchmarks/results/macro-20250909T075538Z.log"
+}
