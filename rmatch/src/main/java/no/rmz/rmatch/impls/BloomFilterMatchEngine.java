@@ -15,23 +15,11 @@ package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
 import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.interfaces.MatchEngine;
-import no.rmz.rmatch.interfaces.MatchSet;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.RunnableMatchesHolder;
+import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.SimpleBloomFilter;
 
 /**

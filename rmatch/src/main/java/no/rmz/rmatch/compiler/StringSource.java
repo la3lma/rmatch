@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.compiler;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 // XXX This looks really stupid!
 

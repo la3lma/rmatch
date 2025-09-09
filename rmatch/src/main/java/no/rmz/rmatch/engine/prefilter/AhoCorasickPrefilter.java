@@ -13,12 +13,7 @@
  */
 package no.rmz.rmatch.engine.prefilter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import org.ahocorasick.trie.Emit;
 import org.ahocorasick.trie.Trie;
 

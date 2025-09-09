@@ -6,8 +6,9 @@ to demonstrate the improved charts for GitHub issue #161.
 
 import json
 import os
-from datetime import datetime, timedelta
 import random
+from datetime import datetime, timedelta
+
 
 def create_sample_jmh_data():
     """Create sample JMH data files with 5000 and 10000 pattern counts."""
