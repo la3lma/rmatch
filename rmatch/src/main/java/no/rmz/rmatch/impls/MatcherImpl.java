@@ -15,6 +15,9 @@ package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
@@ -33,6 +36,10 @@ public final class MatcherImpl implements Matcher {
 
   /** Our precious MatchEngine. */
   private final MatchEngine me;
+
+  /** Flag to enable Bloom filter optimization. */
+  private static final boolean USE_BLOOM_FILTER =
+      "bloom".equalsIgnoreCase(System.getProperty("rmatch.engine", "default"));
 
   /** Our equally prescious NodeStorage. Our precioussss. */
   private final NodeStorage ns;
@@ -57,13 +64,30 @@ public final class MatcherImpl implements Matcher {
     checkNotNull(regexpFactory);
     ns = new NodeStorageImpl();
     rs = new RegexpStorageImpl(ns, compiler, regexpFactory);
-    me = new MatchEngineImpl(ns);
+    if (USE_BLOOM_FILTER) {
+      me = new BloomFilterMatchEngine(ns);
+    } else {
+      me = new MatchEngineImpl(ns);
+    }
   }
 
   @Override
   public void add(final String r, final Action a) throws RegexpParserException {
     synchronized (rs) {
       rs.add(r, a);
+
+      // Initialize engine-specific optimizations
+      if (USE_BLOOM_FILTER && me instanceof BloomFilterMatchEngine) {
+        final BloomFilterMatchEngine bfEngine = (BloomFilterMatchEngine) me;
+        final java.util.Set<Regexp> regexps = new java.util.HashSet<>();
+        for (final String regexpStr : rs.getRegexpSet()) {
+          regexps.add(rs.getRegexp(regexpStr));
+        }
+        bfEngine.initialize(regexps);
+      } else if (me instanceof MatchEngineImpl) {
+        // Configure AhoCorasick prefilter for legacy engine
+        configurePrefilterForLegacyEngine();
+      }
     }
   }
 
@@ -71,7 +95,39 @@ public final class MatcherImpl implements Matcher {
   public void remove(final String r, final Action a) {
     synchronized (rs) {
       rs.remove(r, a);
+
+      // Reconfigure prefilter after removal
+      if (!USE_BLOOM_FILTER && me instanceof MatchEngineImpl) {
+        configurePrefilterForLegacyEngine();
+      }
     }
+  }
+
+  /**
+   * Configure the AhoCorasick prefilter for the legacy MatchEngineImpl. This builds pattern
+   * mappings and enables aggressive literal-based prefiltering.
+   */
+  private void configurePrefilterForLegacyEngine() {
+    final MatchEngineImpl legacyEngine = (MatchEngineImpl) me;
+
+    // Build pattern ID to regex string mapping
+    final Map<Integer, String> patterns = new HashMap<>();
+    final Map<Integer, Integer> flags = new HashMap<>();
+    final Map<String, Regexp> regexpMappings = new HashMap<>();
+
+    final Set<String> regexpStrings = rs.getRegexpSet();
+    int patternId = 0;
+
+    for (final String regexpStr : regexpStrings) {
+      patterns.put(patternId, regexpStr);
+      flags.put(
+          patternId, 0); // Default flags, could be enhanced to detect case-insensitive patterns
+      regexpMappings.put(regexpStr, rs.getRegexp(regexpStr));
+      patternId++;
+    }
+
+    // Configure the prefilter with our patterns and mappings
+    legacyEngine.configurePrefilter(patterns, flags, regexpMappings);
   }
 
   @Override

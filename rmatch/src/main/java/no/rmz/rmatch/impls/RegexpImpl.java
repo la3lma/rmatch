@@ -16,7 +16,9 @@ package no.rmz.rmatch.impls;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import no.rmz.rmatch.interfaces.*;
@@ -55,8 +57,7 @@ public final class RegexpImpl implements Regexp {
   private NDFANode myNode;
 
   /** Cache for first-character matching results to optimize O(l*m) bottleneck. */
-  private final ConcurrentHashMap<Character, Boolean> firstCharacterCache =
-      new ConcurrentHashMap<>();
+  private final Map<Character, Boolean> firstCharacterCache = new HashMap<>();
 
   /**
    * Make a new instance of Regexp representing a regular expression.
@@ -270,7 +271,7 @@ public final class RegexpImpl implements Regexp {
   }
 
   @Override
-  public boolean canStartWith(final Character ch) {
+  public synchronized boolean canStartWith(final Character ch) {
     checkNotNull(ch, "Character cannot be null");
 
     // Return cached result if available

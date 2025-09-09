@@ -15,7 +15,7 @@ PNG_TARGETS = $(patsubst $(PLANTUML_DIR)/%.puml,$(ILLUSTRATIONS_DIR)/%.png,$(PUM
 SVG_TARGETS = $(patsubst $(PLANTUML_DIR)/%.puml,$(ILLUSTRATIONS_DIR)/%.svg,$(PUML_SOURCES))
 
 # Default target
-all: analysis.pdf
+all: analysis.pdf experience-report.pdf
 
 # Download PlantUML if not present
 $(PLANTUML_JAR):
@@ -41,21 +41,28 @@ diagrams: $(PNG_TARGETS) $(SVG_TARGETS)
 
 # Compile LaTeX to PDF
 analysis.pdf: analysis.tex references.bib $(PNG_TARGETS)
-	@echo "Compiling LaTeX document..."
+	@echo "Compiling analysis document..."
 	pdflatex analysis.tex
 	bibtex analysis
 	pdflatex analysis.tex
 	pdflatex analysis.tex
 	@echo "Generated: analysis.pdf"
 
+# Compile experience report to PDF
+experience-report.pdf: experience-report.tex
+	@echo "Compiling experience report..."
+	pdflatex experience-report.tex
+	pdflatex experience-report.tex
+	@echo "Generated: experience-report.pdf"
+
 # Clean generated files
 clean:
-	rm -f analysis.aux analysis.bbl analysis.blg analysis.log analysis.out analysis.toc
+	rm -f *.aux *.bbl *.blg *.log *.out *.toc
 	rm -rf $(ILLUSTRATIONS_DIR)
 
 # Clean everything including PDF
 distclean: clean
-	rm -f analysis.pdf $(PLANTUML_JAR)
+	rm -f analysis.pdf experience-report.pdf $(PLANTUML_JAR)
 
 # Force rebuild of diagrams
 rebuild-diagrams: 
@@ -70,7 +77,8 @@ help:
 	@echo "Available targets:"
 	@echo "  all              - Generate diagrams and compile PDF (default)"
 	@echo "  diagrams         - Generate all PlantUML diagrams (PNG and SVG)"
-	@echo "  analysis.pdf     - Compile LaTeX document to PDF"
+	@echo "  analysis.pdf     - Compile analysis document to PDF"
+	@echo "  experience-report.pdf - Compile experience report to PDF"
 	@echo "  clean            - Remove temporary LaTeX files and diagrams"
 	@echo "  distclean        - Remove all generated files including PDF"
 	@echo "  rebuild-diagrams - Force regeneration of all diagrams"
@@ -90,5 +98,6 @@ check-prereqs:
 
 # Dependencies
 analysis.pdf: $(PNG_TARGETS)
+experience-report.pdf: experience-report.tex
 $(PNG_TARGETS): $(PLANTUML_JAR)
 $(SVG_TARGETS): $(PLANTUML_JAR)
