@@ -106,7 +106,7 @@ public class ConcurrencyTest {
     assertEquals(0, errorCount.get(), "Should not have any errors in concurrent heap operations");
 
     // Verify heap is still functional
-    assertTrue(heap.size() > 0);
+    assertTrue(!heap.isEmpty());
     assertFalse(heap.isEmpty());
 
     executor.shutdown();

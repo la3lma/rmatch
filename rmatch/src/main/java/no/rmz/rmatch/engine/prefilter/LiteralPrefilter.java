@@ -166,7 +166,7 @@ public final class LiteralPrefilter {
         // Handle quoted literals \Q...\E
         if (c == '\\' && i + 1 < regex.length() && regex.charAt(i + 1) == 'E') {
           // End of quoted section - add the literal
-          if (current.length() > 0) {
+          if (!current.isEmpty()) {
             literals.add(current.toString());
             current.setLength(0);
           }
@@ -184,14 +184,14 @@ public final class LiteralPrefilter {
         // Handle escaped characters
         if (c == 'Q') {
           // Start of quoted section
-          if (current.length() > 0) {
+          if (!current.isEmpty()) {
             literals.add(current.toString());
             current.setLength(0);
           }
           inQuote = true;
         } else if ("nrtfaebBAdDsSwWzZ".indexOf(c) >= 0) {
           // Special escape sequences end current literal
-          if (current.length() > 0) {
+          if (!current.isEmpty()) {
             literals.add(current.toString());
             current.setLength(0);
           }
@@ -213,7 +213,7 @@ public final class LiteralPrefilter {
           inClass = false;
         }
         // Inside character class, end current literal
-        if (current.length() > 0) {
+        if (!current.isEmpty()) {
           literals.add(current.toString());
           current.setLength(0);
         }
@@ -226,7 +226,7 @@ public final class LiteralPrefilter {
           && regex.charAt(i + 1) == '?'
           && regex.charAt(i + 2) == ':') {
         // Non-capturing group (?:
-        if (current.length() > 0) {
+        if (!current.isEmpty()) {
           literals.add(current.toString());
           current.setLength(0);
         }
@@ -237,7 +237,7 @@ public final class LiteralPrefilter {
       switch (c) {
         case '[':
           inClass = true;
-          if (current.length() > 0) {
+          if (!current.isEmpty()) {
             literals.add(current.toString());
             current.setLength(0);
           }
@@ -254,7 +254,7 @@ public final class LiteralPrefilter {
         case '{':
         case '}':
           // Metacharacters end current literal
-          if (current.length() > 0) {
+          if (!current.isEmpty()) {
             literals.add(current.toString());
             current.setLength(0);
           }
@@ -267,7 +267,7 @@ public final class LiteralPrefilter {
     }
 
     // Add final literal if any
-    if (current.length() > 0) {
+    if (!current.isEmpty()) {
       literals.add(current.toString());
     }
 

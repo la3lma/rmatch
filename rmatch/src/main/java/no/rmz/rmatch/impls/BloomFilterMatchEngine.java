@@ -152,9 +152,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
       // Extract literal hints from the pattern
       final var hint = LiteralPrefilter.extract(patternId++, pattern, 0);
-      if (hint.isPresent()) {
-        hints.add(hint.get());
-      }
+      hint.ifPresent(hints::add);
     }
 
     if (!hints.isEmpty()) {

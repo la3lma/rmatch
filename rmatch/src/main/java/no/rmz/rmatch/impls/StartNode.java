@@ -39,7 +39,7 @@ public final class StartNode extends AbstractNDFANode {
   private static final Regexp START_NO_REGEXP = new RegexpImpl(""); // XX??
 
   /** The DFA that represents the StartNode instance. */
-  private DFANodeImpl topDFA = new DFANodeImpl(Collections.EMPTY_SET);
+  private final DFANodeImpl topDFA = new DFANodeImpl(Collections.EMPTY_SET);
 
   /** A monitor that is used to synchronize access to the StartNode instance. */
   private final Object topDfaMonitor = new Object();

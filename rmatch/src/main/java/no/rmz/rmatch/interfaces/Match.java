@@ -125,7 +125,7 @@ public interface Match {
       };
 
   /** A comparator that compares matches based on their domination status. */
-  final Comparator<Match> COMPARE_BY_DOMINATION =
+  Comparator<Match> COMPARE_BY_DOMINATION =
       (final Match ths, final Match that) -> {
         if (ths == that) {
           return 0;
