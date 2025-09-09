@@ -38,6 +38,9 @@ jobs:
           echo "Generating Java regex performance timeline chart..."
           python3 scripts/generate_java_performance_plot.py || echo "Java regex timeline chart skipped"
           
+          echo "Generating performance comparison chart..."
+          python3 scripts/generate_performance_comparison_plot.py || echo "Performance comparison chart generation skipped"
+          
           echo "Updating README.md performance comparison table..."
           python3 scripts/update_readme_performance_table.py || echo "README table update skipped"
           
@@ -66,7 +69,7 @@ jobs:
       - name: Check for changes
         id: check-changes
         run: |
-          git add charts/ performance_timeline.png java_performance_timeline.png
+          git add charts/ performance_timeline.png java_performance_timeline.png performance_comparison.png
           if git diff --staged --quiet; then
             echo "No changes to commit"
             echo "changes=false" >> $GITHUB_OUTPUT
@@ -80,10 +83,10 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add charts/ performance_timeline.png java_performance_timeline.png
+          git add charts/ performance_timeline.png java_performance_timeline.png performance_comparison.png
           git commit -m "chore: update performance charts
 
-          Auto-generated performance evolution, rmatch timeline, and Java regex timeline charts
+          Auto-generated performance evolution, rmatch timeline, Java regex timeline, and comparison charts
           
           [skip ci]"
           git push

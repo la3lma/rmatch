@@ -72,6 +72,14 @@ jobs:
           echo "Generating macro performance timeline chart..."
           python3 scripts/generate_macro_performance_plot.py
           
+          # Generate Java regex performance timeline chart
+          echo "Generating Java regex performance timeline chart..."
+          python3 scripts/generate_java_performance_plot.py
+          
+          # Generate performance comparison chart (rmatch vs Java ratios)
+          echo "Generating performance comparison chart..."
+          python3 scripts/generate_performance_comparison_plot.py
+          
           # Update README.md performance comparison table with latest results
           echo "Updating README.md performance table..."
           python3 scripts/update_readme_performance_table.py
@@ -84,7 +92,7 @@ jobs:
           git config --local user.name "GitHub Action"
           
           # Add all performance-related files
-          git add performance_timeline.png java_performance_timeline.png README.md
+          git add performance_timeline.png java_performance_timeline.png performance_comparison.png README.md
           
           # Only commit if there are changes
           if ! git diff --staged --quiet; then

@@ -31,6 +31,8 @@ jobs:
           python3 scripts/generate_macro_performance_plot.py || echo "rmatch chart generation skipped"
           # Generate Java regex timeline chart
           python3 scripts/generate_java_performance_plot.py || echo "Java regex chart generation skipped"
+          # Generate performance comparison chart (rmatch vs Java ratios)
+          python3 scripts/generate_performance_comparison_plot.py || echo "Performance comparison chart generation skipped"
           # Update README.md performance table
           python3 scripts/update_readme_performance_table.py || echo "README table update skipped"
       - name: Profile hot path
@@ -38,4 +40,4 @@ jobs:
       - name: Compare vs baseline and comment
         run: ./scripts/compare_and_comment.sh  # uses GH_TOKEN to post PR comment
       - uses: actions/upload-artifact@v4
-        with: { name: perf-artifacts, path: "jmh-result.json macro-result.json profiles/*.svg performance_timeline.png java_performance_timeline.png" }
+        with: { name: perf-artifacts, path: "jmh-result.json macro-result.json profiles/*.svg performance_timeline.png java_performance_timeline.png performance_comparison.png" }

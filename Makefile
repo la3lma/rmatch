@@ -1,6 +1,6 @@
  SHELL := /bin/bash
 
- .PHONY: build test ci bench-micro bench-macro bench-java profile fmt spotless spotbugs
+ .PHONY: build test ci bench-micro bench-macro bench-java charts profile fmt spotless spotbugs
 
 build:
 	mvn -q -B spotless:apply
@@ -26,6 +26,12 @@ bench-macro:
 
 bench-java:
 	MAX_REGEXPS=10000 scripts/run_java_benchmark_with_memory.sh
+
+charts:
+	python3 scripts/generate_macro_performance_plot.py
+	python3 scripts/generate_java_performance_plot.py
+	python3 scripts/generate_performance_comparison_plot.py
+	python3 scripts/update_readme_performance_table.py
 
 profile:
 	DUR=30; scripts/profile_async_profiler.sh $$DUR
