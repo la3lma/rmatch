@@ -30,10 +30,19 @@ jobs:
       - name: Generate performance charts
         run: |
           echo "Generating performance evolution charts..."
-          python3 scripts/generate_performance_charts.py
+          python3 scripts/generate_performance_charts.py || echo "Performance trend charts skipped"
           
           echo "Generating macro performance timeline chart..."
-          python3 scripts/generate_macro_performance_plot.py
+          python3 scripts/generate_macro_performance_plot.py || echo "rmatch timeline chart skipped"
+          
+          echo "Generating Java regex performance timeline chart..."
+          python3 scripts/generate_java_performance_plot.py || echo "Java regex timeline chart skipped"
+          
+          echo "Generating performance comparison chart..."
+          python3 scripts/generate_performance_comparison_plot.py || echo "Performance comparison chart generation skipped"
+          
+          echo "Updating README.md performance comparison table..."
+          python3 scripts/update_readme_performance_table.py || echo "README table update skipped"
           
           # Check if charts were generated
           if [ -f "charts/performance_trend.png" ]; then
@@ -44,16 +53,23 @@ jobs:
           fi
           
           if [ -f "performance_timeline.png" ]; then
-            echo "Macro performance timeline chart generated successfully"
+            echo "rmatch performance timeline chart generated successfully"
             ls -la performance_timeline.png
           else
-            echo "Warning: No macro performance timeline chart was generated"
+            echo "Warning: No rmatch performance timeline chart was generated"
+          fi
+          
+          if [ -f "java_performance_timeline.png" ]; then
+            echo "Java regex performance timeline chart generated successfully"
+            ls -la java_performance_timeline.png
+          else
+            echo "Warning: No Java regex performance timeline chart was generated"
           fi
       
       - name: Check for changes
         id: check-changes
         run: |
-          git add charts/ performance_timeline.png
+          git add charts/ performance_timeline.png java_performance_timeline.png performance_comparison.png
           if git diff --staged --quiet; then
             echo "No changes to commit"
             echo "changes=false" >> $GITHUB_OUTPUT
@@ -67,10 +83,10 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add charts/ performance_timeline.png
+          git add charts/ performance_timeline.png java_performance_timeline.png performance_comparison.png
           git commit -m "chore: update performance charts
 
-          Auto-generated performance evolution and macro timeline charts
+          Auto-generated performance evolution, rmatch timeline, Java regex timeline, and comparison charts
           
           [skip ci]"
           git push

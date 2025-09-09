@@ -52,8 +52,15 @@ jobs:
             -Dexec.mainClass=no.rmz.rmatch.performancetests.GitHubActionPerformanceTestRunner \
             -Dexec.args="${MAX_REGEXPS} ${NUM_RUNS}" \
             || exit 1
+          
+          # Also run individual benchmarks for README table updates
+          echo "Running rmatch benchmark for README table..."
+          MAX_REGEXPS=5000 ./scripts/run_macro_with_memory.sh || echo "rmatch benchmark failed"
+          
+          echo "Running Java regex benchmark for README table..."
+          MAX_REGEXPS=5000 ./scripts/run_java_benchmark_with_memory.sh || echo "Java regex benchmark failed"
       
-      - name: Generate performance charts
+      - name: Generate performance charts and update README
         run: |
           # Install Python dependencies for chart generation
           python3 -m pip install --user -r requirements.txt
@@ -64,34 +71,43 @@ jobs:
           # Generate macro performance timeline chart
           echo "Generating macro performance timeline chart..."
           python3 scripts/generate_macro_performance_plot.py
+          
+          # Generate Java regex performance timeline chart
+          echo "Generating Java regex performance timeline chart..."
+          python3 scripts/generate_java_performance_plot.py
+          
+          # Generate performance comparison chart (rmatch vs Java ratios)
+          echo "Generating performance comparison chart..."
+          python3 scripts/generate_performance_comparison_plot.py
+          
+          # Update README.md performance comparison table with latest results
+          echo "Updating README.md performance table..."
+          python3 scripts/update_readme_performance_table.py
       
-      - name: Commit updated performance timeline
+      - name: Commit updated performance data
         if: github.event_name == 'pull_request'
         run: |
           # Configure git
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Check if performance_timeline.png was updated
-          if [ -f "performance_timeline.png" ]; then
-            git add performance_timeline.png
+          # Add all performance-related files
+          git add performance_timeline.png java_performance_timeline.png performance_comparison.png README.md
+          
+          # Only commit if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update performance data
             
-            # Only commit if there are changes
-            if ! git diff --staged --quiet; then
-              git commit -m "chore: update macro performance timeline chart
-              
-              Auto-generated after running performance benchmarks
-              
-              [skip ci]"
-              
-              # Push the changes back to the PR branch
-              git push origin HEAD:${{ github.head_ref }}
-              echo "✅ Updated performance timeline chart committed to PR"
-            else
-              echo "ℹ️  No changes to performance timeline chart"
-            fi
+            Auto-generated performance timeline charts and README table
+            after running performance benchmarks
+            
+            [skip ci]"
+            
+            # Push the changes back to the PR branch
+            git push origin HEAD:${{ github.head_ref }}
+            echo "✅ Updated performance data committed to PR"
           else
-            echo "⚠️  Performance timeline chart not found"
+            echo "ℹ️  No changes to performance data"
           fi
       
       - name: Compare and comment

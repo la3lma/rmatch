@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Generate a performance plot from macro benchmark results.
-Reads all macro-*.json files from benchmarks/results/ and creates a timeline plot.
+Generate a performance plot from Java regex benchmark results.
+Reads all java-*.json files from benchmarks/results/ and creates a timeline plot.
+This creates the same type of visualization as the rmatch benchmark, allowing direct comparison.
 """
 
 import json
@@ -16,19 +17,15 @@ def parse_timestamp(timestamp_str):
     """Parse timestamp format 20250909T091046Z to datetime"""
     return datetime.strptime(timestamp_str, "%Y%m%dT%H%M%SZ")
 
-def load_macro_results(results_dir):
-    """Load all macro benchmark results from JSON files"""
+def load_java_results(results_dir):
+    """Load all Java regex benchmark results from JSON files"""
     results = []
-    pattern = os.path.join(results_dir, "macro-*.json")
+    pattern = os.path.join(results_dir, "java-*.json")
     
     for json_file in glob.glob(pattern):
         try:
             with open(json_file, 'r') as f:
-                content = f.read()
-                # Fix JSON issues with unescaped quotes in java version string
-                content = content.replace('"openjdk version "21.0.2"', '"openjdk version \\"21.0.2\\"')
-                content = content.replace('"OpenJDK Runtime Environment (build 21.0.2+13-58) OpenJDK 64-Bit Server VM (build 21.0.2+13-58, mixed mode, sharing) "', '"OpenJDK Runtime Environment (build 21.0.2+13-58) OpenJDK 64-Bit Server VM (build 21.0.2+13-58, mixed mode, sharing)"')
-                data = json.loads(content)
+                data = json.load(f)
                 
             # Extract key data
             timestamp = parse_timestamp(data["timestamp"])
@@ -78,18 +75,18 @@ def create_performance_plot(results, output_path):
     
     if has_memory_data:
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 12), sharex=True)
-        fig.suptitle('rmatch Macro Benchmark Performance & Memory History\n(10,000 regex patterns on Wuthering Heights corpus)', 
+        fig.suptitle('Java Regex Benchmark Performance & Memory History\\n(Native java.util.regex.Pattern on Wuthering Heights corpus)', 
                      fontsize=16, fontweight='bold')
     else:
         fig, ax1 = plt.subplots(figsize=(14, 8))
-        ax1.set_title('rmatch Macro Benchmark Performance History\n(10,000 regex patterns on Wuthering Heights corpus)', 
+        ax1.set_title('Java Regex Benchmark Performance History\\n(Native java.util.regex.Pattern on Wuthering Heights corpus)', 
                      fontsize=14, fontweight='bold')
     
     # Extract data for plotting
     timestamps = [r["timestamp"] for r in results]
     durations = [r["duration_s"] for r in results]
     
-    # Color code by performance ranges
+    # Color code by performance ranges (same as rmatch for comparison)
     colors = []
     for r in results:
         if r["duration_s"] < 2:
@@ -112,7 +109,7 @@ def create_performance_plot(results, output_path):
     
     # Format x-axis (use bottom axis for shared plots)
     bottom_ax = ax2 if has_memory_data else ax1
-    bottom_ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\n%H:%M'))
+    bottom_ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\\n%H:%M'))
     bottom_ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
     bottom_ax.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
     plt.setp(bottom_ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
@@ -175,7 +172,7 @@ def create_performance_plot(results, output_path):
                 stats_text += f' | Avg Memory: {avg_memory:.0f}MB | Peak: {max_memory:.0f}MB'
         
         ax1.text(0.02, 0.98, stats_text, transform=ax1.transAxes, 
-                bbox=dict(boxstyle="round,pad=0.3", facecolor="lightblue", alpha=0.7),
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgreen", alpha=0.7),
                 verticalalignment='top', fontsize=10)
     
     # Grid
@@ -186,7 +183,7 @@ def create_performance_plot(results, output_path):
     
     # Save plot
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
-    print(f"Performance plot saved to: {output_path}")
+    print(f"Java regex performance plot saved to: {output_path}")
     
     return len(results)
 
@@ -196,13 +193,13 @@ def main():
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
     results_dir = project_root / "benchmarks" / "results"
-    output_path = project_root / "performance_timeline.png"
+    output_path = project_root / "java_performance_timeline.png"
     
-    print(f"Scanning for macro benchmark results in: {results_dir}")
+    print(f"Scanning for Java regex benchmark results in: {results_dir}")
     
     # Load and process results
-    results = load_macro_results(results_dir)
-    print(f"Found {len(results)} macro benchmark results")
+    results = load_java_results(results_dir)
+    print(f"Found {len(results)} Java regex benchmark results")
     
     if results:
         # Show summary
@@ -211,9 +208,9 @@ def main():
         
         # Create plot
         count = create_performance_plot(results, output_path)
-        print(f"Successfully plotted {count} benchmark results")
+        print(f"Successfully plotted {count} Java regex benchmark results")
     else:
-        print("No valid macro benchmark results found!")
+        print("No valid Java regex benchmark results found!")
 
 if __name__ == "__main__":
     main()
