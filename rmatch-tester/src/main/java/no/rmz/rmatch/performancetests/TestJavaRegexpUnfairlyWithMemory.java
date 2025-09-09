@@ -8,12 +8,12 @@ import no.rmz.rmatch.performancetests.utils.MatcherBenchmarkerWithMemory;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 
 /**
- * Enhanced version of TestJavaRegexpUnfairly that outputs memory consumption data
- * in a format that can be easily captured by shell scripts for JSON output.
- * 
- * This benchmark tests the native Java regex engine (java.util.regex.Pattern)
- * against the same corpus and patterns as the rmatch benchmark, allowing for
- * direct performance and memory consumption comparison.
+ * Enhanced version of TestJavaRegexpUnfairly that outputs memory consumption data in a format that
+ * can be easily captured by shell scripts for JSON output.
+ *
+ * <p>This benchmark tests the native Java regex engine (java.util.regex.Pattern) against the same
+ * corpus and patterns as the rmatch benchmark, allowing for direct performance and memory
+ * consumption comparison.
  */
 public final class TestJavaRegexpUnfairlyWithMemory {
 
@@ -32,16 +32,16 @@ public final class TestJavaRegexpUnfairlyWithMemory {
       argx = argv;
     }
     System.out.println("TestJavaRegexpUnfairlyWithMemory, argx = " + Arrays.toString(argx));
-    
+
     // Measure memory before creating the matcher
     final Runtime runtime = Runtime.getRuntime();
     final long mb = 1024 * 1024;
-    
+
     // Force garbage collection to get accurate baseline
     System.gc();
     Thread.yield();
     final long memoryBeforeInMb = (runtime.totalMemory() - runtime.freeMemory()) / mb;
-    
+
     final Matcher matcher = new JavaRegexpMatcher();
     final Buffer b = new WutheringHeightsBuffer("rmatch-tester/corpus/wuthr10.txt");
 
@@ -53,7 +53,7 @@ public final class TestJavaRegexpUnfairlyWithMemory {
     final long memoryAfterInMb = (runtime.totalMemory() - runtime.freeMemory()) / mb;
     final long totalMemoryInMb = runtime.totalMemory() / mb;
     final long maxMemoryInMb = runtime.maxMemory() / mb;
-    
+
     // Output memory statistics in a format the shell script can parse
     System.out.println("MEMORY_STATS_BEGIN");
     System.out.println("memory_before_mb=" + memoryBeforeInMb);
@@ -62,7 +62,7 @@ public final class TestJavaRegexpUnfairlyWithMemory {
     System.out.println("memory_total_mb=" + totalMemoryInMb);
     System.out.println("memory_max_mb=" + maxMemoryInMb);
     System.out.println("MEMORY_STATS_END");
-    
+
     // Kill all threads and get out of here
     System.exit(0);
   }

@@ -9,8 +9,8 @@ import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarkerWithMemory;
 
 /**
- * Enhanced version of BenchmarkTheWutheringHeightsCorpus that outputs memory consumption data
- * in a format that can be easily captured by the shell script for JSON output.
+ * Enhanced version of BenchmarkTheWutheringHeightsCorpus that outputs memory consumption data in a
+ * format that can be easily captured by the shell script for JSON output.
  */
 public final class BenchmarkTheWutheringHeightsCorpusWithMemory {
 
@@ -29,18 +29,19 @@ public final class BenchmarkTheWutheringHeightsCorpusWithMemory {
       argx = argv;
     }
     System.out.println("BenchmarkTheWutheringHeightsCorpus, argx = " + Arrays.toString(argx));
-    
+
     // Measure memory before creating the matcher
     final Runtime runtime = Runtime.getRuntime();
     final long mb = 1024 * 1024;
-    
+
     // Force garbage collection to get accurate baseline
     System.gc();
     Thread.yield();
     final long memoryBeforeInMb = (runtime.totalMemory() - runtime.freeMemory()) / mb;
-    
+
     final Matcher m = MatcherFactory.newMatcher();
-    MatcherBenchmarkerWithMemory.testMatcher(m, argx, "rmatch-tester/" + LOCATION_OF_WUTHERING_HEIGHTS);
+    MatcherBenchmarkerWithMemory.testMatcher(
+        m, argx, "rmatch-tester/" + LOCATION_OF_WUTHERING_HEIGHTS);
 
     // Force garbage collection and measure final memory
     System.gc();
@@ -48,7 +49,7 @@ public final class BenchmarkTheWutheringHeightsCorpusWithMemory {
     final long memoryAfterInMb = (runtime.totalMemory() - runtime.freeMemory()) / mb;
     final long totalMemoryInMb = runtime.totalMemory() / mb;
     final long maxMemoryInMb = runtime.maxMemory() / mb;
-    
+
     // Output memory statistics in a format the shell script can parse
     System.out.println("MEMORY_STATS_BEGIN");
     System.out.println("memory_before_mb=" + memoryBeforeInMb);
@@ -57,7 +58,7 @@ public final class BenchmarkTheWutheringHeightsCorpusWithMemory {
     System.out.println("memory_total_mb=" + totalMemoryInMb);
     System.out.println("memory_max_mb=" + maxMemoryInMb);
     System.out.println("MEMORY_STATS_END");
-    
+
     System.exit(0); // XXX In case of dangling threads
   }
 

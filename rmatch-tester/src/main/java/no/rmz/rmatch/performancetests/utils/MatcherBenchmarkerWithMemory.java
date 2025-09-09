@@ -45,22 +45,22 @@ public final class MatcherBenchmarkerWithMemory {
       final String regexpListLocation,
       final String logLocation)
       throws RegexpParserException {
-    
+
     final long timeAtStart = System.currentTimeMillis();
     LOG.log(Level.INFO, "Doing the thing for {0}", regexpListLocation);
     LOG.log(Level.INFO, "noOfRegexpsToAdd {0}", noOfRegexpsToAdd);
-    
+
     final Runtime runtime = Runtime.getRuntime();
     final int mb = 1024 * 1024;
-    
+
     // Memory measurement at start of pattern loading
     System.gc();
     Thread.yield();
     final long memoryBeforePatterns = (runtime.totalMemory() - runtime.freeMemory()) / mb;
-    
+
     final FileInhaler fh = new FileInhaler(new File(regexpListLocation));
     final CounterAction wordAction = new CounterAction();
-    
+
     // Loop through the regexps, only adding the noOfRegexpsToAdd
     int counter;
     if (noOfRegexpsToAdd != null && noOfRegexpsToAdd > 0) {
@@ -68,7 +68,7 @@ public final class MatcherBenchmarkerWithMemory {
     } else {
       counter = -1;
     }
-    
+
     for (final String word : fh.inhaleAsListOfLines()) {
       if (counter == 0) {
         break;
@@ -80,45 +80,45 @@ public final class MatcherBenchmarkerWithMemory {
     }
 
     LOG.log(Level.INFO, "(regexp) counter {0}", counter);
-    
+
     // Memory measurement after pattern loading, before matching
     System.gc();
     Thread.yield();
     final long memoryAfterPatterns = (runtime.totalMemory() - runtime.freeMemory()) / mb;
-    
+
     // Run the actual matching
     matcher.match(b);
-    
+
     // Memory measurement after matching, before shutdown
     System.gc();
     Thread.yield();
     final long memoryAfterMatching = (runtime.totalMemory() - runtime.freeMemory()) / mb;
-    
+
     try {
       matcher.shutdown();
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
     }
-    
+
     // Final memory measurement
     System.gc();
     Thread.yield();
     final long memoryAfterShutdown = (runtime.totalMemory() - runtime.freeMemory()) / mb;
-    
+
     final int finalCount = wordAction.getCounter();
     LOG.log(
         Level.INFO,
         "Total no of word  matches in Wuthering Heights is {0}",
         new Object[] {finalCount});
-    
+
     final long timeAtEnd = System.currentTimeMillis();
     final long duration = timeAtEnd - timeAtStart;
     LOG.info("Duration was : " + duration + " millis.");
-    
+
     // Output detailed memory information
     final long totalMemoryInMb = runtime.totalMemory() / mb;
     final long maxMemoryInMb = runtime.maxMemory() / mb;
-    
+
     System.out.println("DETAILED_MEMORY_STATS_BEGIN");
     System.out.println("memory_before_patterns_mb=" + memoryBeforePatterns);
     System.out.println("memory_after_patterns_mb=" + memoryAfterPatterns);
@@ -132,15 +132,12 @@ public final class MatcherBenchmarkerWithMemory {
     System.out.println("duration_ms=" + duration);
     System.out.println("match_count=" + finalCount);
     System.out.println("DETAILED_MEMORY_STATS_END");
-    
+
     // Also do the original CSV logging for compatibility
     final long usedMemoryInMb = memoryAfterMatching;
     CSVAppender.append(
-        logLocation,
-        new long[] {
-          System.currentTimeMillis() / 1000, duration, usedMemoryInMb
-        });
-    
+        logLocation, new long[] {System.currentTimeMillis() / 1000, duration, usedMemoryInMb});
+
     LOG.log(Level.INFO, "Counter = " + finalCount);
     Counters.dumpCounters();
   }
