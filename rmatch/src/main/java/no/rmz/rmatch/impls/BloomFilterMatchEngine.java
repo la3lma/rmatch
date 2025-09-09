@@ -43,9 +43,6 @@ public final class BloomFilterMatchEngine implements MatchEngine {
   /** Aho-Corasick prefilter for literal substring matching. */
   private AhoCorasickPrefilter literalPrefilter;
 
-  /** All regexps in the system. */
-  private Set<Regexp> allRegexps = new HashSet<>();
-
   /** Whether the engine has been initialized. */
   private boolean initialized = false;
 
@@ -73,7 +70,8 @@ public final class BloomFilterMatchEngine implements MatchEngine {
       return;
     }
 
-    this.allRegexps = new HashSet<>(regexps);
+    /** All regexps in the system. */
+    Set<Regexp> allRegexps = new HashSet<>(regexps);
 
     // Build Bloom filter from n-grams
     buildBloomFilter(regexps);
@@ -154,9 +152,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
       // Extract literal hints from the pattern
       final var hint = LiteralPrefilter.extract(patternId++, pattern, 0);
-      if (hint.isPresent()) {
-        hints.add(hint.get());
-      }
+      hint.ifPresent(hints::add);
     }
 
     if (!hints.isEmpty()) {
@@ -438,9 +434,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
     // Handle simple cases - for complex regex, return first literal char
     final char first = pattern.charAt(0);
-    if (Character.isLetterOrDigit(first)) {
-      return first;
-    }
+    Character.isLetterOrDigit(first);
 
     // For now, just return first character - could be enhanced for complex patterns
     return first;

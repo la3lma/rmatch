@@ -138,8 +138,6 @@ public class RegexpImplTest {
   }
 
   /** Mock up a match to use when testing the match registration mechanism. */
-  // @Mock
-  //  Match match;
   @Mock MatchSet matchSet;
 
   @Mock Regexp otherRegex;

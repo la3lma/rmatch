@@ -16,7 +16,6 @@ package no.rmz.rmatch.impls;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import no.rmz.rmatch.interfaces.*;
@@ -73,8 +72,7 @@ public final class MatchSetImpl implements MatchSet {
 
   @Override
   public boolean equals(final Object o) {
-    if (o instanceof MatchSet) {
-      final MatchSet ms = (MatchSet) o;
+    if (o instanceof MatchSet ms) {
       return ms.getId() == getId();
     } else {
       return false;
@@ -182,7 +180,7 @@ public final class MatchSetImpl implements MatchSet {
   @Override
   public Set<Match> getMatches() {
     synchronized (matches) {
-      return Collections.unmodifiableSet(new HashSet<>(matches));
+      return Set.copyOf(matches);
     }
   }
 

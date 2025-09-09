@@ -61,7 +61,7 @@ public final class CharRangeNode extends AbstractNDFANode {
    * @param next The next NDFANode to go to if the input char is within the range.
    */
   public CharRangeNode(final CharRange range, final Regexp r, final NDFANode next) {
-    this(range.getStart(), range.getEnd(), r, next);
+    this(range.start(), range.end(), r, next);
   }
 
   @Override

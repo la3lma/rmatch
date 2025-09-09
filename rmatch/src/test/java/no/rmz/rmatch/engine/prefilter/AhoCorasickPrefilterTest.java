@@ -35,9 +35,9 @@ public class AhoCorasickPrefilterTest {
 
     assertEquals(1, candidates.size());
     final AhoCorasickPrefilter.Candidate candidate = candidates.get(0);
-    assertEquals(1, candidate.patternId);
-    assertEquals(9, candidate.endIndexExclusive); // "foo" ends at position 9
-    assertEquals(3, candidate.literalLength);
+    assertEquals(1, candidate.patternId());
+    assertEquals(9, candidate.endIndexExclusive()); // "foo" ends at position 9
+    assertEquals(3, candidate.literalLength());
     assertEquals(6, candidate.startIndexForMatch()); // literal starts at 6, offset 0
   }
 
@@ -54,17 +54,17 @@ public class AhoCorasickPrefilterTest {
 
     // Find foo candidate
     final AhoCorasickPrefilter.Candidate fooCand =
-        candidates.stream().filter(c -> c.patternId == 1).findFirst().orElse(null);
+        candidates.stream().filter(c -> c.patternId() == 1).findFirst().orElse(null);
     assertNotNull(fooCand);
-    assertEquals(3, fooCand.endIndexExclusive);
-    assertEquals(3, fooCand.literalLength);
+    assertEquals(3, fooCand.endIndexExclusive());
+    assertEquals(3, fooCand.literalLength());
 
     // Find bar candidate
     final AhoCorasickPrefilter.Candidate barCand =
-        candidates.stream().filter(c -> c.patternId == 2).findFirst().orElse(null);
+        candidates.stream().filter(c -> c.patternId() == 2).findFirst().orElse(null);
     assertNotNull(barCand);
-    assertEquals(11, barCand.endIndexExclusive);
-    assertEquals(3, barCand.literalLength);
+    assertEquals(11, barCand.endIndexExclusive());
+    assertEquals(3, barCand.literalLength());
   }
 
   @Test
@@ -78,8 +78,8 @@ public class AhoCorasickPrefilterTest {
 
     assertEquals(2, candidates.size());
     // Should find both "abc" and "bcd" in "abcd"
-    assertTrue(candidates.stream().anyMatch(c -> c.patternId == 1));
-    assertTrue(candidates.stream().anyMatch(c -> c.patternId == 2));
+    assertTrue(candidates.stream().anyMatch(c -> c.patternId() == 1));
+    assertTrue(candidates.stream().anyMatch(c -> c.patternId() == 2));
   }
 
   @Test
@@ -112,8 +112,8 @@ public class AhoCorasickPrefilterTest {
 
     assertEquals(3, candidates.size());
     for (final AhoCorasickPrefilter.Candidate candidate : candidates) {
-      assertEquals(1, candidate.patternId);
-      assertEquals(3, candidate.literalLength);
+      assertEquals(1, candidate.patternId());
+      assertEquals(3, candidate.literalLength());
     }
   }
 
@@ -127,9 +127,9 @@ public class AhoCorasickPrefilterTest {
 
     assertEquals(1, candidates.size());
     final AhoCorasickPrefilter.Candidate candidate = candidates.get(0);
-    assertEquals(6, candidate.endIndexExclusive); // "bar" ends at position 6
-    assertEquals(3, candidate.literalLength);
-    assertEquals(2, candidate.literalOffsetInMatch);
+    assertEquals(6, candidate.endIndexExclusive()); // "bar" ends at position 6
+    assertEquals(3, candidate.literalLength());
+    assertEquals(2, candidate.literalOffsetInMatch());
     assertEquals(1, candidate.startIndexForMatch()); // (6-3)-2 = 1
   }
 
@@ -152,7 +152,7 @@ public class AhoCorasickPrefilterTest {
     final List<AhoCorasickPrefilter.Candidate> candidates = prefilter.scan("testing");
 
     assertEquals(2, candidates.size()); // Same literal should generate candidates for both patterns
-    assertTrue(candidates.stream().anyMatch(c -> c.patternId == 1));
-    assertTrue(candidates.stream().anyMatch(c -> c.patternId == 2));
+    assertTrue(candidates.stream().anyMatch(c -> c.patternId() == 1));
+    assertTrue(candidates.stream().anyMatch(c -> c.patternId() == 2));
   }
 }

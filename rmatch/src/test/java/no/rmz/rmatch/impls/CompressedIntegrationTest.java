@@ -29,12 +29,11 @@ public class CompressedIntegrationTest {
   private NDFANode node1;
   private NDFANode node2;
   private NDFANode node3;
-  private Regexp regexp1;
   private Set<NDFANode> testNodeSet;
 
   @BeforeEach
   void setUp() {
-    regexp1 = mock(Regexp.class);
+    Regexp regexp1 = mock(Regexp.class);
 
     node1 = mock(NDFANode.class);
     when(node1.getId()).thenReturn(100L);

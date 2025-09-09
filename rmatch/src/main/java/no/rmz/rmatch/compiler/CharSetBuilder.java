@@ -84,8 +84,7 @@ public final class CharSetBuilder {
   @NotNull
   private NDFANode createInvertedMatch(NDFANode arrival, NDFANode endNode) {
     final NDFANode intermediateNode;
-    final NDFANode failingMatchNode = new FailNode(regexp);
-    intermediateNode = failingMatchNode;
+    intermediateNode = new FailNode(regexp);
     final NDFANode gettingThroughAnyhow =
         new AbstractNDFANode(regexp, false) {
           @Override

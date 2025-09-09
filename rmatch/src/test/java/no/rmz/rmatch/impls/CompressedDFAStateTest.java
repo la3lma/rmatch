@@ -152,18 +152,13 @@ public class CompressedDFAStateTest {
     // Create a simple ID to node mapper
     java.util.function.IntFunction<NDFANode> mapper =
         id -> {
-          switch (id) {
-            case 10:
-              return node1;
-            case 20:
-              return node2;
-            case 30:
-              return node3;
-            case 50:
-              return node5;
-            default:
-              return null;
-          }
+          return switch (id) {
+            case 10 -> node1;
+            case 20 -> node2;
+            case 30 -> node3;
+            case 50 -> node5;
+            default -> null;
+          };
         };
 
     // Test that we can convert back - don't use TreeSet due to mock compareTo issues
@@ -207,7 +202,7 @@ public class CompressedDFAStateTest {
 
   @Test
   void testSingleNodeState() {
-    CompressedDFAState state = new CompressedDFAState(Arrays.asList(node1));
+    CompressedDFAState state = new CompressedDFAState(Collections.singletonList(node1));
 
     assertEquals(1, state.size());
     assertArrayEquals(new int[] {10}, state.getNodeIds());

@@ -52,14 +52,11 @@ public class ARegexpCompilerTest {
   /**
    * A helper class that holds a matcher and a buffer, and is consequently, and unimaginatively,
    * called "MB". Sorry folks, but that' the truth.
+   *
+   * @param m The matcher.
+   * @param b The buffer.
    */
-  public static final class MB {
-
-    /** The matcher. */
-    private final Matcher m;
-
-    /** The buffer. */
-    private final Buffer b;
+  public record MB(Matcher m, Buffer b) {
 
     /**
      * Making the pair.
@@ -67,17 +64,15 @@ public class ARegexpCompilerTest {
      * @param m matcher.
      * @param b buffer.
      */
-    public MB(final Matcher m, final Buffer b) {
-      this.m = m;
-      this.b = b;
-    }
+    public MB {}
 
     /**
      * Get the B.
      *
      * @return the B.
      */
-    public Buffer getB() {
+    @Override
+    public Buffer b() {
       return b;
     }
 
@@ -86,7 +81,8 @@ public class ARegexpCompilerTest {
      *
      * @return the M.
      */
-    public Matcher getM() {
+    @Override
+    public Matcher m() {
       return m;
     }
   }
@@ -139,13 +135,11 @@ public class ARegexpCompilerTest {
    *
    * @param mb The MB instance
    * @param nameOfTest name of test
-   * @param start start of match
    * @param stop end of match
    */
-  private void verifyPerformMatch(
-      final MB mb, final String nameOfTest, final int start, final int stop) {
-    GraphDumper.dump(nameOfTest, mb.getM().getNodeStorage());
-    verify(action).performMatch(any(Buffer.class), eq(start), eq(stop));
+  private void verifyPerformMatch(final MB mb, final String nameOfTest, final int stop) {
+    GraphDumper.dump(nameOfTest, mb.m().getNodeStorage());
+    verify(action).performMatch(any(Buffer.class), eq(0), eq(stop));
   }
 
   /** Test of addString method, of class ARegexpCompiler. */
@@ -157,7 +151,7 @@ public class ARegexpCompilerTest {
     final MB mb =
         runMatcherFromCompiler(regexpPattern, testString, arb -> arb.addString(regexpPattern));
 
-    verifyPerformMatch(mb, "ARegexpCompilerTestAddString", 0, 0);
+    verifyPerformMatch(mb, "ARegexpCompilerTestAddString", 0);
   }
 
   /** Test of addString method, of class ARegexpCompiler. */
@@ -175,7 +169,7 @@ public class ARegexpCompilerTest {
               arb.addString("b");
             });
 
-    verifyPerformMatch(mb, "testAddStringLength2", 0, 1);
+    verifyPerformMatch(mb, "testAddStringLength2", 1);
   }
 
   /** Test of separateAlternatives method, of class ARegexpCompiler. */
@@ -193,7 +187,7 @@ public class ARegexpCompilerTest {
               arb.addString("b");
             });
 
-    verifyPerformMatch(mb, "ARegexpCompilerTestSeparateAlternatives", 0, 0);
+    verifyPerformMatch(mb, "ARegexpCompilerTestSeparateAlternatives", 0);
   }
 
   /** Test recognition of a char set. */
@@ -212,7 +206,7 @@ public class ARegexpCompilerTest {
               arb.endCharSet();
             });
 
-    verifyPerformMatch(mb, "testCharSet", 0, 0);
+    verifyPerformMatch(mb, "testCharSet", 0);
   }
 
   /** Test recognition of a char set. */
@@ -232,7 +226,7 @@ public class ARegexpCompilerTest {
               arb.endCharSet();
             });
 
-    verifyPerformMatch(mb, "testInverseCharSet", 0, 0);
+    verifyPerformMatch(mb, "testInverseCharSet", 0);
   }
 
   /** Test of addRangeToCharSet method, of class ARegexpCompiler. */
@@ -250,7 +244,7 @@ public class ARegexpCompilerTest {
               arb.endCharSet();
             });
 
-    verifyPerformMatch(mb, "testAddRangeToCharSet", 0, 0);
+    verifyPerformMatch(mb, "testAddRangeToCharSet", 0);
   }
 
   /** Test of addAnyChar method, of class ARegexpCompiler. */
@@ -261,7 +255,7 @@ public class ARegexpCompilerTest {
     final MB mb =
         runMatcherFromCompiler(regexpPattern, testString, AbstractRegexBuilder::addAnyChar);
 
-    verifyPerformMatch(mb, "testAddAnyChar", 0, 0);
+    verifyPerformMatch(mb, "testAddAnyChar", 0);
   }
 
   /** Test of addBeginningOfLine method, of class ARegexpCompiler. */
@@ -280,7 +274,7 @@ public class ARegexpCompilerTest {
               arb.addAnyChar();
             });
 
-    verifyPerformMatch(mb, "testAddBeginningOfLine", 0, 0);
+    verifyPerformMatch(mb, "testAddBeginningOfLine", 0);
   }
 
   /** Test of addEndOfLine method, of class ARegexpCompiler. */
@@ -298,7 +292,7 @@ public class ARegexpCompilerTest {
               arb.addString("z");
               arb.addAnyChar();
             });
-    verifyPerformMatch(mb, "testAddendOfLine", 0, 0);
+    verifyPerformMatch(mb, "testAddendOfLine", 0);
   }
 
   /** Test of addOptionalSingular method, of class ARegexpCompiler. */
@@ -315,7 +309,7 @@ public class ARegexpCompilerTest {
               arb.addOptionalSingular();
               arb.addString("b");
             });
-    verifyPerformMatch(mb, "testAddOptionalSingular", 0, 0);
+    verifyPerformMatch(mb, "testAddOptionalSingular", 0);
   }
 
   /** Test of addOptionalZeroOrMulti method, of class ARegexpCompiler. */
@@ -334,7 +328,7 @@ public class ARegexpCompilerTest {
               arb.addString("n");
             });
 
-    verifyPerformMatch(mb, "testAddOptionalZeroOrMulti", 0, 5);
+    verifyPerformMatch(mb, "testAddOptionalZeroOrMulti", 5);
   }
 
   /** Test of addOptionalOnceOrMulti method, of class ARegexpCompiler. */
@@ -354,6 +348,6 @@ public class ARegexpCompilerTest {
               arb.addString("n");
             });
 
-    verifyPerformMatch(mb, "testAddOptionalOnceOrMulti", 0, 5);
+    verifyPerformMatch(mb, "testAddOptionalOnceOrMulti", 5);
   }
 }

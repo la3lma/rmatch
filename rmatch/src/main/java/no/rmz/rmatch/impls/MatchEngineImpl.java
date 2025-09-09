@@ -304,8 +304,7 @@ public final class MatchEngineImpl implements MatchEngine {
     assert prefilterEnabled && prefilter != null;
 
     // For StringBuffer, we can access the content directly without consuming the buffer
-    if (b instanceof no.rmz.rmatch.utils.StringBuffer) {
-      final no.rmz.rmatch.utils.StringBuffer sb = (no.rmz.rmatch.utils.StringBuffer) b;
+    if (b instanceof no.rmz.rmatch.utils.StringBuffer sb) {
       return sb.getCurrentRestString();
     }
 
@@ -336,7 +335,7 @@ public final class MatchEngineImpl implements MatchEngine {
 
         // Map pattern ID to an actual Regexp object
         if (patternIdToRegexp != null) {
-          final Regexp regexp = patternIdToRegexp.get(candidate.patternId);
+          final Regexp regexp = patternIdToRegexp.get(candidate.patternId());
           if (regexp != null) {
             reusablePositionToRegexps.computeIfAbsent(startPos, k -> new HashSet<>()).add(regexp);
           }
