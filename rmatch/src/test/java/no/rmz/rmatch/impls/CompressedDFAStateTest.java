@@ -202,7 +202,7 @@ public class CompressedDFAStateTest {
 
   @Test
   void testSingleNodeState() {
-    CompressedDFAState state = new CompressedDFAState(Arrays.asList(node1));
+    CompressedDFAState state = new CompressedDFAState(Collections.singletonList(node1));
 
     assertEquals(1, state.size());
     assertArrayEquals(new int[] {10}, state.getNodeIds());

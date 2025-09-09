@@ -2,7 +2,7 @@
  * Copyright 2012. Bjørn Remseth (rmz@rmz.no).
  *
  * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
+ * except in compliance with the License. You may get a copy of the License at
  *
  * <p>http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -13,11 +13,11 @@
  */
 package no.rmz.rmatch.utils;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import no.rmz.rmatch.interfaces.Buffer;
 
-/** An implementation of the Buffer interface, that holds all of the input as a String. */
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/** An implementation of the Buffer interface that holds all inputs as a String. */
 public final class StringBuffer implements Buffer, Cloneable {
 
   /** A string containing the entire content of the buffer. */
@@ -53,18 +53,6 @@ public final class StringBuffer implements Buffer, Cloneable {
     this.currentChar = aThis.currentChar;
   }
 
-  /**
-   * Set the current position to be somewhere in the string.
-   *
-   * @param pos the pos to set currentPos to.
-   */
-  public void setCurrentPos(final int pos) {
-    synchronized (monitor) {
-      assert pos > 0 && pos < str.length();
-      currentPos = pos;
-    }
-  }
-
   @Override
   public boolean hasNext() {
     synchronized (monitor) {
@@ -73,7 +61,7 @@ public final class StringBuffer implements Buffer, Cloneable {
     }
   }
 
-  /** Advance the position pointer by one, and update the currentChar value. */
+  /** Advance the position pointer by one and update the currentChar value. */
   private void progress() {
     synchronized (monitor) {
       currentPos += 1;

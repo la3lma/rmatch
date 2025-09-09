@@ -27,8 +27,8 @@ import no.rmz.rmatch.interfaces.*;
 /**
  * A multithreaded matcher. It will keep an array of matchers, into which it will partition the
  * regular expressions. Addition/Removal goes to one of the matchers, not all of them. When running
- * matches, all of the matchers are run concurrently, and the MultiMatcher's implementation of the
- * match method will not complete until all of the matcher's match methods has completed.
+ * matches, all the matchers are run concurrently, and the MultiMatcher's implementation of the
+ * match method will not complete until all the matcher's match methods has completed.
  */
 public final class MultiMatcher implements Matcher {
 

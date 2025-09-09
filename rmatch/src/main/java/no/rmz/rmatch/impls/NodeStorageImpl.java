@@ -123,11 +123,7 @@ public final class NodeStorageImpl implements NodeStorage {
   @Override
   public DFANode getNextFromStartNode(final Character ch) {
     checkNotNull(ch, "Illegal to use null char");
-    return nextFromDFAMap.computeIfAbsent(
-        ch,
-        key -> {
-          return sn.getNextDFA(ch, this);
-        });
+    return nextFromDFAMap.computeIfAbsent(ch, key -> sn.getNextDFA(ch, this));
   }
 
   @Override
