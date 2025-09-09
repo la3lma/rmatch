@@ -1,0 +1,10 @@
+[ERROR] Failed to execute goal on project rmatch-tester: Could not resolve dependencies for project no.rmz:rmatch-tester:jar:1.1-SNAPSHOT
+[ERROR] dependency: no.rmz:rmatch:jar:1.1-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact no.rmz:rmatch:jar:1.1-SNAPSHOT
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException
