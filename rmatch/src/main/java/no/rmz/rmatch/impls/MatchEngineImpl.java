@@ -334,7 +334,7 @@ public final class MatchEngineImpl implements MatchEngine {
       if (startPos >= 0) {
         reusableCandidatePositions.add(startPos);
 
-        // Map pattern ID to actual Regexp object
+        // Map pattern ID to an actual Regexp object
         if (patternIdToRegexp != null) {
           final Regexp regexp = patternIdToRegexp.get(candidate.patternId);
           if (regexp != null) {
