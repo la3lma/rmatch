@@ -19,8 +19,8 @@ jobs:
         run: ./mvnw -q -B -DskipTests package || ./gradlew -q build -x test
       - name: Run JMH
         run: ./scripts/run_jmh.sh  # outputs jmh-result.json
-      - name: Run Macro Benchmark
-        run: ./scripts/run_macro.sh  # outputs macro-result.json
+      - name: Run Macro Benchmark with Memory Tracking
+        run: ./scripts/run_macro_with_memory.sh  # outputs macro-result.json with memory data
       - name: Generate macro performance timeline
         run: |
           # Install Python dependencies if needed

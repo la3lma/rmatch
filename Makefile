@@ -22,7 +22,7 @@ bench-micro:
     # scripts/run_jmh.sh
 
 bench-macro:
-	MAX_REGEXPS=10000 scripts/run_macro.sh
+	MAX_REGEXPS=10000 scripts/run_macro_with_memory.sh
 
 profile:
 	DUR=30; scripts/profile_async_profiler.sh $$DUR
