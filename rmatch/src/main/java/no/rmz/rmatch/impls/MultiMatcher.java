@@ -55,12 +55,6 @@ public final class MultiMatcher implements Matcher {
   /** The number of matchers in the matchers array. */
   private final int noOfMatchers;
 
-  /** The compiler used by all the matchers. */
-  private final NDFACompiler compiler;
-
-  /** The regular expression factory used by all the matchers. */
-  private final RegexpFactory regexpFactory;
-
   /** An executor service that is used when invoking the sub-matchers. */
   private final ExecutorService executorService;
 
@@ -84,8 +78,10 @@ public final class MultiMatcher implements Matcher {
   public MultiMatcher(
       final int noOfMatchers, final NDFACompiler compiler, final RegexpFactory regexpFactory) {
 
-    this.compiler = checkNotNull(compiler);
-    this.regexpFactory = checkNotNull(regexpFactory);
+    /** The compiler used by all the matchers. */
+    NDFACompiler compiler1 = checkNotNull(compiler);
+    /** The regular expression factory used by all the matchers. */
+    RegexpFactory regexpFactory1 = checkNotNull(regexpFactory);
     checkArgument(noOfMatchers >= 1, "No of partitions must be positive");
     checkArgument(noOfMatchers < MAX_NO_OF_MATCHERS, "No of partitions must be less than 100K");
     this.noOfMatchers = noOfMatchers;

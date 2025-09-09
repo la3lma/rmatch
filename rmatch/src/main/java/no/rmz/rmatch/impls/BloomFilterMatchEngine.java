@@ -43,9 +43,6 @@ public final class BloomFilterMatchEngine implements MatchEngine {
   /** Aho-Corasick prefilter for literal substring matching. */
   private AhoCorasickPrefilter literalPrefilter;
 
-  /** All regexps in the system. */
-  private Set<Regexp> allRegexps = new HashSet<>();
-
   /** Whether the engine has been initialized. */
   private boolean initialized = false;
 
@@ -73,7 +70,8 @@ public final class BloomFilterMatchEngine implements MatchEngine {
       return;
     }
 
-    this.allRegexps = new HashSet<>(regexps);
+    /** All regexps in the system. */
+    Set<Regexp> allRegexps = new HashSet<>(regexps);
 
     // Build Bloom filter from n-grams
     buildBloomFilter(regexps);

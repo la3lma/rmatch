@@ -36,6 +36,7 @@ public final class LiteralPrefilter {
   /** Result wrapper for literal extraction. */
   public static final class Result {
     /** The extracted literal hint, if any. */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public final Optional<LiteralHint> hint;
 
     /**

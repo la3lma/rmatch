@@ -14,17 +14,11 @@ public final class CounterAction implements Action {
   /** How long to wait between reports. */
   private static final int DEFAULT_TICK_INTERVAL_FOR_IN_ACTIONS_BETWEEN_REPORTS = 4000;
 
-  /** Should the reports be verbose? */
-  private final boolean verbose = true;
-
   /** Monitor used to synchronize access. */
   private final Object monitor = new Object();
 
   /** The value of the counter. */
   private int counter = 0;
-
-  /** The tick interval we'll actually use. */
-  private final int tickInterval = DEFAULT_TICK_INTERVAL_FOR_IN_ACTIONS_BETWEEN_REPORTS;
 
   /** Initialize the timestamp for the last tick to be the time of class initialization. */
   private long lastTick = System.currentTimeMillis();
@@ -34,6 +28,10 @@ public final class CounterAction implements Action {
     synchronized (monitor) {
       counter += 1;
 
+      /** The tick interval we'll actually use. */
+      int tickInterval = DEFAULT_TICK_INTERVAL_FOR_IN_ACTIONS_BETWEEN_REPORTS;
+      /** Should the reports be verbose? */
+      boolean verbose = true;
       if (verbose && (counter % tickInterval) == 0) {
 
         // Collecting a report from the known counters

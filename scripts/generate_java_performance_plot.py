@@ -5,13 +5,14 @@ Reads all java-*.json files from benchmarks/results/ and creates a timeline plot
 This creates the same type of visualization as the rmatch benchmark, allowing direct comparison.
 """
 
-import json
 import glob
+import json
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import os
 from datetime import datetime
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 from pathlib import Path
+
 
 def parse_timestamp(timestamp_str):
     """Parse timestamp format 20250909T091046Z to datetime"""

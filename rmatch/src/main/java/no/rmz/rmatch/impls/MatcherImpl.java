@@ -28,9 +28,6 @@ import no.rmz.rmatch.interfaces.*;
  */
 public final class MatcherImpl implements Matcher {
 
-  /** The compiler we will use. */
-  private final NDFACompiler compiler;
-
   /** The regexp storage we will use. */
   private final RegexpStorage rs;
 
@@ -60,7 +57,8 @@ public final class MatcherImpl implements Matcher {
    * @param regexpFactory A regexp factory to use.
    */
   public MatcherImpl(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
-    this.compiler = checkNotNull(compiler);
+    /** The compiler we will use. */
+    NDFACompiler compiler1 = checkNotNull(compiler);
     checkNotNull(regexpFactory);
     ns = new NodeStorageImpl();
     rs = new RegexpStorageImpl(ns, compiler, regexpFactory);
