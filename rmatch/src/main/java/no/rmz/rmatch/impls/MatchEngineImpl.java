@@ -146,9 +146,7 @@ public final class MatchEngineImpl implements MatchEngine {
       }
 
       final Optional<LiteralHint> hint = LiteralPrefilter.extract(patternId, regex, regexFlags);
-      if (hint.isPresent()) {
-        hints.add(hint.get());
-      }
+      hint.ifPresent(hints::add);
     }
 
     if (!hints.isEmpty()) {
