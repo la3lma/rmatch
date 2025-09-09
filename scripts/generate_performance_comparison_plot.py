@@ -5,14 +5,15 @@ This chart shows the relative performance of rmatch compared to native Java rege
 with values above 1.0 meaning rmatch is slower/uses more memory than Java.
 """
 
-import json
 import glob
-import os
-from datetime import datetime
-import matplotlib.pyplot as plt
+import json
 import matplotlib.dates as mdates
-from pathlib import Path
+import matplotlib.pyplot as plt
+import os
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+
 
 def parse_timestamp(timestamp_str):
     """Parse timestamp format 20250909T091046Z to datetime"""

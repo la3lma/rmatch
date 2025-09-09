@@ -25,11 +25,7 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.impls.DFANodeImpl;
-import no.rmz.rmatch.interfaces.DFANode;
-import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.PrintableEdge;
-import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.interfaces.*;
 
 /** Utility class to dump the content of a graph as a Graphviz file. */
 public final class GraphDumper {
@@ -120,10 +116,10 @@ public final class GraphDumper {
 
     for (final NDFANode source : ndfaNodes) {
       for (final PrintableEdge edge : source.getEdgesToPrint()) {
-        if (edge.getLabel() == null) {
-          printEpsilonEdge(out, source, edge.getDestination());
+        if (edge.label() == null) {
+          printEpsilonEdge(out, source, edge.destination());
         } else {
-          printLabeledEdge(out, source, edge.getDestination(), edge.getLabel());
+          printLabeledEdge(out, source, edge.destination(), edge.label());
         }
       }
     }

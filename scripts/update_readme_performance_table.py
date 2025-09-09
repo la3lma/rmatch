@@ -5,12 +5,13 @@ This script reads the latest rmatch and Java regex benchmark results and updates
 the README.md file with current performance metrics and ratios.
 """
 
-import json
 import glob
+import json
 import os
 import re
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 
 def get_latest_benchmark_result(results_dir, pattern):
     """Get the most recent benchmark result matching the pattern"""

@@ -75,6 +75,8 @@ public class MatchImplTest {
   @SuppressWarnings("SpellCheckingInspection")
   @Test
   public void testCreation() {
+    //noinspection unchecked
+    @SuppressWarnings("unchecked")
     final MatchSet msx =
         new MatchSetImpl(1, new DFANodeImpl((Set<NDFANode>) Collections.EMPTY_SET));
     final Regexp r = new RegexpImpl("Krasnji Octobr");

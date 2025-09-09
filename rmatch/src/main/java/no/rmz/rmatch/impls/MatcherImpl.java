@@ -28,9 +28,6 @@ import no.rmz.rmatch.interfaces.*;
  */
 public final class MatcherImpl implements Matcher {
 
-  /** The compiler we will use. */
-  private final NDFACompiler compiler;
-
   /** The regexp storage we will use. */
   private final RegexpStorage rs;
 
@@ -60,7 +57,8 @@ public final class MatcherImpl implements Matcher {
    * @param regexpFactory A regexp factory to use.
    */
   public MatcherImpl(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
-    this.compiler = checkNotNull(compiler);
+    /** The compiler we will use. */
+    NDFACompiler compiler1 = checkNotNull(compiler);
     checkNotNull(regexpFactory);
     ns = new NodeStorageImpl();
     rs = new RegexpStorageImpl(ns, compiler, regexpFactory);
@@ -77,8 +75,7 @@ public final class MatcherImpl implements Matcher {
       rs.add(r, a);
 
       // Initialize engine-specific optimizations
-      if (USE_BLOOM_FILTER && me instanceof BloomFilterMatchEngine) {
-        final BloomFilterMatchEngine bfEngine = (BloomFilterMatchEngine) me;
+      if (USE_BLOOM_FILTER && me instanceof BloomFilterMatchEngine bfEngine) {
         final java.util.Set<Regexp> regexps = new java.util.HashSet<>();
         for (final String regexpStr : rs.getRegexpSet()) {
           regexps.add(rs.getRegexp(regexpStr));
@@ -143,5 +140,5 @@ public final class MatcherImpl implements Matcher {
   }
 
   @Override
-  public void shutdown() throws InterruptedException {}
+  public void shutdown() {}
 }

@@ -25,9 +25,6 @@ import no.rmz.rmatch.interfaces.Regexp;
  */
 public final class CompiledFragment {
 
-  /** The regexp for which this is a compilation fragment. */
-  private final Regexp r;
-
   /** The entry-point for this fragment's NDFA. */
   private final NDFANode arrivalNode;
 
@@ -42,7 +39,8 @@ public final class CompiledFragment {
    * @param endingNode If successful traversal of the NDFA, this node will be reached.
    */
   public CompiledFragment(final Regexp r, final NDFANode arrivalNode, final NDFANode endingNode) {
-    this.r = checkNotNull(r);
+    /** The regexp for which this is a compilation fragment. */
+    Regexp r1 = checkNotNull(r);
     this.arrivalNode = checkNotNull(arrivalNode);
     this.endingNode = checkNotNull(endingNode);
   }

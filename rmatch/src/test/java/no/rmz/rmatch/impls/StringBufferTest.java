@@ -42,12 +42,14 @@ public final class StringBufferTest {
   /** Test that the length we get is the real one. */
   @Test
   public void testLength() {
+    //noinspection deprecation
     assertEquals(sb.getCurrentRestString().length(), staticString.length());
   }
 
   /** Test that the string that is stored is the right one. */
   @Test
   public void testEquality() {
+    //noinspection deprecation
     assertEquals(sb.getCurrentRestString(), staticString);
   }
 }

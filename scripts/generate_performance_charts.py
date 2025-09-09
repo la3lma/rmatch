@@ -9,14 +9,14 @@ It also processes newer JSON performance check reports from the benchmarks/resul
 The generated charts are saved as PNG files that can be included in documentation.
 """
 
-import pandas as pd
-import matplotlib.pyplot as plt
+import json
 import matplotlib.dates as mdates
-import seaborn as sns
+import matplotlib.pyplot as plt
 import numpy as np
 import os
+import pandas as pd
+import seaborn as sns
 import sys
-import json
 from datetime import datetime
 from pathlib import Path
 

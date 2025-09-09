@@ -39,7 +39,7 @@ public final class Counter {
   public Counter(final String name, final boolean canBeDecremented) {
     this.name = checkNotNull(name, "Counter name can't be null").trim();
     this.canBeDecremented = canBeDecremented;
-    checkArgument(name.length() != 0, "Counter name can't be empty string");
+    checkArgument(!name.isEmpty(), "Counter name can't be empty string");
   }
 
   public Counter(final String name) {

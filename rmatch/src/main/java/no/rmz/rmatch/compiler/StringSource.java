@@ -13,9 +13,9 @@
  */
 package no.rmz.rmatch.compiler;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-// XXX This looks really stupid!
+// XXX This looks like it could be improved!
 
 /** A source of character used by the compiler to get input characters. */
 public final class StringSource {

@@ -14,7 +14,8 @@
 package no.rmz.rmatch.impls;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.*;
 import no.rmz.rmatch.interfaces.NDFANode;
@@ -28,12 +29,11 @@ public class CompressedIntegrationTest {
   private NDFANode node1;
   private NDFANode node2;
   private NDFANode node3;
-  private Regexp regexp1;
   private Set<NDFANode> testNodeSet;
 
   @BeforeEach
   void setUp() {
-    regexp1 = mock(Regexp.class);
+    Regexp regexp1 = mock(Regexp.class);
 
     node1 = mock(NDFANode.class);
     when(node1.getId()).thenReturn(100L);

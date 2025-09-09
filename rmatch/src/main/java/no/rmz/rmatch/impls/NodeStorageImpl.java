@@ -77,7 +77,7 @@ public final class NodeStorageImpl implements NodeStorage {
         result.add(current);
         final Set<NDFANode> connectedNodes = new HashSet<>(current.getEpsilons());
         for (final PrintableEdge edge : current.getEdgesToPrint()) {
-          connectedNodes.add(edge.getDestination());
+          connectedNodes.add(edge.destination());
         }
         connectedNodes.removeAll(result);
         unexplored.addAll(connectedNodes);
@@ -123,11 +123,7 @@ public final class NodeStorageImpl implements NodeStorage {
   @Override
   public DFANode getNextFromStartNode(final Character ch) {
     checkNotNull(ch, "Illegal to use null char");
-    return nextFromDFAMap.computeIfAbsent(
-        ch,
-        key -> {
-          return sn.getNextDFA(ch, this);
-        });
+    return nextFromDFAMap.computeIfAbsent(ch, key -> sn.getNextDFA(ch, this));
   }
 
   @Override

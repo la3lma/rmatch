@@ -21,26 +21,22 @@ import java.util.Objects;
  * <p>This class represents a literal substring found within a regex pattern that can be used for
  * prefiltering. The prefilter can scan for these literals using efficient string matching
  * algorithms like Aho-Corasick, and only trigger regex matching when the literal is found.
+ *
+ * @param patternId Stable ID for the pattern this literal came from.
+ * @param literal The literal substring extracted from the regex (non-empty).
+ * @param offsetInRegex Start offset of the literal inside the regex pattern string.
+ * @param anchoredPrefix True if literal is anchored at start (pattern has ^ before it with no
+ *     consuming tokens).
+ * @param caseInsensitive True if the regex is case-insensitive overall (Pattern.CASE_INSENSITIVE).
+ * @param literalOffsetInMatch If literal starts at match index+k, this is k (0 if it's the prefix).
  */
-public final class LiteralHint {
-  /** Stable ID for the pattern this literal came from. */
-  public final int patternId;
-
-  /** The literal substring extracted from the regex (non-empty). */
-  public final String literal;
-
-  /** Start offset of the literal inside the regex pattern string. */
-  public final int offsetInRegex;
-
-  /** True if literal is anchored at start (pattern has ^ before it with no consuming tokens). */
-  public final boolean anchoredPrefix;
-
-  /** True if the regex is case-insensitive overall (Pattern.CASE_INSENSITIVE). */
-  public final boolean caseInsensitive;
-
-  /** If literal starts at match index+k, this is k (0 if it's the prefix). */
-  public final int literalOffsetInMatch;
-
+public record LiteralHint(
+    int patternId,
+    String literal,
+    int offsetInRegex,
+    boolean anchoredPrefix,
+    boolean caseInsensitive,
+    int literalOffsetInMatch) {
   /**
    * Creates a new literal hint.
    *
@@ -51,20 +47,7 @@ public final class LiteralHint {
    * @param caseInsensitive true if the regex is case-insensitive
    * @param literalOffsetInMatch offset of literal within the match (0 if prefix)
    */
-  public LiteralHint(
-      final int patternId,
-      final String literal,
-      final int offsetInRegex,
-      final boolean anchoredPrefix,
-      final boolean caseInsensitive,
-      final int literalOffsetInMatch) {
-    this.patternId = patternId;
-    this.literal = literal;
-    this.offsetInRegex = offsetInRegex;
-    this.anchoredPrefix = anchoredPrefix;
-    this.caseInsensitive = caseInsensitive;
-    this.literalOffsetInMatch = literalOffsetInMatch;
-  }
+  public LiteralHint {}
 
   @Override
   public String toString() {
@@ -88,10 +71,9 @@ public final class LiteralHint {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof LiteralHint)) {
+    if (!(o instanceof LiteralHint that)) {
       return false;
     }
-    final LiteralHint that = (LiteralHint) o;
     return patternId == that.patternId
         && anchoredPrefix == that.anchoredPrefix
         && caseInsensitive == that.caseInsensitive

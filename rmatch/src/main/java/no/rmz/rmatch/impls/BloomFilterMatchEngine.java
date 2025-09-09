@@ -15,23 +15,11 @@ package no.rmz.rmatch.impls;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
 import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Match;
-import no.rmz.rmatch.interfaces.MatchEngine;
-import no.rmz.rmatch.interfaces.MatchSet;
-import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.interfaces.RunnableMatchesHolder;
+import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.SimpleBloomFilter;
 
 /**
@@ -54,9 +42,6 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
   /** Aho-Corasick prefilter for literal substring matching. */
   private AhoCorasickPrefilter literalPrefilter;
-
-  /** All regexps in the system. */
-  private Set<Regexp> allRegexps = new HashSet<>();
 
   /** Whether the engine has been initialized. */
   private boolean initialized = false;
@@ -85,7 +70,8 @@ public final class BloomFilterMatchEngine implements MatchEngine {
       return;
     }
 
-    this.allRegexps = new HashSet<>(regexps);
+    /** All regexps in the system. */
+    Set<Regexp> allRegexps = new HashSet<>(regexps);
 
     // Build Bloom filter from n-grams
     buildBloomFilter(regexps);
@@ -166,9 +152,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
       // Extract literal hints from the pattern
       final var hint = LiteralPrefilter.extract(patternId++, pattern, 0);
-      if (hint.isPresent()) {
-        hints.add(hint.get());
-      }
+      hint.ifPresent(hints::add);
     }
 
     if (!hints.isEmpty()) {
@@ -450,9 +434,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
     // Handle simple cases - for complex regex, return first literal char
     final char first = pattern.charAt(0);
-    if (Character.isLetterOrDigit(first)) {
-      return first;
-    }
+    Character.isLetterOrDigit(first);
 
     // For now, just return first character - could be enhanced for complex patterns
     return first;

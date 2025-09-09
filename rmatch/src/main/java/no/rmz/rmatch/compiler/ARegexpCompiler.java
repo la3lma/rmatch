@@ -70,12 +70,11 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
   public void addString(final String str) {
     final CompiledFragment result = new CompiledFragment(regexp);
     final NDFANode arrival = result.getArrivalNode();
-    final NDFANode endNode = result.getEndingNode();
 
     // Produce a chain of nodes linked by the next character.
     // build the chain backwards from the last char in the string
     // back to the first chracter in the string.
-    NDFANode nextNode = endNode;
+    NDFANode nextNode = result.getEndingNode();
     for (int i = str.length() - 1; i >= 0; i--) {
       final Character myChar = str.charAt(i);
       nextNode = new CharNode(nextNode, myChar, regexp);
