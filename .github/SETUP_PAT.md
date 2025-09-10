@@ -56,5 +56,6 @@ If you see errors like "Resource not accessible by integration":
 2. Check that the PAT has all required permissions
 3. Ensure the PAT hasn't expired
 4. Make sure you're using a personal PAT, not a GitHub App token
+5. Run the diagnostic script: `./scripts/check_pat_setup.sh` (in GitHub Actions)
 
 The workflows are designed to fallback to `GITHUB_TOKEN` when `REPORT_TOKEN` is not available, but some operations may fail with reduced permissions.
