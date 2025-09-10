@@ -1,0 +1,14 @@
+# Prospects directory gitignore
+# Exclude temporary files and downloads
+
+# Maven build artifacts
+target/
+
+# Java compiled classes
+*.class
+
+# Downloaded JDBC drivers
+postgresql-*.jar
+
+# Docker volumes (if created locally)
+.postgres_data/
