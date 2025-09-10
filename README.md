@@ -50,3 +50,9 @@ than myself, but it's not quite there yet.  Be patient ;)
 
 [![Test Coverage](https://api.codeclimate.com/v1/badges/ecfba15253e7095438fb/test_coverage)](https://codeclimate.com/repos/64a2ba4d1c8c821c92003b52/test_coverage)
 
+## GitHub Actions Setup
+
+This repository includes automated performance testing and reporting via GitHub Actions. To enable all workflow features, you may need to configure a Personal Access Token (PAT) with appropriate permissions. 
+
+For detailed setup instructions, see [GitHub Actions PAT Setup](.github/SETUP_PAT.md).
+
