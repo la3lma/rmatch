@@ -38,6 +38,8 @@ jobs:
       - name: Profile hot path
         run: ./scripts/profile_async_profiler.sh  # outputs *.svg
       - name: Compare vs baseline and comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPORT_TOKEN || secrets.GITHUB_TOKEN }}
         run: ./scripts/compare_and_comment.sh  # uses GH_TOKEN to post PR comment
       - uses: actions/upload-artifact@v4
         with: { name: perf-artifacts, path: "jmh-result.json macro-result.json profiles/*.svg performance_timeline.png java_performance_timeline.png performance_comparison.png" }

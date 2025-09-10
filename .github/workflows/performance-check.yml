@@ -86,6 +86,8 @@ jobs:
       
       - name: Commit updated performance data
         if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPORT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           # Configure git
           git config --local user.email "action@github.com"
@@ -103,7 +105,8 @@ jobs:
             
             [skip ci]"
             
-            # Push the changes back to the PR branch
+            # Push the changes back to the PR branch using the elevated token
+            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
             git push origin HEAD:${{ github.head_ref }}
             echo "✅ Updated performance data committed to PR"
           else
@@ -112,7 +115,7 @@ jobs:
       
       - name: Compare and comment
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.REPORT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           # Enhanced compare and comment script with pass/fail logic
           ./scripts/compare_and_comment.sh

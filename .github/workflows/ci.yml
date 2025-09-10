@@ -50,6 +50,8 @@ jobs:
 #        run: make profile  # outputs *.svg
 
       - name: Compare vs baseline and comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPORT_TOKEN || secrets.GITHUB_TOKEN }}
         run: ./scripts/compare_and_comment.sh  # uses GH_TOKEN to post PR comment
       - name: Upload results
         uses: actions/upload-artifact@v4
