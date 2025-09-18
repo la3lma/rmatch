@@ -1,0 +1,71 @@
+@startuml testing_framework_components
+
+!theme cerulean-outline
+title Extended Testing Framework - Component Overview
+
+package "Test Orchestration" {
+  [Test Scheduler] as scheduler
+  [Resource Manager] as resources
+  [Results Aggregator] as aggregator
+}
+
+package "Pattern Management" {
+  [Pattern Library] as patterns
+  [Pattern Generator] as patgen
+  [Pattern Validator] as patval
+}
+
+package "Input Management" {
+  [Corpus Manager] as corpus
+  [Input Synthesizer] as inputsynth
+  [Data Loader] as loader
+}
+
+package "Test Execution" {
+  [Performance Tests] as perftest
+  [Stress Tests] as stresstest
+  [Regression Tests] as regtest
+}
+
+package "Metrics & Analysis" {
+  [Metrics Collector] as metrics
+  [Performance Analyzer] as analyzer
+  [Report Generator] as reports
+}
+
+package "Infrastructure" {
+  [CI/CD Integration] as cicd
+  [Baseline Manager] as baseline
+  [Configuration] as config
+}
+
+' Relationships
+scheduler --> perftest
+scheduler --> stresstest
+scheduler --> regtest
+
+resources --> scheduler
+aggregator <-- perftest
+aggregator <-- stresstest
+aggregator <-- regtest
+
+patterns --> perftest
+patgen --> patterns
+patval --> patterns
+
+corpus --> perftest
+inputsynth --> corpus
+loader --> corpus
+
+metrics <-- perftest
+metrics <-- stresstest
+metrics <-- regtest
+
+analyzer --> metrics
+reports --> analyzer
+
+cicd --> scheduler
+baseline --> analyzer
+config --> scheduler
+
+@enduml
