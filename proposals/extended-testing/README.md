@@ -35,42 +35,44 @@ The build process creates:
 ## Content Overview
 
 ### Main Proposal Document
-- **Problem Analysis**: Current testing limitations
-- **Proposed Framework**: Comprehensive testing architecture
-- **Implementation Plan**: 6 sequential tasks totaling 44-56 weeks
-- **Expected Benefits**: 10x performance improvement potential
+- **Problem Analysis**: Current testing limitations including legacy CSV logging infrastructure
+- **Proposed Framework**: Comprehensive testing architecture based on modern JMH infrastructure
+- **Implementation Plan**: 6 sequential tasks emphasizing modernization and bioinformatics integration
+- **Enhanced Dataset Coverage**: Bioinformatics data from NCBI, UniProt, Ensembl plus established benchmarks
+- **Expected Benefits**: 10x performance improvement potential with diverse testing scenarios
 
 ### Sequential Tasks for Implementation
-1. **Foundation Infrastructure** (6-8 weeks)
-2. **Pattern Library Development** (8-10 weeks)  
-3. **Input Corpus Diversification** (7-9 weeks)
-4. **Advanced Metrics Collection** (8-10 weeks)
-5. **CI/CD Integration** (7-9 weeks)
+1. **Foundation Infrastructure** (6-8 weeks) - **PRIORITY: Remove legacy CSV logging, modernize to JMH**
+2. **Pattern Library Development** (8-10 weeks) - **Enhanced with bioinformatics patterns**
+3. **Input Corpus Diversification** (8-9 weeks) - **Major focus: Biology/gene sequences, established benchmarks**
+4. **Advanced Metrics Collection** (8-10 weeks) - **JMH-based metrics only**
+5. **CI/CD Integration** (7-9 weeks) - **Full GitHub Actions compatibility across all corpora**
 6. **Documentation & Training** (8-10 weeks)
 
 ### Technical Architecture
-- **Test Orchestrator**: Coordinates test execution
-- **Pattern Library**: 600+ categorized regex patterns
-- **Corpus Manager**: Multi-domain test data
-- **Metrics Collector**: Advanced performance analysis
+- **Modern JMH-Based Test Orchestrator**: Coordinates test execution without legacy CSV dependencies
+- **Enhanced Pattern Library**: 600+ categorized regex patterns including bioinformatics sequences
+- **Diversified Corpus Manager**: Multi-domain test data with biology datasets (NCBI, UniProt, Ensembl)
+- **Established Benchmark Integration**: Canterbury Corpus, Large Text Compression Benchmark
+- **Advanced Metrics Collector**: JMH-based performance analysis with GitHub Actions compatibility
 - **CI/CD Integration**: GitHub Actions automation
 
 ## Key Benefits
 
-**Performance Optimization:**
-- Systematic bottleneck identification
-- Diverse test scenarios reveal optimization opportunities
-- Comprehensive metrics guide development decisions
+**Infrastructure Modernization:**
+- Eliminates legacy CSV logging for consistent, reliable measurements
+- Full JMH integration for accurate microbenchmarks and GitHub Actions compatibility
+- Modern CI/CD pipeline with automated corpus management
 
-**Development Process:**
-- Automated regression detection
-- Continuous performance monitoring
-- Evidence-based optimization prioritization
+**Comprehensive Dataset Coverage:**
+- **Bioinformatics Integration**: Real-world biological sequence data from major repositories
+- **Established Benchmarks**: Canterbury Corpus and Large Text Compression Benchmark for standardized comparisons  
+- **Diverse Test Scenarios**: Multiple domains (literature, code, logs, structured data, biology)
 
-**Competitive Analysis:**
-- Detailed comparison with Java regex
-- Performance trend tracking
-- Optimization effectiveness validation
+**Development Process Enhancement:**
+- Automated regression detection across all corpus types
+- Continuous performance monitoring with GitHub Actions workflows
+- Evidence-based optimization prioritization with concrete references and methodologies
 
 ## Implementation Strategy
 

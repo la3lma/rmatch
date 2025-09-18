@@ -133,13 +133,23 @@ public class RegexFeatureBasedGenerator implements PatternGenerator {
 - **Effort**: 10-12 weeks (including community coordination)
 
 ## Success Criteria
-- [ ] 600+ patterns across all categories implemented
-- [ ] Pattern metadata system fully functional
-- [ ] Automated generation for 3+ categories
-- [ ] Pattern validation system operational
-- [ ] Performance impact of pattern library < 5% overhead
-- [ ] Integration tests with existing framework passing
-- [ ] Documentation for pattern contributors
+- [ ] **600+ patterns across all categories implemented**
+  - [ ] Pattern categories covering simple to pathological complexity levels
+  - [ ] Bioinformatics-specific patterns for biological sequence matching
+  - [ ] Patterns from established benchmark collections
+- [ ] **JMH integration and modernization complete**
+  - [ ] Pattern library fully compatible with JMH framework (from Task 001)
+  - [ ] No dependency on legacy CSV logging infrastructure
+  - [ ] Pattern metadata system integrated with JMH annotations
+  - [ ] GitHub Actions compatible pattern loading and validation
+- [ ] **Automated generation and validation operational**
+  - [ ] Automated generation for 3+ categories
+  - [ ] Pattern validation system operational across all pattern types
+  - [ ] Performance impact of pattern library < 5% overhead
+- [ ] **Integration and documentation complete**
+  - [ ] Integration tests with modernized framework passing
+  - [ ] Documentation for pattern contributors
+  - [ ] Cross-validation with existing rmatch baseline systems
 
 ## Testing Strategy
 1. **Pattern Correctness Testing**
@@ -158,9 +168,11 @@ public class RegexFeatureBasedGenerator implements PatternGenerator {
    - Test pattern selection algorithms
 
 ## Dependencies
-- Task 001: Foundation Infrastructure (must be completed first)
+- **Task 001: Foundation Infrastructure** (must be completed first for JMH modernization)
 - Existing rmatch regex compilation system
 - Pattern validation tools
+- **Modern JMH benchmarking infrastructure** (no CSV dependencies)
+- GitHub Actions environment for automated testing
 
 ## Estimated Effort
 **8-10 weeks** including pattern curation, generation system, validation, and integration.
