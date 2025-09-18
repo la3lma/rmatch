@@ -345,6 +345,47 @@ Modernize and establish the foundational infrastructure for the extended testing
     \item \textbf{Hybrid approach}: Combine new components with existing infrastructure, providing balanced effort and benefits while enabling gradual migration from legacy systems
 \end{enumerate}
 
+\subsection{Task 001E: Foundation Infrastructure Evaluation \& Learning}
+
+\subsubsection{Title}
+Evaluate Foundation Infrastructure Implementation and Capture Learning
+
+\subsubsection{Problem}
+Implementation experience from Task 001 needs to be captured and analyzed to inform subsequent task planning and design decisions. Lessons learned about JMH integration complexity, infrastructure modernization challenges, and performance impact need to be documented and incorporated into future task specifications.
+
+\subsubsection{Proposal}
+Conduct comprehensive evaluation of the foundation infrastructure implementation:
+\begin{itemize}
+    \item \textbf{Performance Impact Assessment}: Measure actual overhead of new framework components vs. baseline expectations
+    \item \textbf{Integration Complexity Analysis}: Document challenges encountered during JMH modernization and CSV system removal
+    \item \textbf{Design Decision Validation}: Evaluate effectiveness of chosen architecture patterns for extensibility and maintainability
+    \item \textbf{Learning Capture \& Plan Refinement}: Update subsequent task descriptions based on implementation insights and performance characteristics discovered
+\end{itemize}
+
+\subsubsection{Learning Questions \& Reflection Points}
+\begin{enumerate}
+    \item \textbf{JMH Integration}: Was the CSV-to-JMH migration smoother or more complex than anticipated? What specific technical challenges emerged?
+    \item \textbf{Performance Baseline}: How does the new framework compare to legacy CSV-based measurements in terms of accuracy and overhead?
+    \item \textbf{GitHub Actions Compatibility}: Are there unexpected CI/CD integration issues that should inform Task 005 planning?
+    \item \textbf{Architecture Decisions}: Which design patterns worked well and which should be reconsidered for subsequent tasks?
+\end{enumerate}
+
+\subsubsection{Plan Refinement Actions}
+Based on evaluation results, update subsequent task specifications:
+\begin{itemize}
+    \item Adjust complexity estimates for Tasks 002-008 based on actual infrastructure modernization effort
+    \item Refine performance testing approaches in Task 004 based on discovered JMH capabilities and limitations
+    \item Update CI/CD integration strategy in Task 005 based on GitHub Actions compatibility findings
+    \item Modify documentation requirements in Task 008 based on implementation complexity insights
+\end{itemize}
+
+% LEARNING COMMENTS: This space reserved for capturing actual implementation insights
+% TODO: After Task 001 completion, update this section with:
+% - Specific technical challenges encountered
+% - Performance impact measurements vs. expectations
+% - Architecture decisions that should influence subsequent tasks
+% - Refined effort estimates for remaining tasks
+
 \subsection{Task 002: Pattern Library Development}
 
 \subsubsection{Title}
@@ -368,6 +409,47 @@ Create a structured pattern library with:
     \item Automated generation with manual validation (scalable, requires validation)
     \item Crowd-sourced pattern collection (diverse, quality control challenges)
 \end{enumerate}
+
+\subsection{Task 002E: Pattern Library Evaluation \& Learning}
+
+\subsubsection{Title}
+Evaluate Pattern Library Implementation and Refine Testing Strategy
+
+\subsubsection{Problem}
+Pattern library implementation provides critical insights into pattern complexity characteristics, automated generation effectiveness, and performance impact across different pattern categories. These learnings must inform subsequent corpus diversification and metrics collection strategies.
+
+\subsubsection{Proposal}
+Conduct comprehensive evaluation of pattern library implementation:
+\begin{itemize}
+    \item \textbf{Pattern Coverage Analysis}: Assess completeness and quality of generated patterns across complexity categories
+    \item \textbf{Performance Characterization}: Measure actual performance impact of different pattern types vs. theoretical complexity metrics
+    \item \textbf{Generation System Effectiveness}: Evaluate automated pattern generation quality and manual validation effort required
+    \item \textbf{Integration Assessment}: Test pattern library integration with Task 001 infrastructure for scalability and maintainability
+\end{itemize}
+
+\subsubsection{Learning Questions \& Reflection Points}
+\begin{enumerate}
+    \item \textbf{Pattern Quality}: Did automated generation produce realistic and valuable test patterns, or is manual curation more critical than anticipated?
+    \item \textbf{Complexity Metrics}: How well do theoretical complexity scores correlate with actual rmatch performance characteristics?
+    \item \textbf{Coverage Gaps}: What regex features or pattern types are still under-represented and should be prioritized?
+    \item \textbf{Performance Insights}: Which pattern categories revealed unexpected performance characteristics that should influence algorithm development?
+\end{enumerate}
+
+\subsubsection{Plan Refinement Actions}
+Based on pattern library evaluation, update subsequent task planning:
+\begin{itemize}
+    \item Adjust input corpus selection in Task 003 to prioritize text domains that complement discovered pattern performance characteristics
+    \item Refine metrics collection in Task 004 to focus on performance dimensions revealed as most critical by pattern analysis
+    \item Update automated test generation in Task 005 to incorporate pattern effectiveness learnings
+    \item Modify optimization guidance in Task 007 based on performance bottlenecks identified through pattern library testing
+\end{itemize}
+
+% LEARNING COMMENTS: This space reserved for capturing pattern library implementation insights
+% TODO: After Task 002 completion, update this section with:
+% - Pattern generation quality assessment and refinement recommendations
+% - Correlation analysis between complexity metrics and actual performance
+% - Specific pattern categories that revealed optimization opportunities
+% - Revised estimates for corpus selection and metrics collection priorities
 
 \subsection{Task 003: Input Corpus Diversification}
 
@@ -398,6 +480,47 @@ The bioinformatics datasets are particularly valuable because they represent rea
     \item \textbf{Community-contributed corpora}: Leverages diverse real-world inputs and community engagement, but requires quality control and careful handling of privacy/licensing issues
 \end{enumerate}
 
+\subsection{Task 003E: Input Corpus Evaluation \& Learning}
+
+\subsubsection{Title}
+Evaluate Corpus Diversification Impact and Refine Performance Understanding
+
+\subsubsection{Problem}
+Corpus diversification reveals how rmatch performance varies across different text domains and characteristics. These insights are critical for understanding optimization priorities and developing appropriate metrics collection strategies for Task 004.
+
+\subsubsection{Proposal}
+Conduct comprehensive evaluation of corpus diversification impact:
+\begin{itemize}
+    \item \textbf{Domain-Specific Performance Analysis}: Compare rmatch performance across literary, bioinformatics, code, and log file domains
+    \item \textbf{Text Characteristic Impact Assessment}: Measure how factors like character set diversity, line length, and structural patterns affect performance
+    \item \textbf{Bioinformatics Dataset Insights}: Analyze performance on biological sequences to understand long exact match and high repetition scenarios
+    \item \textbf{Benchmark Comparison Validation}: Validate rmatch results against established benchmark collections for research credibility
+\end{itemize}
+
+\subsubsection{Learning Questions \& Reflection Points}
+\begin{enumerate}
+    \item \textbf{Domain Variations}: Which text domains revealed unexpected performance characteristics that differ from literary text assumptions?
+    \item \textbf{Bioinformatics Performance}: Do biological sequences stress rmatch differently than anticipated, requiring algorithm adjustments?
+    \item \textbf{Optimization Priorities}: Which corpus characteristics suggest the most impactful optimization directions?
+    \item \textbf{Metrics Requirements}: What performance dimensions became critical across diverse corpora that weren't apparent with single-domain testing?
+\end{enumerate}
+
+\subsubsection{Plan Refinement Actions}
+Based on corpus evaluation insights, refine subsequent task approaches:
+\begin{itemize}
+    \item Prioritize specific latency/throughput metrics in Task 004 based on domain-specific performance variations discovered
+    \item Adjust automated test generation in Task 005 to focus on corpus characteristics that revealed optimization opportunities
+    \item Update CI/CD integration in Task 006 to emphasize performance monitoring for most critical text domains
+    \item Refine optimization guidance in Task 007 based on domain-specific bottlenecks identified
+\end{itemize}
+
+% LEARNING COMMENTS: This space reserved for capturing corpus diversification insights
+% TODO: After Task 003 completion, update this section with:
+% - Specific domain performance variations and their implications
+% - Bioinformatics dataset insights and algorithm stress points
+% - Text characteristic factors most impactful on rmatch performance
+% - Refined metrics collection priorities based on cross-domain analysis
+
 \subsection{Task 004: Advanced Metrics Collection}
 
 \subsubsection{Title}
@@ -421,6 +544,47 @@ Extend metrics collection to include:
     \item Implement custom metrics collection (tailored but requires development)
     \item Integrate with monitoring platforms (comprehensive but adds dependencies)
 \end{enumerate}
+
+\subsection{Task 004E: Advanced Metrics Evaluation \& Learning}
+
+\subsubsection{Title}
+Evaluate Advanced Metrics Implementation and Refine Performance Understanding
+
+\subsubsection{Problem}
+Advanced metrics collection reveals the detailed performance characteristics necessary for effective optimization guidance. The implementation provides insights into which metrics are most valuable for identifying bottlenecks and guiding development priorities.
+
+\subsubsection{Proposal}
+Conduct comprehensive evaluation of advanced metrics implementation:
+\begin{itemize}
+    \item \textbf{Metrics Effectiveness Assessment}: Evaluate which metrics provide the most actionable insights for optimization decisions
+    \item \textbf{Collection Overhead Analysis}: Measure performance impact of metrics collection itself across different monitoring intensities
+    \item \textbf{Bottleneck Identification Validation}: Test effectiveness of new metrics for identifying actual performance bottlenecks vs. baseline throughput measurements
+    \item \textbf{Cross-Domain Metrics Analysis}: Analyze metric behavior across diverse corpora from Task 003 to understand domain-specific optimization priorities
+\end{itemize}
+
+\subsubsection{Learning Questions \& Reflection Points}
+\begin{enumerate}
+    \item \textbf{Critical Metrics}: Which latency percentiles and performance dimensions proved most valuable for identifying optimization opportunities?
+    \item \textbf{Collection Trade-offs}: What is the optimal balance between metrics detail and collection overhead for continuous monitoring?
+    \item \textbf{Domain Sensitivity}: How do optimal metrics vary across different text domains and pattern complexities?
+    \item \textbf{Actionability}: Which metrics translate most directly to specific optimization strategies and algorithm improvements?
+\end{enumerate}
+
+\subsubsection{Plan Refinement Actions}
+Based on metrics evaluation insights, optimize subsequent task strategies:
+\begin{itemize}
+    \item Focus automated test generation in Task 005 on scenarios that exercise the most critical performance dimensions identified
+    \item Configure CI/CD integration in Task 006 to emphasize the most actionable metrics for regression detection
+    \item Prioritize analysis and reporting in Task 007 around metrics that proved most effective for optimization guidance
+    \item Update documentation in Task 008 to emphasize metrics interpretation patterns discovered through implementation
+\end{itemize}
+
+% LEARNING COMMENTS: This space reserved for capturing advanced metrics implementation insights
+% TODO: After Task 004 completion, update this section with:
+% - Ranking of metric effectiveness for optimization guidance
+% - Optimal collection overhead vs. insight trade-offs
+% - Domain-specific metric sensitivity patterns
+% - Specific bottleneck identification success stories and refinements needed
 
 \subsection{Task 005: Automated Test Generation}
 
@@ -446,6 +610,47 @@ Implement automated test generation including:
     \item Genetic algorithm approach (explores space well but unpredictable)
 \end{enumerate}
 
+\subsection{Task 005E: Automated Test Generation Evaluation \& Learning}
+
+\subsubsection{Title}
+Evaluate Automated Test Generation Effectiveness and Refine Testing Strategy
+
+\subsubsection{Problem}
+Automated test generation provides insights into edge cases, stress scenarios, and pattern combinations that manual testing might miss. The effectiveness of different generation strategies must be evaluated to optimize testing coverage and integration with CI/CD workflows.
+
+\subsubsection{Proposal}
+Conduct comprehensive evaluation of automated test generation implementation:
+\begin{itemize}
+    \item \textbf{Coverage Effectiveness Assessment}: Measure how automated generation improves test coverage beyond manual pattern curation
+    \item \textbf{Edge Case Discovery Analysis}: Evaluate effectiveness of different generation strategies for identifying performance edge cases and correctness issues
+    \item \textbf{Generation Strategy Comparison}: Compare rule-based, ML-based, and genetic algorithm approaches for practical testing value
+    \item \textbf{Integration Readiness Evaluation}: Assess automated generation suitability for CI/CD integration and continuous testing workflows
+\end{itemize}
+
+\subsubsection{Learning Questions \& Reflection Points}
+\begin{enumerate}
+    \item \textbf{Generation Quality}: Which automated generation strategies produced the most valuable test cases for revealing rmatch performance characteristics?
+    \item \textbf{Edge Case Value}: Did automated generation discover performance edge cases or correctness issues that manual testing missed?
+    \item \textbf{Maintenance Requirements}: What is the ongoing effort required to maintain and tune automated generation vs. manual test case development?
+    \item \textbf{CI/CD Readiness}: How should automated generation be integrated into continuous testing to provide maximum value without excessive execution time?
+\end{enumerate}
+
+\subsubsection{Plan Refinement Actions}
+Based on automated generation evaluation, optimize CI/CD and reporting strategies:
+\begin{itemize}
+    \item Configure CI/CD integration in Task 006 to emphasize the most effective automated generation strategies
+    \item Focus analysis and reporting in Task 007 on performance dimensions where automated generation revealed critical insights
+    \item Update documentation in Task 008 to include best practices for automated test case interpretation and maintenance
+    \item Adjust timeline estimates for ongoing maintenance based on generation strategy effectiveness findings
+\end{itemize}
+
+% LEARNING COMMENTS: This space reserved for capturing automated test generation insights
+% TODO: After Task 005 completion, update this section with:
+% - Comparative effectiveness of different generation strategies
+% - Specific edge cases discovered through automation vs. manual testing
+% - Integration complexity and maintenance requirements assessment
+% - Recommendations for CI/CD integration and execution scheduling
+
 \subsection{Task 006: CI/CD Integration}
 
 \subsubsection{Title}
@@ -469,6 +674,47 @@ Implement CI/CD integration with:
     \item Tiered testing approach (fast tests always, extended tests periodically)
     \item Manual trigger for extended tests (flexible but requires discipline)
 \end{enumerate}
+
+\subsection{Task 006E: CI/CD Integration Evaluation \& Learning}
+
+\subsubsection{Title}
+Evaluate CI/CD Integration Effectiveness and Refine Continuous Testing Strategy
+
+\subsubsection{Problem}
+CI/CD integration is critical for making the extended testing framework valuable in practice. The implementation provides insights into execution time trade-offs, regression detection effectiveness, and developer workflow integration that must inform final reporting and documentation strategies.
+
+\subsubsection{Proposal}
+Conduct comprehensive evaluation of CI/CD integration implementation:
+\begin{itemize}
+    \item \textbf{Execution Time Analysis}: Measure actual CI/CD execution times vs. targets for different testing tier configurations
+    \item \textbf{Regression Detection Effectiveness}: Evaluate accuracy and sensitivity of automated performance regression detection across diverse scenarios
+    \item \textbf{Developer Workflow Impact}: Assess integration smoothness and developer feedback on testing workflow changes
+    \item \textbf{Baseline Management Evaluation}: Test effectiveness of automated baseline updating and performance trend tracking
+\end{itemize}
+
+\subsubsection{Learning Questions \& Reflection Points}
+\begin{enumerate}
+    \item \textbf{Execution Efficiency}: Did the tiered testing approach achieve the desired balance between comprehensiveness and speed?
+    \item \textbf{Regression Sensitivity}: Are the performance gates appropriately tuned to catch meaningful regressions without false positives?
+    \item \textbf{Adoption Barriers}: What aspects of the CI/CD integration create friction for developers and how can they be addressed?
+    \item \textbf{Maintenance Overhead}: What ongoing maintenance requirements emerged for baseline management and test configuration?
+\end{enumerate}
+
+\subsubsection{Plan Refinement Actions}
+Based on CI/CD integration evaluation, finalize framework implementation:
+\begin{itemize}
+    \item Optimize analysis and reporting in Task 007 based on CI/CD execution time constraints and developer feedback needs
+    \item Focus documentation in Task 008 on addressing adoption barriers and workflow integration challenges identified
+    \item Refine maintenance procedures based on actual overhead requirements discovered during integration
+    \item Update performance gate configurations based on regression detection effectiveness analysis
+\end{itemize}
+
+% LEARNING COMMENTS: This space reserved for capturing CI/CD integration insights
+% TODO: After Task 006 completion, update this section with:
+% - Actual execution time performance vs. targets and optimization opportunities
+% - Regression detection accuracy and tuning recommendations
+% - Developer adoption feedback and workflow integration improvements
+% - Baseline management maintenance requirements and automation opportunities
 
 \subsection{Task 007: Results Analysis and Reporting}
 
@@ -494,6 +740,47 @@ Create analysis and reporting capabilities:
     \item Dashboard-based interactive analysis (flexible but requires development)
 \end{enumerate}
 
+\subsection{Task 007E: Results Analysis Evaluation \& Learning}
+
+\subsubsection{Title}
+Evaluate Analysis Framework Effectiveness and Capture Final Optimization Insights
+
+\subsubsection{Problem}
+The results analysis and reporting framework represents the culmination of all previous testing infrastructure work. Its effectiveness in providing actionable optimization guidance determines the overall value of the extended testing regime and informs final documentation requirements.
+
+\subsubsection{Proposal}
+Conduct comprehensive evaluation of analysis and reporting framework:
+\begin{itemize}
+    \item \textbf{Optimization Guidance Effectiveness}: Assess how well automated analysis translates performance data into actionable optimization recommendations
+    \item \textbf{Trend Analysis Accuracy}: Evaluate performance trend detection accuracy and sensitivity across diverse testing scenarios
+    \item \textbf{Bottleneck Identification Validation}: Test effectiveness of automated bottleneck identification against manual performance analysis
+    \item \textbf{Competitive Analysis Value}: Assess quality and utility of comparative analysis against baseline and competitive implementations
+\end{itemize}
+
+\subsubsection{Learning Questions \& Reflection Points}
+\begin{enumerate}
+    \item \textbf{Analysis Quality}: How accurate and actionable are the automated optimization recommendations compared to manual performance analysis?
+    \item \textbf{Insight Discovery}: Did the analysis framework reveal optimization opportunities that weren't apparent from raw metrics alone?
+    \item \textbf{Presentation Effectiveness}: Which reporting formats and visualizations proved most useful for different audiences (developers, researchers, management)?
+    \item \textbf{Integration Success}: How well does the complete testing pipeline from pattern library through analysis provide end-to-end optimization guidance?
+\end{enumerate}
+
+\subsubsection{Plan Refinement Actions}
+Based on analysis framework evaluation, finalize project delivery:
+\begin{itemize}
+    \item Focus documentation in Task 008 on the most effective analysis interpretation patterns and optimization workflows discovered
+    \item Compile comprehensive lessons learned from all evaluation phases to guide future testing framework evolution
+    \item Identify the most impactful elements of the extended testing regime for prioritized maintenance and enhancement
+    \item Document the complete methodology for applying insights from this implementation to other regex engine optimization projects
+\end{itemize}
+
+% LEARNING COMMENTS: This space reserved for capturing results analysis framework insights
+% TODO: After Task 007 completion, update this section with:
+% - Assessment of optimization recommendation accuracy and actionability
+% - Most effective analysis techniques and reporting formats discovered
+% - End-to-end testing pipeline effectiveness evaluation
+% - Comprehensive lessons learned synthesis for future projects
+
 \subsection{Task 008: Documentation and Training}
 
 \subsubsection{Title}
@@ -518,17 +805,72 @@ Develop documentation including:
     \item Video-based training materials (accessible but time-intensive to create)
 \end{enumerate}
 
+\subsection{Task 008E: Documentation Evaluation \& Project Synthesis}
+
+\subsubsection{Title}
+Evaluate Documentation Effectiveness and Synthesize Complete Project Learning
+
+\subsubsection{Problem}
+Documentation quality and training effectiveness determine long-term adoption and value of the extended testing framework. This final evaluation synthesizes learning from all implementation phases to provide comprehensive guidance for future optimization efforts and testing framework evolution.
+
+\subsubsection{Proposal}
+Conduct comprehensive final evaluation and project synthesis:
+\begin{itemize}
+    \item \textbf{Documentation Usability Assessment}: Test documentation effectiveness with actual users across different experience levels and use cases
+    \item \textbf{Training Material Validation}: Evaluate training effectiveness for both framework usage and result interpretation
+    \item \textbf{Complete Framework Evaluation}: Assess end-to-end framework effectiveness from pattern library through optimization guidance
+    \item \textbf{Project Learning Synthesis}: Compile comprehensive lessons learned from all evaluation phases to guide future development
+\end{itemize}
+
+\subsubsection{Learning Questions \& Reflection Points}
+\begin{enumerate}
+    \item \textbf{Documentation Quality}: How effective are the documentation and training materials for enabling productive framework usage?
+    \item \textbf{Framework Value}: What is the overall effectiveness of the extended testing regime for enabling optimization decisions?
+    \item \textbf{Implementation Insights}: What were the most significant learnings from this iterative implementation approach?
+    \item \textbf{Future Evolution}: Based on all evaluation phases, what should be the priorities for continued framework development?
+\end{enumerate}
+
+\subsubsection{Project Learning Synthesis}
+Compile and document comprehensive insights from all evaluation phases:
+\begin{itemize}
+    \item \textbf{Methodology Effectiveness}: Assess the value of iterative implementation with explicit evaluation phases
+    \item \textbf{Technical Architecture Lessons}: Document architectural decisions that proved most valuable and those requiring refinement
+    \item \textbf{Performance Optimization Insights}: Synthesize optimization guidance discovered through comprehensive testing
+    \item \textbf{Future Roadmap}: Define priorities for continued testing framework evolution based on implementation experience
+\end{itemize}
+
+% LEARNING COMMENTS: This space reserved for capturing final project synthesis
+% TODO: After Task 008 completion, update this section with:
+% - Overall framework effectiveness assessment and user feedback
+% - Comprehensive methodology evaluation for iterative testing framework development
+% - Complete technical lessons learned and architectural recommendations
+% - Defined roadmap for future framework evolution and optimization priorities
+
 \newpage
 \section{Conclusion}
 
-This extended testing proposal addresses the critical need for modernization of the rmatch testing infrastructure while significantly expanding test coverage to include bioinformatics datasets and established benchmarks. The proposal emphasizes:
+This extended testing proposal addresses the critical need for modernization of the rmatch testing infrastructure while significantly expanding test coverage to include bioinformatics datasets and established benchmarks. The proposal emphasizes both comprehensive technical implementation and systematic learning through iterative evaluation:
 
 \begin{itemize}
     \item \textbf{Infrastructure modernization}: Removal of legacy CSV logging in favor of JMH-based measurements for consistency and GitHub Actions compatibility
     \item \textbf{Comprehensive dataset coverage}: Integration of bioinformatics data from major repositories (NCBI, UniProt, Ensembl) alongside established benchmark collections
-    \item \textbf{Practical implementation}: Concrete acquisition methods, GitHub Actions workflows, and step-by-step task sequences
+    \item \textbf{Iterative learning methodology}: Each implementation task includes explicit evaluation and reflection phases to capture insights and refine subsequent task planning
+    \item \textbf{Self-modifying execution plan}: Learning from each evaluation phase informs and updates the approach for remaining tasks, ensuring continuous improvement of both implementation and methodology
     \item \textbf{Research foundation}: Extensive bibliography connecting to established pattern matching and bioinformatics literature
 \end{itemize}
+
+\subsection{Recursive Learning Approach}
+
+The proposal's innovative structure incorporates systematic learning and plan refinement through:
+
+\begin{itemize}
+    \item \textbf{Evaluation tasks}: Each implementation task (001, 002, 003, etc.) is followed by an evaluation task (001E, 002E, 003E, etc.) that captures learning and refines future planning
+    \item \textbf{Explicit reflection points}: Learning questions guide systematic analysis of what worked, what didn't, and what should be adjusted
+    \item \textbf{Plan refinement actions}: Each evaluation explicitly updates subsequent task approaches based on implementation insights
+    \item \textbf{Learning comments sections}: Reserved spaces for capturing actual implementation insights that inform project evolution
+\end{itemize}
+
+This recursive approach ensures that the testing framework development benefits from continuous learning and adaptation, maximizing the value of implementation experience for both immediate results and long-term methodology improvement.
 
 The successful implementation of this proposal will provide rmatch with a robust, diverse, and continuously updated testing framework that can guide optimization efforts across multiple domains and usage patterns while maintaining compatibility with modern development workflows.
 
