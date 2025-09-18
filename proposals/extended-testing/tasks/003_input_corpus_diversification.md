@@ -15,39 +15,57 @@ Current corpus limitations:
 - No structured data formats
 
 ## Proposal
-Develop a diverse corpus collection that represents various text processing scenarios:
+Develop a diverse corpus collection that represents various text processing scenarios, with particular emphasis on biology/bioinformatics data and established pattern matching benchmarks:
 
 ### Text Domain Categories
 
-1. **Literature Corpus (Multiple Works)**
+1. **Bioinformatics and Biological Sequence Corpus** ⭐
+   - **DNA/RNA sequences**: NCBI GenBank sequences, human genome segments
+   - **Protein sequences**: UniProt database entries, FASTA format files  
+   - **Gene annotation data**: GTF/GFF files with regulatory patterns
+   - **Multiple sequence alignments**: CLUSTAL and MUSCLE alignment outputs
+   - **Phylogenetic data**: Newick format trees with complex naming patterns
+   - **Biological literature**: PubMed abstracts with gene/protein mentions
+   - **Size**: 100+ sequence files, ~1GB total
+   - **Pattern characteristics**: High repetition, long exact matches, biological motifs
+
+2. **Literature Corpus (Multiple Works)**
    - Classic literature: Pride and Prejudice, Alice in Wonderland, etc.
-   - Modern literature: Recent public domain works
+   - Modern literature: Recent public domain works  
    - Poetry: Various forms and structures
    - Multiple languages: French, German, Spanish public domain texts
    - **Size**: 50+ works, ~100MB total
 
-2. **Technical Text Corpus**
+3. **Technical Text Corpus**
    - Source code: Java, Python, JavaScript, C++ samples
    - Configuration files: XML, JSON, YAML formats
    - Documentation: Markdown, LaTeX, HTML
    - Log files: Web server, application, system logs
    - **Size**: 1000+ files, ~500MB total
 
-3. **Structured Data Corpus**
+4. **Structured Data Corpus**
    - CSV files with various delimiters and escaping
    - Tab-separated data with different structures
    - Semi-structured text: email formats, chat logs
    - Mixed format documents
    - **Size**: 500+ files, ~200MB total
 
-4. **Unicode Stress Test Corpus**
+5. **Established Benchmark Datasets**  
+   - **Canterbury Corpus**: Standard compression benchmark texts
+   - **Large Text Compression Benchmark**: Realistic large-scale data
+   - **SMART Information Retrieval**: Document collection for IR research
+   - **20 Newsgroups**: Classic text classification dataset
+   - **Common Crawl samples**: Real web data segments
+   - **Size**: Varies, up to 10GB total
+
+6. **Unicode Stress Test Corpus**
    - Multi-byte character documents (Chinese, Japanese, Arabic)
    - Emoji-heavy social media text
    - Mathematical notation and symbols
    - Right-to-left text processing
    - **Size**: 100+ files, ~50MB total
 
-5. **Synthetic Stress Test Corpus**
+7. **Synthetic Stress Test Corpus**
    - High match density inputs (many pattern matches)
    - Low match density inputs (few or no matches)
    - Pathological inputs designed to stress regex engines
@@ -68,12 +86,14 @@ public class CorpusMetadata {
 }
 
 public enum TextDomain {
+    BIOINFORMATICS,     // DNA/RNA/protein sequences, gene annotations
     LITERATURE,
     SOURCE_CODE,
     LOG_FILES,
     STRUCTURED_DATA,
     SOCIAL_MEDIA,
     TECHNICAL_DOCS,
+    BENCHMARK_STANDARD, // Established benchmark datasets
     SYNTHETIC
 }
 
@@ -85,8 +105,68 @@ public enum TextFeature {
     LONG_LINES,
     SHORT_LINES,
     REPEATED_PATTERNS,
-    SPARSE_CONTENT
+    SPARSE_CONTENT,
+    BIOLOGICAL_SEQUENCES,   // DNA/RNA patterns (ATCG, etc.)
+    PROTEIN_MOTIFS,         // Amino acid sequences
+    ANNOTATION_MARKERS,     // Gene annotation symbols
+    HIGH_REPETITION,        // Common in biological data
+    FIXED_WIDTH_FIELDS      // Common in bioinformatics formats
 }
+```
+
+### Concrete Dataset Sources and Acquisition Methods
+
+#### Bioinformatics Data Sources
+1. **NCBI GenBank** - https://www.ncbi.nlm.nih.gov/genbank/
+   - **Acquisition**: Use NCBI E-utilities API for programmatic access
+   - **Formats**: FASTA, GenBank flat files
+   - **GitHub Actions compatible**: REST API with rate limiting
+
+2. **UniProt Protein Database** - https://www.uniprot.org/
+   - **Acquisition**: Download via UniProt REST API
+   - **Formats**: FASTA, XML, TSV
+   - **Size**: Complete proteomes (~100MB-1GB per species)
+
+3. **Ensembl Genome Browser** - https://www.ensembl.org/
+   - **Acquisition**: FTP download of GTF/GFF annotation files
+   - **Example**: Human GRCh38 annotations (~50MB compressed)
+   - **Pattern complexity**: Rich annotation metadata
+
+4. **1000 Genomes Project** - https://www.internationalgenome.org/
+   - **Acquisition**: Public cloud buckets (AWS, Google Cloud)
+   - **Formats**: VCF files with variant annotations
+   - **GitHub Actions**: Use cloud CLI tools
+
+#### Established Benchmark Collections
+5. **Canterbury Corpus** - https://corpus.canterbury.ac.nz/
+   - **Direct download**: Public FTP server
+   - **Files**: alice29.txt, asyoulik.txt, cp.html, etc.
+   - **Size**: ~3MB total, diverse characteristics
+
+6. **Large Text Compression Benchmark** - http://mattmahoney.net/dc/textdata.html
+   - **Files**: enwik8 (100MB), enwik9 (1GB) Wikipedia dumps
+   - **GitHub Actions**: Wget/curl downloads
+
+7. **SMART Collection** - ftp://ftp.cs.cornell.edu/pub/smart/
+   - **Classic IR benchmark**: 1,033 documents
+   - **Pattern testing**: Document retrieval scenarios
+
+#### Programmatic Dataset Generation
+```bash
+# GitHub Actions compatible download script
+#!/bin/bash
+set -e
+
+# Download Canterbury Corpus
+wget -q http://corpus.canterbury.ac.nz/corpus/canterbury.tar.gz
+tar -xzf canterbury.tar.gz
+
+# Download sample genome data
+wget -q "https://ftp.ensembl.org/pub/release-109/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz"
+gunzip Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz
+
+# Download UniProt sample
+wget -q "https://rest.uniprot.org/uniprotkb/stream?query=organism_id:9606&format=fasta&size=1000" -O human_proteins_sample.fasta
 ```
 
 ### Corpus Management System
@@ -146,35 +226,47 @@ public class TextCorpus {
 
 ### Implementation Plan
 
-1. **Corpus Collection (Weeks 1-2)**
-   - Identify and download public domain texts
-   - Collect open-source code repositories
-   - Gather publicly available log file samples
-   - Create structured data samples
+1. **Bioinformatics Corpus Collection (Weeks 1-2)** ⭐
+   - Set up NCBI E-utilities integration for sequence downloads
+   - Implement UniProt API client for protein data acquisition  
+   - Create genome annotation parsers for GTF/GFF files
+   - Add biological sequence validators and format converters
+   - **GitHub Actions**: Automated daily/weekly corpus updates
 
-2. **Corpus Processing (Week 3)**
-   - Implement text cleaning and normalization
-   - Create corpus metadata extraction
-   - Build corpus indexing system
-   - Add file format detection
+2. **Standard Benchmark Integration (Week 3)**
+   - Download and integrate Canterbury Corpus
+   - Add Large Text Compression Benchmark datasets
+   - Integrate SMART collection for information retrieval patterns
+   - Create benchmark dataset validation and checksum verification
+   - **GitHub Actions**: Automated benchmark data integrity checks
 
-3. **Synthetic Generation (Weeks 4-5)**
-   - Implement match density generators
-   - Create stress test input generation
-   - Build Unicode complexity generators
-   - Add large-scale input generation
+3. **Corpus Processing and Metadata (Week 4)**
+   - Implement text cleaning and normalization (preserve biological accuracy)
+   - Create corpus metadata extraction with biological annotations
+   - Build corpus indexing system with domain-specific features
+   - Add file format detection for bioinformatics formats
+   - **GitHub Actions**: Corpus processing pipeline
 
-4. **Management System (Week 6)**
-   - Implement corpus selection algorithms
-   - Create corpus statistics analysis
+4. **Synthetic Generation (Weeks 5-6)**
+   - Implement biological sequence generators (realistic DNA/protein patterns)
+   - Create match density generators for all domains
+   - Build stress test input generation
+   - Add Unicode complexity generators
+   - **GitHub Actions**: Synthetic data generation workflows
+
+5. **Management System (Week 7)**
+   - Implement corpus selection algorithms with domain weighting
+   - Create corpus statistics analysis with biological metrics
    - Build corpus validation system
-   - Add corpus update mechanisms
+   - Add corpus update mechanisms with versioning
+   - **GitHub Actions**: Automated corpus management
 
-5. **Integration (Week 7)**
-   - Integrate with test framework
+6. **Integration and Testing (Weeks 8-9)**
+   - Integrate with JMH-based test framework (from Task 001)
    - Add corpus selection to test orchestration
-   - Implement efficient streaming
-   - Create corpus management tools
+   - Implement efficient streaming for large biological datasets
+   - Create corpus management tools and CLI
+   - **GitHub Actions**: End-to-end testing pipeline
 
 ## Alternatives
 
@@ -199,14 +291,27 @@ public class TextCorpus {
 - **Effort**: 8-12 weeks
 
 ## Success Criteria
-- [ ] 5+ text domains represented with adequate coverage
-- [ ] Corpus management system fully operational
-- [ ] Synthetic generation for all stress test scenarios
-- [ ] Unicode complexity coverage implemented
-- [ ] Corpus selection algorithms working correctly
-- [ ] Performance impact of corpus loading < 10% overhead
-- [ ] Integration with existing test framework complete
-- [ ] Documentation for corpus contributors
+- [ ] **Bioinformatics corpus integration complete**
+  - [ ] NCBI GenBank sequence integration working
+  - [ ] UniProt protein database integration functional
+  - [ ] GTF/GFF genome annotation processing implemented
+  - [ ] Biological sequence pattern validation in place
+- [ ] **Established benchmark datasets integrated**
+  - [ ] Canterbury Corpus fully integrated and tested
+  - [ ] Large Text Compression Benchmark datasets available
+  - [ ] SMART collection accessible for IR pattern testing
+  - [ ] Benchmark data integrity verification implemented
+- [ ] **Comprehensive domain coverage achieved**
+  - [ ] 7+ text domains represented with adequate coverage
+  - [ ] Corpus management system fully operational with biological metadata
+  - [ ] Synthetic generation for all stress test scenarios including biological
+  - [ ] Unicode complexity coverage implemented
+- [ ] **Technical infrastructure complete**
+  - [ ] Corpus selection algorithms working correctly with domain priorities
+  - [ ] Performance impact of corpus loading < 10% overhead
+  - [ ] Integration with JMH-based test framework complete
+  - [ ] Full GitHub Actions workflow compatibility verified
+  - [ ] Documentation for corpus contributors with biological data guidelines
 
 ## Testing Strategy
 1. **Corpus Quality Validation**
@@ -231,4 +336,4 @@ public class TextCorpus {
 - Text processing utilities
 
 ## Estimated Effort
-**7-9 weeks** including corpus collection, processing, synthetic generation, and management system implementation.
+**8-9 weeks** including bioinformatics corpus integration, established benchmark dataset integration, corpus processing, synthetic generation, and management system implementation with full GitHub Actions compatibility.

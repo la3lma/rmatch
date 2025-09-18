@@ -4,24 +4,27 @@
 Integrate Extended Testing with GitHub Actions and CI/CD Pipeline
 
 ## Problem
-Extended testing needs to be integrated into the development workflow to provide continuous performance monitoring and prevent regressions. The current CI/CD setup has limited performance testing integration and doesn't provide comprehensive feedback on optimization efforts.
+Extended testing needs to be integrated into the development workflow to provide continuous performance monitoring and prevent regressions. All tests must be runnable within GitHub workflows to meet the design criteria specified in the project requirements.
 
 Current CI/CD limitations:
 - Basic performance tests run only occasionally
 - No systematic regression detection
-- Limited performance feedback in pull requests
+- Limited performance feedback in pull requests  
 - Manual baseline management
 - No automated performance trend analysis
+- **Missing integration with modern JMH infrastructure** (from Task 001)
+- **Lack of bioinformatics corpus integration** (from Task 003)
+- **No automated corpus management in workflows**
 
 ## Proposal
 Implement comprehensive CI/CD integration with automated performance monitoring:
 
 ### GitHub Actions Workflow Integration
 
-1. **Tiered Testing Strategy**
+1. **Enhanced Tiered Testing Strategy (GitHub Actions Native)**
    ```yaml
-   # .github/workflows/performance-testing.yml
-   name: Performance Testing
+   # .github/workflows/extended-performance-testing.yml
+   name: Extended Performance Testing
    
    on:
      pull_request:
@@ -29,30 +32,77 @@ Implement comprehensive CI/CD integration with automated performance monitoring:
      push:
        branches: [main, master]
      schedule:
-       - cron: '0 2 * * *'  # Nightly comprehensive tests
+       - cron: '0 2 * * *'  # Nightly comprehensive tests with all corpora
    
    jobs:
      quick-performance:
        if: github.event_name == 'pull_request'
-       # Fast subset of tests for PR feedback
+       strategy:
+         matrix:
+           corpus: [wuthering-heights, canterbury-small, synthetic-basic]
+           pattern-category: [simple, medium-complexity]
+       steps:
+         - uses: actions/checkout@v4
+         - name: Setup JDK 17
+           uses: actions/setup-java@v4
+           with:
+             java-version: '17'
+         - name: Run JMH Quick Benchmarks
+           run: |
+             mvn clean compile
+             java -jar benchmarks/jmh/target/benchmarks.jar \
+               -wi 2 -i 3 -f 1 \
+               -prof gc \
+               -rff results/quick-${{ matrix.corpus }}-${{ matrix.pattern-category }}.json
        
      comprehensive-performance:
        if: github.event_name == 'push' || github.event_name == 'schedule'
-       # Full test suite for main branch and nightly runs
+       strategy:
+         matrix:
+           corpus: [literature, bioinformatics, technical, structured, unicode, benchmark-standard]
+           pattern-category: [simple, complex, pathological]
+       steps:
+         - name: Download Bioinformatics Corpora
+           run: |
+             # Automated corpus acquisition compatible with GitHub Actions
+             ./scripts/download-ncbi-samples.sh
+             ./scripts/download-uniprot-samples.sh
+             ./scripts/download-ensembl-annotations.sh
+         - name: Run Comprehensive JMH Benchmarks
+           run: |
+             mvn clean compile
+             java -jar benchmarks/jmh/target/benchmarks.jar \
+               -wi 5 -i 10 -f 2 \
+               -prof gc:churn=false \
+               -prof stack:lines=10 \
+               -rff results/comprehensive-${{ matrix.corpus }}-${{ matrix.pattern-category }}.json
        
      regression-analysis:
-       # Automated regression detection and reporting
+       needs: [quick-performance, comprehensive-performance]
+       runs-on: ubuntu-latest
+       steps:
+         - name: Performance Regression Analysis
+           run: |
+             # Use existing PerformanceCriteriaEvaluator
+             java -cp target/classes no.rmz.rmatch.performancetests.PerformanceCriteriaEvaluator \
+               --baseline-dir benchmarks/baseline/ \
+               --results-dir results/ \
+               --output-format github-actions
    ```
 
-2. **Performance Gates**
+2. **JMH-Integrated Performance Gates**
    ```java
+   @BenchmarkMode(Mode.Throughput)
+   @State(Scope.Benchmark)
    public class PerformanceGate {
        private final double maxRegressionPercent;
        private final double minImprovementThreshold;
        private final List<MetricThreshold> thresholds;
        
+       @Benchmark
        public GateResult evaluate(Metrics current, Metrics baseline) {
-           // Implement gate logic
+           // JMH-compatible gate evaluation
+           // Integrates with existing PerformanceCriteriaEvaluator
        }
    }
    
@@ -190,15 +240,26 @@ Implement comprehensive CI/CD integration with automated performance monitoring:
 - **Effort**: 6-8 weeks
 
 ## Success Criteria
-- [ ] GitHub Actions workflows operational for all scenarios
-- [ ] Performance gates preventing regressions
-- [ ] Automated baseline management working
-- [ ] PR performance feedback system functional
-- [ ] Nightly comprehensive testing operational
-- [ ] Performance trend reporting automated
-- [ ] Test execution time under 15 minutes for PR tests
-- [ ] Full test suite under 2 hours for nightly runs
-- [ ] Historical performance data preserved and accessible
+- [ ] **Complete GitHub Actions workflow integration**
+  - [ ] All tests runnable within GitHub Actions (design requirement met)
+  - [ ] Multi-matrix testing with all corpus types (literature, bioinformatics, technical, etc.)
+  - [ ] Automated corpus downloading and management in workflows
+  - [ ] JMH benchmark integration with GitHub Actions reporting
+- [ ] **Modernized performance infrastructure**
+  - [ ] No legacy CSV logging in any workflows
+  - [ ] All measurements through JMH infrastructure only
+  - [ ] Integration with existing PerformanceCriteriaEvaluator
+  - [ ] Performance gates preventing regressions via JMH results
+- [ ] **Comprehensive automation and monitoring**
+  - [ ] Automated baseline management working with version control
+  - [ ] PR performance feedback system functional with JMH data
+  - [ ] Nightly comprehensive testing operational across all corpora
+  - [ ] Performance trend reporting automated
+- [ ] **Performance and efficiency targets**
+  - [ ] Test execution time under 15 minutes for PR tests
+  - [ ] Full test suite under 2 hours for nightly runs (including bioinformatics corpora)
+  - [ ] Historical performance data preserved and accessible
+  - [ ] GitHub Actions artifact storage for all benchmark results
 
 ## Testing Strategy
 1. **CI/CD Workflow Testing**
@@ -217,11 +278,13 @@ Implement comprehensive CI/CD integration with automated performance monitoring:
    - Validate result accuracy
 
 ## Dependencies
-- Task 001: Foundation Infrastructure
+- Task 001: Foundation Infrastructure (Legacy CSV removal and JMH modernization)
+- Task 003: Input Corpus Diversification (Bioinformatics and benchmark datasets)
 - Task 004: Advanced Metrics Collection
-- GitHub Actions environment
-- Artifact storage infrastructure
-- Performance baseline data
+- GitHub Actions environment with matrix build capabilities
+- Artifact storage infrastructure for JMH results
+- Performance baseline data in version control
+- Corpus download automation scripts
 
 ## Estimated Effort
 **7-9 weeks** including workflow setup, baseline management, reporting integration, and comprehensive testing.

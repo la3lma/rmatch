@@ -6,7 +6,8 @@
   number={6},
   pages={419--422},
   year={1968},
-  publisher={ACM New York, NY, USA}
+  publisher={ACM New York, NY, USA},
+  url={https://doi.org/10.1145/363347.363387}
 }
 
 @article{aho1975,
@@ -17,28 +18,33 @@
   number={6},
   pages={333--340},
   year={1975},
-  publisher={ACM New York, NY, USA}
+  publisher={ACM New York, NY, USA},
+  url={https://doi.org/10.1145/360825.360855}
 }
 
 @inproceedings{cox2007,
   title={Regular expression matching can be simple and fast (but is slow in Java, Perl, PHP, Python, Ruby,...)},
   author={Cox, Russ},
   booktitle={Google Tech Talk},
-  year={2007}
+  year={2007},
+  url={https://swtch.com/~rsc/regexp/regexp1.html}
 }
 
 @book{friedl2006,
   title={Mastering regular expressions},
   author={Friedl, Jeffrey EF},
   year={2006},
-  publisher={O'Reilly Media, Inc.}
+  publisher={O'Reilly Media, Inc.},
+  isbn={978-0596528126},
+  url={https://www.oreilly.com/library/view/mastering-regular-expressions/0596528124/}
 }
 
 @misc{re2,
   title={RE2: A fast, safe, thread-friendly alternative to backtracking regular expression engines},
   author={Google},
   howpublished={\url{https://github.com/google/re2}},
-  year={2010}
+  year={2010},
+  url={https://github.com/google/re2}
 }
 
 @inproceedings{baeza1999,
@@ -47,5 +53,181 @@
   booktitle={International symposium on string processing and information retrieval},
   pages={14--33},
   year={1999},
-  organization={Springer}
+  organization={Springer},
+  url={https://doi.org/10.1007/978-1-4615-4415-2_2}
+}
+
+% Bioinformatics and Biology References
+@article{altschul1990basic,
+  title={Basic local alignment search tool},
+  author={Altschul, Stephen F and Gish, Warren and Miller, Webb and Myers, Eugene W and Lipman, David J},
+  journal={Journal of molecular biology},
+  volume={215},
+  number={3},
+  pages={403--410},
+  year={1990},
+  publisher={Elsevier},
+  url={https://doi.org/10.1016/S0022-2836(05)80360-2},
+  note={Foundational paper for biological sequence pattern matching}
+}
+
+@article{durbin1998biological,
+  title={Biological sequence analysis: probabilistic models of proteins and nucleic acids},
+  author={Durbin, Richard and Eddy, Sean R and Krogh, Anders and Mitchison, Graeme},
+  journal={Cambridge university press},
+  year={1998},
+  isbn={978-0521629713},
+  url={https://www.cambridge.org/core/books/biological-sequence-analysis/8BAF8F82E7F5A46B7C9F2A3C1D7E6FC9},
+  note={Comprehensive guide to sequence pattern analysis methods}
+}
+
+@article{gusfield1997algorithms,
+  title={Algorithms on strings, trees and sequences: computer science and computational biology},
+  author={Gusfield, Dan},
+  year={1997},
+  publisher={Cambridge university press},
+  isbn={978-0521585194},
+  url={https://www.cambridge.org/core/books/algorithms-on-strings-trees-and-sequences/F5A62A6234CF4D9AA3C54E4C4F5E4A8E},
+  note={Essential algorithms for biological string processing}
+}
+
+@misc{ncbi_genbank,
+  title={GenBank Overview},
+  author={{National Center for Biotechnology Information}},
+  year={2021},
+  howpublished={\url{https://www.ncbi.nlm.nih.gov/genbank/}},
+  url={https://www.ncbi.nlm.nih.gov/genbank/},
+  note={Primary repository for biological sequence data}
+}
+
+@article{uniprot2021,
+  title={UniProt: the universal protein knowledgebase in 2021},
+  author={{UniProt Consortium}},
+  journal={Nucleic acids research},
+  volume={49},
+  number={D1},
+  pages={D480--D489},
+  year={2021},
+  publisher={Oxford University Press},
+  url={https://doi.org/10.1093/nar/gkaa1100},
+  note={Comprehensive protein sequence and annotation database}
+}
+
+@article{cunningham2022ensembl,
+  title={Ensembl 2022},
+  author={Cunningham, Fiona and Allen, James E and Allen, Jamie and Alvarez-Jarreta, Jorge and Amode, M Ridwan and Armean, Irina M and Austine-Orimoloye, Olanrewaju and Azov, Andrey G and Barnes, If and Bennett, Ruth and others},
+  journal={Nucleic acids research},
+  volume={50},
+  number={D1},
+  pages={D988--D995},
+  year={2022},
+  publisher={Oxford University Press},
+  url={https://doi.org/10.1093/nar/gkab1049},
+  note={Genome annotation and comparative genomics database}
+}
+
+@article{thousand_genomes2015,
+  title={A global reference for human genetic variation},
+  author={{1000 Genomes Project Consortium}},
+  journal={Nature},
+  volume={526},
+  number={7571},
+  pages={68--74},
+  year={2015},
+  publisher={Nature Publishing Group},
+  url={https://doi.org/10.1038/nature15393},
+  note={Large-scale human genetic variation dataset}
+}
+
+% Pattern Matching Benchmarks and Datasets
+@misc{canterbury_corpus,
+  title={The Canterbury Corpus},
+  author={Arnold, Ross and Bell, Tim},
+  year={1997},
+  howpublished={\url{https://corpus.canterbury.ac.nz/}},
+  url={https://corpus.canterbury.ac.nz/},
+  note={Standard benchmark collection for compression and pattern matching}
+}
+
+@misc{large_text_benchmark,
+  title={Large Text Compression Benchmark},
+  author={Mahoney, Matt},
+  year={2011},
+  howpublished={\url{http://mattmahoney.net/dc/textdata.html}},
+  url={http://mattmahoney.net/dc/textdata.html},
+  note={Large-scale text datasets for compression and pattern matching evaluation}
+}
+
+@inproceedings{smart_collection,
+  title={The SMART retrieval system: experiments in automatic document processing},
+  author={Salton, Gerard and McGill, Michael J},
+  year={1983},
+  publisher={Prentice-Hall},
+  url={https://archive.org/details/smartretrievalsys00salt},
+  note={Classic information retrieval test collection}
+}
+
+@inproceedings{lang1995newsgroups,
+  title={NewsWeeder: Learning to filter netnews},
+  author={Lang, Ken},
+  booktitle={Machine Learning Proceedings 1995},
+  pages={331--339},
+  year={1995},
+  publisher={Elsevier},
+  url={https://doi.org/10.1016/B978-1-55860-377-6.50048-7},
+  note={20 Newsgroups dataset widely used for text classification benchmarks}
+}
+
+% Performance Testing and Benchmarking References
+@article{jmh2013,
+  title={OpenJDK: JMH},
+  author={Shipilev, Aleksey},
+  year={2013},
+  howpublished={\url{https://openjdk.org/projects/code-tools/jmh/}},
+  url={https://openjdk.org/projects/code-tools/jmh/},
+  note={Java Microbenchmark Harness for accurate performance measurement}
+}
+
+@inproceedings{blackburn2006dacapo,
+  title={The DaCapo benchmarks: Java benchmarking development and analysis},
+  author={Blackburn, Stephen M and Garner, Robin and Hoffmann, Chris and Khang, Asjad M and McKinley, Kathryn S and Bentzur, Rotem and Diwan, Amer and Feinberg, Daniel and Frampton, Daniel and Guyer, Samuel Z and others},
+  booktitle={Proceedings of the 21st annual ACM SIGPLAN conference on Object-oriented programming systems, languages, and applications},
+  pages={169--190},
+  year={2006},
+  url={https://doi.org/10.1145/1167473.1167488},
+  note={Standard Java benchmarking suite}
+}
+
+% GitHub Actions and CI/CD References
+@misc{github_actions,
+  title={GitHub Actions Documentation},
+  author={{GitHub Inc.}},
+  year={2023},
+  howpublished={\url{https://docs.github.com/en/actions}},
+  url={https://docs.github.com/en/actions},
+  note={Continuous integration and deployment platform}
+}
+
+% Regular Expression Performance Studies
+@inproceedings{davis2018impact,
+  title={The impact of regular expression denial of service (ReDoS) in practice: an empirical study at the ecosystem scale},
+  author={Davis, James C and Coghlan, Christy A and Servant, Francisco and Lee, Dongyoon},
+  booktitle={Proceedings of the 2018 26th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering},
+  pages={246--256},
+  year={2018},
+  url={https://doi.org/10.1145/3236024.3236027},
+  note={Large-scale study of regex performance in real-world applications}
+}
+
+@article{rathnayake2014faster,
+  title={Faster Unicode string processing through parallel bit streams},
+  author={Rathnayake, Arash and Cameron, Robert D},
+  journal={Software: Practice and Experience},
+  volume={44},
+  number={1},
+  pages={91--118},
+  year={2014},
+  publisher={Wiley Online Library},
+  url={https://doi.org/10.1002/spe.2150},
+  note={High-performance text processing with parallel algorithms}
 }
