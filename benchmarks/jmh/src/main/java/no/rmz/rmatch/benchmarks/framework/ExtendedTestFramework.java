@@ -247,8 +247,8 @@ public class ExtendedTestFramework {
               selectedPatterns.size(),
               throughput);
 
-      // Log structured results (modern replacement for CSV logging)
-      LOG.info(results.toStructuredLog());
+      // Note: Removed per-iteration logging to match sparse logging of previous system
+      // Results are available in JMH JSON output for analysis
 
       bh.consume(results);
       return results;
@@ -300,7 +300,8 @@ public class ExtendedTestFramework {
               selectedPatterns.size(),
               throughput);
 
-      LOG.info(results.toStructuredLog());
+      // Note: Removed per-iteration logging to match sparse logging of previous system
+      // Results are available in JMH JSON output for analysis
 
       bh.consume(results);
       return results;

@@ -93,9 +93,9 @@ public final class DefaultPatternLibrary implements PatternLibrary {
   private void addComplexPatterns() {
     final List<TestPattern> complexPatterns =
         List.of(
-            // Email-like patterns (simplified)
+            // Email-like patterns (simplified for rmatch compatibility)
             new TestPattern(
-                "[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z]{2,4}",
+                "[a-zA-Z0-9]+@[a-zA-Z0-9]+[.][a-zA-Z]+",
                 new PatternMetadata(
                     "simple_email", "Simple email pattern", PatternCategory.COMPLEX, 5, false)),
 
@@ -135,21 +135,21 @@ public final class DefaultPatternLibrary implements PatternLibrary {
                     5,
                     false)),
             new TestPattern(
-                "([0-9]+\\.){3}[0-9]+",
+                "[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+",
                 new PatternMetadata(
                     "ip_address", "IP address pattern", PatternCategory.COMPLEX, 4, false)),
 
-            // Simple anchors
+            // Patterns without anchors (rmatch compatibility)
             new TestPattern(
-                "^[a-z]+$",
+                "[a-z]+",
                 new PatternMetadata(
-                    "full_line_lowercase",
-                    "Full line lowercase",
+                    "lowercase_letters",
+                    "Lowercase letters",
                     PatternCategory.COMPLEX,
                     3,
                     false)),
             new TestPattern(
-                "^[A-Z][a-z]*$",
+                "[A-Z][a-z]*",
                 new PatternMetadata(
                     "capitalized_word", "Capitalized word", PatternCategory.COMPLEX, 3, false)));
 
