@@ -1,0 +1,56 @@
+@startuml test_execution_flow
+
+!theme cerulean-outline
+title Extended Testing Framework - Test Execution Flow
+
+actor Developer
+participant "CI/CD System" as CI
+participant "Test Orchestrator" as Orchestrator
+participant "Pattern Library" as Patterns
+participant "Corpus Manager" as Corpus
+participant "rmatch Engine" as Engine
+participant "Metrics Collector" as Metrics
+participant "Results Analyzer" as Analyzer
+participant "Report Generator" as Reports
+
+Developer -> CI : Push code changes
+CI -> Orchestrator : Trigger performance tests
+
+Orchestrator -> Patterns : Load test patterns
+Patterns -> Orchestrator : Pattern sets by category
+
+Orchestrator -> Corpus : Load test inputs
+Corpus -> Orchestrator : Input data sets
+
+loop For each test scenario
+    Orchestrator -> Engine : Execute pattern matching
+    Engine -> Metrics : Performance data
+    Metrics -> Orchestrator : Collected metrics
+end
+
+Orchestrator -> Analyzer : Raw test results
+Analyzer -> Analyzer : Process metrics\nDetect regressions\nCompare to baseline
+
+Analyzer -> Reports : Analysis results
+Reports -> Reports : Generate performance report
+
+Reports -> CI : Test results & report
+CI -> Developer : Performance feedback
+
+note right of Analyzer
+  Analyzes:
+  - Throughput changes
+  - Memory usage patterns
+  - Latency percentiles
+  - Scalability metrics
+end note
+
+note right of Reports
+  Generates:
+  - Performance summary
+  - Regression warnings
+  - Optimization recommendations
+  - Comparison charts
+end note
+
+@enduml
