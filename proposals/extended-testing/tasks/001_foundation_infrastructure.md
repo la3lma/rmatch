@@ -4,48 +4,69 @@
 Set up Extended Testing Framework Foundation
 
 ## Problem
-The current testing infrastructure lacks the foundation for comprehensive performance testing. We need to establish the basic framework components that will support advanced testing scenarios.
+The current testing infrastructure has foundational issues that must be addressed before comprehensive performance testing can be implemented effectively.
 
-Current limitations:
-- Limited test orchestration capabilities
-- No structured pattern library
-- Basic metrics collection only
-- Insufficient test categorization
+Critical current limitations:
+- **Legacy CSV logging system**: Still using outdated `CSVAppender` for metrics collection instead of modern JMH infrastructure
+- Limited test orchestration capabilities aligned with existing modern benchmarking
+- No structured pattern library integrated with current JMH benchmarks
+- Inconsistent metrics collection across legacy and modern systems
+- Insufficient test categorization and GitHub Actions compatibility
 
 ## Proposal
-Create the foundational infrastructure for the extended testing framework:
+Modernize and establish the foundational infrastructure for the extended testing framework:
 
-### Core Components
-1. **Test Framework Architecture**
-   - Create `ExtendedTestFramework` main class
-   - Implement `TestOrchestrator` for coordinating test execution
-   - Add `TestConfiguration` for framework settings
+### Phase 1: Legacy System Modernization (PRIORITY)
+1. **Remove Legacy CSV Logging Infrastructure**
+   - Deprecate and remove `CSVAppender` class and all references
+   - Replace CSV-based measurements in `HandleTheWutheringHeightsCorpus`
+   - Migrate `BenchmarkLargeCorpus` to use only JMH infrastructure
+   - Remove CSV file dependencies from existing benchmark workflows
 
-2. **Pattern Library Structure**
-   - Create `PatternLibrary` interface and implementation
-   - Add pattern categorization system (Simple, Complex, Pathological)
-   - Implement pattern metadata tracking (complexity scores, characteristics)
+2. **Standardize on JMH Infrastructure**  
+   - Extend existing JMH benchmarks in `benchmarks/jmh/` module
+   - Integrate all performance measurements through JMH framework
+   - Ensure GitHub Actions compatibility for all measurements
+   - Maintain consistency with existing `MatcherBenchmarker` patterns
 
-3. **Basic Test Orchestration**
-   - Implement `TestSuite` abstraction for grouping related tests
-   - Create `TestScenario` class for individual test cases
-   - Add test execution scheduling and resource management
+### Phase 2: Enhanced Framework Components
+3. **Pattern Library Structure (JMH-Integrated)**
+   - Create `PatternLibrary` interface compatible with JMH benchmarks
+   - Add pattern categorization system (Simple, Complex, Pathological)  
+   - Implement pattern metadata tracking integrated with JMH annotations
+   - Support dynamic pattern loading for JMH benchmark scenarios
 
-4. **Initial Metrics Collection Framework**
-   - Extend existing metrics with additional performance indicators
-   - Create `MetricsCollector` interface with multiple implementations
-   - Add support for latency percentiles (P50, P95, P99)
+4. **Modern Test Orchestration**
+   - Implement `TestSuite` abstraction leveraging JMH test harness
+   - Create `TestScenario` class for individual JMH benchmark cases
+   - Add GitHub Actions compatible test execution scheduling
+   - Integrate with existing performance baseline management
+
+5. **Enhanced Metrics Collection Framework**
+   - Extend existing JMH-based metrics with additional performance indicators
+   - Maintain compatibility with current `PerformanceCriteriaEvaluator`
+   - Add support for latency percentiles (P50, P95, P99) via JMH profilers
+   - Ensure all metrics are GitHub Actions reportable
 
 ### Implementation Details
 ```java
-// Core framework classes
+// Modern JMH-based framework classes
+@BenchmarkMode(Mode.Throughput)
+@State(Scope.Benchmark)
 public class ExtendedTestFramework {
-    private final TestOrchestrator orchestrator;
     private final PatternLibrary patternLibrary;
-    private final MetricsCollector metricsCollector;
+    private final TestConfiguration config;
     
+    @Setup
+    public void setup() {
+        // Initialize pattern library and configuration
+        // Remove any CSV logging dependencies
+    }
+    
+    @Benchmark
     public TestResults runTestSuite(TestSuite suite) {
-        // Implementation
+        // JMH-based benchmark execution
+        // Compatible with GitHub Actions reporting
     }
 }
 
@@ -53,13 +74,33 @@ public interface PatternLibrary {
     List<TestPattern> getPatternsByCategory(PatternCategory category);
     TestPattern createPattern(String regex, PatternMetadata metadata);
     void addCustomPattern(TestPattern pattern);
+    
+    // JMH integration methods
+    @Setup(Level.Trial)
+    void prepareForBenchmark(BenchmarkConfiguration config);
+}
+
+// Legacy removal targets
+@Deprecated // TO BE REMOVED IN THIS TASK
+public class CSVAppender {
+    // This entire class will be removed and replaced with JMH reporting
+}
+
+// Migration path for existing code
+public class ModernMatcherBenchmarker {
+    // Replaces CSV-based measurements with JMH infrastructure
+    // Maintains compatibility with existing baseline management
+    // Ensures GitHub Actions compatibility
 }
 ```
 
 ### Integration Points
-- Extend existing `ComprehensivePerformanceTest` class
-- Integrate with current JMH benchmark infrastructure
-- Maintain compatibility with existing baseline management
+- **Remove** dependency on legacy `CSVAppender` and CSV file logging
+- **Modernize** existing `ComprehensivePerformanceTest` class to use only JMH
+- **Enhance** current JMH benchmark infrastructure in `benchmarks/jmh/`
+- **Maintain** compatibility with existing baseline management system
+- **Ensure** full GitHub Actions workflow compatibility
+- **Integrate** with current `PerformanceCriteriaEvaluator` for pass/fail determination
 
 ## Alternatives
 
@@ -79,11 +120,20 @@ public interface PatternLibrary {
 - **Effort**: Medium (6-8 weeks)
 
 ## Success Criteria
-- [ ] Core framework classes implemented and tested
-- [ ] Pattern library with at least 3 categories and 50 patterns
-- [ ] Extended metrics collection showing P95/P99 latencies
-- [ ] Integration tests passing with existing infrastructure
-- [ ] Documentation for framework usage
+- [ ] **Legacy CSV infrastructure completely removed**
+  - [ ] `CSVAppender` class removed from codebase
+  - [ ] All CSV file logging replaced with JMH measurements
+  - [ ] `HandleTheWutheringHeightsCorpus` modernized to use JMH only
+  - [ ] No remaining dependencies on CSV-based performance tracking
+- [ ] **Modern JMH-based framework implemented**
+  - [ ] Core framework classes implemented and tested with JMH integration
+  - [ ] Pattern library with at least 3 categories and 50 patterns (JMH compatible)
+  - [ ] Enhanced metrics collection showing P95/P99 latencies via JMH profilers
+  - [ ] Full GitHub Actions workflow compatibility verified
+- [ ] **Integration and validation complete**
+  - [ ] Integration tests passing with modernized infrastructure
+  - [ ] Backward compatibility maintained for baseline management
+  - [ ] Documentation updated to reflect JMH-only approach
 
 ## Testing Strategy
 1. Unit tests for all new framework components

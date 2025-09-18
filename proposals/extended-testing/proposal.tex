@@ -327,22 +327,22 @@ This appendix provides detailed task descriptions for implementing the extended 
 Set up Extended Testing Framework Foundation
 
 \subsubsection{Problem}
-The current testing infrastructure lacks the foundation for comprehensive performance testing. We need to establish the basic framework components that will support advanced testing scenarios.
+The current testing infrastructure has critical foundational issues that must be addressed before comprehensive performance testing can be implemented effectively. Specifically, the system still relies on legacy CSV logging mechanisms instead of modern JMH infrastructure, creating inconsistencies and limiting GitHub Actions compatibility.
 
 \subsubsection{Proposal}
-Create the foundational infrastructure for the extended testing framework:
+Modernize and establish the foundational infrastructure for the extended testing framework:
 \begin{itemize}
-    \item Establish test framework architecture
-    \item Create basic test orchestration components
-    \item Set up pattern library structure
-    \item Implement initial metrics collection framework
+    \item \textbf{Remove legacy CSV logging infrastructure}: Deprecate and eliminate \texttt{CSVAppender} class and all CSV-based measurements to ensure consistency~\cite{jmh2013}
+    \item \textbf{Standardize on JMH infrastructure}: Migrate all performance measurements to use the existing JMH framework for accuracy and GitHub Actions compatibility
+    \item \textbf{Establish modern test framework architecture}: Create JMH-integrated components for test orchestration and pattern management
+    \item \textbf{Implement enhanced metrics collection framework}: Extend JMH-based metrics to include latency percentiles and advanced performance indicators
 \end{itemize}
 
 \subsubsection{Alternatives}
 \begin{enumerate}
-    \item Build entirely new testing framework (high effort, clean design)
-    \item Extend existing JMH infrastructure (lower effort, maintains compatibility)
-    \item Hybrid approach combining new components with existing infrastructure (balanced)
+    \item \textbf{Build entirely new testing framework}: Clean design but high effort and potential compatibility issues with existing baseline management
+    \item \textbf{Extend existing JMH infrastructure (Recommended)}: Lower effort, maintains compatibility with current performance evaluation systems~\cite{blackburn2006dacapo}, and ensures GitHub Actions compatibility~\cite{github_actions}
+    \item \textbf{Hybrid approach}: Combine new components with existing infrastructure, providing balanced effort and benefits while enabling gradual migration from legacy systems
 \end{enumerate}
 
 \subsection{Task 002: Pattern Library Development}
@@ -378,19 +378,24 @@ Expand Test Input Corpus Beyond Wuthering Heights
 Testing primarily on a single literary text limits the generalizability of performance results. Different text types may reveal different performance characteristics.
 
 \subsubsection{Proposal}
-Develop a diverse corpus collection including:
+Develop a diverse corpus collection including bioinformatics datasets and established benchmarks:
 \begin{itemize}
-    \item Multiple text domains (literature, code, logs, structured data)
-    \item Various text characteristics (length, character sets, structure)
-    \item Synthetic input generation for stress testing
-    \item Corpus metadata for result interpretation
+    \item \textbf{Bioinformatics Data}: DNA/RNA sequences from NCBI GenBank~\cite{ncbi_genbank}, protein sequences from UniProt~\cite{uniprot2021}, and genome annotations from Ensembl~\cite{cunningham2022ensembl}
+    \item \textbf{Established Benchmarks}: Canterbury Corpus~\cite{canterbury_corpus} and Large Text Compression Benchmark~\cite{large_text_benchmark} for standardized comparisons
+    \item \textbf{Multiple text domains}: Literature, source code, log files, structured data, and social media text
+    \item \textbf{Various text characteristics}: Different character sets, line lengths, and structural patterns
+    \item \textbf{Synthetic input generation}: Controlled stress testing with known pattern matching properties
+    \item \textbf{Comprehensive metadata}: Domain-specific annotations for result interpretation and pattern complexity analysis
 \end{itemize}
+
+The bioinformatics datasets are particularly valuable because they represent real-world pattern matching scenarios with high repetition rates, long exact matches, and biological motifs that stress different aspects of regex engines compared to literary text. Integration with established benchmark collections ensures compatibility with broader pattern matching research~\cite{altschul1990basic,gusfield1997algorithms}.
 
 \subsubsection{Alternatives}
 \begin{enumerate}
-    \item Use existing public corpora (quick setup, licensing considerations)
-    \item Generate synthetic corpora (controlled characteristics, may not reflect reality)
-    \item Combine real and synthetic data (balanced approach, more complex)
+    \item \textbf{Use existing public corpora}: Quick setup with established datasets like Canterbury Corpus~\cite{canterbury_corpus}, but may not cover rmatch-specific needs and requires careful licensing consideration
+    \item \textbf{Generate all synthetic corpora}: Provides controlled characteristics and unlimited variety, but may not reflect real-world usage patterns found in biological sequences or established benchmarks
+    \item \textbf{Hybrid real + synthetic approach (Recommended)}: Combines realistic patterns from bioinformatics datasets~\cite{durbin1998biological} with controlled testing scenarios, providing both validation against known benchmarks and stress testing capabilities
+    \item \textbf{Community-contributed corpora}: Leverages diverse real-world inputs and community engagement, but requires quality control and careful handling of privacy/licensing issues
 \end{enumerate}
 
 \subsection{Task 004: Advanced Metrics Collection}
@@ -512,5 +517,22 @@ Develop documentation including:
     \item Interactive tutorials and examples (engaging but requires development)
     \item Video-based training materials (accessible but time-intensive to create)
 \end{enumerate}
+
+\newpage
+\section{Conclusion}
+
+This extended testing proposal addresses the critical need for modernization of the rmatch testing infrastructure while significantly expanding test coverage to include bioinformatics datasets and established benchmarks. The proposal emphasizes:
+
+\begin{itemize}
+    \item \textbf{Infrastructure modernization}: Removal of legacy CSV logging in favor of JMH-based measurements for consistency and GitHub Actions compatibility
+    \item \textbf{Comprehensive dataset coverage}: Integration of bioinformatics data from major repositories (NCBI, UniProt, Ensembl) alongside established benchmark collections
+    \item \textbf{Practical implementation}: Concrete acquisition methods, GitHub Actions workflows, and step-by-step task sequences
+    \item \textbf{Research foundation}: Extensive bibliography connecting to established pattern matching and bioinformatics literature
+\end{itemize}
+
+The successful implementation of this proposal will provide rmatch with a robust, diverse, and continuously updated testing framework that can guide optimization efforts across multiple domains and usage patterns while maintaining compatibility with modern development workflows.
+
+\bibliographystyle{plain}
+\bibliography{references}
 
 \end{document}
