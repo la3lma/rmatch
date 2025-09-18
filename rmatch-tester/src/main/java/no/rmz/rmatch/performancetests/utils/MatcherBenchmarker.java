@@ -126,11 +126,15 @@ public final class MatcherBenchmarker {
     final Runtime runtime = Runtime.getRuntime();
     final int mb = 1024 * 1024;
     final long usedMemoryInMb = (runtime.totalMemory() - runtime.freeMemory()) / mb;
-    CSVAppender.append(
-        logLocation,
-        new long[] {
-          System.currentTimeMillis() / MILLISECONDS_IN_A_SECOND, duration, usedMemoryInMb
-        });
+
+    // Modern structured logging approach instead of CSV
+    LOG.info(
+        String.format(
+            "PERFORMANCE_METRICS: duration_ms=%d, memory_mb=%d, matches=%d, timestamp=%d",
+            duration,
+            usedMemoryInMb,
+            finalCount,
+            System.currentTimeMillis() / MILLISECONDS_IN_A_SECOND));
     LOG.log(Level.INFO, "Counter = " + finalCount);
     Counters.dumpCounters();
   }
