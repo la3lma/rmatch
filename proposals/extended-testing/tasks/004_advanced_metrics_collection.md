@@ -219,3 +219,40 @@ Extend metrics collection to provide comprehensive performance insights:
 
 ## Estimated Effort
 **8-10 weeks** including implementation, JVM integration, analysis tools, and comprehensive testing.
+
+## Learning and Reflection Elements
+
+### Self-Assessment Questions
+During implementation, regularly reflect on:
+1. **Metrics Effectiveness**: Which metrics provide the most actionable insights for optimization decisions?
+2. **Collection Overhead**: What is the performance impact of comprehensive metrics collection itself?
+3. **Bottleneck Identification**: How effective are the new metrics for identifying actual performance bottlenecks vs. baseline measurements?
+4. **Domain Sensitivity**: How do optimal metrics vary across different text domains discovered in Task 003?
+
+### Progress Checkpoints
+- **Week 3**: Latency metrics effectiveness assessment - are percentile measurements revealing optimization opportunities?
+- **Week 5**: Collection overhead analysis - is metrics gathering impacting performance beyond acceptable limits?
+- **Week 7**: Cross-domain metrics validation - do metrics behave consistently across corpus domains from Task 003?
+
+### Plan Adjustment Triggers
+Be prepared to adjust subsequent task approaches if:
+- Specific metrics prove more valuable than others (may focus automated generation in Task 005)
+- Collection overhead is too high (may require metrics selection optimization)
+- Domain-specific metric patterns emerge (may affect CI/CD monitoring strategy in Task 006)
+- New bottlenecks are identified (may influence optimization priorities and analysis focus in Task 007)
+
+### Learning Capture Requirements
+Document for Task 004E evaluation and subsequent task refinement:
+- Ranking of metric effectiveness for optimization guidance and bottleneck identification
+- Optimal collection overhead vs. insight trade-offs for different monitoring scenarios
+- Domain-specific metric sensitivity patterns discovered across diverse corpus types
+- Specific bottleneck identification success stories and areas needing refinement
+
+### Insights for Future Tasks
+Capture insights that should inform:
+- **Task 005 (Automated Generation)**: Focus generation on scenarios that exercise the most critical performance dimensions identified
+- **Task 006 (CI/CD Integration)**: Emphasize the most actionable metrics for regression detection and continuous monitoring
+- **Task 007 (Analysis & Reporting)**: Prioritize analysis around metrics that proved most effective for optimization guidance
+- **Task 008 (Documentation)**: Emphasize metrics interpretation patterns that proved most valuable
+
+**Note**: Completion of this task triggers Task 004E (Advanced Metrics Evaluation & Learning) to capture insights and refine subsequent task planning.
