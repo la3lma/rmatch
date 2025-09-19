@@ -1,5 +1,6 @@
 package no.rmz.rmatch.utils;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import no.rmz.rmatch.interfaces.Action;
@@ -11,50 +12,59 @@ public final class CounterAction implements Action {
   /** Our dear old Log. */
   private static final Logger LOG = Logger.getLogger(CounterAction.class.getName());
 
-  /** How long to wait between reports. */
-  private static final int DEFAULT_TICK_INTERVAL_FOR_IN_ACTIONS_BETWEEN_REPORTS = 4000;
+  /** Time between reports in milliseconds (~2 seconds). */
+  private static final long REPORT_INTERVAL_MILLIS = 2000;
 
-  /** Monitor used to synchronize access. */
-  private final Object monitor = new Object();
+  /** Global rate limiter shared across ALL CounterAction instances. */
+  private static final AtomicBoolean globalLoggingLock = new AtomicBoolean(false);
+  
+  /** Global timestamp for last log shared across ALL instances. */
+  private static volatile long globalLastTick = System.currentTimeMillis();
 
-  /** The value of the counter. */
-  private int counter = 0;
-
-  /** Initialize the timestamp for the last tick to be the time of class initialization. */
-  private long lastTick = System.currentTimeMillis();
+  /** The value of the counter for THIS instance. */
+  private final AtomicInteger counter = new AtomicInteger(0);
 
   @Override
   public void performMatch(final Buffer b, final int start, final int end) {
-    synchronized (monitor) {
-      counter += 1;
+    counter.incrementAndGet();
+    
+    // LOGGING COMPLETELY DISABLED - no more INFO spam
+    // If you need logging, uncomment the code below and adjust the interval
+    /*
+    final long now = System.currentTimeMillis();
+    
+    // Global rate limiting: only ONE CounterAction instance across the entire JVM can log at a time,
+    // and only if enough time has passed since the last global log
+    if (now - globalLastTick >= REPORT_INTERVAL_MILLIS && 
+        globalLoggingLock.compareAndSet(false, true)) {
+      
+      try {
+        // Double-check the time condition after acquiring the global lock
+        if (now - globalLastTick >= REPORT_INTERVAL_MILLIS) {
+          // Collecting a report from the known counters
+          final StringBuilder sb = new StringBuilder();
+          for (final Counter c : FastCounters.getCounters()) {
+            sb.append("  ").append(c.toString()).append(", ");
+          }
 
-      /** The tick interval we'll actually use. */
-      int tickInterval = DEFAULT_TICK_INTERVAL_FOR_IN_ACTIONS_BETWEEN_REPORTS;
-      /** Should the reports be verbose? */
-      boolean verbose = true;
-      if (verbose && (counter % tickInterval) == 0) {
+          final long duration = now - globalLastTick;
 
-        // Collecting a report from the known counters
-        final StringBuilder sb = new StringBuilder();
-        for (final Counter c : FastCounters.getCounters()) {
-          sb.append("  ").append(c.toString()).append(", ");
+          LOG.log(
+              Level.INFO,
+              "Match counter == {0}, duration = {1}, start/end = {2}/{3}, match string = ''{4}'' {5}",
+              new Object[] {
+                currentCount, duration, start, end, b.getString(start, end + 1), sb.toString()
+              });
+          
+          // Update the global timestamp
+          globalLastTick = now;
         }
-
-        // Making a report for the current counter,
-        // plus all the counters.
-        long now = System.currentTimeMillis();
-        long duration = now - lastTick;
-        double speed = duration / (double) tickInterval;
-
-        LOG.log(
-            Level.INFO,
-            "Match counter == {0}, duration = {1}, speed = {2} millis/tick, start/end = {3}/{4}, match string = ''{5}'' {6}",
-            new Object[] {
-              counter, duration, speed, start, end, b.getString(start, end + 1), sb.toString()
-            });
-        lastTick = now;
+      } finally {
+        // Always release the global logging lock
+        globalLoggingLock.set(false);
       }
     }
+    */
   }
 
   /**
@@ -63,8 +73,6 @@ public final class CounterAction implements Action {
    * @return an integer.
    */
   public int getCounter() {
-    synchronized (monitor) {
-      return counter;
-    }
+    return counter.get();
   }
 }
