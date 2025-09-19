@@ -39,7 +39,7 @@ public final class MatcherBenchmarker {
    * @param maxRegexps Maximum number of regexps to load, or -1 for all
    * @return List of regular expression strings
    */
-  public static List<String> loadRegexpsFromFile(String regexpPath, int maxRegexps) {
+  public static List<String> loadRegexpsFromFile(final String regexpPath, final int maxRegexps) {
     final FileInhaler fh = new FileInhaler(new File(regexpPath));
     final List<String> regexps = new ArrayList<>();
 

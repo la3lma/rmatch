@@ -40,16 +40,16 @@ public final class DFANodeImpl implements DFANode {
   private final Set<Regexp> regexps = new HashSet<>();
 
   /**
-   * Maximum number of cached edges per DFA node to prevent memory leaks.
-   * This prevents the nextMap from growing unbounded and causing OutOfMemoryError.
+   * Maximum number of cached edges per DFA node to prevent memory leaks. This prevents the nextMap
+   * from growing unbounded and causing OutOfMemoryError.
    */
-  private static final int MAX_CACHED_EDGES = 1000;
-  
+  private static final int MAX_CACHED_EDGES = 10000;
+
   /**
    * A map of computed edges going out of this node. There may be more edges going out of this node,
    * but these are the nodes that have been encountered so far during matching.
-   * 
-   * Size is limited to MAX_CACHED_EDGES to prevent memory leaks.
+   *
+   * <p>Size is limited to MAX_CACHED_EDGES to prevent memory leaks.
    */
   private final ConcurrentMap<Character, DFANode> nextMap = new ConcurrentHashMap<>();
 
@@ -219,12 +219,12 @@ public final class DFANodeImpl implements DFANode {
     if (cachedNode != null) {
       return cachedNode;
     }
-    
+
     // If cache is full, clear it to prevent memory leaks
     if (nextMap.size() >= MAX_CACHED_EDGES) {
       nextMap.clear();
     }
-    
+
     return nextMap.computeIfAbsent(
         ch,
         key -> {

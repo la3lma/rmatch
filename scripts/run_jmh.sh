@@ -166,6 +166,7 @@ args=( -rf json -rff "$JSON_OUT" -o "$TXT_OUT" )
 include="${JMH_INCLUDE:-no\.rmz\.rmatch\.benchmarks\..*}"
 
 # Try shaded jar first
+echo "Try shaded jar first"
 set +e
 java -jar "$JAR" "${args[@]}" "$include" ${*:-}
 status=$?

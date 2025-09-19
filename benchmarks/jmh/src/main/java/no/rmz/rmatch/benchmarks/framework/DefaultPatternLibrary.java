@@ -143,11 +143,7 @@ public final class DefaultPatternLibrary implements PatternLibrary {
             new TestPattern(
                 "[a-z]+",
                 new PatternMetadata(
-                    "lowercase_letters",
-                    "Lowercase letters",
-                    PatternCategory.COMPLEX,
-                    3,
-                    false)),
+                    "lowercase_letters", "Lowercase letters", PatternCategory.COMPLEX, 3, false)),
             new TestPattern(
                 "[A-Z][a-z]*",
                 new PatternMetadata(
