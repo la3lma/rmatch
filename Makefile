@@ -1,6 +1,6 @@
  SHELL := /bin/bash
 
- .PHONY: build test ci bench-micro bench-macro bench-java charts profile fmt spotless spotbugs
+ .PHONY: build test ci bench-micro bench-macro bench-java charts profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env
 
 build:
 	mvn -q -B spotless:apply
@@ -44,3 +44,32 @@ spotless:
 
 spotbugs:
 	mvn -q -B spotbugs:check
+
+setup-visualization-env:
+	@echo "Setting up Python virtual environment for benchmark visualization..."
+	@if [ ! -d "scripts/.venv" ]; then \
+		echo "Creating virtual environment..."; \
+		python3 -m venv --clear scripts/.venv; \
+		echo "Upgrading pip..."; \
+		scripts/.venv/bin/pip install --upgrade pip; \
+		echo "Installing dependencies with platform-specific binaries..."; \
+		scripts/.venv/bin/pip install --no-cache-dir --force-reinstall --only-binary=all -r scripts/requirements.txt; \
+		echo "Virtual environment created successfully at scripts/.venv"; \
+	else \
+		echo "Checking virtual environment compatibility..."; \
+		if ! scripts/.venv/bin/python -c "import pandas, numpy, matplotlib, seaborn" 2>/dev/null; then \
+			echo "Virtual environment incompatible, recreating..."; \
+			rm -rf scripts/.venv; \
+			python3 -m venv --clear scripts/.venv; \
+			scripts/.venv/bin/pip install --upgrade pip; \
+			scripts/.venv/bin/pip install --no-cache-dir --force-reinstall --only-binary=all -r scripts/requirements.txt; \
+		else \
+			echo "Virtual environment is compatible"; \
+		fi; \
+	fi
+
+visualize-benchmarks: setup-visualization-env
+	@echo "Generating JMH benchmark visualizations..."
+	@mkdir -p performance-graphs
+	@scripts/run_visualization.sh
+	@echo "Visualizations saved to performance-graphs/"
