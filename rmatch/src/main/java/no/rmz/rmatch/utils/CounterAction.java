@@ -1,12 +1,11 @@
 package no.rmz.rmatch.utils;
 
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import no.rmz.rmatch.interfaces.Action;
+import no.rmz.rmatch.interfaces.Buffer;
 
 /** Simple utility action used to count the number of something. */
 public final class CounterAction implements Action {

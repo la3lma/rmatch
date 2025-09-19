@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Matcher;
+import no.rmz.rmatch.performancetests.JavaRegexpMatcher;
 import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.StringBuffer;
 import org.openjdk.jmh.annotations.*;
@@ -39,17 +40,20 @@ public class ExtendedTestFramework {
 
   private static final Logger LOG = Logger.getLogger(ExtendedTestFramework.class.getName());
 
-  @Param({"10", "50", "100"})
+  @Param({"50", "100", "200", "500"})
   public int patternCount;
 
   @Param({"SIMPLE", "COMPLEX"})
   public String patternCategory;
 
-  @Param({"VERY_FEW", "SOME", "MANY", "ALL"})
-  public String corpusSize;
+  @Param({"100", "MAX"})
+  public String corpusPatternCount;
 
-  @Param({"WUTHERING_HEIGHTS", "CRIME_AND_PUNISHMENT", "SHERLOCK_HOLMES"})
+  @Param({"WUTHERING_HEIGHTS", "CRIME_AND_PUNISHMENT"})
   public String textCorpus;
+
+  @Param({"RMATCH", "JAVA_NATIVE"})
+  public String matcherType;
 
   private PatternLibrary patternLibrary;
   private BenchmarkConfiguration config;
@@ -85,20 +89,28 @@ public class ExtendedTestFramework {
       LOG.info(
           "Loaded corpus text: " + corpus.getFilename() + " (" + corpusText.length() + " chars)");
 
-      // Load regex patterns
-      CorpusInputProvider.CorpusSize size = CorpusInputProvider.CorpusSize.valueOf(corpusSize);
-      corpusPatterns = CorpusInputProvider.loadRegexPatterns(size);
+      // Always load maximum patterns available (ALL corpus size)
+      corpusPatterns = CorpusInputProvider.loadRegexPatterns(CorpusInputProvider.CorpusSize.ALL);
       LOG.info(
-          "Loaded corpus patterns: "
-              + size.getFilename()
-              + " ("
-              + corpusPatterns.size()
-              + " patterns)");
+          "Loaded maximum corpus patterns: ALL (" + corpusPatterns.size() + " patterns available)");
     } catch (IOException e) {
       LOG.warning("Failed to load corpus data: " + e.getMessage());
       // Fall back to synthetic data
       corpusText = testInput;
       corpusPatterns = List.of("the", "and", "to", "of", "a", "in", "is", "it", "you", "that");
+    }
+  }
+
+  /**
+   * Create the appropriate matcher based on the matcherType parameter.
+   *
+   * @return A matcher instance (either rmatch or Java native)
+   */
+  private Matcher createMatcher() {
+    if ("JAVA_NATIVE".equals(matcherType)) {
+      return new JavaRegexpMatcher();
+    } else {
+      return MatcherFactory.newMatcher();
     }
   }
 
@@ -248,7 +260,9 @@ public class ExtendedTestFramework {
         "Running benchmark: runTestSuite with category="
             + patternCategory
             + ", patternCount="
-            + patternCount);
+            + patternCount
+            + ", matcherType="
+            + matcherType);
 
     final long startTime = System.nanoTime();
     final Runtime runtime = Runtime.getRuntime();
@@ -261,7 +275,7 @@ public class ExtendedTestFramework {
       final var selectedPatterns = patterns.stream().limit(patternCount).toList();
 
       // Create matcher and add patterns
-      final Matcher matcher = MatcherFactory.newMatcher();
+      final Matcher matcher = createMatcher();
       final CounterAction action = new CounterAction();
 
       for (final TestPattern pattern : selectedPatterns) {
@@ -284,7 +298,7 @@ public class ExtendedTestFramework {
 
       final TestResults results =
           new TestResults(
-              "pattern_matching_" + category.name().toLowerCase(),
+              "pattern_matching_" + category.name().toLowerCase() + "_" + matcherType.toLowerCase(),
               duration,
               memoryUsed,
               matchCount,
@@ -315,7 +329,9 @@ public class ExtendedTestFramework {
         "Running benchmark: patternCompilationBenchmark with category="
             + patternCategory
             + ", patternCount="
-            + patternCount);
+            + patternCount
+            + ", matcherType="
+            + matcherType);
 
     final long startTime = System.nanoTime();
     final Runtime runtime = Runtime.getRuntime();
@@ -326,7 +342,7 @@ public class ExtendedTestFramework {
       final var patterns = patternLibrary.getPatternsByCategory(category);
       final var selectedPatterns = patterns.stream().limit(patternCount).toList();
 
-      final Matcher matcher = MatcherFactory.newMatcher();
+      final Matcher matcher = createMatcher();
       final CounterAction action = new CounterAction();
 
       for (final TestPattern pattern : selectedPatterns) {
@@ -343,7 +359,10 @@ public class ExtendedTestFramework {
 
       final TestResults results =
           new TestResults(
-              "pattern_compilation_" + category.name().toLowerCase(),
+              "pattern_compilation_"
+                  + category.name().toLowerCase()
+                  + "_"
+                  + matcherType.toLowerCase(),
               duration,
               memoryUsed,
               0, // No matches in compilation benchmark
@@ -377,21 +396,26 @@ public class ExtendedTestFramework {
     LOG.info(
         "Running benchmark: corpusBasedBenchmark with textCorpus="
             + textCorpus
-            + ", corpusSize="
-            + corpusSize
-            + ", patternCount="
-            + patternCount);
+            + ", corpusPatternCount="
+            + corpusPatternCount
+            + ", matcherType="
+            + matcherType);
 
     final long startTime = System.nanoTime();
     final Runtime runtime = Runtime.getRuntime();
     final long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
 
     try {
-      final Matcher matcher = MatcherFactory.newMatcher();
+      final Matcher matcher = createMatcher();
       final CounterAction action = new CounterAction();
 
-      // Use patterns from corpus, limited by patternCount
-      final int actualPatternCount = Math.min(patternCount, corpusPatterns.size());
+      // Determine actual pattern count: 100 for smoketest, max for "MAX"
+      final int actualPatternCount;
+      if ("MAX".equals(corpusPatternCount)) {
+        actualPatternCount = corpusPatterns.size();
+      } else {
+        actualPatternCount = Math.min(Integer.parseInt(corpusPatternCount), corpusPatterns.size());
+      }
       for (int i = 0; i < actualPatternCount; i++) {
         matcher.add(corpusPatterns.get(i), action);
       }
@@ -412,7 +436,12 @@ public class ExtendedTestFramework {
 
       final TestResults results =
           new TestResults(
-              "corpus_" + textCorpus.toLowerCase() + "_" + corpusSize.toLowerCase(),
+              "corpus_"
+                  + textCorpus.toLowerCase()
+                  + "_"
+                  + corpusPatternCount.toLowerCase()
+                  + "_"
+                  + matcherType.toLowerCase(),
               duration,
               memoryUsed,
               matchCount,
@@ -440,21 +469,26 @@ public class ExtendedTestFramework {
   @Benchmark
   public TestResults corpusPatternCompilationBenchmark(final Blackhole bh) {
     LOG.info(
-        "Running benchmark: corpusPatternCompilationBenchmark with corpusSize="
-            + corpusSize
-            + ", patternCount="
-            + patternCount);
+        "Running benchmark: corpusPatternCompilationBenchmark with corpusPatternCount="
+            + corpusPatternCount
+            + ", matcherType="
+            + matcherType);
 
     final long startTime = System.nanoTime();
     final Runtime runtime = Runtime.getRuntime();
     final long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
 
     try {
-      final Matcher matcher = MatcherFactory.newMatcher();
+      final Matcher matcher = createMatcher();
       final CounterAction action = new CounterAction();
 
-      // Compile patterns from corpus
-      final int actualPatternCount = Math.min(patternCount, corpusPatterns.size());
+      // Determine actual pattern count: 100 for smoketest, max for "MAX"
+      final int actualPatternCount;
+      if ("MAX".equals(corpusPatternCount)) {
+        actualPatternCount = corpusPatterns.size();
+      } else {
+        actualPatternCount = Math.min(Integer.parseInt(corpusPatternCount), corpusPatterns.size());
+      }
       for (int i = 0; i < actualPatternCount; i++) {
         matcher.add(corpusPatterns.get(i), action);
       }
@@ -469,7 +503,10 @@ public class ExtendedTestFramework {
 
       final TestResults results =
           new TestResults(
-              "corpus_pattern_compilation_" + corpusSize.toLowerCase(),
+              "corpus_pattern_compilation_"
+                  + corpusPatternCount.toLowerCase()
+                  + "_"
+                  + matcherType.toLowerCase(),
               duration,
               memoryUsed,
               0, // No matches in compilation benchmark
