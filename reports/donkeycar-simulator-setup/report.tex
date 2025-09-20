@@ -1,0 +1,1132 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx}
+\usepackage[margin=1in]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{fancyvrb}
+
+% Configure listings for bash/shell code
+\lstdefinestyle{bashstyle}{
+    language=bash,
+    backgroundcolor=\color{gray!5},
+    basicstyle=\footnotesize\ttfamily,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!60!black},
+    frame=single,
+    rulecolor=\color{black!30},
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=2
+}
+
+% Configure listings for Python code
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    backgroundcolor=\color{gray!10},
+    basicstyle=\footnotesize\ttfamily,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    frame=single,
+    rulecolor=\color{black!30},
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4
+}
+
+% Configure listings for YAML
+\lstdefinestyle{yamlstyle}{
+    language={},
+    backgroundcolor=\color{gray!5},
+    basicstyle=\footnotesize\ttfamily,
+    frame=single,
+    rulecolor=\color{black!30},
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=2
+}
+
+\lstset{style=bashstyle}
+
+\title{Donkeycar Simulator Environment Setup:\\A Comprehensive Guide for M2 Mac Studio with LeRobot Integration}
+\author{Technical Implementation Guide}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report provides a comprehensive step-by-step guide for setting up a donkeycar simulator environment on an M2 Mac Studio with 96GB of memory. The guide covers the complete installation process, configuration of simulation environments, and integration pathways with Hugging Face's LeRobot ecosystem for imitation learning. This setup enables both testing and training of autonomous vehicle policies in simulated environments before deployment to physical hardware.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+The donkeycar project is an open-source platform for building and racing autonomous RC cars. While physical hardware provides the ultimate testing ground, simulators offer significant advantages during development:
+
+\begin{itemize}
+    \item Rapid iteration and testing cycles
+    \item Safety for algorithm development
+    \item Reproducible testing conditions
+    \item Cost-effective experimentation
+    \item Integration with modern ML frameworks
+\end{itemize}
+
+This guide focuses specifically on setting up a robust simulation environment on Apple Silicon (M2 Mac Studio) and establishing integration pathways with the LeRobot ecosystem for advanced imitation learning workflows.
+
+\section{System Requirements and Prerequisites}
+
+\subsection{Hardware Requirements}
+
+\textbf{Target System Specifications:}
+\begin{itemize}
+    \item \textbf{Device:} M2 Mac Studio
+    \item \textbf{Memory:} 96GB unified memory
+    \item \textbf{Storage:} Minimum 100GB available space
+    \item \textbf{Network:} Broadband internet connection
+\end{itemize}
+
+\subsection{Software Prerequisites}
+
+Before beginning the installation, ensure the following software is installed:
+
+\begin{itemize}
+    \item \textbf{macOS:} Version 12.0 (Monterey) or later
+    \item \textbf{Xcode Command Line Tools}
+    \item \textbf{Homebrew} package manager
+    \item \textbf{Python 3.9+} (preferably 3.11)
+    \item \textbf{Git} version control
+\end{itemize}
+
+\section{Step-by-Step Installation Guide}
+
+\subsection{Step 1: Install System Dependencies}
+
+First, install the essential development tools and dependencies:
+
+\begin{lstlisting}[style=bashstyle, caption={Install Xcode Command Line Tools}]
+xcode-select --install
+\end{lstlisting}
+
+\begin{lstlisting}[style=bashstyle, caption={Install Homebrew}]
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+\end{lstlisting}
+
+\begin{lstlisting}[style=bashstyle, caption={Install Essential Dependencies}]
+# Update Homebrew
+brew update
+
+# Install Python and essential tools
+brew install python@3.11
+brew install git
+brew install cmake
+brew install pkg-config
+
+# Install graphics and multimedia libraries
+brew install ffmpeg
+brew install opencv
+brew install pybind11
+
+# Install game development libraries for simulator support
+brew install sdl2
+brew install glfw
+brew install glew
+\end{lstlisting}
+
+\subsection{Step 2: Set Up Python Environment}
+
+Create a dedicated Python environment for the donkeycar simulator:
+
+\begin{lstlisting}[style=bashstyle, caption={Create Virtual Environment}]
+# Create project directory
+mkdir -p ~/donkeycar_sim
+cd ~/donkeycar_sim
+
+# Create virtual environment using Python 3.11
+python3.11 -m venv venv_donkey
+
+# Activate the environment
+source venv_donkey/bin/activate
+
+# Upgrade pip and install essential packages
+pip install --upgrade pip
+pip install wheel setuptools
+\end{lstlisting}
+
+\subsection{Step 3: Install Donkeycar Framework}
+
+Install the core donkeycar framework with simulator support:
+
+\begin{lstlisting}[style=bashstyle, caption={Install Donkeycar}]
+# Install donkeycar with all extras
+pip install donkeycar[pc]
+
+# Alternative: Install from source for latest features
+git clone https://github.com/autorope/donkeycar.git
+cd donkeycar
+pip install -e .[pc]
+cd ..
+\end{lstlisting}
+
+\subsection{Step 4: Install Unity-Based Simulator}
+
+The primary donkeycar simulator is built on Unity. Install the simulator client:
+
+\begin{lstlisting}[style=bashstyle, caption={Download and Setup Unity Simulator}]
+# Create simulator directory
+mkdir simulator
+cd simulator
+
+# Download the macOS Unity simulator
+# Note: Replace URL with current release from donkeycar GitHub releases
+curl -L -o DonkeySimMac.zip \
+  "https://github.com/tawnkramer/gym-donkeycar/releases/download/v1.7.0/DonkeySimMac.zip"
+
+# Extract simulator
+unzip DonkeySimMac.zip
+
+# Make executable (if needed)
+chmod +x DonkeySimMac.app/Contents/MacOS/donkey_sim
+
+cd ..
+\end{lstlisting}
+
+\subsection{Step 5: Install Gym-Donkeycar}
+
+Install the OpenAI Gym interface for donkeycar:
+
+\begin{lstlisting}[style=bashstyle, caption={Install Gym-Donkeycar}]
+# Install gym-donkeycar
+pip install gym-donkeycar
+
+# Alternative: Install from source
+git clone https://github.com/tawnkramer/gym-donkeycar.git
+cd gym-donkeycar
+pip install -e .
+cd ..
+\end{lstlisting}
+
+\subsection{Step 6: Configure Simulator Settings}
+
+Create a configuration file for the simulator:
+
+\begin{lstlisting}[style=pythonstyle, caption={Create simulator configuration (sim\_config.py)}]
+# sim_config.py
+import numpy as np
+
+# Simulator connection settings
+SIM_HOST = "127.0.0.1"
+SIM_PORT = 9091
+
+# Camera settings
+IMAGE_W = 160
+IMAGE_H = 120
+IMAGE_DEPTH = 3
+
+# Vehicle settings
+MAX_STEERING = 1.0
+MAX_THROTTLE = 1.0
+
+# Training settings
+FRAME_SKIP = 1
+STEER_LIMIT_LEFT = -1.0
+STEER_LIMIT_RIGHT = 1.0
+
+# Path to Unity simulator executable
+SIM_PATH = "./simulator/DonkeySimMac.app/Contents/MacOS/donkey_sim"
+
+# Scene selection (available scenes)
+DONKEY_SIM_SCENES = [
+    "generated_track",
+    "warehouse",
+    "sparkfun_avc",
+    "generated_road"
+]
+
+# Default scene
+DEFAULT_SCENE = "generated_track"
+\end{lstlisting}
+
+\section{Testing the Simulator Installation}
+
+\subsection{Step 7: Basic Simulator Test}
+
+Create a test script to verify the installation:
+
+\begin{lstlisting}[style=pythonstyle, caption={Basic simulator test (test\_simulator.py)}]
+#!/usr/bin/env python3
+"""
+Basic test of donkeycar simulator installation
+"""
+import time
+import numpy as np
+import gym
+import gym_donkeycar
+
+def test_basic_connection():
+    """Test basic simulator connection"""
+    print("Testing donkeycar simulator connection...")
+    
+    # Create environment
+    env = gym.make("donkey-generated-track-v0")
+    
+    try:
+        # Reset environment
+        obs = env.reset()
+        print(f"Environment reset successful. Observation shape: {obs.shape}")
+        
+        # Run a few test steps
+        for step in range(10):
+            # Random action (steering, throttle)
+            action = np.array([
+                np.random.uniform(-1, 1),  # steering
+                np.random.uniform(0, 0.5)   # throttle
+            ])
+            
+            obs, reward, done, info = env.step(action)
+            print(f"Step {step}: reward={reward:.3f}, done={done}")
+            
+            if done:
+                obs = env.reset()
+                print("Environment reset after episode completion")
+            
+            time.sleep(0.1)
+        
+        print("Basic simulator test completed successfully")
+        
+    except Exception as e:
+        print(f"Test failed: {e}")
+    finally:
+        env.close()
+
+if __name__ == "__main__":
+    test_basic_connection()
+\end{lstlisting}
+
+\subsection{Step 8: Run the Test}
+
+Execute the test to verify your installation:
+
+\begin{lstlisting}[style=bashstyle, caption={Run simulator test}]
+# Ensure virtual environment is activated
+source venv_donkey/bin/activate
+
+# Start the Unity simulator first (in a separate terminal)
+./simulator/DonkeySimMac.app/Contents/MacOS/donkey_sim &
+
+# Wait a moment for simulator to start, then run test
+sleep 5
+python test_simulator.py
+\end{lstlisting}
+
+\section{Advanced Configuration}
+
+\subsection{Multi-Scene Training Setup}
+
+Configure multiple environments for diverse training:
+
+\begin{lstlisting}[style=pythonstyle, caption={Multi-scene configuration}]
+# multi_scene_config.py
+TRAINING_SCENES = {
+    "generated_track": {
+        "difficulty": "easy",
+        "features": ["curved_track", "simple_textures"],
+        "gym_env": "donkey-generated-track-v0"
+    },
+    "warehouse": {
+        "difficulty": "medium", 
+        "features": ["obstacles", "tight_spaces"],
+        "gym_env": "donkey-warehouse-v0"
+    },
+    "sparkfun_avc": {
+        "difficulty": "hard",
+        "features": ["real_world_replica", "complex_track"],
+        "gym_env": "donkey-avc-sparkfun-v0"
+    }
+}
+
+def create_multi_env_wrapper():
+    """Create wrapper for training across multiple scenes"""
+    import random
+    
+    class MultiSceneEnv:
+        def __init__(self, scenes=None):
+            self.scenes = scenes or list(TRAINING_SCENES.keys())
+            self.current_env = None
+            self.scene_rotation_interval = 100  # steps
+            self.step_count = 0
+            
+        def reset(self):
+            # Rotate scene periodically
+            if (self.step_count % self.scene_rotation_interval == 0 or 
+                self.current_env is None):
+                self._switch_scene()
+            
+            return self.current_env.reset()
+            
+        def step(self, action):
+            self.step_count += 1
+            return self.current_env.step(action)
+            
+        def _switch_scene(self):
+            scene = random.choice(self.scenes)
+            env_name = TRAINING_SCENES[scene]["gym_env"]
+            
+            if self.current_env:
+                self.current_env.close()
+                
+            self.current_env = gym.make(env_name)
+            print(f"Switched to scene: {scene}")
+            
+        def close(self):
+            if self.current_env:
+                self.current_env.close()
+    
+    return MultiSceneEnv()
+\end{lstlisting}
+
+\section{LeRobot Integration Pathways}
+
+\subsection{Overview of LeRobot Ecosystem}
+
+Hugging Face's LeRobot is a state-of-the-art framework for robot learning that provides:
+
+\begin{itemize}
+    \item Pre-trained models for robotic tasks
+    \item Imitation learning algorithms
+    \item Dataset management for robot demonstrations
+    \item Integration with Hugging Face model hub
+    \item Support for various robot platforms
+\end{itemize}
+
+\subsection{Step 9: Install LeRobot Dependencies}
+
+\begin{lstlisting}[style=bashstyle, caption={Install LeRobot framework}]
+# Install LeRobot (note: as of 2024, this is still in development)
+pip install lerobot
+
+# Install additional ML dependencies
+pip install torch torchvision torchaudio
+pip install transformers
+pip install datasets
+pip install wandb  # for experiment tracking
+
+# Install computer vision dependencies
+pip install albumentations
+pip install timm
+\end{lstlisting}
+
+\subsection{Data Collection Pipeline}
+
+Create a system for collecting demonstration data compatible with LeRobot:
+
+\begin{lstlisting}[style=pythonstyle, caption={Data collection for LeRobot (collect\_demonstrations.py)}]
+#!/usr/bin/env python3
+"""
+Collect demonstration data from donkeycar simulator in LeRobot format
+"""
+import json
+import numpy as np
+import cv2
+from pathlib import Path
+import time
+from datetime import datetime
+import gym
+import gym_donkeycar
+from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+
+class DonkeycarDataCollector:
+    def __init__(self, dataset_name="donkeycar_demos", save_dir="./datasets"):
+        self.dataset_name = dataset_name
+        self.save_dir = Path(save_dir)
+        self.save_dir.mkdir(exist_ok=True)
+        
+        # Initialize environment
+        self.env = gym.make("donkey-generated-track-v0")
+        
+        # Dataset structure for LeRobot compatibility
+        self.episodes = []
+        self.current_episode = None
+        
+    def start_episode(self):
+        """Start a new episode of data collection"""
+        obs = self.env.reset()
+        
+        self.current_episode = {
+            "episode_id": len(self.episodes),
+            "timestamp": datetime.now().isoformat(),
+            "observations": [],
+            "actions": [],
+            "rewards": [],
+            "dones": []
+        }
+        
+        # Store initial observation
+        self._store_observation(obs)
+        
+        return obs
+    
+    def collect_step(self, action):
+        """Collect one step of interaction data"""
+        obs, reward, done, info = self.env.step(action)
+        
+        # Store data
+        self._store_action(action)
+        self._store_observation(obs)
+        self.current_episode["rewards"].append(reward)
+        self.current_episode["dones"].append(done)
+        
+        if done:
+            self.end_episode()
+            
+        return obs, reward, done, info
+    
+    def _store_observation(self, obs):
+        """Store observation (image) data"""
+        # Convert to standard format and compress
+        if isinstance(obs, np.ndarray):
+            # Resize if needed for efficiency
+            obs_resized = cv2.resize(obs, (160, 120))
+            
+            # Store as compressed format
+            self.current_episode["observations"].append({
+                "image": obs_resized.tolist(),  # Will be compressed in save
+                "timestamp": time.time()
+            })
+    
+    def _store_action(self, action):
+        """Store action data"""
+        self.current_episode["actions"].append({
+            "steering": float(action[0]),
+            "throttle": float(action[1]),
+            "timestamp": time.time()
+        })
+    
+    def end_episode(self):
+        """End current episode and save data"""
+        if self.current_episode:
+            self.episodes.append(self.current_episode)
+            print(f"Episode {self.current_episode['episode_id']} completed with "
+                  f"{len(self.current_episode['actions'])} steps")
+            self.current_episode = None
+    
+    def save_dataset(self):
+        """Save collected data in LeRobot compatible format"""
+        dataset_path = self.save_dir / f"{self.dataset_name}.json"
+        
+        dataset_info = {
+            "dataset_name": self.dataset_name,
+            "total_episodes": len(self.episodes),
+            "creation_date": datetime.now().isoformat(),
+            "environment": "donkeycar-simulator",
+            "action_space": {
+                "steering": {"min": -1.0, "max": 1.0},
+                "throttle": {"min": -1.0, "max": 1.0}
+            },
+            "observation_space": {
+                "image": {"shape": [120, 160, 3], "dtype": "uint8"}
+            },
+            "episodes": self.episodes
+        }
+        
+        with open(dataset_path, 'w') as f:
+            json.dump(dataset_info, f, indent=2)
+        
+        print(f"Dataset saved to {dataset_path}")
+        return dataset_path
+
+# Example usage for human demonstrations
+def collect_human_demonstrations():
+    """Example of collecting human demonstration data"""
+    collector = DonkeycarDataCollector()
+    
+    print("Starting demonstration collection...")
+    print("Control the car using your preferred input method")
+    print("Press Ctrl+C to stop collection")
+    
+    try:
+        for episode in range(5):  # Collect 5 episodes
+            print(f"\\nStarting episode {episode + 1}")
+            obs = collector.start_episode()
+            
+            for step in range(1000):  # Max 1000 steps per episode
+                # In real implementation, get action from human input
+                # For demo, use simple policy
+                action = simple_policy(obs)
+                
+                obs, reward, done, info = collector.collect_step(action)
+                
+                if done:
+                    break
+                    
+                time.sleep(0.05)  # 20 FPS
+    
+    except KeyboardInterrupt:
+        print("\\nData collection stopped by user")
+    
+    finally:
+        dataset_path = collector.save_dataset()
+        collector.env.close()
+        return dataset_path
+
+def simple_policy(obs):
+    """Simple example policy - replace with human input in real use"""
+    # Very basic lane following (placeholder)
+    steering = np.random.uniform(-0.3, 0.3)
+    throttle = 0.3
+    return np.array([steering, throttle])
+
+if __name__ == "__main__":
+    dataset_path = collect_human_demonstrations()
+    print(f"Demonstration dataset created: {dataset_path}")
+\end{lstlisting}
+
+\subsection{Imitation Learning Pipeline}
+
+Implement an imitation learning pipeline using the collected data:
+
+\begin{lstlisting}[style=pythonstyle, caption={Imitation learning with LeRobot (train\_imitation.py)}]
+#!/usr/bin/env python3
+"""
+Train imitation learning model using collected donkeycar demonstrations
+"""
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+import json
+import numpy as np
+import cv2
+from pathlib import Path
+import wandb
+from lerobot.common.policies.diffusion.modeling_diffusion import DiffusionPolicy
+
+class DonkeycarDataset(Dataset):
+    """Dataset for donkeycar demonstration data"""
+    
+    def __init__(self, dataset_path, sequence_length=4):
+        self.sequence_length = sequence_length
+        
+        # Load dataset
+        with open(dataset_path, 'r') as f:
+            self.data = json.load(f)
+        
+        # Prepare sequences
+        self.sequences = self._prepare_sequences()
+    
+    def _prepare_sequences(self):
+        """Prepare observation-action sequences for training"""
+        sequences = []
+        
+        for episode in self.data["episodes"]:
+            obs_list = episode["observations"]
+            action_list = episode["actions"]
+            
+            # Create overlapping sequences
+            for i in range(len(obs_list) - self.sequence_length):
+                seq_obs = []
+                seq_actions = []
+                
+                for j in range(self.sequence_length):
+                    # Process observation
+                    img = np.array(obs_list[i + j]["image"], dtype=np.uint8)
+                    img = cv2.resize(img, (160, 120))  # Ensure consistent size
+                    seq_obs.append(img)
+                    
+                    # Process action
+                    if i + j < len(action_list):
+                        action = [
+                            action_list[i + j]["steering"],
+                            action_list[i + j]["throttle"]
+                        ]
+                        seq_actions.append(action)
+                
+                if len(seq_actions) == self.sequence_length:
+                    sequences.append({
+                        "observations": np.array(seq_obs),
+                        "actions": np.array(seq_actions)
+                    })
+        
+        return sequences
+    
+    def __len__(self):
+        return len(self.sequences)
+    
+    def __getitem__(self, idx):
+        seq = self.sequences[idx]
+        
+        # Normalize observations to [0, 1]
+        obs = torch.FloatTensor(seq["observations"]) / 255.0
+        obs = obs.permute(0, 3, 1, 2)  # [T, H, W, C] -> [T, C, H, W]
+        
+        # Actions already in [-1, 1] range
+        actions = torch.FloatTensor(seq["actions"])
+        
+        return obs, actions
+
+class SimplePolicy(nn.Module):
+    """Simple CNN-based policy for imitation learning"""
+    
+    def __init__(self, action_dim=2, sequence_length=4):
+        super().__init__()
+        self.sequence_length = sequence_length
+        
+        # CNN backbone for image processing
+        self.cnn = nn.Sequential(
+            nn.Conv2d(3, 32, 8, stride=4),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, 4, stride=2),
+            nn.ReLU(), 
+            nn.Conv2d(64, 64, 3, stride=1),
+            nn.ReLU(),
+            nn.AdaptiveAvgPool2d((4, 4))
+        )
+        
+        # LSTM for temporal modeling
+        self.lstm = nn.LSTM(64 * 4 * 4, 256, batch_first=True)
+        
+        # Action prediction head
+        self.action_head = nn.Sequential(
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, action_dim),
+            nn.Tanh()  # Output in [-1, 1] range
+        )
+    
+    def forward(self, observations):
+        batch_size, seq_len = observations.shape[:2]
+        
+        # Process each frame through CNN
+        obs_flat = observations.view(-1, *observations.shape[2:])
+        features = self.cnn(obs_flat)
+        features = features.view(batch_size, seq_len, -1)
+        
+        # Process sequence through LSTM
+        lstm_out, _ = self.lstm(features)
+        
+        # Predict actions for each timestep
+        actions = self.action_head(lstm_out)
+        
+        return actions
+
+def train_imitation_model(dataset_path, model_save_path="./models"):
+    """Train imitation learning model"""
+    
+    # Initialize wandb for experiment tracking
+    wandb.init(project="donkeycar-imitation", 
+               config={
+                   "sequence_length": 4,
+                   "batch_size": 32,
+                   "learning_rate": 1e-4,
+                   "epochs": 100
+               })
+    
+    config = wandb.config
+    
+    # Setup data
+    dataset = DonkeycarDataset(dataset_path, config.sequence_length)
+    dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True)
+    
+    # Setup model
+    model = SimplePolicy(action_dim=2, sequence_length=config.sequence_length)
+    optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
+    criterion = nn.MSELoss()
+    
+    # Training loop
+    model.train()
+    for epoch in range(config.epochs):
+        total_loss = 0
+        
+        for batch_idx, (observations, actions) in enumerate(dataloader):
+            optimizer.zero_grad()
+            
+            # Forward pass
+            predicted_actions = model(observations)
+            loss = criterion(predicted_actions, actions)
+            
+            # Backward pass
+            loss.backward()
+            optimizer.step()
+            
+            total_loss += loss.item()
+            
+            # Log progress
+            if batch_idx % 10 == 0:
+                print(f"Epoch {epoch}, Batch {batch_idx}, Loss: {loss.item():.4f}")
+        
+        avg_loss = total_loss / len(dataloader)
+        wandb.log({"epoch": epoch, "train_loss": avg_loss})
+        
+        print(f"Epoch {epoch} completed. Average loss: {avg_loss:.4f}")
+        
+        # Save model checkpoint
+        if (epoch + 1) % 10 == 0:
+            model_path = Path(model_save_path) / f"model_epoch_{epoch+1}.pth"
+            model_path.parent.mkdir(exist_ok=True)
+            torch.save(model.state_dict(), model_path)
+    
+    # Save final model
+    final_model_path = Path(model_save_path) / "final_model.pth"
+    torch.save(model.state_dict(), final_model_path)
+    wandb.save(str(final_model_path))
+    
+    print(f"Training completed. Model saved to {final_model_path}")
+    return final_model_path
+
+if __name__ == "__main__":
+    # Train on collected demonstrations
+    dataset_path = "./datasets/donkeycar_demos.json"
+    if Path(dataset_path).exists():
+        model_path = train_imitation_model(dataset_path)
+        print(f"Model training completed: {model_path}")
+    else:
+        print(f"Dataset not found: {dataset_path}")
+        print("Please run collect_demonstrations.py first")
+\end{lstlisting}
+
+\section{Integration with LeRobot Model Hub}
+
+\subsection{Step 10: Model Deployment and Sharing}
+
+Create utilities for deploying trained models and sharing via Hugging Face Hub:
+
+\begin{lstlisting}[style=pythonstyle, caption={Model deployment utilities (deploy\_model.py)}]
+#!/usr/bin/env python3
+"""
+Deploy trained models to Hugging Face Hub and create inference pipeline
+"""
+import torch
+from huggingface_hub import HfApi, Repository
+from pathlib import Path
+import json
+import numpy as np
+import gym
+import gym_donkeycar
+
+class DonkeycarPolicyInference:
+    """Inference wrapper for trained donkeycar policy"""
+    
+    def __init__(self, model_path, sequence_length=4):
+        self.sequence_length = sequence_length
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
+        # Load model
+        from train_imitation import SimplePolicy
+        self.model = SimplePolicy(action_dim=2, sequence_length=sequence_length)
+        self.model.load_state_dict(torch.load(model_path, map_location=self.device))
+        self.model.to(self.device)
+        self.model.eval()
+        
+        # Initialize observation buffer
+        self.obs_buffer = []
+    
+    def predict(self, observation):
+        """Predict action for given observation"""
+        # Add observation to buffer
+        obs_processed = self._preprocess_observation(observation)
+        self.obs_buffer.append(obs_processed)
+        
+        # Maintain buffer size
+        if len(self.obs_buffer) > self.sequence_length:
+            self.obs_buffer.pop(0)
+        
+        # Need full sequence for prediction
+        if len(self.obs_buffer) < self.sequence_length:
+            # Return safe default action
+            return np.array([0.0, 0.3])  # Straight with slow throttle
+        
+        # Prepare input tensor
+        obs_tensor = torch.FloatTensor(self.obs_buffer).unsqueeze(0)  # Add batch dim
+        obs_tensor = obs_tensor.permute(0, 1, 4, 2, 3)  # [B, T, H, W, C] -> [B, T, C, H, W]
+        obs_tensor = obs_tensor.to(self.device)
+        
+        # Predict
+        with torch.no_grad():
+            actions = self.model(obs_tensor)
+            # Take last action from sequence
+            action = actions[0, -1].cpu().numpy()
+        
+        return action
+    
+    def _preprocess_observation(self, obs):
+        """Preprocess observation for model input"""
+        import cv2
+        
+        # Resize and normalize
+        obs_resized = cv2.resize(obs, (160, 120))
+        obs_normalized = obs_resized.astype(np.float32) / 255.0
+        
+        return obs_normalized
+    
+    def reset(self):
+        """Reset observation buffer"""
+        self.obs_buffer = []
+
+def test_trained_model(model_path):
+    """Test trained model in simulator"""
+    # Initialize inference pipeline
+    policy = DonkeycarPolicyInference(model_path)
+    
+    # Initialize environment
+    env = gym.make("donkey-generated-track-v0")
+    
+    print("Testing trained model in simulator...")
+    
+    try:
+        for episode in range(3):
+            obs = env.reset()
+            policy.reset()
+            
+            total_reward = 0
+            steps = 0
+            
+            print(f"\\nEpisode {episode + 1}:")
+            
+            for step in range(1000):
+                # Get action from policy
+                action = policy.predict(obs)
+                
+                # Take step in environment
+                obs, reward, done, info = env.step(action)
+                
+                total_reward += reward
+                steps += 1
+                
+                if step % 100 == 0:
+                    print(f"  Step {step}: reward={reward:.3f}, "
+                          f"action=[{action[0]:.3f}, {action[1]:.3f}]")
+                
+                if done:
+                    break
+            
+            print(f"  Episode finished: {steps} steps, "
+                  f"total reward: {total_reward:.3f}")
+    
+    except KeyboardInterrupt:
+        print("\\nTesting stopped by user")
+    
+    finally:
+        env.close()
+
+def upload_to_huggingface(model_path, repo_name, token=None):
+    """Upload trained model to Hugging Face Hub"""
+    
+    # Create model card
+    model_card = f"""
+---
+language: en
+license: mit
+tags:
+- donkeycar
+- imitation-learning
+- autonomous-driving
+- robotics
+- lerobot
+---
+
+# Donkeycar Imitation Learning Model
+
+This model was trained using imitation learning on donkeycar simulator data.
+
+## Model Description
+
+- **Architecture**: CNN + LSTM for temporal sequence modeling
+- **Input**: 160x120 RGB images (sequence of 4 frames)
+- **Output**: Steering and throttle commands
+- **Training**: Supervised learning on human demonstrations
+
+## Usage
+
+```python
+from deploy_model import DonkeycarPolicyInference
+
+# Load model
+policy = DonkeycarPolicyInference("path/to/model.pth")
+
+# Get action for observation
+action = policy.predict(observation)
+```
+
+## Training Details
+
+- Framework: PyTorch
+- Sequence Length: 4 frames
+- Action Space: Continuous [-1, 1] for steering and throttle
+- Training Environment: Donkeycar Unity Simulator
+
+## Performance
+
+This model demonstrates basic lane-following behavior in the donkeycar simulator.
+For production use, additional training and validation is recommended.
+"""
+    
+    # Setup repository
+    api = HfApi()
+    
+    try:
+        # Create repository
+        api.create_repo(repo_name, token=token, exist_ok=True)
+        
+        # Clone repository
+        repo = Repository(f"./{repo_name}", clone_from=f"https://huggingface.co/{repo_name}", 
+                         use_auth_token=token)
+        
+        # Copy model file
+        import shutil
+        shutil.copy(model_path, f"./{repo_name}/pytorch_model.pth")
+        
+        # Save model card
+        with open(f"./{repo_name}/README.md", "w") as f:
+            f.write(model_card)
+        
+        # Save configuration
+        config = {
+            "model_type": "donkeycar_policy",
+            "sequence_length": 4,
+            "action_dim": 2,
+            "observation_shape": [120, 160, 3]
+        }
+        
+        with open(f"./{repo_name}/config.json", "w") as f:
+            json.dump(config, f, indent=2)
+        
+        # Push to hub
+        repo.push_to_hub()
+        
+        print(f"Model uploaded successfully to: https://huggingface.co/{repo_name}")
+        
+    except Exception as e:
+        print(f"Upload failed: {e}")
+
+if __name__ == "__main__":
+    model_path = "./models/final_model.pth"
+    
+    if Path(model_path).exists():
+        # Test model
+        test_trained_model(model_path)
+        
+        # Optional: Upload to Hugging Face (requires token)
+        # upload_to_huggingface(model_path, "your-username/donkeycar-policy")
+    else:
+        print(f"Model not found: {model_path}")
+        print("Please run train_imitation.py first")
+\end{lstlisting}
+
+\section{Troubleshooting and Common Issues}
+
+\subsection{Installation Issues}
+
+\textbf{Issue: Unity simulator fails to start}
+\begin{itemize}
+    \item Verify macOS permissions for the simulator executable
+    \item Check that all required frameworks are installed
+    \item Ensure sufficient disk space (minimum 5GB free)
+\end{itemize}
+
+\textbf{Issue: OpenCV installation fails}
+\begin{itemize}
+    \item Install via conda instead: \texttt{conda install opencv}
+    \item Verify Xcode Command Line Tools are properly installed
+    \item Check for conflicting Python installations
+\end{itemize}
+
+\textbf{Issue: Gym-donkeycar connection timeout}
+\begin{itemize}
+    \item Ensure Unity simulator is running before connecting
+    \item Check firewall settings (allow local connections on port 9091)
+    \item Verify simulator configuration matches client settings
+\end{itemize}
+
+\subsection{Performance Optimization}
+
+\textbf{For M2 Mac Studio optimization:}
+
+\begin{lstlisting}[style=bashstyle, caption={Performance optimization commands}]
+# Enable Metal Performance Shaders for PyTorch
+export PYTORCH_ENABLE_MPS_FALLBACK=1
+
+# Optimize Unity simulator settings
+# Lower graphics quality in simulator for better performance
+# Reduce camera resolution if needed
+
+# Monitor system resources
+top -o cpu
+vm_stat 1
+\end{lstlisting}
+
+\section{Future Integration Pathways}
+
+\subsection{Advanced LeRobot Features}
+
+As the LeRobot ecosystem evolves, consider these integration opportunities:
+
+\begin{enumerate}
+    \item \textbf{Multi-modal Learning}: Integrate additional sensors (LiDAR, IMU)
+    \item \textbf{Foundation Models}: Leverage pre-trained vision transformers
+    \item \textbf{Real-to-Sim Transfer}: Bridge simulation and physical hardware
+    \item \textbf{Curriculum Learning}: Progressive difficulty in training scenarios
+    \item \textbf{Human-in-the-loop}: Interactive training and correction systems
+\end{enumerate}
+
+\subsection{Research Directions}
+
+Potential research areas enabled by this setup:
+
+\begin{itemize}
+    \item Comparison of imitation learning algorithms
+    \item Domain adaptation between simulation and reality
+    \item Multi-task learning across different environments
+    \item Integration with other autonomous driving frameworks
+\end{itemize}
+
+\section{Conclusion}
+
+This guide provides a comprehensive foundation for setting up a donkeycar simulator environment on Apple Silicon hardware. The integration with LeRobot creates opportunities for advanced imitation learning research while maintaining compatibility with the broader donkeycar ecosystem.
+
+Key achievements of this setup:
+\begin{itemize}
+    \item Complete simulator environment on M2 Mac Studio
+    \item Integration pathways with LeRobot for imitation learning
+    \item Data collection and training pipelines
+    \item Model deployment and sharing capabilities
+    \item Extensible framework for future research
+\end{itemize}
+
+The combination of donkeycar's accessible platform with LeRobot's advanced learning capabilities opens new possibilities for autonomous vehicle research and development in simulated environments.
+
+\section{Appendix: Additional Resources}
+
+\subsection{Useful Links}
+
+\begin{itemize}
+    \item \textbf{Donkeycar Documentation}: \url{https://docs.donkeycar.com/}
+    \item \textbf{Gym-Donkeycar Repository}: \url{https://github.com/tawnkramer/gym-donkeycar}
+    \item \textbf{LeRobot Documentation}: \url{https://huggingface.co/docs/lerobot}
+    \item \textbf{Unity ML-Agents}: \url{https://unity.com/products/machine-learning-agents}
+    \item \textbf{PyTorch Documentation}: \url{https://pytorch.org/docs/}
+\end{itemize}
+
+\subsection{Community Resources}
+
+\begin{itemize}
+    \item Donkeycar Discord Community
+    \item LeRobot GitHub Discussions
+    \item Autonomous Racing Community Forums
+\end{itemize}
+
+\end{document}

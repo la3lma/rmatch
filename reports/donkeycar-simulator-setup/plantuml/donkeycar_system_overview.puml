@@ -1,0 +1,83 @@
+@startuml donkeycar_system_overview
+
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+title Donkeycar Simulator System Overview
+
+package "Development Environment" as dev {
+    [M2 Mac Studio] as mac
+    [Python 3.11] as python
+    [Virtual Environment] as venv
+}
+
+package "Simulator Layer" as sim {
+    [Unity Simulator] as unity
+    [Gym-Donkeycar] as gym_dk
+    [OpenAI Gym] as gym
+}
+
+package "Learning Framework" as ml {
+    [LeRobot] as lerobot
+    [PyTorch] as pytorch
+    [HuggingFace] as hf
+}
+
+package "Data Pipeline" as data {
+    [Demonstration Data] as demo_data
+    [Training Dataset] as dataset
+    [Model Checkpoints] as checkpoints
+}
+
+package "Deployment" as deploy {
+    [Trained Policy] as policy
+    [Model Hub] as hub
+    [Inference Pipeline] as inference
+}
+
+' Development setup connections
+mac --> python
+python --> venv
+venv --> unity
+
+' Simulator connections
+unity --> gym_dk : "TCP/IP"
+gym_dk --> gym : "OpenAI Gym API"
+
+' Learning framework connections
+gym --> lerobot : "Environment Interface"
+lerobot --> pytorch : "Training Backend"
+pytorch --> hf : "Model Storage"
+
+' Data flow
+gym --> demo_data : "Collect Demonstrations"
+demo_data --> dataset : "Process & Format"
+dataset --> lerobot : "Training Data"
+lerobot --> checkpoints : "Save Models"
+
+' Deployment flow
+checkpoints --> policy : "Best Model"
+policy --> hub : "Upload"
+hub --> inference : "Download & Deploy"
+
+note right of mac
+  96GB Unified Memory
+  Metal Performance Shaders
+  ARM64 Native Performance
+end note
+
+note right of unity
+  Realistic 3D Environment
+  Multiple Track Layouts
+  Physics Simulation
+end note
+
+note right of lerobot
+  Imitation Learning
+  Pre-trained Models
+  Dataset Management
+end note
+
+@enduml
