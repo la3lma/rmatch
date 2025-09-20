@@ -62,7 +62,7 @@ test-run:
 	rm -rf ~/.m2/repository/no/rmz/rmatch
 	mvn -q -B spotless:apply
 	./mvnw clean install
-	bash -x   ./scripts/run_jmh.sh
+	time bash -x   ./scripts/run_jmh.sh
 
 
 setup-visualization-env:
