@@ -15,6 +15,7 @@ import json
 import os
 import glob
 import argparse
+import re
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -39,10 +40,31 @@ def find_latest_run_results(results_dir):
         basename = os.path.basename(json_file)
         # New format: jmh-{RUN_ID}-{timestamp}.json
         # Old format: jmh-{timestamp}.json
-        if basename.count('-') >= 4:  # New format with run ID
-            parts = basename.split('-')
-            # Rejoin the run ID parts (everything except the last timestamp part)
-            run_id = '-'.join(parts[1:-1])  # Skip 'jmh' prefix and timestamp suffix
+        if basename.count('-') >= 3:  # New format with run ID
+            # Handle format: jmh-{SUITE_RUN_ID}-{INDIVIDUAL_TIMESTAMP}.json
+            # Both SUITE_RUN_ID and INDIVIDUAL_TIMESTAMP can contain timestamps
+            # The individual timestamp is always the last timestamp (YYYYMMDDTHHMMSSZ)
+            # We want to extract just the SUITE_RUN_ID part
+            
+            # Find all timestamp patterns in the filename
+            timestamps = re.findall(r'\d{8}T\d{6}Z', basename)
+            if len(timestamps) >= 1:
+                # The last timestamp is the individual run timestamp, remove it
+                last_timestamp = timestamps[-1]
+                # Find the last occurrence and split there
+                last_timestamp_pos = basename.rfind(last_timestamp)
+                if last_timestamp_pos > 0:
+                    # Extract everything between 'jmh-' and the final '-{timestamp}'
+                    prefix = basename[:last_timestamp_pos-1]  # Remove the dash before timestamp
+                    run_id = prefix[4:]  # Remove 'jmh-' prefix
+                else:
+                    # Fallback to old logic
+                    parts = basename.split('-')
+                    run_id = '-'.join(parts[1:-1])
+            else:
+                # Fallback to old logic if no timestamps found
+                parts = basename.split('-')
+                run_id = '-'.join(parts[1:-1])
         else:  # Old format - use timestamp as run ID
             run_id = basename.replace('jmh-', '').replace('.json', '')
         
@@ -50,9 +72,15 @@ def find_latest_run_results(results_dir):
             run_groups[run_id] = []
         run_groups[run_id].append(json_file)
     
+    # Debug: Print all run groups
+    print(f"Found {len(run_groups)} run groups:")
+    for run_id, files in run_groups.items():
+        print(f"  {run_id}: {len(files)} files")
+    
     # Find the most recent run ID
     latest_run_id = max(run_groups.keys())
     latest_files = run_groups[latest_run_id]
+    print(f"Selected latest run: {latest_run_id} with {len(latest_files)} files")
     
     # Sort files within the run by timestamp
     latest_files.sort(reverse=True)
@@ -158,8 +186,17 @@ def prepare_comparison_data(df):
     if 'matcherType' not in df.columns:
         raise ValueError("No matcherType column found. Ensure benchmarks include both RMATCH and JAVA_NATIVE.")
     
+    # Filter for tests that have matcherType (some tests don't have this parameter)
+    comparison_df = df.dropna(subset=['matcherType']).copy()
+    
+    if comparison_df.empty:
+        raise ValueError("No tests found with matcherType parameter. Cannot create comparison plots.")
+    
+    print(f"Filtered to {len(comparison_df)} benchmarks with matcherType")
+    print(f"Available matcherTypes: {comparison_df['matcherType'].unique()}")
+    
     # Add test identifier (excluding matcherType so identical tests get grouped together)
-    df['test_id'] = df.apply(create_test_identifier, axis=1)
+    comparison_df['test_id'] = comparison_df.apply(create_test_identifier, axis=1)
     
     # Define key columns for grouping (exclude matcherType and variable parameters)
     grouping_cols = ['test_id', 'method', 'benchmark', 'score_unit']
@@ -167,11 +204,11 @@ def prepare_comparison_data(df):
     # Add stable parameter columns that should be the same for comparison
     param_cols = ['corpusPatternCount', 'patternCategory', 'patternCount', 'textCorpus']
     for col in param_cols:
-        if col in df.columns:
+        if col in comparison_df.columns:
             grouping_cols.append(col)
     
     # Pivot to get RMATCH and JAVA_NATIVE side by side
-    comparison_df = df.pivot_table(
+    pivoted_df = comparison_df.pivot_table(
         index=grouping_cols,
         columns='matcherType', 
         values='score', 
@@ -179,15 +216,15 @@ def prepare_comparison_data(df):
     ).reset_index()
     
     # Clean up column names
-    comparison_df.columns.name = None
+    pivoted_df.columns.name = None
     
     # Calculate ratios and performance metrics
-    if 'RMATCH' in comparison_df.columns and 'JAVA_NATIVE' in comparison_df.columns:
-        comparison_df['ratio_java_over_rmatch'] = comparison_df['JAVA_NATIVE'] / comparison_df['RMATCH']
-        comparison_df['rmatch_advantage'] = comparison_df['RMATCH'] / comparison_df['JAVA_NATIVE']
-        comparison_df['has_both'] = (~comparison_df['RMATCH'].isna()) & (~comparison_df['JAVA_NATIVE'].isna())
+    if 'RMATCH' in pivoted_df.columns and 'JAVA_NATIVE' in pivoted_df.columns:
+        pivoted_df['ratio_java_over_rmatch'] = pivoted_df['JAVA_NATIVE'] / pivoted_df['RMATCH']
+        pivoted_df['rmatch_advantage'] = pivoted_df['RMATCH'] / pivoted_df['JAVA_NATIVE']
+        pivoted_df['has_both'] = (~pivoted_df['RMATCH'].isna()) & (~pivoted_df['JAVA_NATIVE'].isna())
     
-    return comparison_df
+    return pivoted_df
 
 def plot_runtime_scatter(df, output_dir):
     """Create 2D box and whisker plot comparing RMATCH vs JAVA_NATIVE runtimes."""
