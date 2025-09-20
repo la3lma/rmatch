@@ -215,9 +215,19 @@ def plot_runtime_scatter(df, output_dir):
     max_val = max(complete_data['RMATCH'].max(), complete_data['JAVA_NATIVE'].max())
     min_val = min(complete_data['RMATCH'].min(), complete_data['JAVA_NATIVE'].min())
     
-    # Generate distinct colors and markers for each category
-    colors = plt.cm.tab10(np.linspace(0, 1, min(len(test_categories), 10)))
-    markers = ['s', 'o', '^', 'D', 'v', '<', '>', 'p', '*', 'h'] * ((len(test_categories) // 10) + 1)
+    # Generate distinct colors for each category (cycle through color maps if needed)
+    if len(test_categories) <= 10:
+        colors = plt.cm.tab10(np.linspace(0, 1, len(test_categories)))
+    elif len(test_categories) <= 20:
+        colors = list(plt.cm.tab10(np.linspace(0, 1, 10))) + list(plt.cm.tab20(np.linspace(0, 1, 20)))[10:]
+        colors = colors[:len(test_categories)]
+    else:
+        # For more than 20 categories, use multiple color maps
+        colors = []
+        color_maps = [plt.cm.tab10, plt.cm.tab20, plt.cm.Set1, plt.cm.Set2, plt.cm.Set3]
+        for i in range(len(test_categories)):
+            cmap = color_maps[i // 20 % len(color_maps)]
+            colors.append(cmap((i % 20) / 20))
     
     legend_elements = []
     plot_handles = []  # Store actual plot elements for legend
@@ -264,10 +274,15 @@ def plot_runtime_scatter(df, output_dir):
                            facecolor=color, alpha=0.4, edgecolor=color, linewidth=2)
         ax.add_patch(rect)
         
-        # Draw median point with distinctive marker
-        marker_style = markers[i % len(markers)]
-        scatter_handle = ax.scatter([java_median], [rmatch_median], c=[color], marker=marker_style, 
-                                  s=100, edgecolors='black', linewidth=2, zorder=10)
+        # Draw median point as a numbered circle
+        scatter_handle = ax.scatter([java_median], [rmatch_median], c=[color], marker='o', 
+                                  s=300, edgecolors='black', linewidth=2, zorder=10, alpha=0.8)
+        
+        # Add the number on top of the circle
+        test_number = i + 1
+        ax.text(java_median, rmatch_median, str(test_number), ha='center', va='center',
+                fontsize=10, fontweight='bold', color='white', zorder=11)
+        
         plot_handles.append(scatter_handle)
         
         # Draw whiskers with same color
@@ -296,15 +311,16 @@ def plot_runtime_scatter(df, output_dir):
             ax.scatter(java_outliers_for_rmatch, rmatch_outliers, c=[color]*len(rmatch_outliers), 
                       marker='x', s=30, alpha=0.8, linewidth=2)
         
-        # Create shortened label for this test category
+        # Create shortened label for this test category with number prefix
         short_label = test_id.replace('corpusBasedBenchmark_', 'Corpus_').replace('patternCompilationBenchmark_', 'PC_')
         short_label = short_label.replace('runTestSuite_', 'Suite_').replace('functionalVerification_', 'FV_')
         short_label = short_label.replace('buildMatcher_', 'Build_').replace('matchOnce_', 'Match_')
-        if len(short_label) > 25:
-            short_label = short_label[:22] + "..."
+        if len(short_label) > 30:
+            short_label = short_label[:27] + "..."
         
-        # Set label on the actual scatter plot for legend
-        scatter_handle.set_label(short_label)
+        # Set label with number prefix for legend
+        numbered_label = f"{test_number}. {short_label}"
+        scatter_handle.set_label(numbered_label)
     
     # Add diagonal line (equal performance)
     ax.plot([min_val, max_val], [min_val, max_val], 'r--', alpha=0.7, linewidth=3, label='Equal Performance')
@@ -313,45 +329,34 @@ def plot_runtime_scatter(df, output_dir):
     print(f"Number of test categories processed: {len(plot_handles)}")
     print(f"Plot handles created: {len(plot_handles)}")
     
-    # Let's try the most basic legend approach possible
-    print("Attempting basic legend creation...")
-    
-    # Test 1: Super simple legend inside the plot
+    # Create a single comprehensive legend with all elements
     try:
         if plot_handles and len(plot_handles) > 0:
-            print(f"Trying legend with {len(plot_handles)} handles")
-            # Just try the first 5 handles to avoid overcrowding
-            test_handles = plot_handles[:min(5, len(plot_handles))]
-            legend1 = ax.legend(handles=test_handles, loc='upper right', 
-                               fontsize=8, title='Tests (first 5)', title_fontsize=9)
-            print("Legend creation completed successfully")
+            print(f"Creating comprehensive legend with {len(plot_handles)} test categories + equal performance line")
+            
+            # Create equal performance line element
+            from matplotlib.lines import Line2D
+            equal_perf_element = Line2D([0], [0], color='red', linestyle='--', linewidth=3, label='Equal Performance Line')
+            
+            # Combine all legend elements
+            all_handles = plot_handles + [equal_perf_element]
+            
+            # Create single comprehensive legend
+            comprehensive_legend = ax.legend(handles=all_handles, loc='center left', bbox_to_anchor=(1.02, 0.5),
+                                           fontsize=8, title='Legend', title_fontsize=10,
+                                           frameon=True, framealpha=0.95, facecolor='white', 
+                                           edgecolor='gray', ncol=1)
+            
+            print("Comprehensive legend created successfully")
+            print(f"Legend contains {len(all_handles)} total elements")
+            
         else:
             print("No plot handles available for legend")
+            
     except Exception as e:
-        print(f"Legend creation failed: {e}")
-    
-    # Test 2: Try a manual legend with simple elements
-    try:
-        print("Creating manual test legend...")
-        from matplotlib.lines import Line2D
-        manual_elements = [
-            Line2D([0], [0], marker='o', color='red', linestyle='None', markersize=8, label='Test 1'),
-            Line2D([0], [0], marker='s', color='blue', linestyle='None', markersize=8, label='Test 2'),
-            Line2D([0], [0], marker='^', color='green', linestyle='None', markersize=8, label='Test 3')
-        ]
-        manual_legend = ax.legend(handles=manual_elements, loc='lower left', 
-                                 fontsize=8, title='Manual Test', title_fontsize=9)
-        print("Manual legend created successfully")
-    except Exception as e:
-        print(f"Manual legend creation failed: {e}")
-    
-    # Test 3: Try automatic legend (should pick up labeled elements)
-    try:
-        print("Trying automatic legend...")
-        auto_legend = ax.legend(loc='center left', fontsize=8, title='Auto Legend')
-        print("Automatic legend created")
-    except Exception as e:
-        print(f"Automatic legend failed: {e}")
+        print(f"Comprehensive legend creation failed: {e}")
+        import traceback
+        traceback.print_exc()
     
     ax.set_xlabel('Java Native Score (ops/s)', fontsize=14, fontweight='bold')
     ax.set_ylabel('RMATCH Score (ops/s)', fontsize=14, fontweight='bold')
