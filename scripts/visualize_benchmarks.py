@@ -72,15 +72,9 @@ def find_latest_run_results(results_dir):
             run_groups[run_id] = []
         run_groups[run_id].append(json_file)
     
-    # Debug: Print all run groups
-    print(f"Found {len(run_groups)} run groups:")
-    for run_id, files in run_groups.items():
-        print(f"  {run_id}: {len(files)} files")
-    
     # Find the most recent run ID
     latest_run_id = max(run_groups.keys())
     latest_files = run_groups[latest_run_id]
-    print(f"Selected latest run: {latest_run_id} with {len(latest_files)} files")
     
     # Sort files within the run by timestamp
     latest_files.sort(reverse=True)

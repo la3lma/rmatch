@@ -27,13 +27,25 @@ export JMH_RUN_ID="$RUN_ID"
 
 # Define test configurations for a comprehensive suite
 # Each array element is: "description|include_pattern|extra_params"
-test_configs=(
-    "Pattern Compilation - Simple|.*patternCompilationBenchmark.*|-p patternCount=100 -p patternCategory=SIMPLE"
-    "Pattern Compilation - Complex|.*patternCompilationBenchmark.*|-p patternCount=100 -p patternCategory=COMPLEX"
-    "Corpus Matching - Small Dataset|.*corpusBasedBenchmark.*|-p corpusPatternCount=100 -p textCorpus=WUTHERING_HEIGHTS -p matcherType=RMATCH"
-    "Corpus Matching - Java Native|.*corpusBasedBenchmark.*|-p corpusPatternCount=100 -p textCorpus=WUTHERING_HEIGHTS -p matcherType=JAVA_NATIVE"
-    "Functional Verification|.*functionalVerification.*|-p patternCount=50 -p patternCategory=SIMPLE"
-)
+if [[ "$SUITE_NAME" == "quick" ]]; then
+    # Quick test suite - fast execution, minimal tests including Wuthering Heights
+    test_configs=(
+        "Pattern Compilation - Simple|.*patternCompilationBenchmark.*|-p patternCount=25 -p patternCategory=SIMPLE"
+        "Pattern Compilation - Complex|.*patternCompilationBenchmark.*|-p patternCount=25 -p patternCategory=COMPLEX"
+        "Corpus Matching - RMATCH|.*corpusBasedBenchmark.*|-p corpusPatternCount=10 -p textCorpus=WUTHERING_HEIGHTS -p matcherType=RMATCH"
+        "Corpus Matching - Java Native|.*corpusBasedBenchmark.*|-p corpusPatternCount=10 -p textCorpus=WUTHERING_HEIGHTS -p matcherType=JAVA_NATIVE"
+        "Functional Verification|.*functionalVerification.*|-p patternCount=10 -p patternCategory=SIMPLE"
+    )
+else
+    # Comprehensive test suite - full coverage
+    test_configs=(
+        "Pattern Compilation - Simple|.*patternCompilationBenchmark.*|-p patternCount=100 -p patternCategory=SIMPLE"
+        "Pattern Compilation - Complex|.*patternCompilationBenchmark.*|-p patternCount=100 -p patternCategory=COMPLEX"
+        "Corpus Matching - RMATCH|.*corpusBasedBenchmark.*|-p corpusPatternCount=100 -p textCorpus=WUTHERING_HEIGHTS -p matcherType=RMATCH"
+        "Corpus Matching - Java Native|.*corpusBasedBenchmark.*|-p corpusPatternCount=100 -p textCorpus=WUTHERING_HEIGHTS -p matcherType=JAVA_NATIVE"
+        "Functional Verification|.*functionalVerification.*|-p patternCount=50 -p patternCategory=SIMPLE"
+    )
+fi
 
 # Run each test configuration
 for config in "${test_configs[@]}"; do
