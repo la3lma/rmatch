@@ -347,7 +347,7 @@ def plot_runtime_scatter(df, output_dir):
                                            frameon=True, framealpha=0.95, facecolor='white', 
                                            edgecolor='gray', ncol=1,
                                            columnspacing=0.5, handletextpad=0.3, borderpad=0.5,
-                                           handlelength=1.5, handleheight=1.5)
+                                           handlelength=1.5, handleheight=1.5, markerscale=0.6)
             
             print("Comprehensive legend created successfully")
             print(f"Legend contains {len(all_handles)} total elements")
