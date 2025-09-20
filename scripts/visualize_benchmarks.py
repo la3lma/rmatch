@@ -208,8 +208,8 @@ def plot_runtime_scatter(df, output_dir):
         print("Warning: No test categories found")
         return
     
-    # Create figure with space for legend
-    fig, ax = plt.subplots(figsize=(16, 10))
+    # Create figure with extra space for wide legend
+    fig, ax = plt.subplots(figsize=(20, 10))
     
     # Calculate range for minimum box sizing
     max_val = max(complete_data['RMATCH'].max(), complete_data['JAVA_NATIVE'].max())
@@ -311,15 +311,15 @@ def plot_runtime_scatter(df, output_dir):
             ax.scatter(java_outliers_for_rmatch, rmatch_outliers, c=[color]*len(rmatch_outliers), 
                       marker='x', s=30, alpha=0.8, linewidth=2)
         
-        # Create shortened label for this test category with number prefix
-        short_label = test_id.replace('corpusBasedBenchmark_', 'Corpus_').replace('patternCompilationBenchmark_', 'PC_')
-        short_label = short_label.replace('runTestSuite_', 'Suite_').replace('functionalVerification_', 'FV_')
-        short_label = short_label.replace('buildMatcher_', 'Build_').replace('matchOnce_', 'Match_')
-        if len(short_label) > 30:
-            short_label = short_label[:27] + "..."
+        # Create readable label for this test category with number prefix
+        readable_label = test_id.replace('corpusBasedBenchmark_', 'Corpus_').replace('patternCompilationBenchmark_', 'PatternComp_')
+        readable_label = readable_label.replace('runTestSuite_', 'TestSuite_').replace('functionalVerification_', 'FuncVerify_')
+        readable_label = readable_label.replace('buildMatcher_', 'BuildMatch_').replace('matchOnce_', 'MatchOnce_')
+        readable_label = readable_label.replace('compressedState', 'CompState').replace('createMultiple', 'CreateMult')
+        # Don't truncate - let the legend box expand to fit
         
         # Set label with number prefix for legend
-        numbered_label = f"{test_number}. {short_label}"
+        numbered_label = f"{test_number}. {readable_label}"
         scatter_handle.set_label(numbered_label)
     
     # Add diagonal line (equal performance)
@@ -341,11 +341,13 @@ def plot_runtime_scatter(df, output_dir):
             # Combine all legend elements
             all_handles = plot_handles + [equal_perf_element]
             
-            # Create single comprehensive legend
-            comprehensive_legend = ax.legend(handles=all_handles, loc='center left', bbox_to_anchor=(1.02, 0.5),
-                                           fontsize=8, title='Legend', title_fontsize=10,
+            # Create single comprehensive legend with better spacing and readability
+            comprehensive_legend = ax.legend(handles=all_handles, loc='center left', bbox_to_anchor=(1.01, 0.5),
+                                           fontsize=7, title='Test Categories & Reference', title_fontsize=9,
                                            frameon=True, framealpha=0.95, facecolor='white', 
-                                           edgecolor='gray', ncol=1)
+                                           edgecolor='gray', ncol=1,
+                                           columnspacing=0.5, handletextpad=0.3, borderpad=0.5,
+                                           handlelength=1.5, handleheight=1.5)
             
             print("Comprehensive legend created successfully")
             print(f"Legend contains {len(all_handles)} total elements")
@@ -371,12 +373,12 @@ def plot_runtime_scatter(df, output_dir):
            transform=ax.transAxes, fontsize=11, verticalalignment='top',
            bbox=dict(boxstyle='round,pad=0.5', facecolor='lightcyan', alpha=0.9))
     
-    # Adjust layout to accommodate external legend
-    plt.tight_layout()
+    # Adjust layout to accommodate wide external legend
+    plt.subplots_adjust(right=0.65)  # Leave more space for legend (35% of figure width)
     
-    # Save with bbox_inches='tight' to ensure legend is included
+    # Save with bbox_inches='tight' to ensure legend is fully included
     plt.savefig(os.path.join(output_dir, 'runtime_scatter_rmatch_vs_java.png'), dpi=300, 
-                bbox_inches='tight', facecolor='white', edgecolor='none')
+                bbox_inches='tight', facecolor='white', edgecolor='none', pad_inches=0.2)
     plt.close()
 
 def plot_relative_performance_bars(df, output_dir):
