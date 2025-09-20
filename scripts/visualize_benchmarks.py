@@ -360,10 +360,15 @@ def plot_runtime_scatter(df, output_dir):
         import traceback
         traceback.print_exc()
     
+    # Generate timestamp for the plot
+    from datetime import datetime
+    plot_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     ax.set_xlabel('Java Native Score (ops/s)', fontsize=14, fontweight='bold')
     ax.set_ylabel('RMATCH Score (ops/s)', fontsize=14, fontweight='bold')
     ax.set_title('2D Performance Comparison: RMATCH vs Java Native Regex\n' +
-                '(Rectangles = Q1-Q3 range, Markers = Median, Whiskers = 1.5×IQR, X = Outliers)', 
+                '(Rectangles = Q1-Q3 range, Markers = Median, Whiskers = 1.5×IQR, X = Outliers)\n' +
+                f'Generated: {plot_timestamp}', 
                 fontsize=16, fontweight='bold', pad=20)
     
     ax.grid(True, alpha=0.3)
