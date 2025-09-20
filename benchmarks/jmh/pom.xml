@@ -36,6 +36,11 @@
       <artifactId>rmatch</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>no.rmz</groupId>
+      <artifactId>rmatch-tester</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 
