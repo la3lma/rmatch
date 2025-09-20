@@ -25,23 +25,54 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-def find_latest_results(results_dir):
-    """Find the most recent JMH results files."""
+def find_latest_run_results(results_dir):
+    """Find all results files from the most recent test run."""
     json_pattern = os.path.join(results_dir, "jmh-*.json")
     json_files = glob.glob(json_pattern)
     
     if not json_files:
         raise FileNotFoundError(f"No JMH JSON files found in {results_dir}")
     
-    # Sort by timestamp in filename
-    json_files.sort(reverse=True)
-    latest_json = json_files[0]
+    # Group files by run ID
+    run_groups = {}
+    for json_file in json_files:
+        basename = os.path.basename(json_file)
+        # New format: jmh-{RUN_ID}-{timestamp}.json
+        # Old format: jmh-{timestamp}.json
+        if basename.count('-') >= 4:  # New format with run ID
+            parts = basename.split('-')
+            # Rejoin the run ID parts (everything except the last timestamp part)
+            run_id = '-'.join(parts[1:-1])  # Skip 'jmh' prefix and timestamp suffix
+        else:  # Old format - use timestamp as run ID
+            run_id = basename.replace('jmh-', '').replace('.json', '')
+        
+        if run_id not in run_groups:
+            run_groups[run_id] = []
+        run_groups[run_id].append(json_file)
     
-    # Find corresponding txt file
-    basename = os.path.basename(latest_json).replace('.json', '')
-    txt_file = os.path.join(results_dir, f"{basename}.txt")
+    # Find the most recent run ID
+    latest_run_id = max(run_groups.keys())
+    latest_files = run_groups[latest_run_id]
     
-    return latest_json, txt_file if os.path.exists(txt_file) else None
+    # Sort files within the run by timestamp
+    latest_files.sort(reverse=True)
+    
+    # Find corresponding txt files
+    result_files = []
+    for json_file in latest_files:
+        basename = os.path.basename(json_file).replace('.json', '')
+        txt_file = os.path.join(results_dir, f"{basename}.txt")
+        result_files.append((json_file, txt_file if os.path.exists(txt_file) else None))
+    
+    return latest_run_id, result_files
+
+def find_latest_results(results_dir):
+    """Find the most recent JMH results files - backward compatibility wrapper."""
+    run_id, result_files = find_latest_run_results(results_dir)
+    if result_files:
+        return result_files[0]  # Return first (most recent) file pair
+    else:
+        raise FileNotFoundError(f"No JMH JSON files found in {results_dir}")
 
 def parse_jmh_results(json_file):
     """Parse JMH JSON results into a structured DataFrame."""
@@ -79,6 +110,28 @@ def parse_jmh_results(json_file):
     df = pd.DataFrame(rows)
     return df
 
+def parse_jmh_run_results(result_files):
+    """Parse all JMH results from a single test run into a combined DataFrame."""
+    all_dataframes = []
+    
+    for json_file, txt_file in result_files:
+        print(f"Parsing {os.path.basename(json_file)}...")
+        df = parse_jmh_results(json_file)
+        
+        # Add source file information
+        df['source_file'] = os.path.basename(json_file)
+        
+        all_dataframes.append(df)
+    
+    if not all_dataframes:
+        raise ValueError("No valid JMH result files found")
+    
+    # Combine all results
+    combined_df = pd.concat(all_dataframes, ignore_index=True)
+    
+    print(f"Combined {len(all_dataframes)} result files with {len(combined_df)} total benchmarks")
+    return combined_df
+
 def create_test_identifier(row):
     """Create a unique test identifier from benchmark parameters."""
     components = []
@@ -105,12 +158,21 @@ def prepare_comparison_data(df):
     if 'matcherType' not in df.columns:
         raise ValueError("No matcherType column found. Ensure benchmarks include both RMATCH and JAVA_NATIVE.")
     
-    # Add test identifier
+    # Add test identifier (excluding matcherType so identical tests get grouped together)
     df['test_id'] = df.apply(create_test_identifier, axis=1)
+    
+    # Define key columns for grouping (exclude matcherType and variable parameters)
+    grouping_cols = ['test_id', 'method', 'benchmark', 'score_unit']
+    
+    # Add stable parameter columns that should be the same for comparison
+    param_cols = ['corpusPatternCount', 'patternCategory', 'patternCount', 'textCorpus']
+    for col in param_cols:
+        if col in df.columns:
+            grouping_cols.append(col)
     
     # Pivot to get RMATCH and JAVA_NATIVE side by side
     comparison_df = df.pivot_table(
-        index=['test_id', 'method'] + [col for col in df.columns if col not in ['matcherType', 'score', 'test_id', 'method']],
+        index=grouping_cols,
         columns='matcherType', 
         values='score', 
         aggfunc='mean'
@@ -128,9 +190,9 @@ def prepare_comparison_data(df):
     return comparison_df
 
 def plot_runtime_scatter(df, output_dir):
-    """Create scatter plot comparing RMATCH vs JAVA_NATIVE runtimes."""
+    """Create 2D box and whisker plot comparing RMATCH vs JAVA_NATIVE runtimes."""
     if 'RMATCH' not in df.columns or 'JAVA_NATIVE' not in df.columns:
-        print("Warning: Cannot create scatter plot - missing RMATCH or JAVA_NATIVE data")
+        print("Warning: Cannot create runtime plot - missing RMATCH or JAVA_NATIVE data")
         return
     
     complete_data = df[df['has_both']].copy()
@@ -139,30 +201,177 @@ def plot_runtime_scatter(df, output_dir):
         print("Warning: No complete RMATCH vs JAVA_NATIVE pairs found")
         return
     
-    plt.figure(figsize=(10, 8))
+    # Group data by test categories for 2D box plots
+    test_categories = complete_data['test_id'].unique()
     
-    # Create scatter plot
-    scatter = plt.scatter(complete_data['RMATCH'], complete_data['JAVA_NATIVE'], 
-                         alpha=0.7, s=100, c='blue')
+    if len(test_categories) == 0:
+        print("Warning: No test categories found")
+        return
     
-    # Add diagonal line (equal performance)
+    # Create figure with space for legend
+    fig, ax = plt.subplots(figsize=(16, 10))
+    
+    # Calculate range for minimum box sizing
     max_val = max(complete_data['RMATCH'].max(), complete_data['JAVA_NATIVE'].max())
     min_val = min(complete_data['RMATCH'].min(), complete_data['JAVA_NATIVE'].min())
-    plt.plot([min_val, max_val], [min_val, max_val], 'r--', alpha=0.5, label='Equal Performance')
     
-    # Add labels for points
-    for idx, row in complete_data.iterrows():
-        plt.annotate(row['test_id'], (row['RMATCH'], row['JAVA_NATIVE']), 
-                    xytext=(5, 5), textcoords='offset points', fontsize=8, alpha=0.7)
+    # Generate distinct colors and markers for each category
+    colors = plt.cm.tab10(np.linspace(0, 1, min(len(test_categories), 10)))
+    markers = ['s', 'o', '^', 'D', 'v', '<', '>', 'p', '*', 'h'] * ((len(test_categories) // 10) + 1)
     
-    plt.xlabel('RMATCH Score (ops/s)')
-    plt.ylabel('Java Native Score (ops/s)')
-    plt.title('Performance Comparison: RMATCH vs Java Native Regex\nHigher is Better')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
+    legend_elements = []
+    plot_handles = []  # Store actual plot elements for legend
+    
+    for i, test_id in enumerate(test_categories):
+        test_data = complete_data[complete_data['test_id'] == test_id]
+        if len(test_data) == 0:
+            continue
+            
+        java_values = test_data['JAVA_NATIVE'].values
+        rmatch_values = test_data['RMATCH'].values
+        
+        # Calculate statistics for both dimensions
+        java_q1, java_median, java_q3 = np.percentile(java_values, [25, 50, 75])
+        rmatch_q1, rmatch_median, rmatch_q3 = np.percentile(rmatch_values, [25, 50, 75])
+        
+        java_iqr = java_q3 - java_q1
+        rmatch_iqr = rmatch_q3 - rmatch_q1
+        
+        # Calculate whisker extents (1.5 * IQR)
+        java_lower = max(java_values.min(), java_q1 - 1.5 * java_iqr)
+        java_upper = min(java_values.max(), java_q3 + 1.5 * java_iqr)
+        rmatch_lower = max(rmatch_values.min(), rmatch_q1 - 1.5 * rmatch_iqr)
+        rmatch_upper = min(rmatch_values.max(), rmatch_q3 + 1.5 * rmatch_iqr)
+        
+        color = colors[i % len(colors)]
+        
+        # Draw the main rectangle (Q1 to Q3 in both dimensions) with minimum size
+        rect_width = max(java_q3 - java_q1, (max_val - min_val) * 0.02)  # Minimum 2% of range
+        rect_height = max(rmatch_q3 - rmatch_q1, (max_val - min_val) * 0.02)  # Minimum 2% of range
+        
+        # Center the rectangle if we're using minimum size
+        if java_q3 - java_q1 < (max_val - min_val) * 0.02:
+            rect_x = java_median - rect_width/2
+        else:
+            rect_x = java_q1
+            
+        if rmatch_q3 - rmatch_q1 < (max_val - min_val) * 0.02:
+            rect_y = rmatch_median - rect_height/2
+        else:
+            rect_y = rmatch_q1
+            
+        rect = plt.Rectangle((rect_x, rect_y), rect_width, rect_height, 
+                           facecolor=color, alpha=0.4, edgecolor=color, linewidth=2)
+        ax.add_patch(rect)
+        
+        # Draw median point with distinctive marker
+        marker_style = markers[i % len(markers)]
+        scatter_handle = ax.scatter([java_median], [rmatch_median], c=[color], marker=marker_style, 
+                                  s=100, edgecolors='black', linewidth=2, zorder=10)
+        plot_handles.append(scatter_handle)
+        
+        # Draw whiskers with same color
+        # Horizontal whiskers (Java dimension)
+        ax.plot([java_lower, java_q1], [rmatch_median, rmatch_median], color=color, linewidth=2)  # Left whisker
+        ax.plot([java_q3, java_upper], [rmatch_median, rmatch_median], color=color, linewidth=2)  # Right whisker
+        ax.plot([java_lower, java_lower], [rmatch_median-rmatch_iqr*0.05, rmatch_median+rmatch_iqr*0.05], color=color, linewidth=2)  # Left cap
+        ax.plot([java_upper, java_upper], [rmatch_median-rmatch_iqr*0.05, rmatch_median+rmatch_iqr*0.05], color=color, linewidth=2)  # Right cap
+        
+        # Vertical whiskers (RMATCH dimension)
+        ax.plot([java_median, java_median], [rmatch_lower, rmatch_q1], color=color, linewidth=2)  # Bottom whisker
+        ax.plot([java_median, java_median], [rmatch_q3, rmatch_upper], color=color, linewidth=2)  # Top whisker
+        ax.plot([java_median-java_iqr*0.05, java_median+java_iqr*0.05], [rmatch_lower, rmatch_lower], color=color, linewidth=2)  # Bottom cap
+        ax.plot([java_median-java_iqr*0.05, java_median+java_iqr*0.05], [rmatch_upper, rmatch_upper], color=color, linewidth=2)  # Top cap
+        
+        # Plot outliers with matching color
+        java_outliers = java_values[(java_values < java_lower) | (java_values > java_upper)]
+        rmatch_outliers_for_java = rmatch_values[(java_values < java_lower) | (java_values > java_upper)]
+        if len(java_outliers) > 0:
+            ax.scatter(java_outliers, rmatch_outliers_for_java, c=[color]*len(java_outliers), 
+                      marker='x', s=30, alpha=0.8, linewidth=2)
+        
+        rmatch_outliers = rmatch_values[(rmatch_values < rmatch_lower) | (rmatch_values > rmatch_upper)]
+        java_outliers_for_rmatch = java_values[(rmatch_values < rmatch_lower) | (rmatch_values > rmatch_upper)]
+        if len(rmatch_outliers) > 0:
+            ax.scatter(java_outliers_for_rmatch, rmatch_outliers, c=[color]*len(rmatch_outliers), 
+                      marker='x', s=30, alpha=0.8, linewidth=2)
+        
+        # Create shortened label for this test category
+        short_label = test_id.replace('corpusBasedBenchmark_', 'Corpus_').replace('patternCompilationBenchmark_', 'PC_')
+        short_label = short_label.replace('runTestSuite_', 'Suite_').replace('functionalVerification_', 'FV_')
+        short_label = short_label.replace('buildMatcher_', 'Build_').replace('matchOnce_', 'Match_')
+        if len(short_label) > 25:
+            short_label = short_label[:22] + "..."
+        
+        # Set label on the actual scatter plot for legend
+        scatter_handle.set_label(short_label)
+    
+    # Add diagonal line (equal performance)
+    ax.plot([min_val, max_val], [min_val, max_val], 'r--', alpha=0.7, linewidth=3, label='Equal Performance')
+    
+    # Debug: Print legend information
+    print(f"Number of test categories processed: {len(plot_handles)}")
+    print(f"Plot handles created: {len(plot_handles)}")
+    
+    # Let's try the most basic legend approach possible
+    print("Attempting basic legend creation...")
+    
+    # Test 1: Super simple legend inside the plot
+    try:
+        if plot_handles and len(plot_handles) > 0:
+            print(f"Trying legend with {len(plot_handles)} handles")
+            # Just try the first 5 handles to avoid overcrowding
+            test_handles = plot_handles[:min(5, len(plot_handles))]
+            legend1 = ax.legend(handles=test_handles, loc='upper right', 
+                               fontsize=8, title='Tests (first 5)', title_fontsize=9)
+            print("Legend creation completed successfully")
+        else:
+            print("No plot handles available for legend")
+    except Exception as e:
+        print(f"Legend creation failed: {e}")
+    
+    # Test 2: Try a manual legend with simple elements
+    try:
+        print("Creating manual test legend...")
+        from matplotlib.lines import Line2D
+        manual_elements = [
+            Line2D([0], [0], marker='o', color='red', linestyle='None', markersize=8, label='Test 1'),
+            Line2D([0], [0], marker='s', color='blue', linestyle='None', markersize=8, label='Test 2'),
+            Line2D([0], [0], marker='^', color='green', linestyle='None', markersize=8, label='Test 3')
+        ]
+        manual_legend = ax.legend(handles=manual_elements, loc='lower left', 
+                                 fontsize=8, title='Manual Test', title_fontsize=9)
+        print("Manual legend created successfully")
+    except Exception as e:
+        print(f"Manual legend creation failed: {e}")
+    
+    # Test 3: Try automatic legend (should pick up labeled elements)
+    try:
+        print("Trying automatic legend...")
+        auto_legend = ax.legend(loc='center left', fontsize=8, title='Auto Legend')
+        print("Automatic legend created")
+    except Exception as e:
+        print(f"Automatic legend failed: {e}")
+    
+    ax.set_xlabel('Java Native Score (ops/s)', fontsize=14, fontweight='bold')
+    ax.set_ylabel('RMATCH Score (ops/s)', fontsize=14, fontweight='bold')
+    ax.set_title('2D Performance Comparison: RMATCH vs Java Native Regex\n' +
+                '(Rectangles = Q1-Q3 range, Markers = Median, Whiskers = 1.5×IQR, X = Outliers)', 
+                fontsize=16, fontweight='bold', pad=20)
+    
+    ax.grid(True, alpha=0.3)
+    
+    # Add text explanation in top-left, with corrected interpretation
+    ax.text(0.02, 0.98, 'Points below diagonal: Java Native faster\nPoints above diagonal: RMATCH faster', 
+           transform=ax.transAxes, fontsize=11, verticalalignment='top',
+           bbox=dict(boxstyle='round,pad=0.5', facecolor='lightcyan', alpha=0.9))
+    
+    # Adjust layout to accommodate external legend
     plt.tight_layout()
     
-    plt.savefig(os.path.join(output_dir, 'runtime_scatter_rmatch_vs_java.png'), dpi=300, bbox_inches='tight')
+    # Save with bbox_inches='tight' to ensure legend is included
+    plt.savefig(os.path.join(output_dir, 'runtime_scatter_rmatch_vs_java.png'), dpi=300, 
+                bbox_inches='tight', facecolor='white', edgecolor='none')
     plt.close()
 
 def plot_relative_performance_bars(df, output_dir):
@@ -309,7 +518,7 @@ def plot_method_comparison(df, output_dir):
     plt.close()
 
 def generate_all_visualizations(json_file, output_dir):
-    """Generate all visualization plots."""
+    """Generate all visualization plots from a single file."""
     print(f"Parsing JMH results from: {json_file}")
     df = parse_jmh_results(json_file)
     
@@ -334,6 +543,47 @@ def generate_all_visualizations(json_file, output_dir):
     
     print(f"All visualizations saved to: {output_dir}")
 
+def generate_run_visualizations(result_files, run_id, output_dir):
+    """Generate all visualization plots from a complete test run."""
+    print(f"Parsing JMH results from test run: {run_id}")
+    df = parse_jmh_run_results(result_files)
+    
+    print(f"Found {len(df)} benchmark results across {len(result_files)} files")
+    print(f"Methods: {df['method'].unique().tolist()}")
+    if 'matcherType' in df.columns:
+        print(f"Matcher types: {df['matcherType'].unique().tolist()}")
+    
+    # Prepare comparison data
+    comparison_df = prepare_comparison_data(df)
+    
+    print(f"Creating visualizations in: {output_dir}")
+    
+    # Generate all plots
+    plot_runtime_scatter(comparison_df, output_dir)
+    plot_relative_performance_bars(comparison_df, output_dir)
+    plot_performance_advantage_table(comparison_df, output_dir)
+    plot_method_comparison(comparison_df, output_dir)
+    
+    # Save raw data for inspection
+    comparison_df.to_csv(os.path.join(output_dir, 'benchmark_comparison_data.csv'), index=False)
+    
+    # Create a run summary file
+    run_summary = {
+        'run_id': run_id,
+        'timestamp': datetime.now().isoformat(),
+        'total_benchmarks': len(df),
+        'result_files': [os.path.basename(f[0]) for f in result_files],
+        'methods': df['method'].unique().tolist(),
+        'matcher_types': df['matcherType'].unique().tolist() if 'matcherType' in df.columns else []
+    }
+    
+    import json
+    with open(os.path.join(output_dir, 'run_summary.json'), 'w') as f:
+        json.dump(run_summary, f, indent=2)
+    
+    print(f"All visualizations saved to: {output_dir}")
+    print(f"Test run summary: {run_id} ({len(result_files)} files, {len(df)} benchmarks)")
+
 def main():
     parser = argparse.ArgumentParser(description='Generate JMH benchmark visualizations')
     parser.add_argument('--results-dir', default='benchmarks/results', 
@@ -341,23 +591,50 @@ def main():
     parser.add_argument('--output-dir', default='performance-graphs',
                        help='Output directory for graphs (default: performance-graphs)')
     parser.add_argument('--json-file', help='Specific JSON file to process (overrides --results-dir)')
+    parser.add_argument('--run-id', help='Specific run ID to process (processes all files from that run)')
     
     args = parser.parse_args()
     
     # Create output directory
     os.makedirs(args.output_dir, exist_ok=True)
     
-    # Find input file
+    # Determine processing mode
     if args.json_file:
+        # Single file mode (backward compatibility)
         json_file = args.json_file
         if not os.path.exists(json_file):
             raise FileNotFoundError(f"Specified JSON file not found: {json_file}")
+        print(f"Processing single file: {os.path.basename(json_file)}")
+        generate_all_visualizations(json_file, args.output_dir)
+        
+    elif args.run_id:
+        # Specific run mode
+        json_pattern = os.path.join(args.results_dir, f"jmh-{args.run_id}-*.json")
+        json_files = glob.glob(json_pattern)
+        if not json_files:
+            raise FileNotFoundError(f"No JMH files found for run ID: {args.run_id}")
+        
+        # Create result file pairs
+        result_files = []
+        for json_file in sorted(json_files):
+            basename = os.path.basename(json_file).replace('.json', '')
+            txt_file = os.path.join(args.results_dir, f"{basename}.txt")
+            result_files.append((json_file, txt_file if os.path.exists(txt_file) else None))
+        
+        print(f"Processing run {args.run_id} with {len(result_files)} files")
+        generate_run_visualizations(result_files, args.run_id, args.output_dir)
+        
     else:
-        json_file, txt_file = find_latest_results(args.results_dir)
-        print(f"Using latest results: {os.path.basename(json_file)}")
-    
-    # Generate visualizations
-    generate_all_visualizations(json_file, args.output_dir)
+        # Latest run mode (new default behavior)
+        try:
+            run_id, result_files = find_latest_run_results(args.results_dir)
+            print(f"Processing latest run: {run_id} ({len(result_files)} files)")
+            generate_run_visualizations(result_files, run_id, args.output_dir)
+        except FileNotFoundError:
+            # Fallback to single file mode for backward compatibility
+            json_file, txt_file = find_latest_results(args.results_dir)
+            print(f"Using latest single result: {os.path.basename(json_file)}")
+            generate_all_visualizations(json_file, args.output_dir)
 
 if __name__ == '__main__':
     main()

@@ -18,9 +18,16 @@ cd "$root_dir"
 MVN="./mvnw"; [[ -x "$MVN" ]] || MVN="mvn"
 
 mkdir -p benchmarks/results
+
+# Generate a run identifier if not provided
+if [[ -z "${JMH_RUN_ID:-}" ]]; then
+  JMH_RUN_ID=$(date -u +"%Y%m%dT%H%M%SZ")
+fi
+
+# Generate individual test timestamp for unique filenames within the same run
 stamp=$(date -u +"%Y%m%dT%H%M%SZ")
-JSON_OUT="benchmarks/results/jmh-${stamp}.json"
-TXT_OUT="benchmarks/results/jmh-${stamp}.txt"
+JSON_OUT="benchmarks/results/jmh-${JMH_RUN_ID}-${stamp}.json"
+TXT_OUT="benchmarks/results/jmh-${JMH_RUN_ID}-${stamp}.txt"
 
 # Build shaded jar for the JMH module  
 echo "Building JMH module..." >&2
@@ -230,5 +237,9 @@ if [[ $status -ne 0 ]]; then
 fi
 
 # Emit friendly pointer
+echo "JMH RUN ID: $JMH_RUN_ID"
 echo "JMH JSON: $JSON_OUT"
 echo "JMH TXT : $TXT_OUT"
+
+# Write run ID to a temporary file for other scripts to read
+echo "$JMH_RUN_ID" > /tmp/jmh_current_run_id

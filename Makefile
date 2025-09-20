@@ -1,6 +1,6 @@
  SHELL := /bin/bash
 
- .PHONY: build test ci bench-micro bench-macro bench-java charts profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env
+ .PHONY: build test ci bench-micro bench-macro bench-java bench-suite charts profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env
 
 build:
 	mvn -q -B spotless:apply
@@ -27,6 +27,18 @@ bench-macro:
 bench-java:
 	MAX_REGEXPS=10000 scripts/run_java_benchmark_with_memory.sh
 
+bench-suite:
+	@echo "Running comprehensive JMH benchmark suite..."
+	JMH_FORKS=1 \
+    JMH_WARMUP_IT=1 \
+    JMH_IT=2 \
+    JMH_WARMUP=1s \
+    JMH_MEASURE=2s \
+    JMH_THREADS=1 \
+    scripts/run_jmh_suite.sh comprehensive
+	@echo "Generating visualizations for the test suite..."
+	$(MAKE) visualize-benchmarks
+
 charts:
 	python3 scripts/generate_macro_performance_plot.py
 	python3 scripts/generate_java_performance_plot.py
@@ -44,6 +56,14 @@ spotless:
 
 spotbugs:
 	mvn -q -B spotbugs:check
+
+
+test-run:
+	rm -rf ~/.m2/repository/no/rmz/rmatch
+	mvn -q -B spotless:apply
+	./mvnw clean install
+	bash -x   ./scripts/run_jmh.sh
+
 
 setup-visualization-env:
 	@echo "Setting up Python virtual environment for benchmark visualization..."
