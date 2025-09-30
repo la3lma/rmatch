@@ -1,0 +1,22 @@
+{
+  "run_id": "20250920T150514Z-quick",
+  "timestamp": "2025-09-20T17:42:28.816908",
+  "total_benchmarks": 34,
+  "result_files": [
+    "jmh-20250920T150514Z-quick-20250920T151023Z.json",
+    "jmh-20250920T150514Z-quick-20250920T150605Z.json",
+    "jmh-20250920T150514Z-quick-20250920T150547Z.json",
+    "jmh-20250920T150514Z-quick-20250920T150530Z.json",
+    "jmh-20250920T150514Z-quick-20250920T150514Z.json"
+  ],
+  "methods": [
+    "functionalVerification",
+    "corpusBasedBenchmark",
+    "patternCompilationBenchmark"
+  ],
+  "matcher_types": [
+    NaN,
+    "JAVA_NATIVE",
+    "RMATCH"
+  ]
+}
