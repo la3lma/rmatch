@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.performancetests.utils.CSVAppender;
 import no.rmz.rmatch.performancetests.utils.FileInhaler;
 import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
@@ -183,13 +182,13 @@ public class SequenceLoaderTest {
     System.out.println("Used this much memory: " + result.getMaxNoOfMbsUsed());
     assertTrue(result.getMaxNoOfMbsUsed() < MAX_MEMORY_TO_USE_IN_MB);
 
-    CSVAppender.append(
-        THE_LOCATION_OF_TEST_RESULTS_FOR_VERY_FEW_WORDS,
-        new long[] {
-          System.currentTimeMillis() / MILLIS_IN_SECOND,
-          result.getDuration(),
-          result.getMaxNoOfMbsUsed()
-        });
+    // Modern structured logging instead of CSV
+    LOG.info(
+        String.format(
+            "PERFORMANCE_METRICS_TEST: test=very_few_regexps, duration_ms=%d, memory_mb=%d, timestamp=%d",
+            result.getDuration(),
+            result.getMaxNoOfMbsUsed(),
+            System.currentTimeMillis() / MILLIS_IN_SECOND));
     Counters.dumpCounters();
   }
 
@@ -214,13 +213,14 @@ public class SequenceLoaderTest {
     assertTrue(result.getDuration() < MAX_TIME_TO_USE_IN_MILLIS, "result was = " + result);
     assertTrue(result.getMaxNoOfMbsUsed() < MAX_MEMORY_TO_USE_IN_MB, "result was = " + result);
 
-    CSVAppender.append(
-        MEASUREMENT_RESULTS_FROM_SOME_WORDS_TESTS,
-        new long[] {
-          System.currentTimeMillis() / MILLIS_IN_SECOND,
-          result.getDuration(),
-          result.getMaxNoOfMbsUsed()
-        });
+    // Modern structured logging instead of CSV
+    LOG.info(
+        String.format(
+            "PERFORMANCE_METRICS_TEST: test=some_regexps, duration_ms=%d, memory_mb=%d, matches=%d, timestamp=%d",
+            result.getDuration(),
+            result.getMaxNoOfMbsUsed(),
+            result.getNoOfMatches(),
+            System.currentTimeMillis() / MILLIS_IN_SECOND));
   }
 
   /**
