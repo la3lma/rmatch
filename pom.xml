@@ -35,17 +35,17 @@
 
     <properties>
         <maven.plugin.validation>DEFAULT</maven.plugin.validation>
-        <java.version>17</java.version>
-        <errorprone.version>2.33.0</errorprone.version>
+        <java.version>25</java.version>
+        <errorprone.version>2.37.0</errorprone.version>
         <findbugs.version>1.3.2</findbugs.version>
         <guava.version>33.5.0-jre</guava.version>
         <guice.version>3.0</guice.version>
-        <junit-jupiter.version>5.9.3</junit-jupiter.version>
+        <junit-jupiter.version>5.11.4</junit-jupiter.version>
+        <junit-platform.version>1.11.4</junit-platform.version>
         <junit.version>4.13.2</junit.version>
         <mavenCheckstylePlugin.version>3.6.0</mavenCheckstylePlugin.version>
         <mavenCoberturaPlugin.version>2.5.1</mavenCoberturaPlugin.version>
         <mavenCompilerPlugin.version>3.14.1</mavenCompilerPlugin.version>
-        <mavenCompilerPlugin.version>3.14.0</mavenCompilerPlugin.version>
         <mavenDependencyPlugin.version>3.9.0</mavenDependencyPlugin.version>
 
         <mavenFindbugsPlugin.version>3.0.5</mavenFindbugsPlugin.version>
@@ -54,7 +54,7 @@
         <mavenSourcePlugin.version>3.3.1</mavenSourcePlugin.version>
         <mavenSurefire.version>3.5.4</mavenSurefire.version>
         <mockitoCore.version>5.20.0</mockitoCore.version>
-        <mockitoJunitJupiter.version>6.0.0</mockitoJunitJupiter.version>
+        <mockitoJunitJupiter.version>5.20.0</mockitoJunitJupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -72,14 +72,42 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.20.0</version>
+            <version>${mockitoJunitJupiter.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${mockitoJunitJupiter.version}</version>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-commons</artifactId>
+            <version>${junit-platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-engine</artifactId>
+            <version>${junit-platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -120,7 +148,7 @@
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.9.6.0</version>
+                    <version>4.9.8.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
