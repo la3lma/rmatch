@@ -231,3 +231,28 @@ fi
 # Emit friendly pointer
 echo "JMH JSON: $JSON_OUT"
 echo "JMH TXT : $TXT_OUT"
+
+# Augment JMH JSON with architecture information
+echo "Adding architecture information to JMH results..." >&2
+if [[ -f "$JSON_OUT" ]] && [[ -x "$root_dir/scripts/collect_system_info.sh" ]]; then
+  system_info_json=$("$root_dir/scripts/collect_system_info.sh" 2>/dev/null || echo "{}")
+  
+  # Create augmented JSON with architecture info
+  temp_json=$(mktemp)
+  if command -v jq >/dev/null 2>&1; then
+    # Use jq if available
+    jq --argjson arch "$system_info_json" '. + {architecture: $arch}' "$JSON_OUT" > "$temp_json"
+    mv "$temp_json" "$JSON_OUT"
+  else
+    # Fallback: manually add architecture field
+    # Read the original JSON (it's an array)
+    cat > "$temp_json" <<EOJSON
+{
+  "architecture": ${system_info_json},
+  "benchmarks": $(cat "$JSON_OUT")
+}
+EOJSON
+    mv "$temp_json" "$JSON_OUT"
+  fi
+  echo "Architecture information added to JMH results" >&2
+fi
