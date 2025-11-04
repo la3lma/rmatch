@@ -334,7 +334,8 @@ public final class SystemInfo {
    */
   private static void detectContainerEnvironment(Map<String, Object> info) {
     // Check for Docker
-    if (System.getenv("DOCKER_CONTAINER") != null || executeCommand("cat /.dockerenv") != null) {
+    if (System.getenv("DOCKER_CONTAINER") != null
+        || java.nio.file.Files.exists(java.nio.file.Paths.get("/.dockerenv"))) {
       info.put("container_type", "docker");
     }
 
@@ -399,8 +400,18 @@ public final class SystemInfo {
     // Include key identifying information
     id.append(systemInfo.getOrDefault("os_arch", "unknown"));
     id.append("_");
-    id.append(
-        systemInfo.getOrDefault("cpu_model", "unknown").toString().replaceAll("[^a-zA-Z0-9]", "_"));
+
+    // Sanitize and truncate CPU model to avoid overly long IDs
+    String cpuModel = systemInfo.getOrDefault("cpu_model", "unknown").toString();
+    String sanitizedModel =
+        cpuModel.replaceAll("[^a-zA-Z0-9]", "_").replaceAll("_+", "_").replaceAll("^_|_$", "");
+
+    // Truncate to 50 characters max to keep ID manageable
+    if (sanitizedModel.length() > 50) {
+      sanitizedModel = sanitizedModel.substring(0, 50);
+    }
+
+    id.append(sanitizedModel);
     id.append("_");
     id.append(systemInfo.getOrDefault("cpu_logical_cores", "0"));
 

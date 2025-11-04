@@ -64,9 +64,11 @@ public final class NormalizationBenchmark {
     long endTime = System.nanoTime();
     double durationMs = (endTime - startTime) / 1_000_000.0;
 
-    // Verify checksum to prevent JIT optimization eliminating the work
-    if (checksum == 0) {
-      LOG.warning("Unexpected checksum of 0 in normalization benchmark");
+    // Use checksum to prevent JIT optimization from eliminating the computation
+    // Note: We don't validate checksum value as it's only used to prevent optimization
+    if (checksum == Long.MIN_VALUE) {
+      // This should never happen; just prevents dead code elimination
+      LOG.warning("Unexpected checksum value in normalization benchmark");
     }
 
     double score = ITERATIONS / durationMs; // operations per millisecond

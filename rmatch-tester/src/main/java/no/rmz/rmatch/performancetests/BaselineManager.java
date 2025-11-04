@@ -214,9 +214,10 @@ public final class BaselineManager {
           architectureId = line.substring("# Architecture: ".length()).trim();
         } else if (line.startsWith("# Normalization Score: ")) {
           try {
-            normalizationScore =
-                Double.parseDouble(line.substring("# Normalization Score: ".length()).trim());
-          } catch (NumberFormatException e) {
+            String scoreStr = line.substring("# Normalization Score: ".length()).trim();
+            // Extract just the numeric part (handle cases with additional text)
+            normalizationScore = Double.parseDouble(scoreStr.split("\\s+")[0]);
+          } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             LOG.warning("Failed to parse normalization score from baseline");
           }
         }

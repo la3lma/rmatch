@@ -88,13 +88,24 @@ cp "$temp_java" "$temp_class"
 
 # Build classpath
 CLASSPATH="rmatch-tester/target/classes:rmatch/target/classes"
-for jar in $(find ~/.m2/repository -name "guava-*.jar" | head -1); do
-  CLASSPATH="$CLASSPATH:$jar"
-done
+
+# Try to get Guava from Maven classpath
+GUAVA_JAR=$($MVN -q -B -f rmatch-tester/pom.xml dependency:build-classpath -Dmdep.outputFile=/dev/stdout 2>/dev/null | tr ':' '\n' | grep guava | head -1)
+if [[ -n "$GUAVA_JAR" ]]; then
+  CLASSPATH="$CLASSPATH:$GUAVA_JAR"
+else
+  # Fallback to standard Maven repository location
+  for jar in ~/.m2/repository/com/google/guava/guava-*/guava-*.jar; do
+    if [[ -f "$jar" ]]; then
+      CLASSPATH="$CLASSPATH:$jar"
+      break
+    fi
+  done
+fi
 
 # Compile and run
 javac -cp "$CLASSPATH" -d "$temp_class_dir" "$temp_class" 2>&1 >&2
-java -cp "$temp_class_dir:$CLASSPATH" CollectSystemInfo 2>&1 | grep -v "^Nov" | grep -v "^INFO"
+java -cp "$temp_class_dir:$CLASSPATH" CollectSystemInfo 2>&1
 
 # Cleanup
 rm -rf "$temp_class_dir" "$temp_java"
