@@ -41,6 +41,7 @@
         <guava.version>33.5.0-jre</guava.version>
         <guice.version>3.0</guice.version>
         <junit-jupiter.version>5.11.4</junit-jupiter.version>
+        <junit-platform.version>1.11.4</junit-platform.version>
         <junit.version>4.13.2</junit.version>
         <mavenCheckstylePlugin.version>3.6.0</mavenCheckstylePlugin.version>
         <mavenCoberturaPlugin.version>2.5.1</mavenCoberturaPlugin.version>
@@ -92,21 +93,21 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-commons</artifactId>
-            <version>1.11.4</version>
+            <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-engine</artifactId>
-            <version>1.11.4</version>
+            <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>1.11.4</version>
+            <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
 
