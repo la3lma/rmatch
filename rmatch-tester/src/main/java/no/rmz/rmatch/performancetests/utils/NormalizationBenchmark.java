@@ -45,13 +45,8 @@ public final class NormalizationBenchmark {
       computeWork(i);
     }
 
-    // Force GC before measurement
-    System.gc();
-    try {
-      Thread.sleep(50);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
+    // Note: This lightweight benchmark does not attempt to control for GC pauses.
+    // For more precise benchmarking, use JMH or similar frameworks.
 
     // Measure actual performance
     long startTime = System.nanoTime();
