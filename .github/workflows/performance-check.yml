@@ -1,4 +1,17 @@
 # .github/workflows/performance-check.yml
+#
+# CRITICAL PERFORMANCE VALIDATION RULE:
+# "I will not merge anything to main that does not provably improve performance."
+#
+# This workflow enforces production-scale performance testing with realistic workloads.
+# Micro-benchmarks and lab tests are insufficient - all optimizations must be proven 
+# with 5000+ regex workloads using real text corpora before merging.
+#
+# Key lessons learned:
+# - Theoretical improvements often don't translate to real-world gains
+# - Small-scale synthetic benchmarks can be completely misleading  
+# - Only comprehensive, production-like testing reveals true performance impact
+#
 name: Performance Check
 on:
   pull_request:
@@ -40,13 +53,16 @@ jobs:
         timeout-minutes: 15  # Increased timeout for comprehensive testing (5000 regexps)
         run: |
           echo "Running comprehensive performance comparison with full Wuthering Heights corpus..."
+          echo "ENFORCING RULE: No merges without provable performance improvements!"
+          echo "Testing with production-scale workloads to prevent micro-benchmark deception."
           
           # Create baseline directory
           mkdir -p benchmarks/baseline
           
           # Run the comprehensive performance test using full Wuthering Heights corpus
-          MAX_REGEXPS=5000  # Comprehensive scale for robust performance validation
-          NUM_RUNS=5        # Increased runs for better statistical significance
+          # CRITICAL: These parameters ensure realistic, production-scale validation
+          MAX_REGEXPS=5000  # Comprehensive scale for robust performance validation (NOT lab-scale!)
+          NUM_RUNS=5        # Increased runs for statistical significance (NOT single-run micro-benchmarks!)
           
           # Run performance test - exit code 2 (WARNING) should not cause failure
           ./mvnw -q -B -pl rmatch-tester exec:java \
