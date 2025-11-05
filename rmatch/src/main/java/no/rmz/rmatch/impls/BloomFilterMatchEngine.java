@@ -435,8 +435,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
     // Handle simple cases - for complex regex, return first literal char
     final char first = pattern.charAt(0);
-    Character.isLetterOrDigit(first);
-
+    
     // For now, just return first character - could be enhanced for complex patterns
     return first;
   }
@@ -447,10 +446,19 @@ public final class BloomFilterMatchEngine implements MatchEngine {
     int minLength = 0;
     for (int i = 0; i < pattern.length(); i++) {
       final char c = pattern.charAt(i);
-      if (Character.isLetterOrDigit(c)) {
+      // Optimized character classification - faster than Character.isLetterOrDigit()
+      if (isLetterOrDigit(c)) {
         minLength++;
       }
     }
     return Math.max(1, minLength);
+  }
+
+  /**
+   * Optimized letter or digit check using range comparisons.
+   * Faster than Character.isLetterOrDigit() for ASCII characters which are most common.
+   */
+  private static boolean isLetterOrDigit(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
   }
 }

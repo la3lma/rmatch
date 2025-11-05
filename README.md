@@ -52,6 +52,29 @@ than myself, but it's not quite there yet.  Be patient ;)
 
 ---
 
+## 🚨 CRITICAL: Performance Validation Rule
+
+> **"I will not merge anything to main that does not provably improve performance."**
+
+### Development Guidelines for Performance Changes
+
+**ALL performance optimizations MUST:**
+
+1. **✅ Use Production-Scale Testing**: Test with 5000+ regex workloads against real text corpora
+2. **✅ Show Measurable Improvement**: Demonstrate clear performance gains in comprehensive benchmarks  
+3. **❌ Never Trust Micro-Benchmarks**: Small-scale synthetic tests are insufficient and often misleading
+4. **❌ Never Trust Theoretical Improvements**: Code that "should be faster" must prove it IS faster
+
+### Lessons Learned
+
+- **Enum switching** theoretical 13.6% improvement → **Actually slower** in production
+- **Pattern matching instanceof** → **1.7% performance regression**  
+- **Character classification optimizations** → **2-9% performance regression**
+
+**The Rule Exists Because:** Brilliant optimization ideas are necessary, but they must be proven in our specific use case with realistic workloads before adoption.
+
+---
+
 ## GC Optimization for Java 25
 
 rmatch includes tools to experiment with different Garbage Collector (GC) configurations on Java 25 to optimize memory usage and performance.
