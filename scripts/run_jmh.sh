@@ -240,8 +240,8 @@ if [[ -f "$JSON_OUT" ]] && [[ -x "$root_dir/scripts/collect_system_info.sh" ]]; 
   # Create augmented JSON with architecture info
   temp_json=$(mktemp)
   if command -v jq >/dev/null 2>&1; then
-    # Use jq if available
-    jq --argjson arch "$system_info_json" '. + {architecture: $arch}' "$JSON_OUT" > "$temp_json"
+    # Use jq if available - wrap JMH array in object with architecture info
+    jq --argjson arch "$system_info_json" '{architecture: $arch, benchmarks: .}' "$JSON_OUT" > "$temp_json"
     mv "$temp_json" "$JSON_OUT"
   else
     # Fallback: manually add architecture field
