@@ -355,6 +355,10 @@ public final class PerformanceCriteriaEvaluator {
     boolean statisticallySignificant =
         isStatisticallySignificant(currentTimeStats, baselineTimeStats);
 
+    // Get base performance result first
+    PerformanceResult baseResult =
+        determineStatus(timeImprovementPercent, memoryImprovementPercent, statisticallySignificant);
+
     // Build explanation with architecture information
     StringBuilder explanationBuilder = new StringBuilder();
 
@@ -383,9 +387,6 @@ public final class PerformanceCriteriaEvaluator {
         }
       }
     }
-
-    PerformanceResult baseResult =
-        determineStatus(timeImprovementPercent, memoryImprovementPercent, statisticallySignificant);
 
     explanationBuilder.append(baseResult.getExplanation());
 
