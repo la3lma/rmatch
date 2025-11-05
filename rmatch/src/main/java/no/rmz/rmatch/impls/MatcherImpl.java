@@ -108,11 +108,12 @@ public final class MatcherImpl implements Matcher {
     final MatchEngineImpl legacyEngine = (MatchEngineImpl) me;
 
     // Build pattern ID to regex string mapping
-    final Map<Integer, String> patterns = new HashMap<>();
-    final Map<Integer, Integer> flags = new HashMap<>();
-    final Map<String, Regexp> regexpMappings = new HashMap<>();
-
     final Set<String> regexpStrings = rs.getRegexpSet();
+    final int size = regexpStrings.size();
+    final Map<Integer, String> patterns = new HashMap<>(size);
+    final Map<Integer, Integer> flags = new HashMap<>(size);
+    final Map<String, Regexp> regexpMappings = new HashMap<>(size);
+
     int patternId = 0;
 
     for (final String regexpStr : regexpStrings) {
