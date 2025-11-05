@@ -125,7 +125,9 @@ jobs:
             echo "Performance check FAILED - regression detected"
             exit 1
           elif [ $exit_code -eq 2 ]; then
-            echo "Performance check WARNING - within noise threshold"
+            echo "Performance check WARNING - within noise threshold or cross-architecture comparison"
+            # Don't fail the CI job for warnings - these indicate uncertainty rather than confirmed regression
+            echo "Treating WARNING as success to avoid false failures"
           else
             echo "Performance check encountered error"
             exit 1
