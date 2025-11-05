@@ -26,9 +26,10 @@ if ! command -v java &> /dev/null; then
     exit 1
 fi
 
-JAVA_VERSION=$(java -version 2>&1 | grep version | cut -d'"' -f2 | cut -d'.' -f1)
-if [ "$JAVA_VERSION" -lt 25 ]; then
-    echo "WARNING: Java 25 required for all modern features. Current version: $JAVA_VERSION"
+JAVA_VERSION_STRING=$(java -version 2>&1 | grep version | cut -d'"' -f2)
+JAVA_MAJOR_VERSION=$(echo "$JAVA_VERSION_STRING" | cut -d'.' -f1)
+if [ "$JAVA_MAJOR_VERSION" -lt 25 ] 2>/dev/null; then
+    echo "WARNING: Java 25 required for all modern features. Current version: $JAVA_VERSION_STRING"
 fi
 
 # Create output directory
@@ -53,6 +54,7 @@ mvn clean package -pl benchmarks/jmh -am -DskipTests -q
 # Run the benchmarks
 echo ""
 echo "Running dispatch optimization benchmarks..."
+echo "Note: Command-line JMH parameters override benchmark annotations for reproducibility"
 echo ""
 
 JMH_JAR="${PROJECT_ROOT}/benchmarks/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar"
@@ -63,6 +65,8 @@ if [ ! -f "${JMH_JAR}" ]; then
 fi
 
 # Run all dispatch benchmarks
+# Note: These parameters override @Fork, @Warmup, and @Measurement annotations
+# to ensure consistent, reproducible results across runs
 java -jar "${JMH_JAR}" \
     -f "${JMH_FORKS}" \
     -wi "${JMH_WARMUP_IT}" \
