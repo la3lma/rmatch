@@ -105,7 +105,8 @@ fi
 
 # Compile and run
 javac -cp "$CLASSPATH" -d "$temp_class_dir" "$temp_class" 2>&1 >&2
-java -cp "$temp_class_dir:$CLASSPATH" CollectSystemInfo 2>&1
+# Suppress Java logging by redirecting stderr, only output JSON to stdout
+java -cp "$temp_class_dir:$CLASSPATH" -Djava.util.logging.level=OFF CollectSystemInfo 2>/dev/null
 
 # Cleanup
 rm -rf "$temp_class_dir" "$temp_java"
