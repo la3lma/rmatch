@@ -1,6 +1,6 @@
  SHELL := /bin/bash
 
- .PHONY: build test ci bench-micro bench-macro bench-java charts profile fmt spotless spotbugs
+ .PHONY: build test ci bench-micro bench-macro bench-java charts profile fmt spotless spotbugs bench-gc-experiments validate-gc
 
 build:
 	mvn -q -B spotless:apply
@@ -44,3 +44,12 @@ spotless:
 
 spotbugs:
 	mvn -q -B spotbugs:check
+
+bench-gc-experiments:
+	@echo "Running GC experiments with different configurations..."
+	@echo "This will test: G1 (default), ZGC Generational, Shenandoah, and Compact Object Headers variants"
+	scripts/run_gc_experiments.sh both all
+
+validate-gc:
+	@echo "Validating GC configurations for Java 25..."
+	scripts/validate_gc_configs.sh
