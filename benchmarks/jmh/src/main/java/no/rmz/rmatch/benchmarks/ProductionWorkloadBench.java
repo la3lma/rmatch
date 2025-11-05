@@ -28,6 +28,9 @@ import org.openjdk.jmh.infra.Blackhole;
 @Measurement(iterations = 3, time = 3, timeUnit = TimeUnit.SECONDS)
 public class ProductionWorkloadBench {
 
+  /** Default corpus length for testing. */
+  private static final int DEFAULT_CORPUS_LENGTH = 10000;
+
   @Param({"1000", "5000"})
   public int patternCount;
 
@@ -43,7 +46,7 @@ public class ProductionWorkloadBench {
     patterns = generateRealisticPatterns(patternCount);
 
     // Load or generate a realistic corpus
-    corpus = generateRealisticCorpus(10000);
+    corpus = generateRealisticCorpus(DEFAULT_CORPUS_LENGTH);
 
     // Setup matcher with default configuration
     System.setProperty("rmatch.prefilter", "disabled");

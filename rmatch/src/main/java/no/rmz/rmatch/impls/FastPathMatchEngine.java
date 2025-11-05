@@ -23,6 +23,7 @@ import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
 import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
 import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.utils.StringBuffer;
 
 /**
  * Enhanced MatchEngine with fast-path optimizations for common cases.
@@ -246,7 +247,7 @@ public final class FastPathMatchEngine implements MatchEngine {
 
   /** Collect buffer text for prefilter scanning. */
   private String collectBufferText(final Buffer b) {
-    if (b instanceof no.rmz.rmatch.utils.StringBuffer sb) {
+    if (b instanceof StringBuffer sb) {
       return sb.getCurrentRestString();
     }
     return null;

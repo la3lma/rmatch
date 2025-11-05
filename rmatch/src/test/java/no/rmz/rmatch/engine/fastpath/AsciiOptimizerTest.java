@@ -178,20 +178,21 @@ public class AsciiOptimizerTest {
   @Test
   public void testFindFirstNonAsciiWithMultipleChunks() {
     // Test the 4-character-at-a-time optimization
-    // Create a string with ASCII chars, then Unicode at position 17 (after 4 full chunks)
+    // Position 17 is after 4 full chunks (4*4 = 16) plus one more character
+    final int positionAfterMultipleChunks = 17;
     StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < 17; i++) {
+    for (int i = 0; i < positionAfterMultipleChunks; i++) {
       sb.append('a');
     }
     sb.append('é'); // Unicode at position 17
 
-    assertEquals(17, AsciiOptimizer.findFirstNonAscii(sb.toString(), 0));
+    assertEquals(positionAfterMultipleChunks, AsciiOptimizer.findFirstNonAscii(sb.toString(), 0));
 
     // Test with Unicode at positions aligned with chunk boundaries
     String test4 = "aaaé"; // Position 3
     assertEquals(3, AsciiOptimizer.findFirstNonAscii(test4, 0));
 
-    String test5 = "aaaaé"; // Position 4
+    String test5 = "aaaaé"; // Position 4 (at chunk boundary)
     assertEquals(4, AsciiOptimizer.findFirstNonAscii(test5, 0));
 
     String test8 = "aaaaaaaaé"; // Position 8
