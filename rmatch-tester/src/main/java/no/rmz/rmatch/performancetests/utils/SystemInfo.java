@@ -361,28 +361,51 @@ public final class SystemInfo {
    * @return Command output or null if failed
    */
   private static String executeCommand(String command) {
+    Process process = null;
     try {
       ProcessBuilder pb = new ProcessBuilder("sh", "-c", command);
-      Process process = pb.start();
-
-      BufferedReader reader =
-          new BufferedReader(
-              new InputStreamReader(
-                  process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
+      process = pb.start();
       StringBuilder output = new StringBuilder();
-      String line;
-      while ((line = reader.readLine()) != null) {
-        output.append(line).append("\n");
+      StringBuilder errorOutput = new StringBuilder();
+      // Read stdout and stderr fully to avoid deadlocks
+      try (BufferedReader stdoutReader =
+               new BufferedReader(
+                   new InputStreamReader(
+                       process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
+           BufferedReader stderrReader =
+               new BufferedReader(
+                   new InputStreamReader(
+                       process.getErrorStream(), java.nio.charset.StandardCharsets.UTF_8))) {
+        String line;
+        while ((line = stdoutReader.readLine()) != null) {
+          output.append(line).append("\n");
+        }
+        // Consume stderr fully (discard or log)
+        while ((line = stderrReader.readLine()) != null) {
+          // Optionally collect error output
+          errorOutput.append(line).append("\n");
+        }
       }
-
       int exitCode = process.waitFor();
       if (exitCode == 0) {
         return output.toString();
       }
+      // Optionally, could log errorOutput if needed
       return null;
-
     } catch (Exception e) {
       return null;
+    } finally {
+      if (process != null) {
+        try {
+          process.getInputStream().close();
+        } catch (Exception ignored) {}
+        try {
+          process.getErrorStream().close();
+        } catch (Exception ignored) {}
+        try {
+          process.getOutputStream().close();
+        } catch (Exception ignored) {}
+      }
     }
   }
 
