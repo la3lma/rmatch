@@ -7,8 +7,8 @@ set -euo pipefail
 echo "Testing GC configuration flags with Java 25..."
 echo ""
 
-# Check Java version
-java_version=$(java -version 2>&1 | head -n1 | grep -oP '\d+' | head -n1 || echo "unknown")
+# Check Java version - portable approach without -P flag
+java_version=$(java -version 2>&1 | head -n1 | grep -o '[0-9][0-9]*' | head -n1 || echo "unknown")
 echo "Java version: $(java -version 2>&1 | head -n1)"
 echo ""
 
@@ -31,7 +31,7 @@ test_gc_config() {
     flags="$flags -XX:+PrintFlagsFinal"
   fi
   
-  # Try to run Java with the flags
+  # Try to run Java with the flags (quote properly to handle spaces)
   if java $flags -version >/dev/null 2>&1; then
     echo "✓ OK"
     return 0

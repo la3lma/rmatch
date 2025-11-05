@@ -8,8 +8,8 @@ set -euo pipefail
 root_dir=$(git rev-parse --show-toplevel)
 cd "$root_dir"
 
-# Ensure we're using Java 25
-java_version=$(java -version 2>&1 | head -n1 | grep -oP '\d+' | head -n1)
+# Ensure we're using Java 25 - portable approach without -P flag
+java_version=$(java -version 2>&1 | head -n1 | grep -o '[0-9][0-9]*' | head -n1)
 if [[ "$java_version" != "25" ]]; then
   echo "ERROR: Java 25 is required. Current version: $java_version" >&2
   echo "Please set JAVA_HOME to point to Java 25" >&2
@@ -66,9 +66,12 @@ run_benchmark_with_gc() {
   mkdir -p "$result_dir"
   
   # Set up MAVEN_OPTS with GC flags
+  # Note: We overwrite MAVEN_OPTS to ensure clean GC configuration for each test.
+  # If scripts internally set MAVEN_OPTS, those will be overridden.
   export MAVEN_OPTS="${gc_flags}"
   
   # Also set up flags for direct Java execution
+  # JAVA_TOOL_OPTIONS is picked up by all JVM invocations
   export JAVA_TOOL_OPTIONS="${gc_flags}"
   
   local status=0
