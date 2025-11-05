@@ -50,3 +50,38 @@ than myself, but it's not quite there yet.  Be patient ;)
 
 [![Test Coverage](https://api.codeclimate.com/v1/badges/ecfba15253e7095438fb/test_coverage)](https://codeclimate.com/repos/64a2ba4d1c8c821c92003b52/test_coverage)
 
+---
+
+## GC Optimization for Java 25
+
+rmatch includes tools to experiment with different Garbage Collector (GC) configurations on Java 25 to optimize memory usage and performance.
+
+### Quick Start
+
+Validate GC configurations:
+```bash
+scripts/validate_gc_configs.sh
+```
+
+Run benchmarks with all GC variants:
+```bash
+make bench-gc-experiments
+```
+
+### Available GC Configurations
+
+- **G1 (default)**: General-purpose GC with good throughput
+- **ZGC Generational**: Low-latency GC for large heaps
+- **Shenandoah**: Concurrent GC with predictable pause times
+- **Compact Object Headers**: Reduces memory footprint (Java 25 feature)
+
+### Documentation
+
+See [GC_EXPERIMENTS.md](GC_EXPERIMENTS.md) for:
+- Detailed usage instructions
+- How to analyze results
+- Applying findings to improve performance
+- References to Java 25 GC improvements
+
+The experiments help identify optimal GC settings for regex engines with high object churn, following recommendations from the [JDK 25 Performance Improvements](https://inside.java/2025/10/20/jdk-25-performance-improvements/) article.
+
