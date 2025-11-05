@@ -22,8 +22,10 @@ public final class GitHubActionPerformanceTestRunner {
       LOG.info("Starting GitHub Action Performance Test");
       LOG.info("Max regexps: " + maxRegexps + ", Number of runs: " + numRuns);
 
-      // Load baseline results with architecture check - discards baselines from unknown architectures
-      List<MatcherBenchmarker.TestRunResult> baselineResults = BaselineManager.loadRmatchBaselineWithArchitectureCheck();
+      // Load baseline results with architecture check - discards baselines from unknown
+      // architectures
+      List<MatcherBenchmarker.TestRunResult> baselineResults =
+          BaselineManager.loadRmatchBaselineWithArchitectureCheck();
 
       // Run performance comparison
       GitHubActionPerformanceTest.ComparisonResult result =
@@ -46,22 +48,24 @@ public final class GitHubActionPerformanceTestRunner {
       boolean isMainBranch =
           gitRef != null && (gitRef.endsWith("/main") || gitRef.endsWith("/master"));
       boolean isBootstrapCase = baselineResults.isEmpty();
-      
+
       // Check if baseline was discarded due to unknown architecture
       boolean wasUnknownArchitectureBaseline = false;
       if (BaselineManager.baselineExists(BaselineManager.DEFAULT_BASELINE_DIR, "rmatch")) {
-        BaselineManager.EnvironmentInfo existingBaselineEnv = 
+        BaselineManager.EnvironmentInfo existingBaselineEnv =
             BaselineManager.loadBaselineEnvironment(BaselineManager.DEFAULT_BASELINE_DIR, "rmatch");
-        wasUnknownArchitectureBaseline = existingBaselineEnv != null 
-            && "unknown".equals(existingBaselineEnv.getArchitectureId())
-            && baselineResults.isEmpty();
+        wasUnknownArchitectureBaseline =
+            existingBaselineEnv != null
+                && "unknown".equals(existingBaselineEnv.getArchitectureId())
+                && baselineResults.isEmpty();
       }
 
       if (isMainBranch || isBootstrapCase || wasUnknownArchitectureBaseline) {
         if (isBootstrapCase && !wasUnknownArchitectureBaseline) {
           LOG.info("No baseline exists - establishing initial baseline from current results");
         } else if (wasUnknownArchitectureBaseline) {
-          LOG.info("Existing baseline has unknown architecture - establishing new baseline from current results");
+          LOG.info(
+              "Existing baseline has unknown architecture - establishing new baseline from current results");
         } else {
           LOG.info("Updating baseline for main branch");
         }
