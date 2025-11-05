@@ -2,6 +2,8 @@
 
 This document describes how to run and analyze GC (Garbage Collector) configuration experiments for rmatch on Java 25.
 
+> **New to GC experiments?** See [QUICKSTART_GC.md](QUICKSTART_GC.md) for a step-by-step tutorial with examples.
+
 ## Background
 
 Java 25 introduces several GC improvements that can benefit applications with high object churn like regex engines:
