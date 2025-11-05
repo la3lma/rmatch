@@ -16,7 +16,9 @@ package no.rmz.rmatch.impls;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.CounterType;
@@ -81,6 +83,9 @@ public final class MatchSetImpl implements MatchSet {
 
   /** The set of matches being pursued through this MatchSetImpl. */
   private final Set<Match> matches;
+
+  /** Reusable list for creating match snapshots to avoid repeated allocations in hot paths. */
+  private final List<Match> matchSnapshot = new ArrayList<>();
 
   /** The current deterministic node that is used when pushing the matches further. */
   private DFANode currentNode;
@@ -243,14 +248,11 @@ public final class MatchSetImpl implements MatchSet {
     // destruction, but we won't do anything more about that fact
     // from within this loop.
 
-    // Create snapshot to avoid ConcurrentModificationException
-    final Set<Match> matchSnapshot;
+    // Reuse snapshot list to avoid allocation
+    matchSnapshot.clear();
     synchronized (matches) {
-      matchSnapshot = new HashSet<>(matches);
+      matchSnapshot.addAll(matches);
     }
-
-    // Collect matches to remove to avoid ConcurrentModificationException
-    final Set<Match> matchesToRemove = new HashSet<>();
 
     for (final Match m : matchSnapshot) {
       m.setInactive();
@@ -260,12 +262,8 @@ public final class MatchSetImpl implements MatchSet {
           m.abandon(currentChar);
         }
       }
-      matchesToRemove.add(m);
-    }
-
-    // Remove matches after iteration is complete
-    synchronized (matches) {
-      for (final Match m : matchesToRemove) {
+      // Remove directly instead of building intermediate set
+      synchronized (matches) {
         removeMatch(m);
       }
     }
@@ -278,14 +276,11 @@ public final class MatchSetImpl implements MatchSet {
     // got a current  node, so we'll se what we can do to progress
     // the matches we've got.
 
-    // Create snapshot to avoid ConcurrentModificationException
-    final Set<Match> matchSnapshot;
+    // Reuse snapshot list to avoid allocation
+    matchSnapshot.clear();
     synchronized (matches) {
-      matchSnapshot = new HashSet<>(matches);
+      matchSnapshot.addAll(matches);
     }
-
-    // Collect matches to remove to avoid ConcurrentModificationException
-    final Set<Match> matchesToRemove = new HashSet<>();
 
     for (final Match m : matchSnapshot) {
 
@@ -310,14 +305,10 @@ public final class MatchSetImpl implements MatchSet {
           m.abandon(currentChar);
         }
 
-        matchesToRemove.add(m);
-      }
-    }
-
-    // Remove matches after iteration is complete
-    synchronized (matches) {
-      for (final Match m : matchesToRemove) {
-        removeMatch(m);
+        // Remove directly instead of building intermediate set
+        synchronized (matches) {
+          removeMatch(m);
+        }
       }
     }
   }
@@ -366,26 +357,19 @@ public final class MatchSetImpl implements MatchSet {
     // Check if there are any regexps for which matches must fail
     // for this node, and then fail them.
     if (currentNode.failsSomeRegexps()) {
-      // Create snapshot to avoid ConcurrentModificationException
-      final Set<Match> matchSnapshot;
+      // Reuse snapshot list to avoid allocation
+      matchSnapshot.clear();
       synchronized (matches) {
-        matchSnapshot = new HashSet<>(matches);
+        matchSnapshot.addAll(matches);
       }
-
-      // Collect matches to remove to avoid ConcurrentModificationException
-      final Set<Match> matchesToRemove = new HashSet<>();
 
       for (final Match m : matchSnapshot) {
         if (currentNode.isFailingFor(m.getRegexp())) {
           m.abandon(currentChar);
-          matchesToRemove.add(m);
-        }
-      }
-
-      // Remove matches after iteration is complete
-      synchronized (matches) {
-        for (final Match m : matchesToRemove) {
-          removeMatch(m);
+          // Remove directly instead of building intermediate set
+          synchronized (matches) {
+            removeMatch(m);
+          }
         }
       }
     }
@@ -404,14 +388,14 @@ public final class MatchSetImpl implements MatchSet {
   public void finalCommit(final RunnableMatchesHolder runnableMatches) {
     checkNotNull(runnableMatches, "Target can't be null");
 
-    // Create snapshot to avoid ConcurrentModificationException
-    final Set<Match> matchSnapshot;
+    // Reuse snapshot list to avoid allocation
+    matchSnapshot.clear();
     synchronized (matches) {
-      matchSnapshot = new HashSet<>(matches);
+      matchSnapshot.addAll(matches);
     }
 
-    final Set<Regexp> visitedRegexps = new HashSet<>();
-    final Set<Match> matchesToRemove = new HashSet<>();
+    // Pre-size with reasonable capacity based on expected regexp count
+    final Set<Regexp> visitedRegexps = new HashSet<>(matchSnapshot.size());
 
     for (final Match m : matchSnapshot) {
       if (m.notReadyForCommit()) {
@@ -422,12 +406,8 @@ public final class MatchSetImpl implements MatchSet {
         visitedRegexps.add(r);
         r.commitUndominated(runnableMatches);
       }
-      matchesToRemove.add(m);
-    }
-
-    // Remove matches after iteration is complete
-    synchronized (matches) {
-      for (final Match m : matchesToRemove) {
+      // Remove directly instead of building intermediate set
+      synchronized (matches) {
         removeMatch(m);
       }
     }

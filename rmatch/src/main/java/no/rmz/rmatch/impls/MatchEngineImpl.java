@@ -131,8 +131,8 @@ public final class MatchEngineImpl implements MatchEngine {
       return;
     }
 
-    final List<LiteralHint> hints = new ArrayList<>();
-    patternIdToRegexp = new HashMap<>();
+    final List<LiteralHint> hints = new ArrayList<>(patterns.size());
+    patternIdToRegexp = new HashMap<>(patterns.size());
 
     for (final Map.Entry<Integer, String> entry : patterns.entrySet()) {
       final int patternId = entry.getKey();
@@ -162,7 +162,7 @@ public final class MatchEngineImpl implements MatchEngine {
       final Map<Integer, String> patterns, final Map<Integer, Integer> flags) {
     // Without regexp mappings, prefilter can't map candidates back to regexps
     // This is a limitation of the legacy interface
-    configurePrefilter(patterns, flags, new HashMap<>());
+    configurePrefilter(patterns, flags, new HashMap<>(0));
   }
 
   /**
