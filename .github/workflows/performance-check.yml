@@ -125,22 +125,13 @@ jobs:
           ./scripts/compare_and_comment.sh
           exit_code=$?
           
-          # Set job status based on performance criteria
-          if [ $exit_code -eq 0 ]; then
-            echo "Performance check PASSED"
-            exit 0
-          elif [ $exit_code -eq 1 ]; then
-            echo "Performance check FAILED - regression detected"
-            exit 1
-          elif [ $exit_code -eq 2 ]; then
-            echo "Performance check WARNING - within noise threshold or cross-architecture comparison"
-            # Don't fail the CI job for warnings - these indicate uncertainty rather than confirmed regression
-            echo "Treating WARNING as success to avoid false failures"
-            exit 0
-          else
-            echo "Performance check encountered error"
+          # compare_and_comment.sh now handles exit code conversion internally
+          # It will exit with 0 for both PASS and WARNING cases to avoid spurious CI failures
+          if [ $exit_code -ne 0 ]; then
+            echo "Performance comparison failed"
             exit 1
           fi
+          echo "Performance comparison completed successfully"
       
       - name: Upload performance artifacts
         uses: actions/upload-artifact@v4
