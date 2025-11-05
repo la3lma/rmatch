@@ -35,6 +35,7 @@ public class ProductionWorkloadBench {
   private String corpus;
   private Matcher defaultMatcher;
   private Matcher ahoPrefilterMatcher;
+  private Matcher fastPathMatcher;
 
   @Setup(Level.Trial)
   public void setup() throws RegexpParserException {
@@ -61,6 +62,15 @@ public class ProductionWorkloadBench {
     for (String pattern : patterns) {
       ahoPrefilterMatcher.add(pattern, ahoAction);
     }
+
+    // Setup matcher with FastPath engine
+    System.setProperty("rmatch.prefilter", "aho");
+    System.setProperty("rmatch.engine", "fastpath");
+    fastPathMatcher = MatcherFactory.newMatcher();
+    CounterAction fastPathAction = new CounterAction();
+    for (String pattern : patterns) {
+      fastPathMatcher.add(pattern, fastPathAction);
+    }
   }
 
   @TearDown(Level.Trial)
@@ -70,6 +80,9 @@ public class ProductionWorkloadBench {
     }
     if (ahoPrefilterMatcher != null) {
       ahoPrefilterMatcher.shutdown();
+    }
+    if (fastPathMatcher != null) {
+      fastPathMatcher.shutdown();
     }
   }
 
@@ -157,6 +170,13 @@ public class ProductionWorkloadBench {
   public void matchWithAhoPrefilter(Blackhole bh) {
     StringBuffer buffer = new StringBuffer(corpus);
     ahoPrefilterMatcher.match(buffer);
+    bh.consume(buffer);
+  }
+
+  @Benchmark
+  public void matchWithFastPathEngine(Blackhole bh) {
+    StringBuffer buffer = new StringBuffer(corpus);
+    fastPathMatcher.match(buffer);
     bh.consume(buffer);
   }
 }
