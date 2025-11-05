@@ -144,7 +144,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
   }
 
   private void buildLiteralPrefilter(final Set<Regexp> regexps) {
-    final List<LiteralHint> hints = new ArrayList<>();
+    final List<LiteralHint> hints = new ArrayList<>(regexps.size());
 
     int patternId = 0;
     for (final Regexp regexp : regexps) {
@@ -283,7 +283,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
   private Set<Integer> getLiteralCandidatePositions(final String text) {
     final List<AhoCorasickPrefilter.Candidate> candidates = literalPrefilter.scan(text);
-    final Set<Integer> positions = new HashSet<>();
+    final Set<Integer> positions = new HashSet<>(candidates.size());
 
     for (final AhoCorasickPrefilter.Candidate candidate : candidates) {
       final int startPos = candidate.startIndexForMatch();
@@ -298,7 +298,8 @@ public final class BloomFilterMatchEngine implements MatchEngine {
   private Set<Regexp> bloomFilterRegexps(
       final Set<Regexp> candidates, final String text, final int position) {
     // Use local collection for thread safety - slight allocation cost but necessary
-    final Set<Regexp> results = new HashSet<>();
+    // Pre-size based on expected pass rate (typically 20-50% of candidates)
+    final Set<Regexp> results = new HashSet<>(candidates.size() / 2);
 
     for (final Regexp regexp : candidates) {
       if (bloomFilterTest(regexp, text, position)) {
