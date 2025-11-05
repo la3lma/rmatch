@@ -169,6 +169,37 @@ public final class BaselineManager {
   }
 
   /**
+   * Load baseline results with architecture validation, discarding baselines from unknown
+   * architectures.
+   *
+   * @param baselineDir Directory containing baseline files
+   * @return List of baseline test results, empty if no baseline exists or if baseline architecture
+   *     is unknown
+   */
+  public static List<MatcherBenchmarker.TestRunResult> loadRmatchBaselineWithArchitectureCheck(
+      String baselineDir) {
+    // First check if baseline has unknown architecture
+    EnvironmentInfo baselineEnv = loadBaselineEnvironment(baselineDir, "rmatch");
+    if (baselineEnv != null && "unknown".equals(baselineEnv.getArchitectureId())) {
+      LOG.info(
+          "Discarding baseline from unknown architecture - will establish new baseline from current run");
+      return new ArrayList<>();
+    }
+
+    return loadRmatchBaseline(baselineDir);
+  }
+
+  /**
+   * Load baseline results with architecture validation using default directory.
+   *
+   * @return List of baseline test results, empty if no baseline exists or if baseline architecture
+   *     is unknown
+   */
+  public static List<MatcherBenchmarker.TestRunResult> loadRmatchBaselineWithArchitectureCheck() {
+    return loadRmatchBaselineWithArchitectureCheck(DEFAULT_BASELINE_DIR);
+  }
+
+  /**
    * Load environment information from baseline file.
    *
    * @param baselineDir Directory containing baseline files
