@@ -435,7 +435,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
     // Handle simple cases - for complex regex, return first literal char
     final char first = pattern.charAt(0);
-    
+
     // For now, just return first character - could be enhanced for complex patterns
     return first;
   }
@@ -455,8 +455,8 @@ public final class BloomFilterMatchEngine implements MatchEngine {
   }
 
   /**
-   * Optimized letter or digit check using range comparisons.
-   * Faster than Character.isLetterOrDigit() for ASCII characters which are most common.
+   * Optimized letter or digit check using range comparisons. Faster than
+   * Character.isLetterOrDigit() for ASCII characters which are most common.
    */
   private static boolean isLetterOrDigit(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');

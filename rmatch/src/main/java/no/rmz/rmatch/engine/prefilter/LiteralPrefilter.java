@@ -275,41 +275,40 @@ public final class LiteralPrefilter {
   }
 
   /**
-   * Optimized vowel check using range comparisons instead of indexOf.
-   * Faster than "aeiouAEIOU".indexOf(c) >= 0 for hot path character classification.
+   * Optimized vowel check using range comparisons instead of indexOf. Faster than
+   * "aeiouAEIOU".indexOf(c) >= 0 for hot path character classification.
    */
   private static boolean isVowel(char c) {
-    return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' ||
-           c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U';
+    return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'A' || c == 'E'
+        || c == 'I' || c == 'O' || c == 'U';
   }
 
   /**
-   * Optimized common consonant check using range comparisons.
-   * Replaces expensive "thnrsldcmpfgywbvkjxqzTHNRSLDCMPFGYWBVKJXQZ".indexOf(c) >= 0
+   * Optimized common consonant check using range comparisons. Replaces expensive
+   * "thnrsldcmpfgywbvkjxqzTHNRSLDCMPFGYWBVKJXQZ".indexOf(c) >= 0
    */
   private static boolean isCommonConsonant(char c) {
-    return (c >= 'a' && c <= 'z' && !isVowel(c)) || 
-           (c >= 'A' && c <= 'Z' && !isVowel(c));
+    return (c >= 'a' && c <= 'z' && !isVowel(c)) || (c >= 'A' && c <= 'Z' && !isVowel(c));
   }
 
   /**
-   * Optimized digit check using range comparison instead of Character.isDigit().
-   * Faster for ASCII digits which are most common in regex patterns.
+   * Optimized digit check using range comparison instead of Character.isDigit(). Faster for ASCII
+   * digits which are most common in regex patterns.
    */
   private static boolean isDigit(char c) {
     return c >= '0' && c <= '9';
   }
 
   /**
-   * Optimized punctuation check using direct character comparisons.
-   * Replaces expensive "!@#$%^&*()_+-=[]{}|;':,.<>?/~`".indexOf(c) >= 0
+   * Optimized punctuation check using direct character comparisons. Replaces expensive
+   * "!@#$%^&*()_+-=[]{}|;':,.<>?/~`".indexOf(c) >= 0
    */
   private static boolean isPunctuation(char c) {
-    return c == '!' || c == '@' || c == '#' || c == '$' || c == '%' || c == '^' ||
-           c == '&' || c == '*' || c == '(' || c == ')' || c == '_' || c == '+' ||
-           c == '-' || c == '=' || c == '[' || c == ']' || c == '{' || c == '}' ||
-           c == '|' || c == ';' || c == '\'' || c == ':' || c == ',' || c == '.' ||
-           c == '<' || c == '>' || c == '?' || c == '/' || c == '~' || c == '`';
+    return c == '!' || c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '&'
+        || c == '*' || c == '(' || c == ')' || c == '_' || c == '+' || c == '-' || c == '='
+        || c == '[' || c == ']' || c == '{' || c == '}' || c == '|' || c == ';' || c == '\''
+        || c == ':' || c == ',' || c == '.' || c == '<' || c == '>' || c == '?' || c == '/'
+        || c == '~' || c == '`';
   }
 
   /** Private constructor to prevent instantiation. */
