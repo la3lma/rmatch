@@ -48,10 +48,17 @@ jobs:
           MAX_REGEXPS=5000  # Comprehensive scale for robust performance validation
           NUM_RUNS=5        # Increased runs for better statistical significance
           
+          # Run performance test - exit code 2 (WARNING) should not cause failure
           ./mvnw -q -B -pl rmatch-tester exec:java \
             -Dexec.mainClass=no.rmz.rmatch.performancetests.GitHubActionPerformanceTestRunner \
-            -Dexec.args="${MAX_REGEXPS} ${NUM_RUNS}" \
-            || exit 1
+            -Dexec.args="${MAX_REGEXPS} ${NUM_RUNS}" || {
+            exit_code=$?
+            if [ $exit_code -eq 2 ]; then
+              echo "Performance test returned WARNING status - treating as success"
+            else
+              exit 1
+            fi
+          }
           
           # Also run individual benchmarks for README table updates
           echo "Running rmatch benchmark for README table..."

@@ -87,25 +87,20 @@ public final class GitHubActionPerformanceTestRunner {
       }
       System.out.println("==================================\n");
 
-      System.out.println("DEBUG: About to switch on status: " + status);
       switch (status) {
         case PASS:
           System.out.println("✅ Performance check PASSED");
-          System.out.println("DEBUG: Calling System.exit(0)");
           System.exit(0);
           break;
         case WARNING:
           System.out.println("⚠️ Performance check WARNING");
-          System.out.println("DEBUG: Calling System.exit(2)");
           System.exit(2);
           break;
         case FAIL:
           System.out.println("❌ Performance check FAILED");
-          System.out.println("DEBUG: Calling System.exit(1)");
           System.exit(1);
           break;
         default:
-          System.out.println("DEBUG: Unknown status, calling System.exit(1)");
           System.exit(1);
       }
 
