@@ -117,7 +117,16 @@ parse_memory_stats() {
 # Parse memory data
 parse_memory_stats "$temp_output"
 
-# Generate JSON with memory data
+# Collect system and architecture information
+echo "Collecting system architecture information..." >&2
+system_info_json=""
+if [[ -x "$root_dir/scripts/collect_system_info.sh" ]]; then
+  system_info_json=$("$root_dir/scripts/collect_system_info.sh" 2>/dev/null || echo "{}")
+else
+  system_info_json="{}"
+fi
+
+# Generate JSON with memory data and architecture info
 cat > "$JSON_OUT" <<EOF
 {
   "type": "java_regex",
@@ -125,6 +134,7 @@ cat > "$JSON_OUT" <<EOF
   "git": { "sha": "${sha}", "branch": "${branch}" },
   "java": "${java_ver}",
   "os": { "name": "${os_name}", "release": "${os_rel}" },
+  "architecture": ${system_info_json},
   "args": { "max_regexps": ${MAX_REGEXPS} },
   "duration_ms": ${dur_ms},
   "memory": {

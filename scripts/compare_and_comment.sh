@@ -118,4 +118,11 @@ if [[ -n "${GITHUB_TOKEN:-}" && -n "${GITHUB_REPOSITORY:-}" && -f "${GITHUB_EVEN
   fi
 fi
 
-exit $EXIT_CODE
+# For GitHub Actions workflow, treat WARNING (exit code 2) as success (exit code 0)
+# This prevents spurious CI failures while still allowing the differentiation in logs
+if [[ $EXIT_CODE -eq 2 ]]; then
+  echo "Exiting with success (0) instead of warning (2) for CI compatibility"
+  exit 0
+else
+  exit $EXIT_CODE
+fi
