@@ -4,7 +4,7 @@
 # G1 with Compact Object Headers provides 5-12% performance improvement
 JAVA_GC_OPTS := -XX:+UseCompactObjectHeaders
 
-.PHONY: build test ci bench-micro bench-macro bench-java charts profile fmt spotless spotbugs bench-gc-experiments bench-gc-experiments-fast validate-gc
+.PHONY: build test ci bench-micro bench-macro bench-java charts profile fmt spotless spotbugs bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch
 
 build:
 	mvn -q -B spotless:apply
@@ -63,3 +63,8 @@ bench-gc-experiments-fast:
 validate-gc:
 	@echo "Validating GC configurations for Java 25..."
 	scripts/validate_gc_configs.sh
+
+bench-dispatch:
+	@echo "Running dispatch optimization benchmarks..."
+	@echo "This tests modern Java language features: pattern matching, switch expressions, etc."
+	JMH_FORKS=3 JMH_WARMUP_IT=5 JMH_IT=10 scripts/run_dispatch_benchmarks.sh

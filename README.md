@@ -85,3 +85,46 @@ See [GC_EXPERIMENTS.md](GC_EXPERIMENTS.md) for:
 
 The experiments help identify optimal GC settings for regex engines with high object churn, following recommendations from the [JDK 25 Performance Improvements](https://inside.java/2025/10/20/jdk-25-performance-improvements/) article.
 
+---
+
+## Dispatch Optimization Experiments
+
+rmatch includes benchmarks to test modern Java language features for dispatch pattern optimization on Java 25.
+
+### Quick Start
+
+Run dispatch optimization benchmarks:
+```bash
+make bench-dispatch
+```
+
+Or run the script directly:
+```bash
+scripts/run_dispatch_benchmarks.sh
+```
+
+### What's Tested
+
+The benchmarks evaluate three optimization strategies:
+
+1. **Pattern Matching for instanceof** - Java 16+ pattern matching vs traditional cast
+2. **Switch Expressions** - Enhanced switch with arrow syntax vs if-else chains  
+3. **Enum Dispatch** - Switch expressions vs if-else for enum handling
+
+### Key Findings
+
+Based on empirical testing:
+- ✅ **Enum switch expressions**: 13.6% faster than if-else chains - RECOMMENDED
+- ❌ **Pattern matching instanceof**: No measurable benefit (0.08%)
+- ✅ **If-else for char ranges**: 19.5% faster than switch - keep current approach
+
+### Documentation
+
+See [DISPATCH_OPTIMIZATION_RESULTS.md](DISPATCH_OPTIMIZATION_RESULTS.md) for:
+- Detailed benchmark results
+- Performance analysis
+- Specific recommendations for code changes
+- Examples of patterns to refactor
+
+These experiments follow the same methodology as GC experiments to provide data-driven guidance on whether modern language features improve performance.
+
