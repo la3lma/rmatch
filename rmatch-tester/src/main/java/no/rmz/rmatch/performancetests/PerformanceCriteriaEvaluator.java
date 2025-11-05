@@ -219,13 +219,13 @@ public final class PerformanceCriteriaEvaluator {
           String.format(
               "Performance regression detected: time %.1f%%, memory %.1f%%",
               timeImprovementPercent * 100, memoryImprovementPercent * 100);
-      
+
       // Only fail if statistically significant, otherwise treat as warning
       Status status = statisticallySignificant ? Status.FAIL : Status.WARNING;
       if (!statisticallySignificant) {
         explanation += " (Low statistical significance - treating as WARNING rather than FAIL)";
       }
-      
+
       return new PerformanceResult(
           timeImprovementPercent,
           memoryImprovementPercent,
@@ -375,14 +375,17 @@ public final class PerformanceCriteriaEvaluator {
       } else {
         explanationBuilder.append(
             "⚠️ WARNING: Normalization data missing, comparison may be inaccurate. Treating as WARNING to avoid false failures. ");
-        // If we can't normalize properly across architectures, treat any regression as WARNING rather than FAIL
+        // If we can't normalize properly across architectures, treat any regression as WARNING
+        // rather than FAIL
         if (baseResult.getStatus() == Status.FAIL) {
           return new PerformanceResult(
               timeImprovementPercent,
               memoryImprovementPercent,
               Status.WARNING,
-              explanationBuilder.toString() + " " + baseResult.getExplanation() + 
-              " Cross-architecture comparison without normalization - downgrading FAIL to WARNING.",
+              explanationBuilder.toString()
+                  + " "
+                  + baseResult.getExplanation()
+                  + " Cross-architecture comparison without normalization - downgrading FAIL to WARNING.",
               statisticallySignificant);
         }
       }
