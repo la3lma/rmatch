@@ -369,13 +369,13 @@ public final class SystemInfo {
       StringBuilder errorOutput = new StringBuilder();
       // Read stdout and stderr fully to avoid deadlocks
       try (BufferedReader stdoutReader =
-               new BufferedReader(
-                   new InputStreamReader(
-                       process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
-           BufferedReader stderrReader =
-               new BufferedReader(
-                   new InputStreamReader(
-                       process.getErrorStream(), java.nio.charset.StandardCharsets.UTF_8))) {
+              new BufferedReader(
+                  new InputStreamReader(
+                      process.getInputStream(), java.nio.charset.StandardCharsets.UTF_8));
+          BufferedReader stderrReader =
+              new BufferedReader(
+                  new InputStreamReader(
+                      process.getErrorStream(), java.nio.charset.StandardCharsets.UTF_8))) {
         String line;
         while ((line = stdoutReader.readLine()) != null) {
           output.append(line).append("\n");
@@ -398,13 +398,16 @@ public final class SystemInfo {
       if (process != null) {
         try {
           process.getInputStream().close();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         try {
           process.getErrorStream().close();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         try {
           process.getOutputStream().close();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
       }
     }
   }
