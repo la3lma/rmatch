@@ -150,9 +150,22 @@ public final class GitHubActionPerformanceTest {
         }
       }
 
-      // Evaluate performance against criteria (compare rmatch current vs rmatch baseline)
-      PerformanceCriteriaEvaluator.PerformanceResult performanceResult =
-          PerformanceCriteriaEvaluator.evaluate(rmatchResults, baselineRmatchResults);
+      // Get current and baseline environment information
+      BaselineManager.EnvironmentInfo currentEnv = BaselineManager.getCurrentEnvironment();
+      BaselineManager.EnvironmentInfo baselineEnv =
+          BaselineManager.loadBaselineEnvironment(BaselineManager.DEFAULT_BASELINE_DIR, "rmatch");
+
+      // Evaluate performance with architecture awareness
+      PerformanceCriteriaEvaluator.PerformanceResult performanceResult;
+      if (baselineEnv != null) {
+        performanceResult =
+            PerformanceCriteriaEvaluator.evaluateWithArchitecture(
+                rmatchResults, baselineRmatchResults, currentEnv, baselineEnv);
+      } else {
+        // Fall back to regular evaluation if baseline environment info not available
+        performanceResult =
+            PerformanceCriteriaEvaluator.evaluate(rmatchResults, baselineRmatchResults);
+      }
 
       return new ComparisonResult(
           rmatchResults,

@@ -212,17 +212,24 @@ public final class PerformanceCriteriaEvaluator {
       double timeImprovementPercent,
       double memoryImprovementPercent,
       boolean statisticallySignificant) {
-    // Check for regressions first
+    // Check for regressions first, but only fail if we have high confidence in the data
     if (timeImprovementPercent < -REGRESSION_THRESHOLD
         || memoryImprovementPercent < -REGRESSION_THRESHOLD) {
       String explanation =
           String.format(
               "Performance regression detected: time %.1f%%, memory %.1f%%",
               timeImprovementPercent * 100, memoryImprovementPercent * 100);
+
+      // Only fail if statistically significant, otherwise treat as warning
+      Status status = statisticallySignificant ? Status.FAIL : Status.WARNING;
+      if (!statisticallySignificant) {
+        explanation += " (Low statistical significance - treating as WARNING rather than FAIL)";
+      }
+
       return new PerformanceResult(
           timeImprovementPercent,
           memoryImprovementPercent,
-          Status.FAIL,
+          status,
           explanation,
           statisticallySignificant);
     }
@@ -267,6 +274,135 @@ public final class PerformanceCriteriaEvaluator {
         memoryImprovementPercent,
         Status.PASS,
         explanation,
+        statisticallySignificant);
+  }
+
+  /**
+   * Evaluate performance results with architecture-aware comparison.
+   *
+   * <p>When baseline and current environments have different architectures, applies normalization
+   * to enable fair comparison. Provides warnings when comparing across different architectures.
+   *
+   * @param currentResults List of current test run results (minimum 3 required)
+   * @param baselineResults List of baseline test run results
+   * @param currentEnv Current environment information
+   * @param baselineEnv Baseline environment information
+   * @return PerformanceResult with pass/fail determination and architecture notes
+   */
+  public static PerformanceResult evaluateWithArchitecture(
+      List<? extends TestRunResult> currentResults,
+      List<? extends TestRunResult> baselineResults,
+      BaselineManager.EnvironmentInfo currentEnv,
+      BaselineManager.EnvironmentInfo baselineEnv) {
+
+    checkNotNull(currentResults, "Current results cannot be null");
+    checkNotNull(baselineResults, "Baseline results cannot be null");
+    checkNotNull(currentEnv, "Current environment cannot be null");
+
+    if (currentResults.size() < 3) {
+      return new PerformanceResult(
+          0,
+          0,
+          Status.FAIL,
+          "Insufficient runs: need minimum 3, got " + currentResults.size(),
+          false);
+    }
+
+    if (baselineResults.isEmpty() || baselineEnv == null) {
+      return new PerformanceResult(
+          0,
+          0,
+          Status.PASS,
+          "No baseline data available - this run establishes the initial baseline for architecture: "
+              + currentEnv.getArchitectureId(),
+          false);
+    }
+
+    // Check if architectures match
+    boolean sameArchitecture = currentEnv.isSameArchitecture(baselineEnv);
+
+    // Calculate statistics for current and baseline runs
+    RunStatistics currentTimeStats = calculateTimeStatistics(currentResults);
+    RunStatistics currentMemoryStats = calculateMemoryStatistics(currentResults);
+    RunStatistics baselineTimeStats = calculateTimeStatistics(baselineResults);
+    RunStatistics baselineMemoryStats = calculateMemoryStatistics(baselineResults);
+
+    // Apply normalization if architectures differ and we have normalization scores
+    double normalizedCurrentTime = currentTimeStats.getMean();
+    double normalizedBaselineTime = baselineTimeStats.getMean();
+
+    if (!sameArchitecture
+        && currentEnv.getNormalizationScore() > 0
+        && baselineEnv.getNormalizationScore() > 0) {
+
+      // Normalize times based on relative CPU performance
+      // A higher normalization score means faster CPU, so we adjust accordingly
+      double normalizationFactor =
+          baselineEnv.getNormalizationScore() / currentEnv.getNormalizationScore();
+      normalizedCurrentTime = currentTimeStats.getMean() * normalizationFactor;
+
+      // Note: We don't normalize memory as it's less architecture-dependent
+    }
+
+    // Calculate improvement percentages (negative means regression)
+    double timeImprovementPercent =
+        (normalizedBaselineTime - normalizedCurrentTime) / normalizedBaselineTime;
+    double memoryImprovementPercent =
+        (baselineMemoryStats.getMean() - currentMemoryStats.getMean())
+            / baselineMemoryStats.getMean();
+
+    // Check for statistical significance
+    boolean statisticallySignificant =
+        isStatisticallySignificant(currentTimeStats, baselineTimeStats);
+
+    // Get base performance result first
+    PerformanceResult baseResult =
+        determineStatus(timeImprovementPercent, memoryImprovementPercent, statisticallySignificant);
+
+    // Build explanation with architecture information
+    StringBuilder explanationBuilder = new StringBuilder();
+
+    if (!sameArchitecture) {
+      explanationBuilder.append("⚠️ Cross-architecture comparison: ");
+      explanationBuilder.append("Baseline (").append(baselineEnv.getArchitectureId()).append(") ");
+      explanationBuilder
+          .append("vs Current (")
+          .append(currentEnv.getArchitectureId())
+          .append("). ");
+
+      if (currentEnv.getNormalizationScore() > 0 && baselineEnv.getNormalizationScore() > 0) {
+        explanationBuilder.append("Normalization applied. ");
+      } else {
+        explanationBuilder.append(
+            "⚠️ WARNING: Normalization data missing, comparison may be inaccurate. Treating as WARNING to avoid false failures. ");
+        // If we can't normalize properly across architectures, treat any regression as WARNING
+        // rather than FAIL
+        if (baseResult.getStatus() == Status.FAIL) {
+          return new PerformanceResult(
+              timeImprovementPercent,
+              memoryImprovementPercent,
+              Status.WARNING,
+              explanationBuilder.toString()
+                  + " "
+                  + baseResult.getExplanation()
+                  + " Cross-architecture comparison without normalization - downgrading FAIL to WARNING.",
+              statisticallySignificant);
+        }
+      }
+    }
+
+    explanationBuilder.append(baseResult.getExplanation());
+
+    if (!sameArchitecture) {
+      explanationBuilder.append(
+          " Note: For most accurate comparison, run on same architecture as baseline.");
+    }
+
+    return new PerformanceResult(
+        timeImprovementPercent,
+        memoryImprovementPercent,
+        baseResult.getStatus(),
+        explanationBuilder.toString(),
         statisticallySignificant);
   }
 }

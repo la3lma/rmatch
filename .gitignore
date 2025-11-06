@@ -12,6 +12,7 @@ measurements.sqlite
 # Performance test artifacts (usually generated during CI)
 benchmarks/results/performance-check-*.json
 benchmarks/results/pr-performance-summary.md
+benchmarks/results/gc-experiments/*/
 **/target/
 scripts/__pycache__/
 

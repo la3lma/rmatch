@@ -22,8 +22,10 @@ public final class GitHubActionPerformanceTestRunner {
       LOG.info("Starting GitHub Action Performance Test");
       LOG.info("Max regexps: " + maxRegexps + ", Number of runs: " + numRuns);
 
-      // Load baseline results
-      List<MatcherBenchmarker.TestRunResult> baselineResults = BaselineManager.loadRmatchBaseline();
+      // Load baseline results with architecture check - discards baselines from unknown
+      // architectures
+      List<MatcherBenchmarker.TestRunResult> baselineResults =
+          BaselineManager.loadRmatchBaselineWithArchitectureCheck();
 
       // Run performance comparison
       GitHubActionPerformanceTest.ComparisonResult result =
@@ -41,15 +43,38 @@ public final class GitHubActionPerformanceTestRunner {
       generatePRSummary(result);
 
       // Update baseline if this is a merge to main (detected via environment) OR if no baseline
-      // exists (bootstrap)
+      // exists (bootstrap) OR if baseline was discarded due to unknown architecture
       String gitRef = System.getenv("GITHUB_REF");
+      LOG.info("GITHUB_REF environment variable: " + gitRef);
       boolean isMainBranch =
           gitRef != null && (gitRef.endsWith("/main") || gitRef.endsWith("/master"));
       boolean isBootstrapCase = baselineResults.isEmpty();
 
-      if (isMainBranch || isBootstrapCase) {
-        if (isBootstrapCase) {
+      LOG.info(
+          "Baseline update conditions - isMainBranch: "
+              + isMainBranch
+              + ", isBootstrapCase: "
+              + isBootstrapCase
+              + ", baselineResultsSize: "
+              + baselineResults.size());
+
+      // Check if baseline was discarded due to unknown architecture
+      boolean wasUnknownArchitectureBaseline = false;
+      if (BaselineManager.baselineExists(BaselineManager.DEFAULT_BASELINE_DIR, "rmatch")) {
+        BaselineManager.EnvironmentInfo existingBaselineEnv =
+            BaselineManager.loadBaselineEnvironment(BaselineManager.DEFAULT_BASELINE_DIR, "rmatch");
+        wasUnknownArchitectureBaseline =
+            existingBaselineEnv != null
+                && "unknown".equals(existingBaselineEnv.getArchitectureId())
+                && baselineResults.isEmpty();
+      }
+
+      if (isMainBranch || isBootstrapCase || wasUnknownArchitectureBaseline) {
+        if (isBootstrapCase && !wasUnknownArchitectureBaseline) {
           LOG.info("No baseline exists - establishing initial baseline from current results");
+        } else if (wasUnknownArchitectureBaseline) {
+          LOG.info(
+              "Existing baseline has unknown architecture - establishing new baseline from current results");
         } else {
           LOG.info("Updating baseline for main branch");
         }
@@ -195,6 +220,48 @@ public final class GitHubActionPerformanceTestRunner {
           .append(" Performance Comparison\n\n");
 
       markdown.append("**Result**: ").append(perfResult.getExplanation()).append("\n\n");
+
+      // Add architecture information section
+      markdown.append("### 💻 Test Environment\n\n");
+      markdown.append("| Attribute | Value |\n");
+      markdown.append("|-----------|-------|\n");
+
+      BaselineManager.EnvironmentInfo currentEnv = BaselineManager.getCurrentEnvironment();
+      markdown
+          .append("| **Architecture** | `")
+          .append(currentEnv.getArchitectureId())
+          .append("` |\n");
+
+      if (currentEnv.getArchitectureId() != null
+          && !currentEnv.getArchitectureId().equals("unknown")) {
+        markdown
+            .append("| **Normalization Score** | ")
+            .append(String.format("%.0f ops/ms", currentEnv.getNormalizationScore()))
+            .append(" |\n");
+      }
+
+      markdown.append("| **Java Version** | ").append(currentEnv.getJavaVersion()).append(" |\n");
+      markdown
+          .append("| **OS** | ")
+          .append(currentEnv.getOsName())
+          .append(" ")
+          .append(currentEnv.getOsVersion())
+          .append(" |\n");
+      markdown
+          .append("| **Test Runs** | ")
+          .append(result.getRmatchResults().size())
+          .append(" iterations |\n");
+
+      // Check if baseline has different architecture
+      BaselineManager.EnvironmentInfo baselineEnv =
+          BaselineManager.loadBaselineEnvironment(BaselineManager.DEFAULT_BASELINE_DIR, "rmatch");
+      if (baselineEnv != null && !currentEnv.isSameArchitecture(baselineEnv)) {
+        markdown.append("\n> ⚠️ **Architecture Mismatch**: Baseline was run on `");
+        markdown.append(baselineEnv.getArchitectureId());
+        markdown.append("`. Performance normalization applied for fair comparison.\n");
+      }
+
+      markdown.append("\n");
 
       // Performance metrics table for rmatch
       markdown.append("### 📊 rmatch Performance Metrics\n\n");
@@ -353,17 +420,6 @@ public final class GitHubActionPerformanceTestRunner {
       } else {
         markdown.append("| No comparative data available | - | - |\n");
       }
-
-      markdown.append("\n### 🔬 Test Configuration\n");
-      markdown
-          .append("- **Runs**: ")
-          .append(result.getRmatchResults().size())
-          .append(" iterations\n");
-      markdown.append("- **Environment**: GitHub Actions (ubuntu-latest)\n");
-      markdown
-          .append("- **Java Version**: ")
-          .append(System.getProperty("java.version"))
-          .append("\n");
 
       if (result.getBaselineRmatchResults().isEmpty()) {
         markdown.append(

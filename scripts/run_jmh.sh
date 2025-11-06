@@ -18,16 +18,9 @@ cd "$root_dir"
 MVN="./mvnw"; [[ -x "$MVN" ]] || MVN="mvn"
 
 mkdir -p benchmarks/results
-
-# Generate a run identifier if not provided
-if [[ -z "${JMH_RUN_ID:-}" ]]; then
-  JMH_RUN_ID=$(date -u +"%Y%m%dT%H%M%SZ")
-fi
-
-# Generate individual test timestamp for unique filenames within the same run
 stamp=$(date -u +"%Y%m%dT%H%M%SZ")
-JSON_OUT="benchmarks/results/jmh-${JMH_RUN_ID}-${stamp}.json"
-TXT_OUT="benchmarks/results/jmh-${JMH_RUN_ID}-${stamp}.txt"
+JSON_OUT="benchmarks/results/jmh-${stamp}.json"
+TXT_OUT="benchmarks/results/jmh-${stamp}.txt"
 
 # Build shaded jar for the JMH module  
 echo "Building JMH module..." >&2
@@ -173,7 +166,6 @@ args=( -rf json -rff "$JSON_OUT" -o "$TXT_OUT" )
 include="${JMH_INCLUDE:-no\.rmz\.rmatch\.benchmarks\..*}"
 
 # Try shaded jar first
-echo "Try shaded jar first"
 set +e
 java -jar "$JAR" "${args[@]}" "$include" ${*:-}
 status=$?
@@ -237,9 +229,30 @@ if [[ $status -ne 0 ]]; then
 fi
 
 # Emit friendly pointer
-echo "JMH RUN ID: $JMH_RUN_ID"
 echo "JMH JSON: $JSON_OUT"
 echo "JMH TXT : $TXT_OUT"
 
-# Write run ID to a temporary file for other scripts to read
-echo "$JMH_RUN_ID" > /tmp/jmh_current_run_id
+# Augment JMH JSON with architecture information
+echo "Adding architecture information to JMH results..." >&2
+if [[ -f "$JSON_OUT" ]] && [[ -x "$root_dir/scripts/collect_system_info.sh" ]]; then
+  system_info_json=$("$root_dir/scripts/collect_system_info.sh" 2>/dev/null || echo "{}")
+  
+  # Create augmented JSON with architecture info
+  temp_json=$(mktemp)
+  if command -v jq >/dev/null 2>&1; then
+    # Use jq if available - wrap JMH array in object with architecture info
+    jq --argjson arch "$system_info_json" '{architecture: $arch, benchmarks: .}' "$JSON_OUT" > "$temp_json"
+    mv "$temp_json" "$JSON_OUT"
+  else
+    # Fallback: manually add architecture field
+    # Read the original JSON (it's an array)
+    cat > "$temp_json" <<EOJSON
+{
+  "architecture": ${system_info_json},
+  "benchmarks": $(cat "$JSON_OUT")
+}
+EOJSON
+    mv "$temp_json" "$JSON_OUT"
+  fi
+  echo "Architecture information added to JMH results" >&2
+fi

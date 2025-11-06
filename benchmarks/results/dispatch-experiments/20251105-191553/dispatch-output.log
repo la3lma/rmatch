@@ -1,0 +1,245 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.openjdk.jmh.util.Utils (file:/home/runner/work/rmatch/rmatch/benchmarks/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar)
+WARNING: Please consider reporting this to the maintainers of class org.openjdk.jmh.util.Utils
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+# JMH version: 1.37
+# VM version: JDK 25.0.1, OpenJDK 64-Bit Server VM, 25.0.1+8-LTS
+# VM invoker: /usr/lib/jvm/temurin-25-jdk-amd64/bin/java
+# VM options: -Xms2G -Xmx2G -XX:+UseCompactObjectHeaders
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: no.rmz.rmatch.benchmarks.DispatchOptimizationBench.enumIfElseDispatch
+
+# Run progress: 0.00% complete, ETA 00:00:35
+# Fork: 1 of 1
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.openjdk.jmh.util.Utils (file:/home/runner/work/rmatch/rmatch/benchmarks/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar)
+WARNING: Please consider reporting this to the maintainers of class org.openjdk.jmh.util.Utils
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+# Warmup Iteration   1: 1106.214 ns/op
+# Warmup Iteration   2: 1088.954 ns/op
+Iteration   1: 1087.583 ns/op
+Iteration   2: 1152.483 ns/op
+Iteration   3: 1090.517 ns/op
+
+
+Result "no.rmz.rmatch.benchmarks.DispatchOptimizationBench.enumIfElseDispatch":
+  1110.194 ±(99.9%) 668.675 ns/op [Average]
+  (min, avg, max) = (1087.583, 1110.194, 1152.483), stdev = 36.652
+  CI (99.9%): [441.519, 1778.869] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 25.0.1, OpenJDK 64-Bit Server VM, 25.0.1+8-LTS
+# VM invoker: /usr/lib/jvm/temurin-25-jdk-amd64/bin/java
+# VM options: -Xms2G -Xmx2G -XX:+UseCompactObjectHeaders
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: no.rmz.rmatch.benchmarks.DispatchOptimizationBench.enumSwitchDispatch
+
+# Run progress: 14.29% complete, ETA 00:00:34
+# Fork: 1 of 1
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.openjdk.jmh.util.Utils (file:/home/runner/work/rmatch/rmatch/benchmarks/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar)
+WARNING: Please consider reporting this to the maintainers of class org.openjdk.jmh.util.Utils
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+# Warmup Iteration   1: 1007.090 ns/op
+# Warmup Iteration   2: 912.938 ns/op
+Iteration   1: 962.593 ns/op
+Iteration   2: 958.070 ns/op
+Iteration   3: 957.661 ns/op
+
+
+Result "no.rmz.rmatch.benchmarks.DispatchOptimizationBench.enumSwitchDispatch":
+  959.441 ±(99.9%) 49.931 ns/op [Average]
+  (min, avg, max) = (957.661, 959.441, 962.593), stdev = 2.737
+  CI (99.9%): [909.510, 1009.372] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 25.0.1, OpenJDK 64-Bit Server VM, 25.0.1+8-LTS
+# VM invoker: /usr/lib/jvm/temurin-25-jdk-amd64/bin/java
+# VM options: -Xms2G -Xmx2G -XX:+UseCompactObjectHeaders
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: no.rmz.rmatch.benchmarks.DispatchOptimizationBench.ifElseCharClassification
+
+# Run progress: 28.57% complete, ETA 00:00:27
+# Fork: 1 of 1
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.openjdk.jmh.util.Utils (file:/home/runner/work/rmatch/rmatch/benchmarks/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar)
+WARNING: Please consider reporting this to the maintainers of class org.openjdk.jmh.util.Utils
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+# Warmup Iteration   1: 1195.707 ns/op
+# Warmup Iteration   2: 1652.285 ns/op
+Iteration   1: 1121.814 ns/op
+Iteration   2: 1124.856 ns/op
+Iteration   3: 1123.222 ns/op
+
+
+Result "no.rmz.rmatch.benchmarks.DispatchOptimizationBench.ifElseCharClassification":
+  1123.297 ±(99.9%) 27.770 ns/op [Average]
+  (min, avg, max) = (1121.814, 1123.297, 1124.856), stdev = 1.522
+  CI (99.9%): [1095.527, 1151.068] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 25.0.1, OpenJDK 64-Bit Server VM, 25.0.1+8-LTS
+# VM invoker: /usr/lib/jvm/temurin-25-jdk-amd64/bin/java
+# VM options: -Xms2G -Xmx2G -XX:+UseCompactObjectHeaders
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: no.rmz.rmatch.benchmarks.DispatchOptimizationBench.patternMatchingInstanceofDispatch
+
+# Run progress: 42.86% complete, ETA 00:00:21
+# Fork: 1 of 1
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.openjdk.jmh.util.Utils (file:/home/runner/work/rmatch/rmatch/benchmarks/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar)
+WARNING: Please consider reporting this to the maintainers of class org.openjdk.jmh.util.Utils
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+# Warmup Iteration   1: 2987.563 ns/op
+# Warmup Iteration   2: 2536.520 ns/op
+Iteration   1: 2510.434 ns/op
+Iteration   2: 2488.770 ns/op
+Iteration   3: 2489.281 ns/op
+
+
+Result "no.rmz.rmatch.benchmarks.DispatchOptimizationBench.patternMatchingInstanceofDispatch":
+  2496.161 ±(99.9%) 225.543 ns/op [Average]
+  (min, avg, max) = (2488.770, 2496.161, 2510.434), stdev = 12.363
+  CI (99.9%): [2270.619, 2721.704] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 25.0.1, OpenJDK 64-Bit Server VM, 25.0.1+8-LTS
+# VM invoker: /usr/lib/jvm/temurin-25-jdk-amd64/bin/java
+# VM options: -Xms2G -Xmx2G -XX:+UseCompactObjectHeaders
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: no.rmz.rmatch.benchmarks.DispatchOptimizationBench.simpleSwitchCharClassification
+
+# Run progress: 57.14% complete, ETA 00:00:16
+# Fork: 1 of 1
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.openjdk.jmh.util.Utils (file:/home/runner/work/rmatch/rmatch/benchmarks/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar)
+WARNING: Please consider reporting this to the maintainers of class org.openjdk.jmh.util.Utils
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+# Warmup Iteration   1: 1540.002 ns/op
+# Warmup Iteration   2: 1131.689 ns/op
+Iteration   1: 1392.201 ns/op
+Iteration   2: 1397.903 ns/op
+Iteration   3: 1394.765 ns/op
+
+
+Result "no.rmz.rmatch.benchmarks.DispatchOptimizationBench.simpleSwitchCharClassification":
+  1394.956 ±(99.9%) 52.094 ns/op [Average]
+  (min, avg, max) = (1392.201, 1394.956, 1397.903), stdev = 2.855
+  CI (99.9%): [1342.863, 1447.050] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 25.0.1, OpenJDK 64-Bit Server VM, 25.0.1+8-LTS
+# VM invoker: /usr/lib/jvm/temurin-25-jdk-amd64/bin/java
+# VM options: -Xms2G -Xmx2G -XX:+UseCompactObjectHeaders
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: no.rmz.rmatch.benchmarks.DispatchOptimizationBench.switchCharClassification
+
+# Run progress: 71.43% complete, ETA 00:00:10
+# Fork: 1 of 1
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.openjdk.jmh.util.Utils (file:/home/runner/work/rmatch/rmatch/benchmarks/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar)
+WARNING: Please consider reporting this to the maintainers of class org.openjdk.jmh.util.Utils
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+# Warmup Iteration   1: 1553.249 ns/op
+# Warmup Iteration   2: 1137.763 ns/op
+Iteration   1: 1395.099 ns/op
+Iteration   2: 1394.823 ns/op
+Iteration   3: 1401.077 ns/op
+
+
+Result "no.rmz.rmatch.benchmarks.DispatchOptimizationBench.switchCharClassification":
+  1397.000 ±(99.9%) 64.466 ns/op [Average]
+  (min, avg, max) = (1394.823, 1397.000, 1401.077), stdev = 3.534
+  CI (99.9%): [1332.534, 1461.466] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 25.0.1, OpenJDK 64-Bit Server VM, 25.0.1+8-LTS
+# VM invoker: /usr/lib/jvm/temurin-25-jdk-amd64/bin/java
+# VM options: -Xms2G -Xmx2G -XX:+UseCompactObjectHeaders
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 3 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: no.rmz.rmatch.benchmarks.DispatchOptimizationBench.traditionalInstanceofDispatch
+
+# Run progress: 85.71% complete, ETA 00:00:05
+# Fork: 1 of 1
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.openjdk.jmh.util.Utils (file:/home/runner/work/rmatch/rmatch/benchmarks/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar)
+WARNING: Please consider reporting this to the maintainers of class org.openjdk.jmh.util.Utils
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+# Warmup Iteration   1: 2943.885 ns/op
+# Warmup Iteration   2: 2578.227 ns/op
+Iteration   1: 2500.697 ns/op
+Iteration   2: 2507.072 ns/op
+Iteration   3: 2486.958 ns/op
+
+
+Result "no.rmz.rmatch.benchmarks.DispatchOptimizationBench.traditionalInstanceofDispatch":
+  2498.242 ±(99.9%) 187.529 ns/op [Average]
+  (min, avg, max) = (2486.958, 2498.242, 2507.072), stdev = 10.279
+  CI (99.9%): [2310.713, 2685.772] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:00:37
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise
+extra caution when trusting the results, look into the generated code to check the benchmark still
+works, and factor in a small probability of new VM bugs. Additionally, while comparisons between
+different JVMs are already problematic, the performance difference caused by different Blackhole
+modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.
+
+Benchmark                                                    Mode  Cnt     Score     Error  Units
+DispatchOptimizationBench.enumIfElseDispatch                 avgt    3  1110.194 ± 668.675  ns/op
+DispatchOptimizationBench.enumSwitchDispatch                 avgt    3   959.441 ±  49.931  ns/op
+DispatchOptimizationBench.ifElseCharClassification           avgt    3  1123.297 ±  27.770  ns/op
+DispatchOptimizationBench.patternMatchingInstanceofDispatch  avgt    3  2496.161 ± 225.543  ns/op
+DispatchOptimizationBench.simpleSwitchCharClassification     avgt    3  1394.956 ±  52.094  ns/op
+DispatchOptimizationBench.switchCharClassification           avgt    3  1397.000 ±  64.466  ns/op
+DispatchOptimizationBench.traditionalInstanceofDispatch      avgt    3  2498.242 ± 187.529  ns/op
+
+Benchmark result is saved to /home/runner/work/rmatch/rmatch/benchmarks/results/dispatch-experiments/20251105-191553/dispatch-results.json

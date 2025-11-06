@@ -1,6 +1,10 @@
  SHELL := /bin/bash
 
- .PHONY: build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env
+# Optimal GC settings based on experimentation (see GC_OPTIMIZATION_RESULTS.md)
+# G1 with Compact Object Headers provides 5-12% performance improvement
+JAVA_GC_OPTS := -XX:+UseCompactObjectHeaders
+
+.PHONY: build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch
 
 build:
 	mvn -q -B spotless:apply
@@ -11,7 +15,8 @@ test:
 	mvn -q -B verify
 
 bench-micro:
-	JMH_FORKS=1 \
+	MAVEN_OPTS="$(JAVA_GC_OPTS)" \
+    JMH_FORKS=1 \
     JMH_WARMUP_IT=1 \
     JMH_IT=2 \
     JMH_WARMUP=1s \
@@ -22,10 +27,10 @@ bench-micro:
     # scripts/run_jmh.sh
 
 bench-macro:
-	MAX_REGEXPS=10000 scripts/run_macro_with_memory.sh
+	MAVEN_OPTS="$(JAVA_GC_OPTS)" MAX_REGEXPS=10000 scripts/run_macro_with_memory.sh
 
 bench-java:
-	MAX_REGEXPS=10000 scripts/run_java_benchmark_with_memory.sh
+	MAVEN_OPTS="$(JAVA_GC_OPTS)" MAX_REGEXPS=10000 scripts/run_java_benchmark_with_memory.sh
 
 bench-suite:
 	@echo "Running comprehensive JMH benchmark suite..."
@@ -69,6 +74,7 @@ spotless:
 spotbugs:
 	mvn -q -B spotbugs:check
 
+<<<<<<< HEAD
 
 pre-test-run:
 	rm -rf ~/.m2/repository/no/rmz/rmatch
@@ -111,3 +117,23 @@ visualize-benchmarks: setup-visualization-env
 	@mkdir -p performance-graphs
 	@scripts/run_visualization.sh
 	@echo "Visualizations saved to performance-graphs/"
+=======
+bench-gc-experiments:
+	@echo "Running GC experiments with different configurations..."
+	@echo "This will test: G1 (default), ZGC Generational, Shenandoah, and Compact Object Headers variants"
+	scripts/run_gc_experiments.sh both all
+
+bench-gc-experiments-fast:
+	@echo "Running FAST GC experiments with minimal parameters for quick testing..."
+	@echo "This tests the most important configs: G1 vs G1+CompactHeaders vs ZGC+Generational"
+	scripts/run_gc_experiments_fast.sh both important
+
+validate-gc:
+	@echo "Validating GC configurations for Java 25..."
+	scripts/validate_gc_configs.sh
+
+bench-dispatch:
+	@echo "Running dispatch optimization benchmarks..."
+	@echo "This tests modern Java language features: pattern matching, switch expressions, etc."
+	JMH_FORKS=3 JMH_WARMUP_IT=5 JMH_IT=10 scripts/run_dispatch_benchmarks.sh
+>>>>>>> origin/master
