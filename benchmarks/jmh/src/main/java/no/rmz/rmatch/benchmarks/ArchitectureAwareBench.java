@@ -1,22 +1,21 @@
 package no.rmz.rmatch.benchmarks;
 
 import java.util.concurrent.TimeUnit;
-import no.rmz.rmatch.performancetests.utils.SystemInfo;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
 /**
  * Architecture-aware benchmarks that include system normalization for cross-platform comparison.
  * 
- * <p>This benchmark integrates with the rmatch architecture-aware system to provide:
+ * <p>This benchmark provides basic CPU normalization benchmarks for cross-architecture comparison:
  * <ul>
- *   <li>Cross-architecture performance normalization</li>
- *   <li>System information reporting for reproducibility</li>
- *   <li>Integration with existing baseline management</li>
+ *   <li>CPU normalization benchmarks</li>
+ *   <li>Memory allocation benchmarks</li>
+ *   <li>String processing benchmarks</li>
  * </ul>
  */
 @BenchmarkMode(Mode.Throughput)
-@OutputTimeUnit(TimeUnit.OPERATIONS)
+@OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
 @Fork(
     value = 1,
@@ -25,29 +24,22 @@ import org.openjdk.jmh.infra.Blackhole;
       // Java 25 JIT optimizations from performance analysis
       "-XX:+TieredCompilation",
       "-XX:CompileThreshold=500",
-      // GC optimizations
+      // GC optimizations  
       "-XX:+UseCompactObjectHeaders"
     })
 @Warmup(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 3, time = 2, timeUnit = TimeUnit.SECONDS)
 public class ArchitectureAwareBench {
 
-  private SystemInfo systemInfo;
-  
   @Setup(Level.Trial)
   public void setup() {
-    systemInfo = new SystemInfo();
-    
-    // Log system information for reproducibility
+    // Log basic system information for reproducibility
     System.out.println("=== Architecture Information ===");
-    System.out.println("Architecture ID: " + systemInfo.getArchitectureId());
-    System.out.println("CPU Model: " + systemInfo.getCpuModel());
-    System.out.println("CPU Cores: " + systemInfo.getCpuPhysicalCores() + " physical, " + 
-                       systemInfo.getCpuLogicalCores() + " logical");
-    System.out.println("OS: " + systemInfo.getOsName() + " " + systemInfo.getOsVersion());
-    System.out.println("Java: " + systemInfo.getJavaVersion() + " (" + systemInfo.getJavaVendor() + ")");
-    System.out.println("Memory: " + systemInfo.getMaxMemoryMb() + "MB max");
-    System.out.println("Normalization Score: " + String.format("%.0f ops/ms", systemInfo.getNormalizationScore()));
+    System.out.println("OS: " + System.getProperty("os.name") + " " + System.getProperty("os.version"));
+    System.out.println("Architecture: " + System.getProperty("os.arch"));
+    System.out.println("Java: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
+    System.out.println("Available Processors: " + Runtime.getRuntime().availableProcessors());
+    System.out.println("Max Memory: " + (Runtime.getRuntime().maxMemory() / (1024 * 1024)) + "MB");
     System.out.println("=====================================");
   }
 
