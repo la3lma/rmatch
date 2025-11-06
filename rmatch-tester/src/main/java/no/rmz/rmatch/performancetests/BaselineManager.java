@@ -169,21 +169,32 @@ public final class BaselineManager {
   }
 
   /**
-   * Load baseline results with architecture validation, discarding baselines from unknown
-   * architectures.
+   * Load baseline results with architecture validation. Only discards baselines from unknown
+   * architectures if current architecture is known and differs significantly.
    *
    * @param baselineDir Directory containing baseline files
-   * @return List of baseline test results, empty if no baseline exists or if baseline architecture
-   *     is unknown
+   * @return List of baseline test results, empty if no baseline exists or if baseline should be replaced
    */
   public static List<MatcherBenchmarker.TestRunResult> loadRmatchBaselineWithArchitectureCheck(
       String baselineDir) {
     // First check if baseline has unknown architecture
     EnvironmentInfo baselineEnv = loadBaselineEnvironment(baselineDir, "rmatch");
+    EnvironmentInfo currentEnv = getCurrentEnvironment();
+    
     if (baselineEnv != null && "unknown".equals(baselineEnv.getArchitectureId())) {
-      LOG.info(
-          "Discarding baseline from unknown architecture - will establish new baseline from current run");
-      return new ArrayList<>();
+      // Only discard unknown architecture baseline if current architecture is known and significantly different
+      if (!"unknown".equals(currentEnv.getArchitectureId()) && 
+          currentEnv.getNormalizationScore() > 0 && 
+          Math.abs(currentEnv.getNormalizationScore() - 1000.0) > 200.0) {
+        LOG.info(
+            "Discarding baseline from unknown architecture - current architecture " + 
+            currentEnv.getArchitectureId() + " is significantly different. Will establish new baseline.");
+        return new ArrayList<>();
+      } else {
+        LOG.warning(
+            "Baseline has unknown architecture but will be used for comparison with warnings. " +
+            "Current architecture: " + currentEnv.getArchitectureId());
+      }
     }
 
     return loadRmatchBaseline(baselineDir);
