@@ -60,8 +60,9 @@ public final class GitHubActionPerformanceTestRunner {
 
       // Check if baseline was discarded due to unknown architecture
       boolean wasUnknownArchitectureBaseline = false;
+      BaselineManager.EnvironmentInfo existingBaselineEnv = null;
       if (BaselineManager.baselineExists(BaselineManager.DEFAULT_BASELINE_DIR, "rmatch")) {
-        BaselineManager.EnvironmentInfo existingBaselineEnv =
+        existingBaselineEnv =
             BaselineManager.loadBaselineEnvironment(BaselineManager.DEFAULT_BASELINE_DIR, "rmatch");
         wasUnknownArchitectureBaseline =
             existingBaselineEnv != null
@@ -69,17 +70,43 @@ public final class GitHubActionPerformanceTestRunner {
                 && baselineResults.isEmpty();
       }
 
+      // Enhanced logging for baseline decision making
+      if (existingBaselineEnv != null) {
+        LOG.info(
+            "Existing baseline environment: Architecture="
+                + existingBaselineEnv.getArchitectureId()
+                + ", Java="
+                + existingBaselineEnv.getJavaVersion()
+                + ", Commit="
+                + existingBaselineEnv.getGitCommit());
+      }
+
+      BaselineManager.EnvironmentInfo currentEnv = BaselineManager.getCurrentEnvironment();
+      LOG.info(
+          "Current test environment: Architecture="
+              + currentEnv.getArchitectureId()
+              + ", Java="
+              + currentEnv.getJavaVersion()
+              + ", Commit="
+              + currentEnv.getGitCommit());
+
       if (isMainBranch || isBootstrapCase || wasUnknownArchitectureBaseline) {
         if (isBootstrapCase && !wasUnknownArchitectureBaseline) {
-          LOG.info("No baseline exists - establishing initial baseline from current results");
+          LOG.info(
+              "✨ BASELINE CREATION: No baseline exists - establishing initial baseline from current results");
         } else if (wasUnknownArchitectureBaseline) {
           LOG.info(
-              "Existing baseline has unknown architecture - establishing new baseline from current results");
+              "✨ BASELINE REPLACEMENT: Existing baseline has unknown architecture - establishing new baseline from current results");
         } else {
-          LOG.info("Updating baseline for main branch");
+          LOG.info("✨ BASELINE UPDATE: Updating baseline for main branch with current results");
         }
         BaselineManager.saveRmatchBaseline("benchmarks/baseline", result.getRmatchResults());
         BaselineManager.saveJavaBaseline("benchmarks/baseline", result.getJavaResults());
+      } else {
+        LOG.info(
+            "📊 BASELINE COMPARISON: Comparing current results against existing baseline ("
+                + baselineResults.size()
+                + " baseline measurements)");
       }
 
       // Exit with appropriate code based on performance result

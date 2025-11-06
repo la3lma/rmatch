@@ -14,6 +14,8 @@ on:
 jobs:
   update-baseline:
     runs-on: ubuntu-latest  # Use consistent architecture with performance-check
+    permissions:
+      contents: write  # Allow pushing baseline updates back to repository
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,7 +54,7 @@ jobs:
           
           # Run the performance test runner which will detect main branch and update baseline
           # Use same parameters as performance-check for consistency
-          MAX_REGEXPS=5000
+          MAX_REGEXPS=10000
           NUM_RUNS=5
           
           ./mvnw -q -B -pl rmatch-tester exec:java \

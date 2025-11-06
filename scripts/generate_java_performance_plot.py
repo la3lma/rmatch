@@ -15,8 +15,10 @@ from pathlib import Path
 
 
 def parse_timestamp(timestamp_str):
-    """Parse timestamp format 20250909T091046Z to datetime"""
-    return datetime.strptime(timestamp_str, "%Y%m%dT%H%M%SZ")
+    """Parse timestamp format 20250909T091046Z to datetime with UTC timezone"""
+    import pytz
+    dt = datetime.strptime(timestamp_str, "%Y%m%dT%H%M%SZ")
+    return dt.replace(tzinfo=pytz.UTC)
 
 def load_java_results(results_dir):
     """Load all Java regex benchmark results from JSON files"""
@@ -110,10 +112,26 @@ def create_performance_plot(results, output_path):
     
     # Format x-axis (use bottom axis for shared plots)
     bottom_ax = ax2 if has_memory_data else ax1
-    bottom_ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\\n%H:%M'))
-    bottom_ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
-    bottom_ax.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
-    plt.setp(bottom_ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
+    # Intelligent date formatting based on data range
+    if timestamps:
+        time_range = (max(timestamps) - min(timestamps)).days
+        
+        # Special case for single data point or very short range
+        if time_range == 0 or len(timestamps) == 1:
+            bottom_ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\n%H:%M UTC'))
+            bottom_ax.xaxis.set_major_locator(plt.MaxNLocator(3))  # Very limited ticks for single point
+        elif time_range <= 7:  # Less than a week
+            bottom_ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\n%H:%M UTC'))
+            bottom_ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
+            bottom_ax.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
+        elif time_range <= 30:  # Less than a month
+            bottom_ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d UTC'))
+            bottom_ax.xaxis.set_major_locator(mdates.DayLocator(interval=max(1, time_range // 6)))
+        else:  # Longer range
+            bottom_ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m UTC'))
+            bottom_ax.xaxis.set_major_locator(plt.MaxNLocator(8))
+        
+    plt.setp(bottom_ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=9)
     bottom_ax.set_xlabel('Date/Time', fontsize=12)
     
     # Add horizontal reference lines to performance plot
@@ -204,7 +222,7 @@ def main():
     
     if results:
         # Show summary
-        print(f"Date range: {results[0]['timestamp'].strftime('%Y-%m-%d %H:%M')} to {results[-1]['timestamp'].strftime('%Y-%m-%d %H:%M')}")
+        print(f"Date range: {results[0]['timestamp'].strftime('%Y-%m-%d %H:%M UTC')} to {results[-1]['timestamp'].strftime('%Y-%m-%d %H:%M UTC')}")
         print(f"Performance range: {min(r['duration_s'] for r in results):.1f}s to {max(r['duration_s'] for r in results):.1f}s")
         
         # Create plot

@@ -10,6 +10,8 @@ on:
 jobs:
   update-charts:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Allow pushing chart updates back to repository
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -82,11 +84,12 @@ jobs:
         if: steps.check-changes.outputs.changes == 'true'
         run: |
           git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add charts/ performance_timeline.png java_performance_timeline.png performance_comparison.png
+          git config --local user.name "GitHub Action - Chart Generation"
+          git add charts/ performance_timeline.png java_performance_timeline.png performance_comparison.png README.md
           git commit -m "chore: update performance charts
 
           Auto-generated performance evolution, rmatch timeline, Java regex timeline, and comparison charts
+          from existing benchmark data in repository.
           
           [skip ci]"
-          git push
+          git push origin HEAD:${{ github.ref_name }}
