@@ -33,7 +33,14 @@ import org.openjdk.jmh.infra.Blackhole;
 @State(Scope.Benchmark)
 @Fork(
     value = 1,
-    jvmArgs = {"-Xms1G", "-Xmx1G"})
+    jvmArgs = {
+      "-Xms1G", "-Xmx1G",
+      // Java 25 JIT optimizations discovered in performance analysis
+      "-XX:+TieredCompilation",
+      "-XX:CompileThreshold=500",
+      // GC optimizations from master branch
+      "-XX:+UseCompactObjectHeaders"
+    })
 @Warmup(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 3, time = 2, timeUnit = TimeUnit.SECONDS)
 public class ExtendedTestFramework {
@@ -52,7 +59,7 @@ public class ExtendedTestFramework {
   @Param({"WUTHERING_HEIGHTS", "CRIME_AND_PUNISHMENT"})
   public String textCorpus;
 
-  @Param({"RMATCH", "JAVA_NATIVE"})
+  @Param({"RMATCH", "FASTPATH", "FASTPATH_JIT_OPTIMIZED", "JAVA_NATIVE"})
   public String matcherType;
 
   private PatternLibrary patternLibrary;
@@ -104,12 +111,24 @@ public class ExtendedTestFramework {
   /**
    * Create the appropriate matcher based on the matcherType parameter.
    *
-   * @return A matcher instance (either rmatch or Java native)
+   * @return A matcher instance (rmatch variants or Java native)
    */
   private Matcher createMatcher() {
     if ("JAVA_NATIVE".equals(matcherType)) {
       return new JavaRegexpMatcher();
+    } else if ("FASTPATH".equals(matcherType)) {
+      // Configure FastPath engine
+      System.setProperty("rmatch.engine", "fastpath");
+      System.setProperty("rmatch.prefilter", "aho");
+      return MatcherFactory.newMatcher();
+    } else if ("FASTPATH_JIT_OPTIMIZED".equals(matcherType)) {
+      // Configure FastPath with Java 25 JIT optimizations
+      System.setProperty("rmatch.engine", "fastpath");
+      System.setProperty("rmatch.prefilter", "aho");
+      // Note: JIT flags should be set at JVM startup via @Fork jvmArgs
+      return MatcherFactory.newMatcher();
     } else {
+      // Default rmatch matcher
       return MatcherFactory.newMatcher();
     }
   }

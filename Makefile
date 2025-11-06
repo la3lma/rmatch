@@ -4,7 +4,7 @@
 # G1 with Compact Object Headers provides 5-12% performance improvement
 JAVA_GC_OPTS := -XX:+UseCompactObjectHeaders
 
-.PHONY: build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch
+.PHONY: build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch bench-enhanced bench-enhanced-quick bench-enhanced-full bench-enhanced-arch
 
 build:
 	mvn -q -B spotless:apply
@@ -74,8 +74,6 @@ spotless:
 spotbugs:
 	mvn -q -B spotbugs:check
 
-<<<<<<< HEAD
-
 pre-test-run:
 	rm -rf ~/.m2/repository/no/rmz/rmatch
 	mvn -q -B spotless:apply
@@ -84,10 +82,8 @@ pre-test-run:
 test-run-full: pre-test-run
 	time bash -x   ./scripts/run_jmh.sh
 
-
 test-run-mini: pre-test-run
 	time bash -x   ./scripts/run_jmh_mini_suite.sh
-
 
 setup-visualization-env:
 	@echo "Setting up Python virtual environment for benchmark visualization..."
@@ -117,7 +113,7 @@ visualize-benchmarks: setup-visualization-env
 	@mkdir -p performance-graphs
 	@scripts/run_visualization.sh
 	@echo "Visualizations saved to performance-graphs/"
-=======
+
 bench-gc-experiments:
 	@echo "Running GC experiments with different configurations..."
 	@echo "This will test: G1 (default), ZGC Generational, Shenandoah, and Compact Object Headers variants"
@@ -136,4 +132,20 @@ bench-dispatch:
 	@echo "Running dispatch optimization benchmarks..."
 	@echo "This tests modern Java language features: pattern matching, switch expressions, etc."
 	JMH_FORKS=3 JMH_WARMUP_IT=5 JMH_IT=10 scripts/run_dispatch_benchmarks.sh
->>>>>>> origin/master
+
+# Enhanced JMH-based benchmarks with modern performance analysis
+bench-enhanced:
+	@echo "Running standard enhanced benchmarks with JMH Extended Testing Framework..."
+	MAVEN_OPTS="$(JAVA_GC_OPTS)" scripts/run_enhanced_benchmarks.sh standard
+
+bench-enhanced-quick:
+	@echo "Running quick enhanced benchmarks for validation..."
+	MAVEN_OPTS="$(JAVA_GC_OPTS)" scripts/run_enhanced_benchmarks.sh quick
+
+bench-enhanced-full:
+	@echo "Running full enhanced benchmark suite with all matcher types..."
+	MAVEN_OPTS="$(JAVA_GC_OPTS)" scripts/run_enhanced_benchmarks.sh full
+
+bench-enhanced-arch:
+	@echo "Running architecture-aware benchmarks for cross-platform comparison..."
+	MAVEN_OPTS="$(JAVA_GC_OPTS)" scripts/run_enhanced_benchmarks.sh architecture
