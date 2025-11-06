@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Clear all Python-related environment variables
+unset PYTHONPATH
+unset PYTHONHOME
+unset VIRTUAL_ENV
+unset CONDA_DEFAULT_ENV
+unset CONDA_PREFIX
+unset PIP_USER
+
+# Change to a clean directory to avoid any numpy source conflicts
+cd /tmp
+
+# Run the visualization script with absolute paths
+/Users/rmz/git/rmatch/scripts/.venv/bin/python \
+    /Users/rmz/git/rmatch/scripts/visualize_benchmarks.py \
+    --results-dir /Users/rmz/git/rmatch/benchmarks/results \
+    --output-dir /Users/rmz/git/rmatch/performance-graphs
