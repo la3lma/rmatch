@@ -3,6 +3,8 @@
 # Java: 17.0.16
 # OS: Linux 6.11.0-1018-azure
 # Git: 95a42a8e3b1457837ac55ebf36a92785743d28ce (copilot/fix-147)
+# Architecture: x86_64_Azure_GitHub_Actions_Runner
+# Normalization Score: 1000.0 ops_per_ms (baseline reference)
 # Format: matcherTypeName,usedMemoryInMb,durationInMillis
 
 rmatch,294,15123
