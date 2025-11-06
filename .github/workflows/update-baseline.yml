@@ -1,0 +1,106 @@
+# .github/workflows/update-baseline.yml
+#
+# Updates performance baselines when code is merged to main/master branch.
+# This ensures that approved performance improvements become the new baseline
+# for future comparisons.
+#
+name: Update Performance Baseline
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-baseline:
+    runs-on: ubuntu-latest  # Use consistent architecture with performance-check
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0  # Needed for git history
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 25
+      
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+      
+      - name: Prepare runner (pin CPU governor)
+        if: runner.os == 'Linux'
+        run: |
+          # Try to set performance governor, but don't fail if not possible
+          sudo bash -c 'for c in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > $c; done' || echo "Could not set CPU governor (expected on GitHub runners)"
+      
+      - name: Build and install project
+        run: ./mvnw -q -B -DskipTests clean install
+      
+      - name: Update performance baseline
+        run: |
+          echo "Updating performance baseline after merge to main branch..."
+          echo "This ensures approved performance improvements become the new baseline"
+          
+          # Create baseline directory
+          mkdir -p benchmarks/baseline
+          
+          # Run the performance test runner which will detect main branch and update baseline
+          # Use same parameters as performance-check for consistency
+          MAX_REGEXPS=5000
+          NUM_RUNS=5
+          
+          ./mvnw -q -B -pl rmatch-tester exec:java \
+            -Dexec.mainClass=no.rmz.rmatch.performancetests.GitHubActionPerformanceTestRunner \
+            -Dexec.args="${MAX_REGEXPS} ${NUM_RUNS}"
+          
+          echo "Baseline update completed"
+      
+      - name: Check for baseline changes
+        id: check-baseline
+        run: |
+          # Check if baseline files were updated
+          if git diff --quiet benchmarks/baseline/; then
+            echo "No baseline changes detected"
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Baseline files updated"
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Updated files:"
+            git status benchmarks/baseline/ --porcelain
+          fi
+      
+      - name: Commit updated baseline
+        if: steps.check-baseline.outputs.changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Add baseline files
+          git add benchmarks/baseline/
+          
+          git commit -m "chore: update performance baseline
+          
+          Updated performance baseline after merge to main branch.
+          This reflects approved performance improvements and will be
+          used as the reference for future performance comparisons.
+          
+          [skip ci]"
+          
+          git push origin main
+          echo "✅ Performance baseline updated and committed"
+      
+      - name: Upload baseline artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: updated-baselines
+          path: |
+            benchmarks/baseline/*.json
+            benchmarks/results/performance-check-*.json
+          retention-days: 30

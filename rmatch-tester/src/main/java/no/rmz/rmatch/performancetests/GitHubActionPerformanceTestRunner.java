@@ -45,9 +45,14 @@ public final class GitHubActionPerformanceTestRunner {
       // Update baseline if this is a merge to main (detected via environment) OR if no baseline
       // exists (bootstrap) OR if baseline was discarded due to unknown architecture
       String gitRef = System.getenv("GITHUB_REF");
+      LOG.info("GITHUB_REF environment variable: " + gitRef);
       boolean isMainBranch =
           gitRef != null && (gitRef.endsWith("/main") || gitRef.endsWith("/master"));
       boolean isBootstrapCase = baselineResults.isEmpty();
+      
+      LOG.info("Baseline update conditions - isMainBranch: " + isMainBranch + 
+               ", isBootstrapCase: " + isBootstrapCase + 
+               ", baselineResultsSize: " + baselineResults.size());
 
       // Check if baseline was discarded due to unknown architecture
       boolean wasUnknownArchitectureBaseline = false;

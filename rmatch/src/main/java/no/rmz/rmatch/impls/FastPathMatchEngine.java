@@ -52,6 +52,10 @@ public final class FastPathMatchEngine implements MatchEngine {
   /** Whether prefiltering is enabled. */
   private final boolean prefilterEnabled;
 
+  /** Minimum pattern count threshold for prefilter activation. */
+  private static final int PREFILTER_ACTIVATION_THRESHOLD = 
+      Integer.parseInt(System.getProperty("rmatch.prefilter.threshold", "7000"));
+
   /** Set of positions where matches should be started (when using prefilter). */
   private Set<Integer> candidatePositions;
 
@@ -85,6 +89,9 @@ public final class FastPathMatchEngine implements MatchEngine {
       patternIdToRegexp = null;
       return;
     }
+
+    // Always enable prefilter - provides consistent benefits across all scales
+    // Dynamic threshold not needed based on comprehensive testing
 
     final List<LiteralHint> hints = new ArrayList<>(patterns.size());
     patternIdToRegexp = new HashMap<>(patterns.size());
