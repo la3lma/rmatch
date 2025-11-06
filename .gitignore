@@ -31,3 +31,4 @@ scripts/__pycache__/
 **/measurements/*.csv
 proposals/*/plantuml.jar
 proposals/*/build/
+*/**/*.json.backup

@@ -16,8 +16,10 @@ from pathlib import Path
 
 
 def parse_timestamp(timestamp_str):
-    """Parse timestamp format 20250909T091046Z to datetime"""
-    return datetime.strptime(timestamp_str, "%Y%m%dT%H%M%SZ")
+    """Parse timestamp format 20250909T091046Z to datetime with UTC timezone"""
+    import pytz
+    dt = datetime.strptime(timestamp_str, "%Y%m%dT%H%M%SZ")
+    return dt.replace(tzinfo=pytz.UTC)
 
 def load_benchmark_results(results_dir):
     """Load both rmatch and Java regex benchmark results and pair them by timestamp"""
@@ -145,7 +147,7 @@ def create_comparison_plot(comparison_points, output_path):
     
     # Create figure with subplots for different metrics
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12), sharex=True)
-    fig.suptitle('rmatch vs Java Regex Performance Comparison\\n(Ratios over Time - Values > 1.0 mean rmatch is slower/uses more memory)', 
+    fig.suptitle('rmatch vs Java Regex Performance Comparison (Ratios over Time - Values > 1.0 mean rmatch is slower/uses more memory)', 
                  fontsize=16, fontweight='bold')
     
     # Extract data for plotting
@@ -203,12 +205,28 @@ def create_comparison_plot(comparison_points, output_path):
     ax4.grid(True, alpha=0.3)
     ax4.legend()
     
-    # Format x-axis (shared across all subplots)
-    for ax in [ax3, ax4]:
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\\n%H:%M'))
-        ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
-        ax.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
-        plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
+    # Format x-axis (shared across all subplots) - intelligent spacing based on data range
+    if timestamps:
+        time_range = (timestamps[-1] - timestamps[0]).days
+        
+        for ax in [ax3, ax4]:
+            if time_range <= 7:  # Less than a week - show daily
+                ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d\n%H:%M UTC'))
+                ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
+                ax.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
+            elif time_range <= 30:  # Less than a month - show every few days
+                ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d UTC'))
+                ax.xaxis.set_major_locator(mdates.DayLocator(interval=max(1, time_range // 6)))
+                ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+            elif time_range <= 90:  # Less than 3 months - show weekly
+                ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d UTC'))
+                ax.xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
+                ax.xaxis.set_minor_locator(mdates.DayLocator(interval=7))
+            else:  # Long range - show monthly or use MaxNLocator to limit ticks
+                ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m UTC'))
+                ax.xaxis.set_major_locator(plt.MaxNLocator(8))  # Use MaxNLocator for long ranges
+            
+            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=9)
     
     ax3.set_xlabel('Date/Time', fontsize=12)
     ax4.set_xlabel('Date/Time', fontsize=12)
@@ -253,7 +271,7 @@ def main():
     if comparison_points:
         # Show summary of comparison points
         latest = comparison_points[-1]
-        print(f"Latest comparison ({latest['timestamp'].strftime('%Y-%m-%d %H:%M')}):")
+        print(f"Latest comparison ({latest['timestamp'].strftime('%Y-%m-%d %H:%M UTC')}):")
         print(f"  Performance ratio: {latest['duration_ratio']:.1f}x (rmatch vs java)")
         print(f"  Memory ratio: {latest['memory_peak_ratio']:.1f}x (rmatch vs java)")
         print(f"  Pattern count: {latest['max_regexps']}")

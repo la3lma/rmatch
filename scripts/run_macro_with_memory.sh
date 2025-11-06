@@ -6,6 +6,7 @@ set -euo pipefail
 # Env vars:
 #   MAX_REGEXPS   - default 10000
 #   EXTRA_ARGS    - extra args to pass to the Java main, space-separated (optional)
+#   RUN_JAVA_BENCHMARK - if set to "true", also runs Java regex benchmark for comparison (default false)
 
 root_dir=$(git rev-parse --show-toplevel)
 cd "$root_dir"
@@ -163,4 +164,24 @@ rm -f "$temp_output"
 
 echo "Macro log : $LOG_OUT"
 echo "Macro JSON: $JSON_OUT"
+
+# Optionally run Java regex benchmark for comparison data
+if [[ "${RUN_JAVA_BENCHMARK:-false}" == "true" ]]; then
+  echo ""
+  echo "🔄 Running Java regex benchmark for comparison..."
+  
+  # Run Java benchmark with same parameters, but don't let it fail the whole script
+  set +e
+  MAX_REGEXPS=${MAX_REGEXPS} EXTRA_ARGS="${EXTRA_ARGS:-}" ./scripts/run_java_benchmark_with_memory.sh
+  java_status=$?
+  set -e
+  
+  if [[ $java_status -eq 0 ]]; then
+    echo "✅ Java regex benchmark completed successfully"
+  else
+    echo "⚠️  Java regex benchmark failed with status $java_status (continuing anyway)"
+  fi
+  echo ""
+fi
+
 exit $status
