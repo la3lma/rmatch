@@ -34,7 +34,8 @@ import org.openjdk.jmh.infra.Blackhole;
 @Fork(
     value = 1,
     jvmArgs = {
-      "-Xms1G", "-Xmx1G",
+      "-Xms1G",
+      "-Xmx1G",
       // Java 25 JIT optimizations discovered in performance analysis
       "-XX:+TieredCompilation",
       "-XX:CompileThreshold=500",
