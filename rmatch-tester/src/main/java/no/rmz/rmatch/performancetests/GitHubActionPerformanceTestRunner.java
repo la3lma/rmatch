@@ -49,10 +49,14 @@ public final class GitHubActionPerformanceTestRunner {
       boolean isMainBranch =
           gitRef != null && (gitRef.endsWith("/main") || gitRef.endsWith("/master"));
       boolean isBootstrapCase = baselineResults.isEmpty();
-      
-      LOG.info("Baseline update conditions - isMainBranch: " + isMainBranch + 
-               ", isBootstrapCase: " + isBootstrapCase + 
-               ", baselineResultsSize: " + baselineResults.size());
+
+      LOG.info(
+          "Baseline update conditions - isMainBranch: "
+              + isMainBranch
+              + ", isBootstrapCase: "
+              + isBootstrapCase
+              + ", baselineResultsSize: "
+              + baselineResults.size());
 
       // Check if baseline was discarded due to unknown architecture
       boolean wasUnknownArchitectureBaseline = false;
