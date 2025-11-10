@@ -50,7 +50,7 @@
 
         <mavenFindbugsPlugin.version>3.0.5</mavenFindbugsPlugin.version>
         <mavenJarPlugin.version>3.4.2</mavenJarPlugin.version>
-        <mavenReleasePlugin.version>3.1.1</mavenReleasePlugin.version>
+        <mavenReleasePlugin.version>3.2.0</mavenReleasePlugin.version>
         <mavenSourcePlugin.version>3.3.1</mavenSourcePlugin.version>
         <mavenSurefire.version>3.5.4</mavenSurefire.version>
         <mockitoCore.version>5.20.0</mockitoCore.version>
