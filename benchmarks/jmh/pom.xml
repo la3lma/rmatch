@@ -15,9 +15,6 @@
   <name>rmatch-benchmarks-jmh</name>
   <description>JMH Benchmarks for rmatch</description>
 
-  <properties>
-    <jmh.version>1.37</jmh.version>
-  </properties>
 
   <dependencies>
     <dependency>
@@ -51,7 +48,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.14.1</version>
+        <version>${mavenCompilerPlugin.version}</version>
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
@@ -81,7 +78,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>${mavenResourcesPlugin.version}</version>
         <executions>
           <execution>
             <id>copy-resources</id>
@@ -128,7 +125,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.6.1</version>
+        <version>${mavenShadePlugin.version}</version>
         <executions>
           <execution>
             <phase>package</phase>
