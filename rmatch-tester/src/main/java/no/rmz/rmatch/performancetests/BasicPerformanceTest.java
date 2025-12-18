@@ -42,7 +42,10 @@ public final class BasicPerformanceTest {
     int numRuns = 3; // Minimum for statistical significance
 
     LOG.info(
-        "Running regression-grade comparison with " + maxRegexps + " regexps and " + numRuns
+        "Running regression-grade comparison with "
+            + maxRegexps
+            + " regexps and "
+            + numRuns
             + " runs");
 
     GitHubActionPerformanceTest.ComparisonResult result =
