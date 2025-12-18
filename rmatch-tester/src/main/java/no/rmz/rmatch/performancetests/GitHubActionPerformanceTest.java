@@ -5,6 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.io.IOException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
@@ -24,6 +27,12 @@ public final class GitHubActionPerformanceTest {
 
   /** Default number of test runs */
   private static final int DEFAULT_RUNS = 5;
+
+  /** Minimum regexps to exercise realistic performance comparisons */
+  static final int MIN_REGEXPS_FOR_REGRESSION = 10_000;
+
+  /** Minimum corpus size (in bytes) for a "large" corpus regression test */
+  private static final long MIN_CORPUS_BYTES = 500_000L;
 
   /** Performance comparison result */
   public static class ComparisonResult {
@@ -106,6 +115,8 @@ public final class GitHubActionPerformanceTest {
       Buffer buffer = new WutheringHeightsBuffer(corpusPath);
       List<String> regexps = MatcherBenchmarker.loadRegexpsFromFile(regexpPath, maxRegexps);
 
+      validateInputs(corpusPath, regexpPath, regexps, maxRegexps);
+
       // Run multiple test iterations for statistical significance
       List<MatcherBenchmarker.TestRunResult> rmatchResults = new ArrayList<>();
       List<MatcherBenchmarker.TestRunResult> javaResults = new ArrayList<>();
@@ -177,6 +188,36 @@ public final class GitHubActionPerformanceTest {
     } catch (Exception e) {
       LOG.severe("Performance comparison failed: " + e.getMessage());
       throw new RuntimeException("Performance comparison failed", e);
+    }
+  }
+
+  private static void validateInputs(
+      String corpusPath, String regexpPath, List<String> regexps, int requestedRegexps)
+      throws IOException {
+    long corpusSizeBytes = Files.size(Path.of(corpusPath));
+    if (corpusSizeBytes < MIN_CORPUS_BYTES) {
+      throw new IllegalArgumentException(
+          "Corpus '" + corpusPath + "' is too small for a regression-worthy performance test");
+    }
+
+    if (requestedRegexps > 0 && regexps.size() < requestedRegexps) {
+      throw new IllegalArgumentException(
+          "Requested "
+              + requestedRegexps
+              + " regexps but only "
+              + regexps.size()
+              + " were loaded from "
+              + regexpPath);
+    }
+
+    if (requestedRegexps >= MIN_REGEXPS_FOR_REGRESSION
+        && regexps.size() < MIN_REGEXPS_FOR_REGRESSION) {
+      throw new IllegalArgumentException(
+          "Performance comparison must run with at least "
+              + MIN_REGEXPS_FOR_REGRESSION
+              + " regexps to catch regressions (only "
+              + regexps.size()
+              + " loaded)");
     }
   }
 
