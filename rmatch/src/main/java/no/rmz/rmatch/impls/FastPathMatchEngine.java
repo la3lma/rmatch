@@ -69,8 +69,7 @@ public final class FastPathMatchEngine implements MatchEngine {
    */
   public FastPathMatchEngine(final NodeStorage ns) {
     this.ns = checkNotNull(ns, "NodeStorage can't be null");
-    this.prefilterEnabled =
-        "aho".equalsIgnoreCase(System.getProperty("rmatch.prefilter", "disabled"));
+    this.prefilterEnabled = "aho".equalsIgnoreCase(System.getProperty("rmatch.prefilter", "aho"));
   }
 
   /**

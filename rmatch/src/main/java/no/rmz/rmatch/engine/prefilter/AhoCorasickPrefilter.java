@@ -91,7 +91,9 @@ public final class AhoCorasickPrefilter {
   private final Trie trie;
 
   /** Map from literal string to the pattern hints that contain it. */
-  private final Map<String, List<LiteralHint>> buckets = new HashMap<>();
+  private final Map<String, Bucket> buckets = new HashMap<>();
+
+  private record Bucket(LiteralHint[] hints, int literalLength) {}
 
   /**
    * Constructs an Aho-Corasick prefilter from a collection of literal hints.
@@ -100,12 +102,18 @@ public final class AhoCorasickPrefilter {
    */
   public AhoCorasickPrefilter(final Collection<LiteralHint> hints) {
     final Trie.TrieBuilder builder = Trie.builder(); // Allow overlapping matches
+    final Map<String, List<LiteralHint>> tmpBuckets = new HashMap<>();
     // If any hint is case-insensitive, we'll add both cased variants at build time.
     for (final LiteralHint hint : hints) {
       for (final String key : keyedLiterals(hint)) {
-        buckets.computeIfAbsent(key, k -> new ArrayList<>()).add(hint);
+        tmpBuckets.computeIfAbsent(key, k -> new ArrayList<>()).add(hint);
         builder.addKeyword(key);
       }
+    }
+    for (final Map.Entry<String, List<LiteralHint>> entry : tmpBuckets.entrySet()) {
+      buckets.put(
+          entry.getKey(),
+          new Bucket(entry.getValue().toArray(LiteralHint[]::new), entry.getKey().length()));
     }
     this.trie = builder.build();
   }
@@ -144,16 +152,17 @@ public final class AhoCorasickPrefilter {
     final String s = text.toString(); // AC needs String
     final List<Candidate> out = new ArrayList<>();
     for (final Emit emit : trie.parseText(s)) {
-      final String lit = s.substring(emit.getStart(), emit.getEnd() + 1);
-      final List<LiteralHint> hints = buckets.get(lit);
-      if (hints == null) {
+      final String keyword = emit.getKeyword();
+      final Bucket bucket = buckets.get(keyword);
+      if (bucket == null) {
         continue;
       }
       final int endIdxExclusive = emit.getEnd() + 1;
-      for (final LiteralHint hint : hints) {
+      final int literalLength = bucket.literalLength;
+      for (final LiteralHint hint : bucket.hints) {
         out.add(
             new Candidate(
-                hint.patternId(), endIdxExclusive, lit.length(), hint.literalOffsetInMatch()));
+                hint.patternId(), endIdxExclusive, literalLength, hint.literalOffsetInMatch()));
       }
     }
     return out;
