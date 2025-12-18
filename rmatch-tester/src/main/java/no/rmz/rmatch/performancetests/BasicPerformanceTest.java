@@ -37,11 +37,16 @@ public final class BasicPerformanceTest {
     List<MatcherBenchmarker.TestRunResult> baselineResults = BaselineManager.loadRmatchBaseline();
     LOG.info("Loaded " + baselineResults.size() + " baseline results");
 
-    // Test with minimal configuration
-    int maxRegexps = 100; // Very small test
+    // Test with large-scale configuration to ensure regression signalling
+    int maxRegexps = GitHubActionPerformanceTest.MIN_REGEXPS_FOR_REGRESSION;
     int numRuns = 3; // Minimum for statistical significance
 
-    LOG.info("Running basic comparison with " + maxRegexps + " regexps and " + numRuns + " runs");
+    LOG.info(
+        "Running regression-grade comparison with "
+            + maxRegexps
+            + " regexps and "
+            + numRuns
+            + " runs");
 
     GitHubActionPerformanceTest.ComparisonResult result =
         GitHubActionPerformanceTest.runComparison(maxRegexps, baselineResults);
