@@ -33,6 +33,8 @@ bench-java:
 	MAVEN_OPTS="$(JAVA_GC_OPTS)" MAX_REGEXPS=10000 scripts/run_java_benchmark_with_memory.sh
 
 bench-suite:
+	@echo "Cleaning up any stale JMH lock files..."
+	@scripts/cleanup_jmh_locks.sh
 	@echo "Running comprehensive JMH benchmark suite..."
 	JMH_FORKS=1 \
     JMH_WARMUP_IT=1 \
@@ -45,6 +47,8 @@ bench-suite:
 	$(MAKE) visualize-benchmarks
 
 test-run-once: pre-test-run
+	@echo "Cleaning up any stale JMH lock files..."
+	@scripts/cleanup_jmh_locks.sh
 	@echo "Running quick JMH benchmark suite (single iteration per test)..."
 	JMH_FORKS=1 \
     JMH_WARMUP_IT=0 \

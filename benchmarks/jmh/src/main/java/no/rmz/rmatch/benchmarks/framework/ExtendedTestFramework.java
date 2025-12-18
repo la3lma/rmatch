@@ -71,7 +71,14 @@ public class ExtendedTestFramework {
 
   @Setup(Level.Trial)
   public void setup() {
-    LOG.info("Setting up ExtendedTestFramework with " + patternCount + " patterns");
+    System.out.println(
+        "🚀 Setting up benchmark: "
+            + patternCategory
+            + " patterns ("
+            + patternCount
+            + ") with "
+            + matcherType
+            + " matcher");
 
     // Initialize pattern library and configuration
     patternLibrary = new DefaultPatternLibrary();
@@ -86,7 +93,7 @@ public class ExtendedTestFramework {
     // Load corpus data for corpus-based benchmarks
     loadCorpusData();
 
-    LOG.info("Setup complete: " + config);
+    System.out.println("✅ Setup complete - ready for benchmarking");
   }
 
   private void loadCorpusData() {
@@ -94,15 +101,11 @@ public class ExtendedTestFramework {
       // Load text corpus
       CorpusInputProvider.TextCorpus corpus = CorpusInputProvider.TextCorpus.valueOf(textCorpus);
       corpusText = CorpusInputProvider.loadTextCorpus(corpus);
-      LOG.info(
-          "Loaded corpus text: " + corpus.getFilename() + " (" + corpusText.length() + " chars)");
 
       // Always load maximum patterns available (ALL corpus size)
       corpusPatterns = CorpusInputProvider.loadRegexPatterns(CorpusInputProvider.CorpusSize.ALL);
-      LOG.info(
-          "Loaded maximum corpus patterns: ALL (" + corpusPatterns.size() + " patterns available)");
     } catch (IOException e) {
-      LOG.warning("Failed to load corpus data: " + e.getMessage());
+      System.out.println("⚠️  Failed to load corpus data, using fallback: " + e.getMessage());
       // Fall back to synthetic data
       corpusText = testInput;
       corpusPatterns = List.of("the", "and", "to", "of", "a", "in", "is", "it", "you", "that");
@@ -259,7 +262,6 @@ public class ExtendedTestFramework {
     }
 
     testInput = sb.toString();
-    LOG.info("Generated test input with " + testInput.length() + " characters");
   }
 
   /**
@@ -276,14 +278,6 @@ public class ExtendedTestFramework {
    */
   @Benchmark
   public TestResults runTestSuite(final Blackhole bh) {
-    LOG.info(
-        "Running benchmark: runTestSuite with category="
-            + patternCategory
-            + ", patternCount="
-            + patternCount
-            + ", matcherType="
-            + matcherType);
-
     final long startTime = System.nanoTime();
     final Runtime runtime = Runtime.getRuntime();
     final long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
@@ -345,14 +339,6 @@ public class ExtendedTestFramework {
    */
   @Benchmark
   public TestResults patternCompilationBenchmark(final Blackhole bh) {
-    LOG.info(
-        "Running benchmark: patternCompilationBenchmark with category="
-            + patternCategory
-            + ", patternCount="
-            + patternCount
-            + ", matcherType="
-            + matcherType);
-
     final long startTime = System.nanoTime();
     final Runtime runtime = Runtime.getRuntime();
     final long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
@@ -413,14 +399,6 @@ public class ExtendedTestFramework {
    */
   @Benchmark
   public TestResults corpusBasedBenchmark(final Blackhole bh) {
-    LOG.info(
-        "Running benchmark: corpusBasedBenchmark with textCorpus="
-            + textCorpus
-            + ", corpusPatternCount="
-            + corpusPatternCount
-            + ", matcherType="
-            + matcherType);
-
     final long startTime = System.nanoTime();
     final Runtime runtime = Runtime.getRuntime();
     final long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
@@ -488,12 +466,6 @@ public class ExtendedTestFramework {
    */
   @Benchmark
   public TestResults corpusPatternCompilationBenchmark(final Blackhole bh) {
-    LOG.info(
-        "Running benchmark: corpusPatternCompilationBenchmark with corpusPatternCount="
-            + corpusPatternCount
-            + ", matcherType="
-            + matcherType);
-
     final long startTime = System.nanoTime();
     final Runtime runtime = Runtime.getRuntime();
     final long memoryBefore = runtime.totalMemory() - runtime.freeMemory();
