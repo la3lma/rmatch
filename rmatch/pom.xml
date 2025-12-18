@@ -23,13 +23,13 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>26.0.2-1</version>
+            <version>${jetbrains-annotations.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.ahocorasick</groupId>
             <artifactId>ahocorasick</artifactId>
-            <version>0.6.3</version>
+            <version>${ahocorasick.version}</version>
         </dependency>
     </dependencies>
 
