@@ -60,7 +60,7 @@ public final class AsciiOptimizer {
       if (c >= '0' && c <= '9') {
         flags |= DIGIT | WORD;
       }
-      if (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f') {
+      if (Character.isWhitespace(c)) {
         flags |= WHITESPACE;
       }
       if (c == '_') {
