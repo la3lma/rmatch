@@ -46,6 +46,9 @@ public final class MatcherImpl implements Matcher {
   /** Our equally prescious NodeStorage. Our precioussss. */
   private final NodeStorage ns;
 
+  /** Indicates that the engine-specific prefilter needs to be rebuilt. */
+  private volatile boolean prefilterDirty = false;
+
   /**
    * Create a new matcher using the default compiler and regexp factory. This is usually a good
    * choice for production use.
@@ -74,6 +77,8 @@ public final class MatcherImpl implements Matcher {
     } else {
       me = new MatchEngineImpl(ns);
     }
+
+    prefilterDirty = needsPrefilterConfiguration();
   }
 
   @Override
@@ -81,19 +86,8 @@ public final class MatcherImpl implements Matcher {
     synchronized (rs) {
       rs.add(r, a);
 
-      // Initialize engine-specific optimizations
-      if (USE_BLOOM_FILTER && me instanceof BloomFilterMatchEngine bfEngine) {
-        final java.util.Set<Regexp> regexps = new java.util.HashSet<>();
-        for (final String regexpStr : rs.getRegexpSet()) {
-          regexps.add(rs.getRegexp(regexpStr));
-        }
-        bfEngine.initialize(regexps);
-      } else if (USE_FAST_PATH && me instanceof FastPathMatchEngine fpEngine) {
-        // Configure prefilter for fast-path engine
-        configurePrefilterForEngine(fpEngine);
-      } else if (me instanceof MatchEngineImpl) {
-        // Configure AhoCorasick prefilter for legacy engine
-        configurePrefilterForLegacyEngine();
+      if (needsPrefilterConfiguration()) {
+        prefilterDirty = true;
       }
     }
   }
@@ -103,11 +97,8 @@ public final class MatcherImpl implements Matcher {
     synchronized (rs) {
       rs.remove(r, a);
 
-      // Reconfigure prefilter after removal
-      if (USE_FAST_PATH && me instanceof FastPathMatchEngine fpEngine) {
-        configurePrefilterForEngine(fpEngine);
-      } else if (!USE_BLOOM_FILTER && me instanceof MatchEngineImpl) {
-        configurePrefilterForLegacyEngine();
+      if (needsPrefilterConfiguration()) {
+        prefilterDirty = true;
       }
     }
   }
@@ -169,6 +160,8 @@ public final class MatcherImpl implements Matcher {
 
   @Override
   public void match(final Buffer b) {
+    ensurePrefilterConfigured();
+
     synchronized (me) {
       me.match(b);
     }
@@ -181,4 +174,42 @@ public final class MatcherImpl implements Matcher {
 
   @Override
   public void shutdown() {}
+
+  /**
+   * Configure engine-specific prefilters on-demand. This avoids rebuilding heavy data structures
+   * for every single addition/removal when callers batch pattern registration.
+   */
+  private void ensurePrefilterConfigured() {
+    if (!prefilterDirty || !needsPrefilterConfiguration()) {
+      return;
+    }
+
+    synchronized (rs) {
+      if (!prefilterDirty) {
+        return;
+      }
+
+      // Initialize engine-specific optimizations
+      if (USE_BLOOM_FILTER && me instanceof BloomFilterMatchEngine bfEngine) {
+        final java.util.Set<Regexp> regexps = new java.util.HashSet<>();
+        for (final String regexpStr : rs.getRegexpSet()) {
+          regexps.add(rs.getRegexp(regexpStr));
+        }
+        bfEngine.initialize(regexps);
+      } else if (USE_FAST_PATH && me instanceof FastPathMatchEngine fpEngine) {
+        // Configure prefilter for fast-path engine
+        configurePrefilterForEngine(fpEngine);
+      } else if (me instanceof MatchEngineImpl) {
+        // Configure AhoCorasick prefilter for legacy engine
+        configurePrefilterForLegacyEngine();
+      }
+
+      prefilterDirty = false;
+    }
+  }
+
+  /** Returns true if the current engine variant requires prefilter configuration. */
+  private boolean needsPrefilterConfiguration() {
+    return USE_BLOOM_FILTER || USE_FAST_PATH || me instanceof MatchEngineImpl;
+  }
 }
