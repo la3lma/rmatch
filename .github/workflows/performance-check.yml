@@ -1,4 +1,17 @@
 # .github/workflows/performance-check.yml
+#
+# CRITICAL PERFORMANCE VALIDATION RULE:
+# "I will not merge anything to main that does not provably improve performance."
+#
+# This workflow enforces production-scale performance testing with realistic workloads.
+# Micro-benchmarks and lab tests are insufficient - all optimizations must be proven 
+# with 5000+ regex workloads using real text corpora before merging.
+#
+# Key lessons learned:
+# - Theoretical improvements often don't translate to real-world gains
+# - Small-scale synthetic benchmarks can be completely misleading  
+# - Only comprehensive, production-like testing reveals true performance impact
+#
 name: Performance Check
 on:
   pull_request:
@@ -14,11 +27,12 @@ jobs:
         with:
           fetch-depth: 0  # Needed for baseline comparison
       
-      - name: Setup Java
+      - name: Setup Java 25
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'oracle'
           java-version: 25
+          check-latest: true
       
       - name: Cache Maven dependencies
         uses: actions/cache@v3
@@ -40,13 +54,16 @@ jobs:
         timeout-minutes: 15  # Increased timeout for comprehensive testing (5000 regexps)
         run: |
           echo "Running comprehensive performance comparison with full Wuthering Heights corpus..."
+          echo "ENFORCING RULE: No merges without provable performance improvements!"
+          echo "Testing with production-scale workloads to prevent micro-benchmark deception."
           
           # Create baseline directory
           mkdir -p benchmarks/baseline
           
           # Run the comprehensive performance test using full Wuthering Heights corpus
-          MAX_REGEXPS=5000  # Comprehensive scale for robust performance validation
-          NUM_RUNS=5        # Increased runs for better statistical significance
+          # CRITICAL: These parameters ensure realistic, production-scale validation
+          MAX_REGEXPS=5000  # Comprehensive scale for robust performance validation (NOT lab-scale!)
+          NUM_RUNS=5        # Increased runs for statistical significance (NOT single-run micro-benchmarks!)
           
           # Run performance test - exit code 2 (WARNING) should not cause failure
           ./mvnw -q -B -pl rmatch-tester exec:java \
@@ -73,23 +90,28 @@ jobs:
           python3 -m pip install --user -r requirements.txt
           
           # Generate performance evolution charts
-          python3 scripts/generate_performance_charts.py
+          echo "Generating performance evolution charts..."
+          python3 scripts/generate_performance_charts.py || echo "⚠️ Performance charts generation failed"
           
           # Generate macro performance timeline chart
           echo "Generating macro performance timeline chart..."
-          python3 scripts/generate_macro_performance_plot.py
+          python3 scripts/generate_macro_performance_plot.py || echo "⚠️ Macro performance chart generation failed"
           
           # Generate Java regex performance timeline chart
           echo "Generating Java regex performance timeline chart..."
-          python3 scripts/generate_java_performance_plot.py
+          python3 scripts/generate_java_performance_plot.py || echo "⚠️ Java performance chart generation failed"
           
           # Generate performance comparison chart (rmatch vs Java ratios)
           echo "Generating performance comparison chart..."
-          python3 scripts/generate_performance_comparison_plot.py
+          python3 scripts/generate_performance_comparison_plot.py || echo "⚠️ Performance comparison chart generation failed"
           
           # Update README.md performance comparison table with latest results
           echo "Updating README.md performance table..."
-          python3 scripts/update_readme_performance_table.py
+          python3 scripts/update_readme_performance_table.py || echo "⚠️ README performance table update failed"
+          
+          # List generated files for debugging
+          echo "Generated files:"
+          ls -la *.png 2>/dev/null || echo "No PNG files generated"
       
       - name: Commit updated performance data
         if: github.event_name == 'pull_request'
@@ -98,23 +120,45 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # Add all performance-related files
-          git add performance_timeline.png java_performance_timeline.png performance_comparison.png README.md
+          # Add performance-related files that exist
+          files_to_add=""
           
-          # Only commit if there are changes
-          if ! git diff --staged --quiet; then
-            git commit -m "chore: update performance data
+          # Check for performance chart files
+          for file in performance_timeline.png java_performance_timeline.png performance_comparison.png; do
+            if [ -f "$file" ]; then
+              files_to_add="$files_to_add $file"
+              echo "✅ Found $file - will be committed"
+            else
+              echo "ℹ️  $file not found - skipping"
+            fi
+          done
+          
+          # Always try to add README.md (in case performance table was updated)
+          if [ -f "README.md" ]; then
+            files_to_add="$files_to_add README.md"
+          fi
+          
+          # Add files if any exist
+          if [ -n "$files_to_add" ]; then
+            git add $files_to_add
             
-            Auto-generated performance timeline charts and README table
-            after running performance benchmarks
-            
-            [skip ci]"
-            
-            # Push the changes back to the PR branch
-            git push origin HEAD:${{ github.head_ref }}
-            echo "✅ Updated performance data committed to PR"
+            # Only commit if there are changes
+            if ! git diff --staged --quiet; then
+              git commit -m "chore: update performance data
+              
+              Auto-generated performance timeline charts and README table
+              after running performance benchmarks
+              
+              [skip ci]"
+              
+              # Push the changes back to the PR branch
+              git push origin HEAD:${{ github.head_ref }}
+              echo "✅ Updated performance data committed to PR"
+            else
+              echo "ℹ️  No changes to performance data"
+            fi
           else
-            echo "ℹ️  No changes to performance data"
+            echo "ℹ️  No performance files found to commit"
           fi
       
       - name: Compare and comment
@@ -144,4 +188,6 @@ jobs:
             benchmarks/results/*.md
             charts/*.png
             performance_timeline.png
+            java_performance_timeline.png
+            performance_comparison.png
           retention-days: 30

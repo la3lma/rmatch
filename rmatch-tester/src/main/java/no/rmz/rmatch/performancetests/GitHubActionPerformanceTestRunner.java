@@ -22,8 +22,10 @@ public final class GitHubActionPerformanceTestRunner {
       LOG.info("Starting GitHub Action Performance Test");
       LOG.info("Max regexps: " + maxRegexps + ", Number of runs: " + numRuns);
 
-      // Load baseline results
-      List<MatcherBenchmarker.TestRunResult> baselineResults = BaselineManager.loadRmatchBaseline();
+      // Load baseline results with architecture check - discards baselines from unknown
+      // architectures
+      List<MatcherBenchmarker.TestRunResult> baselineResults =
+          BaselineManager.loadRmatchBaselineWithArchitectureCheck();
 
       // Run performance comparison
       GitHubActionPerformanceTest.ComparisonResult result =
@@ -41,20 +43,70 @@ public final class GitHubActionPerformanceTestRunner {
       generatePRSummary(result);
 
       // Update baseline if this is a merge to main (detected via environment) OR if no baseline
-      // exists (bootstrap)
+      // exists (bootstrap) OR if baseline was discarded due to unknown architecture
       String gitRef = System.getenv("GITHUB_REF");
+      LOG.info("GITHUB_REF environment variable: " + gitRef);
       boolean isMainBranch =
           gitRef != null && (gitRef.endsWith("/main") || gitRef.endsWith("/master"));
       boolean isBootstrapCase = baselineResults.isEmpty();
 
-      if (isMainBranch || isBootstrapCase) {
-        if (isBootstrapCase) {
-          LOG.info("No baseline exists - establishing initial baseline from current results");
+      LOG.info(
+          "Baseline update conditions - isMainBranch: "
+              + isMainBranch
+              + ", isBootstrapCase: "
+              + isBootstrapCase
+              + ", baselineResultsSize: "
+              + baselineResults.size());
+
+      // Check if baseline was discarded due to unknown architecture
+      boolean wasUnknownArchitectureBaseline = false;
+      BaselineManager.EnvironmentInfo existingBaselineEnv = null;
+      if (BaselineManager.baselineExists(BaselineManager.DEFAULT_BASELINE_DIR, "rmatch")) {
+        existingBaselineEnv =
+            BaselineManager.loadBaselineEnvironment(BaselineManager.DEFAULT_BASELINE_DIR, "rmatch");
+        wasUnknownArchitectureBaseline =
+            existingBaselineEnv != null
+                && "unknown".equals(existingBaselineEnv.getArchitectureId())
+                && baselineResults.isEmpty();
+      }
+
+      // Enhanced logging for baseline decision making
+      if (existingBaselineEnv != null) {
+        LOG.info(
+            "Existing baseline environment: Architecture="
+                + existingBaselineEnv.getArchitectureId()
+                + ", Java="
+                + existingBaselineEnv.getJavaVersion()
+                + ", Commit="
+                + existingBaselineEnv.getGitCommit());
+      }
+
+      BaselineManager.EnvironmentInfo currentEnv = BaselineManager.getCurrentEnvironment();
+      LOG.info(
+          "Current test environment: Architecture="
+              + currentEnv.getArchitectureId()
+              + ", Java="
+              + currentEnv.getJavaVersion()
+              + ", Commit="
+              + currentEnv.getGitCommit());
+
+      if (isMainBranch || isBootstrapCase || wasUnknownArchitectureBaseline) {
+        if (isBootstrapCase && !wasUnknownArchitectureBaseline) {
+          LOG.info(
+              "✨ BASELINE CREATION: No baseline exists - establishing initial baseline from current results");
+        } else if (wasUnknownArchitectureBaseline) {
+          LOG.info(
+              "✨ BASELINE REPLACEMENT: Existing baseline has unknown architecture - establishing new baseline from current results");
         } else {
-          LOG.info("Updating baseline for main branch");
+          LOG.info("✨ BASELINE UPDATE: Updating baseline for main branch with current results");
         }
         BaselineManager.saveRmatchBaseline("benchmarks/baseline", result.getRmatchResults());
         BaselineManager.saveJavaBaseline("benchmarks/baseline", result.getJavaResults());
+      } else {
+        LOG.info(
+            "📊 BASELINE COMPARISON: Comparing current results against existing baseline ("
+                + baselineResults.size()
+                + " baseline measurements)");
       }
 
       // Exit with appropriate code based on performance result

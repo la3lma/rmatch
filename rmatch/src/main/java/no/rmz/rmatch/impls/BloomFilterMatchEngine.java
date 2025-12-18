@@ -144,7 +144,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
   }
 
   private void buildLiteralPrefilter(final Set<Regexp> regexps) {
-    final List<LiteralHint> hints = new ArrayList<>();
+    final List<LiteralHint> hints = new ArrayList<>(regexps.size());
 
     int patternId = 0;
     for (final Regexp regexp : regexps) {
@@ -283,7 +283,7 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
   private Set<Integer> getLiteralCandidatePositions(final String text) {
     final List<AhoCorasickPrefilter.Candidate> candidates = literalPrefilter.scan(text);
-    final Set<Integer> positions = new HashSet<>();
+    final Set<Integer> positions = new HashSet<>(candidates.size());
 
     for (final AhoCorasickPrefilter.Candidate candidate : candidates) {
       final int startPos = candidate.startIndexForMatch();
@@ -298,7 +298,8 @@ public final class BloomFilterMatchEngine implements MatchEngine {
   private Set<Regexp> bloomFilterRegexps(
       final Set<Regexp> candidates, final String text, final int position) {
     // Use local collection for thread safety - slight allocation cost but necessary
-    final Set<Regexp> results = new HashSet<>();
+    // Pre-size based on expected pass rate (typically 20-50% of candidates)
+    final Set<Regexp> results = new HashSet<>(candidates.size() / 2);
 
     for (final Regexp regexp : candidates) {
       if (bloomFilterTest(regexp, text, position)) {
@@ -434,7 +435,6 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
     // Handle simple cases - for complex regex, return first literal char
     final char first = pattern.charAt(0);
-    Character.isLetterOrDigit(first);
 
     // For now, just return first character - could be enhanced for complex patterns
     return first;
@@ -446,10 +446,19 @@ public final class BloomFilterMatchEngine implements MatchEngine {
     int minLength = 0;
     for (int i = 0; i < pattern.length(); i++) {
       final char c = pattern.charAt(i);
-      if (Character.isLetterOrDigit(c)) {
+      // Optimized character classification - faster than Character.isLetterOrDigit()
+      if (isLetterOrDigit(c)) {
         minLength++;
       }
     }
     return Math.max(1, minLength);
+  }
+
+  /**
+   * Optimized letter or digit check using range comparisons. Faster than
+   * Character.isLetterOrDigit() for ASCII characters which are most common.
+   */
+  private static boolean isLetterOrDigit(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
   }
 }

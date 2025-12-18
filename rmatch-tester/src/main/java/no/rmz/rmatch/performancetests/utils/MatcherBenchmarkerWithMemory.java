@@ -133,10 +133,17 @@ public final class MatcherBenchmarkerWithMemory {
     System.out.println("match_count=" + finalCount);
     System.out.println("DETAILED_MEMORY_STATS_END");
 
-    // Also do the original CSV logging for compatibility
-    final long usedMemoryInMb = memoryAfterMatching;
-    CSVAppender.append(
-        logLocation, new long[] {System.currentTimeMillis() / 1000, duration, usedMemoryInMb});
+    // Modern structured logging approach - capture detailed memory information
+    // Compatible with modern performance tracking systems
+    LOG.info(
+        String.format(
+            "PERFORMANCE_METRICS: duration_ms=%d, memory_used_mb=%d, memory_total_mb=%d, memory_max_mb=%d, matches=%d, timestamp=%d",
+            duration,
+            memoryAfterMatching,
+            totalMemoryInMb,
+            maxMemoryInMb,
+            finalCount,
+            System.currentTimeMillis() / 1000));
 
     LOG.log(Level.INFO, "Counter = " + finalCount);
     Counters.dumpCounters();

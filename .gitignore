@@ -12,6 +12,15 @@ measurements.sqlite
 # Performance test artifacts (usually generated during CI)
 benchmarks/results/performance-check-*.json
 benchmarks/results/pr-performance-summary.md
+benchmarks/results/gc-experiments/*/
+
+# Large benchmark result files (exclude to avoid GitHub file size limits)
+benchmarks/results/*.txt
+benchmarks/results/*.log
+benchmarks/results/jmh-*.json
+benchmarks/results/macro-*.json
+benchmarks/results/java-*.json
+benchmarks/results/enhanced-*/
 **/target/
 scripts/__pycache__/
 
@@ -22,3 +31,4 @@ scripts/__pycache__/
 **/measurements/*.csv
 proposals/*/plantuml.jar
 proposals/*/build/
+*/**/*.json.backup

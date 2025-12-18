@@ -7,7 +7,6 @@ import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.performancetests.utils.CSVAppender;
 import no.rmz.rmatch.performancetests.utils.FileInhaler;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 import no.rmz.rmatch.utils.CounterAction;
@@ -69,14 +68,16 @@ public final class HandleTheWutheringHeightsCorpus {
 
     final Runtime runtime = Runtime.getRuntime();
     final int mb = 1024 * 1024;
-
     final long usedMemoryInMb = ((runtime.totalMemory() - runtime.freeMemory()) / mb);
 
-    CSVAppender.append(
-        "measurements/handle-the-wuthering-heights-corpus.csv",
-        new long[] {
-          System.currentTimeMillis() / MILLISECONDS_IN_A_SECOND, duration, usedMemoryInMb
-        });
+    // Modern logging approach - log structured data instead of CSV
+    LOG.info(
+        String.format(
+            "PERFORMANCE_METRICS: duration_ms=%d, memory_mb=%d, matches=%d, timestamp=%d",
+            duration,
+            usedMemoryInMb,
+            finalCount,
+            System.currentTimeMillis() / MILLISECONDS_IN_A_SECOND));
     Counters.dumpCounters();
   }
 
