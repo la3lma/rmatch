@@ -1,0 +1,42 @@
+# Emacs temporary files
+*~
+\#*\#
+.\#*
+.emacs.desktop
+.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Emacs org-mode
+.org-id-locations
+*_archive
+
+# LaTeX temporary files
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.pdfsync
+*.nav
+*.snm
+*.vrb
+*.bcf
+*.run.xml
+*.fls
+*.figlist
+*.makefile
+*.auxlock
+
+# LaTeX build directories
+auto/
+_minted-*/
+
+# Note: PDF files are intentionally NOT ignored as they may be final outputs
