@@ -34,9 +34,14 @@ public final class MatcherImpl implements Matcher {
   /** Our precious MatchEngine. */
   private final MatchEngine me;
 
+  /** Engine type from system property. */
+  private static final String ENGINE_TYPE = System.getProperty("rmatch.engine", "default");
+
   /** Flag to enable Bloom filter optimization. */
-  private static final boolean USE_BLOOM_FILTER =
-      "bloom".equalsIgnoreCase(System.getProperty("rmatch.engine", "default"));
+  private static final boolean USE_BLOOM_FILTER = "bloom".equalsIgnoreCase(ENGINE_TYPE);
+
+  /** Flag to enable fast-path optimization. */
+  private static final boolean USE_FAST_PATH = "fastpath".equalsIgnoreCase(ENGINE_TYPE);
 
   /** Our equally prescious NodeStorage. Our precioussss. */
   private final NodeStorage ns;
@@ -64,6 +69,8 @@ public final class MatcherImpl implements Matcher {
     rs = new RegexpStorageImpl(ns, compiler, regexpFactory);
     if (USE_BLOOM_FILTER) {
       me = new BloomFilterMatchEngine(ns);
+    } else if (USE_FAST_PATH) {
+      me = new FastPathMatchEngine(ns);
     } else {
       me = new MatchEngineImpl(ns);
     }
@@ -81,6 +88,9 @@ public final class MatcherImpl implements Matcher {
           regexps.add(rs.getRegexp(regexpStr));
         }
         bfEngine.initialize(regexps);
+      } else if (USE_FAST_PATH && me instanceof FastPathMatchEngine fpEngine) {
+        // Configure prefilter for fast-path engine
+        configurePrefilterForEngine(fpEngine);
       } else if (me instanceof MatchEngineImpl) {
         // Configure AhoCorasick prefilter for legacy engine
         configurePrefilterForLegacyEngine();
@@ -94,10 +104,39 @@ public final class MatcherImpl implements Matcher {
       rs.remove(r, a);
 
       // Reconfigure prefilter after removal
-      if (!USE_BLOOM_FILTER && me instanceof MatchEngineImpl) {
+      if (USE_FAST_PATH && me instanceof FastPathMatchEngine fpEngine) {
+        configurePrefilterForEngine(fpEngine);
+      } else if (!USE_BLOOM_FILTER && me instanceof MatchEngineImpl) {
         configurePrefilterForLegacyEngine();
       }
     }
+  }
+
+  /**
+   * Configure the prefilter for FastPathMatchEngine.
+   *
+   * <p>This builds pattern mappings and enables literal-based prefiltering for the fast-path
+   * engine.
+   */
+  private void configurePrefilterForEngine(final FastPathMatchEngine fpEngine) {
+    // Build pattern ID to regex string mapping
+    final Set<String> regexpStrings = rs.getRegexpSet();
+    final int size = regexpStrings.size();
+    final Map<Integer, String> patterns = new HashMap<>(size);
+    final Map<Integer, Integer> flags = new HashMap<>(size);
+    final Map<String, Regexp> regexpMappings = new HashMap<>(size);
+
+    int patternId = 0;
+
+    for (final String regexpStr : regexpStrings) {
+      patterns.put(patternId, regexpStr);
+      flags.put(patternId, 0);
+      regexpMappings.put(regexpStr, rs.getRegexp(regexpStr));
+      patternId++;
+    }
+
+    // Configure the prefilter
+    fpEngine.configurePrefilter(patterns, flags, regexpMappings);
   }
 
   /**
@@ -108,11 +147,12 @@ public final class MatcherImpl implements Matcher {
     final MatchEngineImpl legacyEngine = (MatchEngineImpl) me;
 
     // Build pattern ID to regex string mapping
-    final Map<Integer, String> patterns = new HashMap<>();
-    final Map<Integer, Integer> flags = new HashMap<>();
-    final Map<String, Regexp> regexpMappings = new HashMap<>();
-
     final Set<String> regexpStrings = rs.getRegexpSet();
+    final int size = regexpStrings.size();
+    final Map<Integer, String> patterns = new HashMap<>(size);
+    final Map<Integer, Integer> flags = new HashMap<>(size);
+    final Map<String, Regexp> regexpMappings = new HashMap<>(size);
+
     int patternId = 0;
 
     for (final String regexpStr : regexpStrings) {
