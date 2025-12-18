@@ -37,20 +37,26 @@
         <maven.plugin.validation>DEFAULT</maven.plugin.validation>
         <java.version>25</java.version>
         <errorprone.version>2.37.0</errorprone.version>
-        <findbugs.version>1.3.2</findbugs.version>
         <guava.version>33.5.0-jre</guava.version>
-        <guice.version>7.0.0</guice.version>
+        <jetbrains-annotations.version>26.0.2-1</jetbrains-annotations.version>
+        <ahocorasick.version>0.6.3</ahocorasick.version>
+        <jmh.version>1.37</jmh.version>
         <junit-jupiter.version>5.11.4</junit-jupiter.version>
         <junit-platform.version>6.0.1</junit-platform.version>
-        <junit.version>4.13.2</junit.version>
         <mavenCheckstylePlugin.version>3.6.0</mavenCheckstylePlugin.version>
         <mavenCoberturaPlugin.version>2.5.1</mavenCoberturaPlugin.version>
         <mavenCompilerPlugin.version>3.14.1</mavenCompilerPlugin.version>
         <mavenDependencyPlugin.version>3.9.0</mavenDependencyPlugin.version>
 
         <mavenFindbugsPlugin.version>3.0.5</mavenFindbugsPlugin.version>
+        <mavenResourcesPlugin.version>3.4.0</mavenResourcesPlugin.version>
+        <mavenShadePlugin.version>3.6.1</mavenShadePlugin.version>
         <mavenJarPlugin.version>3.5.0</mavenJarPlugin.version>
         <mavenReleasePlugin.version>3.3.1</mavenReleasePlugin.version>
+
+        <!-- Code quality plugins -->
+        <spotless.version>3.1.0</spotless.version>
+        <spotbugs.version>4.9.8.2</spotbugs.version>
 
         <mavenSourcePlugin.version>3.4.0</mavenSourcePlugin.version>
         <mavenSurefire.version>3.5.4</mavenSurefire.version>
@@ -60,68 +66,128 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
+    <!-- Dependency Management: Define versions centrally without forcing inheritance -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Test Dependencies -->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockitoCore.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockitoJunitJupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
 
+            <!-- JUnit Jupiter -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-commons</artifactId>
+                <version>${junit-platform.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-engine</artifactId>
+                <version>${junit-platform.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-launcher</artifactId>
+                <version>${junit-platform.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- Third-party Libraries -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${jetbrains-annotations.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.ahocorasick</groupId>
+                <artifactId>ahocorasick</artifactId>
+                <version>${ahocorasick.version}</version>
+            </dependency>
+
+            <!-- JMH for benchmarks -->
+            <dependency>
+                <groupId>org.openjdk.jmh</groupId>
+                <artifactId>jmh-core</artifactId>
+                <version>${jmh.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjdk.jmh</groupId>
+                <artifactId>jmh-generator-annprocess</artifactId>
+                <version>${jmh.version}</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- Dependencies that ALL submodules inherit -->
     <dependencies>
-
+        <!-- All submodules get these testing dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockitoCore.version}</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>${mockitoJunitJupiter.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-commons</artifactId>
-            <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-engine</artifactId>
-            <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>${junit-platform.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>${findbugs.version}</version>
-        </dependency>
-
+        <!-- All submodules get Guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
     </dependencies>
 
@@ -144,12 +210,12 @@
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>${spotless.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.9.8.2</version>
+                    <version>${spotbugs.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -184,6 +250,38 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+
+                <!-- Standard Maven plugins -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${mavenResourcesPlugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${mavenSurefire.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${mavenJarPlugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${mavenShadePlugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${mavenSourcePlugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${mavenDependencyPlugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
