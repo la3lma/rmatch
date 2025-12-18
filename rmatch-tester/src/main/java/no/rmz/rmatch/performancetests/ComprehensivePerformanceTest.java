@@ -20,7 +20,7 @@ public final class ComprehensivePerformanceTest {
   private static final Logger LOG = Logger.getLogger(ComprehensivePerformanceTest.class.getName());
 
   /** Default number of regular expressions for comprehensive testing (large scale) */
-  private static final int DEFAULT_COMPREHENSIVE_REGEXPS = 5000;
+  private static final int DEFAULT_COMPREHENSIVE_REGEXPS = 10_000;
 
   /** Maximum number of regular expressions for comprehensive testing */
   private static final int MAX_COMPREHENSIVE_REGEXPS = 10000;
