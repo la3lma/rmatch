@@ -35,13 +35,13 @@ public final class MatcherImpl implements Matcher {
   private final MatchEngine me;
 
   /** Engine type from system property. */
-  private static final String ENGINE_TYPE = System.getProperty("rmatch.engine", "default");
+  private final String engineType = System.getProperty("rmatch.engine", "default");
 
   /** Flag to enable Bloom filter optimization. */
-  private static final boolean USE_BLOOM_FILTER = "bloom".equalsIgnoreCase(ENGINE_TYPE);
+  private final boolean useBloomFilter = "bloom".equalsIgnoreCase(engineType);
 
   /** Flag to enable fast-path optimization. */
-  private static final boolean USE_FAST_PATH = "fastpath".equalsIgnoreCase(ENGINE_TYPE);
+  private final boolean useFastPath = "fastpath".equalsIgnoreCase(engineType);
 
   /** Our equally prescious NodeStorage. Our precioussss. */
   private final NodeStorage ns;
@@ -70,9 +70,9 @@ public final class MatcherImpl implements Matcher {
     checkNotNull(regexpFactory);
     ns = new NodeStorageImpl();
     rs = new RegexpStorageImpl(ns, compiler, regexpFactory);
-    if (USE_BLOOM_FILTER) {
+    if (useBloomFilter) {
       me = new BloomFilterMatchEngine(ns);
-    } else if (USE_FAST_PATH) {
+    } else if (useFastPath) {
       me = new FastPathMatchEngine(ns);
     } else {
       me = new MatchEngineImpl(ns);
@@ -190,13 +190,13 @@ public final class MatcherImpl implements Matcher {
       }
 
       // Initialize engine-specific optimizations
-      if (USE_BLOOM_FILTER && me instanceof BloomFilterMatchEngine bfEngine) {
+      if (useBloomFilter && me instanceof BloomFilterMatchEngine bfEngine) {
         final java.util.Set<Regexp> regexps = new java.util.HashSet<>();
         for (final String regexpStr : rs.getRegexpSet()) {
           regexps.add(rs.getRegexp(regexpStr));
         }
         bfEngine.initialize(regexps);
-      } else if (USE_FAST_PATH && me instanceof FastPathMatchEngine fpEngine) {
+      } else if (useFastPath && me instanceof FastPathMatchEngine fpEngine) {
         // Configure prefilter for fast-path engine
         configurePrefilterForEngine(fpEngine);
       } else if (me instanceof MatchEngineImpl) {
@@ -210,6 +210,6 @@ public final class MatcherImpl implements Matcher {
 
   /** Returns true if the current engine variant requires prefilter configuration. */
   private boolean needsPrefilterConfiguration() {
-    return USE_BLOOM_FILTER || USE_FAST_PATH || me instanceof MatchEngineImpl;
+    return useBloomFilter || useFastPath || me instanceof MatchEngineImpl;
   }
 }
