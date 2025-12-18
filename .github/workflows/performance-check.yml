@@ -27,11 +27,12 @@ jobs:
         with:
           fetch-depth: 0  # Needed for baseline comparison
       
-      - name: Setup Java
+      - name: Setup Java 25
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'oracle'
           java-version: 25
+          check-latest: true
       
       - name: Cache Maven dependencies
         uses: actions/cache@v3

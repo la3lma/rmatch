@@ -41,7 +41,7 @@
         <guava.version>33.5.0-jre</guava.version>
         <guice.version>7.0.0</guice.version>
         <junit-jupiter.version>5.11.4</junit-jupiter.version>
-        <junit-platform.version>1.11.4</junit-platform.version>
+        <junit-platform.version>6.0.1</junit-platform.version>
         <junit.version>4.13.2</junit.version>
         <mavenCheckstylePlugin.version>3.6.0</mavenCheckstylePlugin.version>
         <mavenCoberturaPlugin.version>2.5.1</mavenCoberturaPlugin.version>
@@ -49,12 +49,13 @@
         <mavenDependencyPlugin.version>3.9.0</mavenDependencyPlugin.version>
 
         <mavenFindbugsPlugin.version>3.0.5</mavenFindbugsPlugin.version>
-        <mavenJarPlugin.version>3.4.2</mavenJarPlugin.version>
-        <mavenReleasePlugin.version>3.1.1</mavenReleasePlugin.version>
-        <mavenSourcePlugin.version>3.3.1</mavenSourcePlugin.version>
+        <mavenJarPlugin.version>3.5.0</mavenJarPlugin.version>
+        <mavenReleasePlugin.version>3.3.1</mavenReleasePlugin.version>
+
+        <mavenSourcePlugin.version>3.4.0</mavenSourcePlugin.version>
         <mavenSurefire.version>3.5.4</mavenSurefire.version>
-        <mockitoCore.version>5.20.0</mockitoCore.version>
-        <mockitoJunitJupiter.version>5.20.0</mockitoJunitJupiter.version>
+        <mockitoCore.version>5.21.0</mockitoCore.version>
+        <mockitoJunitJupiter.version>5.21.0</mockitoJunitJupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -143,12 +144,12 @@
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.9.8.1</version>
+                    <version>4.9.8.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
