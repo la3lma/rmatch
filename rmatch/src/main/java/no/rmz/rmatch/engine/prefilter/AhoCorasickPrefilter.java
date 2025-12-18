@@ -111,7 +111,9 @@ public final class AhoCorasickPrefilter {
       }
     }
     for (final Map.Entry<String, List<LiteralHint>> entry : tmpBuckets.entrySet()) {
-      buckets.put(entry.getKey(), new Bucket(entry.getValue().toArray(LiteralHint[]::new), entry.getKey().length()));
+      buckets.put(
+          entry.getKey(),
+          new Bucket(entry.getValue().toArray(LiteralHint[]::new), entry.getKey().length()));
     }
     this.trie = builder.build();
   }
@@ -160,10 +162,7 @@ public final class AhoCorasickPrefilter {
       for (final LiteralHint hint : bucket.hints) {
         out.add(
             new Candidate(
-                hint.patternId(),
-                endIdxExclusive,
-                literalLength,
-                hint.literalOffsetInMatch()));
+                hint.patternId(), endIdxExclusive, literalLength, hint.literalOffsetInMatch()));
       }
     }
     return out;
