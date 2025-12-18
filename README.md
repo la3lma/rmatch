@@ -5,13 +5,12 @@ rmatch
 
 | Metric | rmatch | Java Regex | Ratio (rmatch/java) |
 |--------|--------|------------|---------------------|
-| **5000 patterns** | 19.0s | 4.2s | 4.6x slower |
+| **5000 patterns** | 15.9s | 4.2s | 3.8x slower |
 | **Peak Memory** | 108MB | 19MB | 5.7x more memory |
 | **Pattern Loading** | 19MB | 0MB | 0.0x less memory |
 | **Matching Phase** | 74MB | 4MB | 18.5x more memory |
 
-
-*Latest benchmark comparison between rmatch and native Java regex (java.util.regex.Pattern) on 5000 regex patterns against Wuthering Heights corpus. Updated: 2025-11-05 18:33 UTC*
+*Latest benchmark comparison between rmatch and native Java regex (java.util.regex.Pattern) on 5000 regex patterns against Wuthering Heights corpus. Updated: 2025-11-06 14:46 UTC*
 
 ---
 

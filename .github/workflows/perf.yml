@@ -1,20 +1,23 @@
 # .github/workflows/perf.yml
 name: Performance
 on:
+  push:
+    branches: [main, master]  # Run on every merge to master to build historical dataset
   workflow_dispatch:
   schedule:
     - cron: "0 2 * * *"  # nightly
 jobs:
   perf:
     runs-on: self-hosted  # prefer; fall back to ubuntu-latest if needed
+    permissions:
+      contents: write  # Allow pushing benchmark results back to repository
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Java 25
-        uses: actions/setup-java@v4
-        with: 
-          distribution: 'oracle'
-          java-version: 25
-          check-latest: true
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0  # Need full history for performance tracking
+      - uses: actions/setup-java@v4
+        with: { distribution: 'temurin', java-version: 25 }
       - name: Prepare runner (pin CPU governor)
         if: runner.os == 'Linux'
         run: |
@@ -24,9 +27,9 @@ jobs:
       - name: Run JMH
         run: ./scripts/run_jmh.sh  # outputs jmh-result.json
       - name: Run Macro Benchmark with Memory Tracking
-        run: ./scripts/run_macro_with_memory.sh  # outputs macro-result.json with memory data
+        run: MAX_REGEXPS=10000 ./scripts/run_macro_with_memory.sh  # outputs macro-result.json with memory data
       - name: Run Java Regex Benchmark with Memory Tracking
-        run: ./scripts/run_java_benchmark_with_memory.sh  # outputs java-result.json with memory data
+        run: MAX_REGEXPS=10000 ./scripts/run_java_benchmark_with_memory.sh  # outputs java-result.json with memory data
       - name: Generate performance timelines and update README
         run: |
           # Install Python dependencies if needed
@@ -43,5 +46,52 @@ jobs:
         run: ./scripts/profile_async_profiler.sh  # outputs *.svg
       - name: Compare vs baseline and comment
         run: ./scripts/compare_and_comment.sh  # uses GH_TOKEN to post PR comment
+      
+      - name: Commit benchmark results to repository
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action - Performance Data Collection"
+          
+          # Add all benchmark result files
+          git add benchmarks/results/macro-*.json || echo "No macro results to add"
+          git add benchmarks/results/java-*.json || echo "No java results to add"  
+          git add benchmarks/results/jmh-*.json || echo "No JMH results to add"
+          git add benchmarks/results/jmh-*.txt || echo "No JMH text results to add"
+          
+          # Add updated performance charts
+          git add performance_timeline.png || echo "No macro timeline chart to add"
+          git add java_performance_timeline.png || echo "No java timeline chart to add" 
+          git add performance_comparison.png || echo "No comparison chart to add"
+          git add README.md || echo "No README changes to add"
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No benchmark data changes to commit"
+          else
+            echo "Committing new benchmark results and charts..."
+            git commit -m "chore: add performance benchmark data for $(date -u +%Y-%m-%d)
+            
+            Automated collection of performance data from CI:
+            - rmatch benchmark with 10000 patterns
+            - Java regex benchmark with 10000 patterns  
+            - Updated performance comparison charts
+            - Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+            
+            [skip ci]"
+            
+            git push origin HEAD:${{ github.ref_name }}
+            echo "✅ Benchmark results committed to repository for historical tracking"
+          fi
       - uses: actions/upload-artifact@v4
-        with: { name: perf-artifacts, path: "jmh-result.json macro-result.json profiles/*.svg performance_timeline.png java_performance_timeline.png performance_comparison.png" }
+        with: 
+          name: perf-artifacts-${{ github.sha }}
+          path: |
+            benchmarks/results/macro-*.json
+            benchmarks/results/java-*.json
+            benchmarks/results/jmh-*.json
+            benchmarks/results/jmh-*.txt
+            profiles/*.svg
+            performance_timeline.png
+            java_performance_timeline.png
+            performance_comparison.png
+          retention-days: 365  # Keep historical data for 1 year
