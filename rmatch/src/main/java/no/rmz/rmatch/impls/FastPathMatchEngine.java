@@ -52,9 +52,8 @@ public final class FastPathMatchEngine implements MatchEngine {
   /** Whether prefiltering is enabled. */
   private final boolean prefilterEnabled;
 
-  /** Minimum pattern count threshold for prefilter activation. Default 5000 is optimal based on testing. */
-  private static final int PREFILTER_ACTIVATION_THRESHOLD =
-      Integer.parseInt(System.getProperty("rmatch.prefilter.threshold", "5000"));
+  /** Minimum pattern count threshold for prefilter activation. */
+  private final int prefilterActivationThreshold;
 
   /** Set of positions where matches should be started (when using prefilter). */
   private Set<Integer> candidatePositions;
@@ -70,6 +69,7 @@ public final class FastPathMatchEngine implements MatchEngine {
   public FastPathMatchEngine(final NodeStorage ns) {
     this.ns = checkNotNull(ns, "NodeStorage can't be null");
     this.prefilterEnabled = "aho".equalsIgnoreCase(System.getProperty("rmatch.prefilter", "aho"));
+    this.prefilterActivationThreshold = resolvePrefilterActivationThreshold();
   }
 
   /**
@@ -89,8 +89,11 @@ public final class FastPathMatchEngine implements MatchEngine {
       return;
     }
 
-    // Always enable prefilter - provides consistent benefits across all scales
-    // Dynamic threshold not needed based on comprehensive testing
+    if (patterns.size() < prefilterActivationThreshold) {
+      prefilter = null;
+      patternIdToRegexp = null;
+      return;
+    }
 
     final List<LiteralHint> hints = new ArrayList<>(patterns.size());
     patternIdToRegexp = new HashMap<>(patterns.size());
@@ -114,6 +117,16 @@ public final class FastPathMatchEngine implements MatchEngine {
     } else {
       prefilter = null;
       patternIdToRegexp = null;
+    }
+  }
+
+  private static int resolvePrefilterActivationThreshold() {
+    final String rawThreshold = System.getProperty("rmatch.prefilter.threshold", "7000");
+    try {
+      final int threshold = Integer.parseInt(rawThreshold);
+      return threshold > 0 ? threshold : 7000;
+    } catch (NumberFormatException e) {
+      return 7000;
     }
   }
 
