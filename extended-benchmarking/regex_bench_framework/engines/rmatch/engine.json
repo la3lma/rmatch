@@ -1,0 +1,46 @@
+{
+  "name": "rmatch",
+  "version": "1.1-SNAPSHOT",
+  "description": "High-performance regex engine with linear-time guarantees",
+  "type": "external",
+  "command": ["bash", "runner.sh", "{patterns}", "{corpus}"],
+  "requires": ["java", "mvn"],
+  "disabled": false,
+  "build_command": ["bash", "build.sh"],
+  "output_format": {
+    "match_pattern": "MATCHES=(\\d+)",
+    "time_pattern": "ELAPSED_NS=(\\d+)",
+    "compilation_pattern": "COMPILATION_NS=(\\d+)",
+    "memory_pattern": "MEMORY_BYTES=(\\d+)"
+  },
+  "characteristics": {
+    "backtracking": false,
+    "linear_time_guarantee": true,
+    "supports_backrefs": false,
+    "supports_lookaround": true,
+    "multi_pattern_optimized": true,
+    "memory_profile": "efficient",
+    "compilation_cost": "low"
+  },
+  "platform_requirements": {
+    "java_version": "8+",
+    "maven_version": "3.6+",
+    "memory_mb": 512,
+    "notes": "Requires rmatch to be built and installed to local .m2 repository"
+  },
+  "benchmarking_notes": {
+    "warmup_recommended": 3,
+    "compilation_expensive": false,
+    "memory_efficient": true,
+    "best_for": [
+      "Multi-pattern matching",
+      "Large pattern sets",
+      "High-throughput scanning",
+      "Linear-time guarantees"
+    ],
+    "worst_for": [
+      "Single pattern use cases",
+      "Complex pattern features"
+    ]
+  }
+}
