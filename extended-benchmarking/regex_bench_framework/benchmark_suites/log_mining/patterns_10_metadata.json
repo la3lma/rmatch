@@ -1,0 +1,26 @@
+{
+  "suite_metadata": {
+    "suite_name": "log_mining",
+    "generator": "FairPatternGenerator",
+    "seed": 42,
+    "compatible_engines": [
+      "rmatch",
+      "re2j",
+      "java-native"
+    ],
+    "note": "Patterns designed for cross-engine compatibility"
+  },
+  "patterns": [
+    "(red|green|blue)",
+    "timeout",
+    "error",
+    "[0-9]+",
+    "[^0-9]",
+    "[0-9a-f]",
+    "connection",
+    "success",
+    "failed",
+    "GET|POST|PUT|DELETE"
+  ],
+  "pattern_count": 10
+}
