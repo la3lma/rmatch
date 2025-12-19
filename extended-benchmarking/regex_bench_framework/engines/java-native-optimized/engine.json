@@ -1,0 +1,54 @@
+{
+  "name": "java-native-optimized",
+  "version": "1.0",
+  "description": "Java Native Regex (Optimized) - Pre-compilation, concatenation, and parallel processing",
+  "type": "external",
+  "command": ["bash", ".build/run_java_native_optimized.sh", "{patterns}", "{corpus}"],
+  "requires": ["java", "javac"],
+  "build_command": ["bash", "build.sh"],
+  "output_format": {
+    "match_pattern": "MATCHES=(\\d+)",
+    "time_pattern": "ELAPSED_NS=(\\d+)",
+    "compilation_pattern": "COMPILATION_NS=(\\d+)",
+    "memory_pattern": "MEMORY_BYTES=([-+]?\\d+)",
+    "patterns_compiled_pattern": "PATTERNS_COMPILED=(\\d+)",
+    "patterns_failed_pattern": "PATTERNS_FAILED=(\\d+)"
+  },
+  "characteristics": {
+    "backtracking": true,
+    "linear_time_guarantee": false,
+    "supports_backrefs": true,
+    "supports_lookaround": true,
+    "supports_atomic_groups": true,
+    "supports_possessive_quantifiers": true,
+    "multi_pattern_optimized": true,
+    "memory_profile": "moderate",
+    "compilation_cost": "high",
+    "scanning_speed": "high"
+  },
+  "platform_requirements": {
+    "java_version": "8+",
+    "memory_mb": 2048
+  },
+  "feature_compatibility": {
+    "syntax": "Java",
+    "unsupported_features": [],
+    "notes": "Full Java regex support with pattern concatenation, pre-compilation and parallel processing optimizations"
+  },
+  "benchmarking_notes": {
+    "warmup_recommended": 5,
+    "compilation_expensive": true,
+    "memory_efficient": true,
+    "best_for": [
+      "Large pattern sets",
+      "Multi-pattern workloads",
+      "Parallel processing environments",
+      "Repeated pattern use"
+    ],
+    "worst_for": [
+      "Single-use patterns",
+      "Memory-constrained environments"
+    ],
+    "notes": "Heavily optimized Java regex with pattern concatenation (alternation), pre-compilation, and parallel processing"
+  }
+}
