@@ -9,7 +9,7 @@ SHELL := /bin/bash
 VENV_DIR := .venv
 PYTHON := $(VENV_DIR)/bin/python
 PIP := $(VENV_DIR)/bin/pip
-REGEX_BENCH := $(VENV_DIR)/bin/regex-bench
+REGEX_BENCH := arch -x86_64 $(VENV_DIR)/bin/regex-bench
 
 # Engine directories
 ENGINES_DIR := engines
@@ -158,8 +158,7 @@ bench-phase1: venv build-engines ## Run Phase 1 comprehensive benchmarks
 	$(REGEX_BENCH) run-phase \
 		--config test_matrix/phase1.json \
 		--output $(RESULTS_DIR)/phase1_$(TIMESTAMP) \
-		--parallel 4 \
-		--verbose
+		--parallel 4
 	@echo "$(GREEN)✓ Phase 1 benchmarks complete$(NC)"
 	@echo "$(BLUE)Results: $(RESULTS_DIR)/phase1_$(TIMESTAMP)$(NC)"
 
@@ -171,8 +170,7 @@ bench-phase2: venv build-engines ## Run Phase 2 extended benchmarks
 	$(REGEX_BENCH) run-phase \
 		--config test_matrix/phase2.json \
 		--output $(RESULTS_DIR)/phase2_$(TIMESTAMP) \
-		--parallel 2 \
-		--verbose
+		--parallel 2
 	@echo "$(GREEN)✓ Phase 2 benchmarks complete$(NC)"
 
 .PHONY: bench-custom
@@ -217,7 +215,7 @@ report: venv ## Generate benchmark report from latest results
 	fi; \
 	echo "$(BLUE)Analyzing results: $$latest_result$(NC)"; \
 	mkdir -p $(REPORTS_DIR); \
-	arch -x86_64 $(REGEX_BENCH) generate-report \
+	$(REGEX_BENCH) generate-report \
 		--input "$$latest_result" \
 		--output $(REPORTS_DIR)/report_$(TIMESTAMP) \
 		--format html \

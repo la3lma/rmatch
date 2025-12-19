@@ -276,12 +276,77 @@ def generate_patterns(suite, sizes, output, seed):
               help='Output directory for corpora')
 def setup_corpora(sizes, types, output):
     """Setup test corpora for benchmarking."""
-    console.print(f"📚 [bold blue]Setting Up Test Corpora[/bold blue]")
-    console.print(f"📊 Sizes: {sizes}")
-    console.print(f"🏷️  Types: {types}")
+    from pathlib import Path
+    from .data.corpus import CorpusManager
+    import time
 
-    # TODO: Implement corpus setup
-    console.print("[yellow]⚠️  Corpus setup not yet implemented[/yellow]")
+    console.print(f"📚 [bold blue]Setting Up Test Corpora[/bold blue]")
+
+    # Parse input parameters
+    size_list = [s.strip() for s in sizes.split(',')]
+    type_list = [t.strip() for t in types.split(',')]
+
+    # Validate corpus types
+    valid_types = ['synthetic', 'logs', 'natural_language']
+    for corpus_type in type_list:
+        if corpus_type not in valid_types:
+            console.print(f"[red]❌ Error: Invalid corpus type '{corpus_type}'. Valid types: {', '.join(valid_types)}[/red]")
+            return
+
+    # Create output directory
+    output_dir = Path(output)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    console.print(f"📊 Sizes: {', '.join(size_list)}")
+    console.print(f"🏷️  Types: {', '.join(type_list)}")
+    console.print(f"📂 Output directory: {output_dir}")
+    console.print("")
+
+    # Initialize corpus manager
+    corpus_manager = CorpusManager()
+
+    # Generate corpora
+    total_files = len(size_list) * len(type_list)
+    completed = 0
+
+    console.print(f"[bold green]🚀 Generating {total_files} corpus files...[/bold green]")
+
+    start_time = time.time()
+
+    try:
+        generated_files = corpus_manager.generate_corpus_files(size_list, type_list, output_dir)
+
+        for key, filepath in generated_files.items():
+            completed += 1
+            file_size = filepath.stat().st_size
+            console.print(f"  ✅ [{completed}/{total_files}] {filepath.name} ({_format_bytes(file_size)})")
+
+        elapsed_time = time.time() - start_time
+        console.print("")
+        console.print(f"[bold green]🎉 Successfully generated {total_files} corpus files in {elapsed_time:.1f}s[/bold green]")
+
+        # Show summary
+        console.print("\n[bold blue]📋 Summary:[/bold blue]")
+        total_size = sum(f.stat().st_size for f in generated_files.values())
+        console.print(f"  📁 Files created: {total_files}")
+        console.print(f"  💾 Total size: {_format_bytes(total_size)}")
+        console.print(f"  📂 Location: {output_dir}")
+
+        # Show usage example
+        console.print(f"\n[bold blue]💡 Usage Example:[/bold blue]")
+        console.print(f"  regex-bench benchmark --corpus-dir {output_dir} --patterns patterns.txt")
+
+    except Exception as e:
+        console.print(f"[red]❌ Error generating corpora: {str(e)}[/red]")
+        return
+
+def _format_bytes(bytes_count: int) -> str:
+    """Format bytes into human readable format."""
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if bytes_count < 1024:
+            return f"{bytes_count:.1f}{unit}"
+        bytes_count /= 1024
+    return f"{bytes_count:.1f}TB"
 
 
 @main.command()
