@@ -217,7 +217,7 @@ report: venv ## Generate benchmark report from latest results
 	fi; \
 	echo "$(BLUE)Analyzing results: $$latest_result$(NC)"; \
 	mkdir -p $(REPORTS_DIR); \
-	$(REGEX_BENCH) generate-report \
+	arch -x86_64 $(REGEX_BENCH) generate-report \
 		--input "$$latest_result" \
 		--output $(REPORTS_DIR)/report_$(TIMESTAMP) \
 		--format html \

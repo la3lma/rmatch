@@ -81,8 +81,11 @@ class StatisticalAnalyzer:
         # Throughput calculations
         if scanning_times and results[0].corpus_size_bytes:
             corpus_mb = results[0].corpus_size_bytes / (1024 * 1024)
-            throughputs = [corpus_mb / (t / 1e9) for t in scanning_times]  # MB/s
-            stats['throughput'] = self._compute_throughput_stats(throughputs)
+            # Filter out None and zero values to avoid division by None/zero errors
+            valid_times = [t for t in scanning_times if t is not None and t > 0]
+            if valid_times:
+                throughputs = [corpus_mb / (t / 1e9) for t in valid_times]  # MB/s
+                stats['throughput'] = self._compute_throughput_stats(throughputs)
 
         return stats
 

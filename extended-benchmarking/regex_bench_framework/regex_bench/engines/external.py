@@ -99,7 +99,7 @@ class ExternalEngine(Engine):
 
     def _run_rmatch_file_based(self, patterns_file: Path, corpus_file: Path,
                               iteration: int, output_dir: Path) -> EngineResult:
-        """Execute rmatch using file-based communication to bypass subprocess hanging."""
+        """Execute rmatch using polling-based completion detection to bypass subprocess hanging."""
 
         # Prepare result
         result = EngineResult(
@@ -111,7 +111,6 @@ class ExternalEngine(Engine):
 
         try:
             # Create temporary output files
-            import tempfile
             import uuid
 
             temp_id = str(uuid.uuid4())[:8]
@@ -129,7 +128,7 @@ class ExternalEngine(Engine):
 
             start_time = time.time_ns()
 
-            # Start process without pipes - this avoids the hanging issue
+            # Start process without pipes
             process = subprocess.Popen(
                 command,
                 cwd=self.base_path,
@@ -142,16 +141,70 @@ class ExternalEngine(Engine):
             # Monitor process with psutil
             psutil_process = psutil.Process(process.pid)
 
-            # Wait for completion - this should work since we're not using pipes
-            process.wait(timeout=30)
+            # Polling-based completion detection
+            # rmatch finishes but doesn't signal termination properly
+            poll_interval = 0.1  # 100ms
+            max_wait_time = 30.0  # 30 seconds
+            elapsed = 0.0
+
+            completion_detected = False
+
+            while elapsed < max_wait_time:
+                # Check if process is still alive
+                poll_result = process.poll()
+                if poll_result is not None:
+                    # Process terminated normally
+                    completion_detected = True
+                    break
+
+                # Check for output files indicating completion
+                if stdout_file.exists() and stderr_file.exists():
+                    try:
+                        stdout_content = stdout_file.read_text()
+                        stderr_content = stderr_file.read_text()
+
+                        # Check for rmatch completion indicators
+                        has_results = (
+                            "COMPILATION_NS=" in stdout_content and
+                            "ELAPSED_NS=" in stdout_content and
+                            "MATCHES=" in stdout_content and
+                            "PATTERNS_COMPILED=" in stdout_content
+                        )
+
+                        has_completion_msg = "Benchmark completed:" in stderr_content
+
+                        if has_results and has_completion_msg:
+                            # rmatch finished! Force process termination
+                            try:
+                                process.terminate()
+                                # Give it a moment to terminate gracefully
+                                time.sleep(0.1)
+                                if process.poll() is None:
+                                    process.kill()
+                            except:
+                                pass
+                            completion_detected = True
+                            break
+
+                    except (FileNotFoundError, PermissionError):
+                        # Files not ready yet
+                        pass
+
+                # Sleep before next poll
+                time.sleep(poll_interval)
+                elapsed += poll_interval
 
             end_time = time.time_ns()
             result.total_ns = end_time - start_time
 
-            # Check exit code
-            if process.returncode != 0:
-                result.status = f"exit={process.returncode}"
-                result.notes = f"Process exited with code {process.returncode}"
+            if not completion_detected:
+                # Timeout - kill process and report
+                try:
+                    process.kill()
+                except:
+                    pass
+                result.status = "timeout"
+                result.notes = f"Process timeout after {max_wait_time} seconds"
                 return result
 
             # Read output from files
@@ -180,12 +233,6 @@ class ExternalEngine(Engine):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
 
-            return result
-
-        except subprocess.TimeoutExpired:
-            process.kill()
-            result.status = "timeout"
-            result.notes = "Process timeout (30 seconds)"
             return result
 
         except Exception as e:
