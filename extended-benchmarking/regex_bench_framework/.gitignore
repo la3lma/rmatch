@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Benchmark Results
+results/
+reports/
+*.log
+
+# Engine Build Artifacts
+engines/*/.build/
+engines/*/lib/
+engines/*/target/
+
+# Test Data
+benchmark_suites/*/patterns_*.txt
+benchmark_suites/*/corpus_*.txt
+benchmark_suites/corpora/*.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+setup_debug.log
+
+# Coverage
+.coverage
+htmlcov/
+
+# Jupyter
+.jupyter/
+*.ipynb_checkpoints
