@@ -91,6 +91,9 @@ public final class MatchEngineImpl implements MatchEngine {
   /** Whether prefiltering is enabled via system property. */
   private final boolean prefilterEnabled;
 
+  /** Minimum pattern count threshold for prefilter activation. */
+  private final int prefilterActivationThreshold;
+
   /** Set of positions where matches should be started (when using prefilter). */
   private Set<Integer> candidatePositions;
 
@@ -108,6 +111,7 @@ public final class MatchEngineImpl implements MatchEngine {
   public MatchEngineImpl(final NodeStorage ns) {
     this.ns = checkNotNull(ns, "NodeStorage can't be null");
     this.prefilterEnabled = "aho".equalsIgnoreCase(System.getProperty("rmatch.prefilter", "aho"));
+    this.prefilterActivationThreshold = resolvePrefilterActivationThreshold();
   }
 
   /**
@@ -125,6 +129,12 @@ public final class MatchEngineImpl implements MatchEngine {
       final Map<Integer, Integer> flags,
       final Map<String, Regexp> regexpMappings) {
     if (!prefilterEnabled || patterns.isEmpty()) {
+      prefilter = null;
+      patternIdToRegexp = null;
+      return;
+    }
+
+    if (patterns.size() < prefilterActivationThreshold) {
       prefilter = null;
       patternIdToRegexp = null;
       return;
@@ -345,5 +355,15 @@ public final class MatchEngineImpl implements MatchEngine {
     // Set the references to point to our reusable collections
     candidatePositions = reusableCandidatePositions;
     positionToRegexps = reusablePositionToRegexps;
+  }
+
+  private static int resolvePrefilterActivationThreshold() {
+    final String rawThreshold = System.getProperty("rmatch.prefilter.threshold", "7000");
+    try {
+      final int threshold = Integer.parseInt(rawThreshold);
+      return threshold > 0 ? threshold : 7000;
+    } catch (NumberFormatException e) {
+      return 7000;
+    }
   }
 }
