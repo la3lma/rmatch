@@ -20,7 +20,7 @@ class ComprehensivePerformanceTestTest {
     assertEquals("rmatch-tester/corpus/wuthr10.txt", config.getCorpusPath());
     assertEquals(
         "rmatch-tester/corpus/real-words-in-wuthering-heights.txt", config.getRegexpPath());
-    assertEquals(5000, config.getMaxRegexps());
+    assertEquals(10000, config.getMaxRegexps());
     assertEquals(3, config.getNumRuns());
   }
 
@@ -56,7 +56,7 @@ class ComprehensivePerformanceTestTest {
         new ComprehensivePerformanceTest.ComprehensiveTestConfig(
             "test-corpus.txt", "test-regexps.txt", -1, 0);
 
-    assertEquals(5000, config.getMaxRegexps()); // Should use default
+    assertEquals(10000, config.getMaxRegexps()); // Should use default
     assertEquals(3, config.getNumRuns()); // Should use default
   }
 

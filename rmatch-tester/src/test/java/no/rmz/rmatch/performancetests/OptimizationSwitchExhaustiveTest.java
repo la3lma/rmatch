@@ -87,7 +87,9 @@ class OptimizationSwitchExhaustiveTest {
   private String describe(Map<String, String> props) {
     return String.format(
         "engine=%s,prefilter=%s,threshold=%s",
-        props.get("rmatch.engine"), props.get("rmatch.prefilter"), props.get("rmatch.prefilter.threshold"));
+        props.get("rmatch.engine"),
+        props.get("rmatch.prefilter"),
+        props.get("rmatch.prefilter.threshold"));
   }
 
   private OptimizationRunResult runCombination(
