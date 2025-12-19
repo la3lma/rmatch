@@ -43,6 +43,14 @@ benchmark_suites/*/patterns_*.txt
 benchmark_suites/*/corpus_*.txt
 benchmark_suites/corpora/*.txt
 
+# Generated Corpora (setup-corpora command)
+corpora/
+test_corpora/
+corpus_*.txt
+corpus_synthetic_*.txt
+corpus_logs_*.txt
+corpus_natural_language_*.txt
+
 # IDE
 .vscode/
 .idea/
