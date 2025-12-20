@@ -96,11 +96,11 @@ class HTMLFormatter:
             <div class="summary-grid">
                 <div class="summary-card">
                     <div class="card-label">Phase</div>
-                    <div class="card-value">{phase.title()}</div>
+                    <div class="card-value">{str(phase).title()}</div>
                 </div>
                 <div class="summary-card">
                     <div class="card-label">Status</div>
-                    <div class="card-value {status_class}">{status.title()}</div>
+                    <div class="card-value {status_class}">{str(status).title()}</div>
                 </div>
                 <div class="summary-card">
                     <div class="card-label">Duration</div>
@@ -193,8 +193,8 @@ class HTMLFormatter:
         result_rows = ""
         for i, result in enumerate(raw_results):
             status_class = 'status-success' if result.get('status') == 'ok' else 'status-error'
-            compilation_ms = (result.get('compilation_ns', 0) / 1_000_000)
-            scanning_ms = (result.get('scanning_ns', 0) / 1_000_000)
+            compilation_ms = ((result.get('compilation_ns') or 0) / 1_000_000)
+            scanning_ms = ((result.get('scanning_ns') or 0) / 1_000_000)
 
             result_rows += f"""
                 <tr class="result-row">
@@ -249,9 +249,9 @@ class HTMLFormatter:
             # Get scanning statistics
             scanning = stats.get('scanning', {})
             if scanning:
-                mean_ms = scanning.get('mean', 0) / 1_000_000
-                median_ms = scanning.get('median', 0) / 1_000_000
-                std_ms = scanning.get('std_dev', 0) / 1_000_000
+                mean_ms = (scanning.get('mean') or 0) / 1_000_000
+                median_ms = (scanning.get('median') or 0) / 1_000_000
+                std_ms = (scanning.get('std_dev') or 0) / 1_000_000
 
                 stats_content += f"""
                 <div class="performance-card">
@@ -502,8 +502,8 @@ class MarkdownFormatter:
 
 ## 📊 Summary
 
-- **Phase:** {summary.get('phase', 'unknown').title()}
-- **Status:** {summary.get('status', 'unknown').title()}
+- **Phase:** {str(summary.get('phase', 'unknown')).title()}
+- **Status:** {str(summary.get('status', 'unknown')).title()}
 - **Duration:** {summary.get('duration_seconds', 0):.2f}s
 - **Engines:** {', '.join(summary.get('engines_tested', []))}
 - **Total Runs:** {summary.get('total_combinations', 0)}
@@ -516,8 +516,8 @@ class MarkdownFormatter:
 """
 
         for result in raw_results[:10]:  # Show first 10 results
-            comp_ms = (result.get('compilation_ns', 0) / 1_000_000)
-            scan_ms = (result.get('scanning_ns', 0) / 1_000_000)
+            comp_ms = ((result.get('compilation_ns') or 0) / 1_000_000)
+            scan_ms = ((result.get('scanning_ns') or 0) / 1_000_000)
             markdown += f"| {result.get('engine_name', 'Unknown')} | {result.get('status', 'unknown')} | {comp_ms:.3f} | {scan_ms:.3f} | {result.get('match_count', 0)} | {result.get('patterns_compiled', 0)} |\n"
 
         if len(raw_results) > 10:

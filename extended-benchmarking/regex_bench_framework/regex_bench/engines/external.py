@@ -256,6 +256,23 @@ class ExternalEngine(Engine):
         )
 
         try:
+            # Calculate dynamic timeout based on pattern count and corpus size
+            pattern_count = 0
+            if patterns_file.exists():
+                with open(patterns_file, 'r') as f:
+                    pattern_count = len([line.strip() for line in f if line.strip()])
+
+            corpus_size_mb = corpus_file.stat().st_size / (1024 * 1024) if corpus_file.exists() else 0
+
+            # Base timeout: 45 seconds (30 + 15 as requested)
+            # Scale linearly with the product of pattern count and corpus size in MB
+            # Use a scaling factor that gives reasonable timeouts for large workloads
+            # For 10K patterns × 100MB = should be ~145 seconds (45 + 100)
+            base_timeout = 45
+            scaling_factor = (pattern_count * corpus_size_mb) / 10000  # Fixed: was 100000, now 10000 for proper scaling
+            dynamic_timeout = max(base_timeout, base_timeout + scaling_factor)
+            timeout_seconds = int(min(dynamic_timeout, 600))  # Cap at 10 minutes for safety
+
             # Start process with resource monitoring
             start_time = time.time_ns()
 
@@ -274,9 +291,9 @@ class ExternalEngine(Engine):
             psutil_process = psutil.Process(process.pid)
             peak_memory = 0
 
-            # Wait for completion with aggressive timeout for hanging processes
-            # rmatch should complete in ~400ms, so 30 seconds is generous but catches hangs
-            stdout, stderr = process.communicate(timeout=30)  # 30 second timeout to catch hanging Java processes
+            # Wait for completion with dynamic timeout based on workload size
+            # For 10K patterns × 100MB = timeout of ~145 seconds instead of 30
+            stdout, stderr = process.communicate(timeout=timeout_seconds)
 
             end_time = time.time_ns()
             result.total_ns = end_time - start_time
@@ -308,7 +325,7 @@ class ExternalEngine(Engine):
         except subprocess.TimeoutExpired:
             process.kill()
             result.status = "timeout"
-            result.notes = "Process timeout (30 seconds)"
+            result.notes = f"Process timeout ({timeout_seconds} seconds, calculated for {pattern_count} patterns × {corpus_size_mb:.1f}MB corpus)"
             return result
 
         except Exception as e:

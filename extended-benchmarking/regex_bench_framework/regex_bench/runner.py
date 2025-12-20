@@ -202,8 +202,23 @@ class BenchmarkRunner:
         metadata_file = self.output_dir / "data" / f"patterns_{count}_metadata.json"
 
         if output_file.exists() and metadata_file.exists():
-            logger.info(f"Pattern file already exists: {output_file}")
-            return output_file
+            # Validate metadata matches current configuration before reusing
+            try:
+                with open(metadata_file, 'r') as f:
+                    existing_metadata = json.load(f)
+
+                # Check if metadata matches current config
+                existing_suite = existing_metadata.get('suite_metadata', {})
+                existing_seed = existing_suite.get('seed', None)
+                existing_suite_name = existing_suite.get('suite_name', None)
+
+                if existing_seed == seed and existing_suite_name == suite_name:
+                    logger.info(f"✓ Reusing compatible pattern file: {output_file} (seed={seed}, suite={suite_name})")
+                    return output_file
+                else:
+                    logger.info(f"⚠ Pattern metadata mismatch - regenerating. Current: seed={seed}, suite={suite_name}. Existing: seed={existing_seed}, suite={existing_suite_name}")
+            except (json.JSONDecodeError, FileNotFoundError, KeyError) as e:
+                logger.info(f"⚠ Could not validate pattern metadata ({e}) - regenerating for safety")
 
         logger.info(f"Generating {count} patterns for suite '{suite_name}'")
 

@@ -27,6 +27,9 @@ class ReportGenerator:
         include_charts: bool = False
     ) -> Path:
         """Generate a comprehensive benchmark report."""
+        # Ensure input and output directories are Path objects
+        input_dir = Path(input_dir)
+        output_dir = Path(output_dir)
 
         # Load benchmark data
         data = self._load_benchmark_data(input_dir)
@@ -46,6 +49,9 @@ class ReportGenerator:
 
     def _load_benchmark_data(self, input_dir: Path) -> Dict[str, Any]:
         """Load all benchmark data from results directory."""
+        # Ensure input_dir is a Path object (handle both string and Path inputs)
+        input_dir = Path(input_dir)
+
         data = {
             'metadata': {},
             'raw_results': [],

@@ -150,9 +150,119 @@ test-unit: venv ## Run Python unit tests
 
 ##@ Benchmarking
 
+.PHONY: setup-optimized-data
+setup-optimized-data: ## Setup git-stored stable patterns and corpus files
+	@echo "$(BLUE)Setting up optimized benchmark data with git-stored stable patterns...$(NC)"
+	@mkdir -p benchmark_suites/corpora benchmark_suites/log_mining
+	@# Use git-stored stable patterns (first choice)
+	@if [ -f benchmark_suites/stable_patterns/patterns_10000.txt ]; then \
+		echo "$(GREEN)✓ Found git-stored stable patterns - using those!$(NC)"; \
+		cp benchmark_suites/stable_patterns/patterns_10000.txt benchmark_suites/log_mining/; \
+		cp benchmark_suites/stable_patterns/patterns_10000_metadata.json benchmark_suites/log_mining/; \
+		head -100 benchmark_suites/stable_patterns/patterns_10000.txt > benchmark_suites/log_mining/patterns_100.txt; \
+		head -1000 benchmark_suites/stable_patterns/patterns_10000.txt > benchmark_suites/log_mining/patterns_1000.txt; \
+		head -10 benchmark_suites/stable_patterns/patterns_10000.txt > benchmark_suites/log_mining/patterns_10.txt; \
+		echo "$(GREEN)✓ Created all pattern sizes from stable git patterns$(NC)"; \
+	elif [ -f benchmark_suites/log_mining/patterns_100_fixed.txt ]; then \
+		echo "$(YELLOW)⚠ Stable patterns not found, using existing fixed patterns$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠ Using fallback pattern generation$(NC)"; \
+		$(REGEX_BENCH) generate-patterns --suite log_mining --sizes 100,1000,10000 --output benchmark_suites/log_mining/; \
+	fi
+	@# Ensure we have corpus files
+	@if [ ! -f benchmark_suites/corpora/corpus_100MB.txt ]; then \
+		echo "$(BLUE)Generating 100MB corpus...$(NC)"; \
+		$(REGEX_BENCH) setup-corpora --sizes 100MB --types synthetic --output benchmark_suites/corpora/; \
+	fi
+	@echo "$(GREEN)✓ Optimized data ready with git-stored patterns$(NC)"
+
+.PHONY: bench-phase1-optimized
+bench-phase1-optimized: venv build-engines setup-optimized-data ## Run Phase 1 benchmarks with pre-validated data
+	@echo "$(BLUE)Running OPTIMIZED Phase 1 benchmarks...$(NC)"
+	@echo "$(GREEN)✓ Using pre-validated patterns and corpus$(NC)"
+	@echo "$(YELLOW)This may take 30-60 minutes...$(NC)"
+	@OUTPUT_DIR=$(RESULTS_DIR)/phase1_optimized_$(TIMESTAMP); \
+	mkdir -p "$$OUTPUT_DIR/data"; \
+	echo "$(BLUE)Pre-populating ALL required pattern files...$(NC)"; \
+	if [ -f benchmark_suites/log_mining/patterns_10.txt ]; then \
+		cp benchmark_suites/log_mining/patterns_10.txt "$$OUTPUT_DIR/data/patterns_10.txt"; \
+		cp benchmark_suites/log_mining/patterns_10_metadata.json "$$OUTPUT_DIR/data/patterns_10_metadata.json" 2>/dev/null || echo "⚠ No patterns_10_metadata.json"; \
+		echo "✓ Copied git-stored patterns_10.txt with metadata"; \
+	else \
+		echo "$(YELLOW)⚠ No git-stored patterns_10.txt, will generate$(NC)"; \
+	fi; \
+	if [ -f benchmark_suites/log_mining/patterns_100.txt ]; then \
+		cp benchmark_suites/log_mining/patterns_100.txt "$$OUTPUT_DIR/data/patterns_100.txt"; \
+		cp benchmark_suites/log_mining/patterns_100_metadata.json "$$OUTPUT_DIR/data/patterns_100_metadata.json" 2>/dev/null || echo "⚠ No patterns_100_metadata.json"; \
+		echo "✓ Copied git-stored patterns_100.txt with metadata"; \
+	else \
+		echo "$(YELLOW)⚠ No git-stored patterns_100.txt, will generate$(NC)"; \
+	fi; \
+	if [ -f benchmark_suites/log_mining/patterns_1000.txt ]; then \
+		cp benchmark_suites/log_mining/patterns_1000.txt "$$OUTPUT_DIR/data/patterns_1000.txt"; \
+		cp benchmark_suites/log_mining/patterns_1000_metadata.json "$$OUTPUT_DIR/data/patterns_1000_metadata.json" 2>/dev/null || echo "⚠ No patterns_1000_metadata.json"; \
+		echo "✓ Copied git-stored patterns_1000.txt with metadata"; \
+	else \
+		echo "$(YELLOW)⚠ No git-stored patterns_1000.txt, will generate$(NC)"; \
+	fi; \
+	echo "$(BLUE)Creating metadata files with phase1.json seed (12345)...$(NC)"; \
+	python3 create_pattern_metadata.py "$$OUTPUT_DIR/data"; \
+	if [ -f benchmark_suites/corpora/corpus_synthetic_1MB.txt ]; then \
+		cp benchmark_suites/corpora/corpus_synthetic_1MB.txt "$$OUTPUT_DIR/data/corpus_synthetic_controllable_1MB.txt"; \
+		echo "✓ Copied corpus_synthetic_1MB.txt as corpus_synthetic_controllable_1MB.txt"; \
+	fi; \
+	if [ -f benchmark_suites/corpora/corpus_synthetic_10MB.txt ]; then \
+		cp benchmark_suites/corpora/corpus_synthetic_10MB.txt "$$OUTPUT_DIR/data/corpus_synthetic_controllable_10MB.txt"; \
+		echo "✓ Copied corpus_synthetic_10MB.txt as corpus_synthetic_controllable_10MB.txt"; \
+	fi; \
+	if [ -f benchmark_suites/corpora/corpus_synthetic_100MB.txt ]; then \
+		cp benchmark_suites/corpora/corpus_synthetic_100MB.txt "$$OUTPUT_DIR/data/corpus_synthetic_controllable_100MB.txt"; \
+		echo "✓ Copied corpus_synthetic_100MB.txt as corpus_synthetic_controllable_100MB.txt"; \
+	fi; \
+	echo "$(GREEN)✓ Pre-validated data copied to $$OUTPUT_DIR/data$(NC)"; \
+	ls -la "$$OUTPUT_DIR/data/"; \
+	$(REGEX_BENCH) run-phase \
+		--config test_matrix/phase1.json \
+		--output "$$OUTPUT_DIR" \
+		--engines rmatch,re2j,java-native-optimized,java-native-unfair \
+		--parallel 4
+	@echo "$(GREEN)✓ Optimized Phase 1 benchmarks complete$(NC)"
+	@echo "$(BLUE)Results: $(RESULTS_DIR)/phase1_optimized_$(TIMESTAMP)$(NC)"
+
+.PHONY: bench-10k-fast
+bench-10k-fast: venv build-engines ## Run fast 10K pattern benchmark with all engines
+	@echo "$(BLUE)Running FAST 10K pattern benchmark...$(NC)"
+	@echo "$(GREEN)✓ Using timeout-fixed patterns with all engines$(NC)"
+	@echo "$(YELLOW)This may take 30-45 minutes...$(NC)"
+	@mkdir -p $(RESULTS_DIR)/fast_10k_$(TIMESTAMP)/data
+	@# Copy our timeout-fixed patterns
+	@echo "$(BLUE)Copying timeout-fixed 10K patterns...$(NC)"
+	@if [ -f benchmark_suites/log_mining/patterns_10000_fixed.txt ]; then
+		cp benchmark_suites/log_mining/patterns_10000_fixed.txt $(RESULTS_DIR)/fast_10k_$(TIMESTAMP)/data/patterns_10000.txt
+	else
+		echo "$(RED)✗ Timeout-fixed patterns not found$(NC)"
+		exit 1
+	fi
+	@# Ensure corpus exists
+	@if [ ! -f benchmark_suites/corpora/corpus_100MB.txt ]; then
+		$(REGEX_BENCH) setup-corpora --sizes 100MB --types synthetic --output benchmark_suites/corpora/
+	fi
+	@cp benchmark_suites/corpora/corpus_100MB.txt $(RESULTS_DIR)/fast_10k_$(TIMESTAMP)/data/
+	@echo "$(GREEN)✓ Data ready$(NC)"
+	$(REGEX_BENCH) run-phase \
+		--config test_matrix/ultimate_10k_sequential.json \
+		--output $(RESULTS_DIR)/fast_10k_$(TIMESTAMP) \
+		--engines rmatch,re2j,java-native-optimized,java-native-unfair \
+		--parallel 1
+	@echo "$(GREEN)✓ Fast 10K benchmark complete$(NC)"
+	@echo "$(BLUE)Results: $(RESULTS_DIR)/fast_10k_$(TIMESTAMP)$(NC)"
+
 .PHONY: bench-phase1
-bench-phase1: venv build-engines ## Run Phase 1 comprehensive benchmarks
-	@echo "$(BLUE)Running Phase 1 benchmarks...$(NC)"
+bench-phase1: bench-phase1-optimized ## Run Phase 1 comprehensive benchmarks (redirects to optimized version)
+
+.PHONY: bench-phase1-original
+bench-phase1-original: venv build-engines ## Run ORIGINAL Phase 1 benchmarks (may be slow)
+	@echo "$(BLUE)Running ORIGINAL Phase 1 benchmarks...$(NC)"
 	@echo "$(YELLOW)This may take 30-60 minutes...$(NC)"
 	@mkdir -p $(RESULTS_DIR)/phase1_$(TIMESTAMP)
 	$(REGEX_BENCH) run-phase \
