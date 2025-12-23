@@ -108,8 +108,6 @@ class BenchmarkRunner:
 
     def _discover_and_validate_engines(self) -> List[Any]:
         """Discover available engines and validate configuration."""
-        logger.info("Discovering engines...")
-
         all_engines = self.engine_manager.discover_engines()
         requested_engines = self.config.get('test_matrix', {}).get('engines', [])
 
@@ -123,7 +121,6 @@ class BenchmarkRunner:
             availability = engine.check_availability()
             if availability is None:
                 available_engines.append(engine)
-                logger.info(f"✓ {engine.name}: available")
             else:
                 unavailable_engines.append((engine.name, availability))
                 logger.warning(f"✗ {engine.name}: {availability}")
@@ -149,7 +146,7 @@ class BenchmarkRunner:
         pattern_suites = matrix.get('pattern_suites', ['log_mining'])
         corpora = matrix.get('corpora', ['synthetic_controllable'])
         engines = matrix.get('engines', [])
-        iterations = matrix.get('iterations_per_combination', 5)
+        iterations = matrix.get('iterations_per_combination', 3)
 
         combinations = []
         for pattern_count in pattern_counts:
@@ -157,6 +154,7 @@ class BenchmarkRunner:
                 for pattern_suite in pattern_suites:
                     for corpus_type in corpora:
                         for engine in engines:
+                            # Always create all planned iterations upfront
                             for iteration in range(iterations):
                                 combinations.append({
                                     'pattern_count': pattern_count,
@@ -164,7 +162,8 @@ class BenchmarkRunner:
                                     'pattern_suite': pattern_suite,
                                     'corpus_type': corpus_type,
                                     'engine': engine,
-                                    'iteration': iteration
+                                    'iteration': iteration,
+                                    'max_iterations': iterations
                                 })
 
         logger.info(f"Generated {len(combinations)} test combinations")
@@ -244,11 +243,33 @@ class BenchmarkRunner:
 
         output_file = self.output_dir / "data" / f"corpus_{size}.txt"
 
+        # First check if output file already exists
         if output_file.exists():
             logger.info(f"Corpus file already exists: {output_file}")
             return output_file
 
-        logger.info(f"Generating corpus file: {size}")
+        # Try to find and reuse existing corpus files from benchmark_suites/corpora
+        corpus_dir = Path("benchmark_suites/corpora")
+        existing_files_to_try = [
+            corpus_dir / f"corpus_{corpus_type}_{size}.txt",  # exact type match
+            corpus_dir / f"corpus_synthetic_{size}.txt",      # fallback to synthetic
+            corpus_dir / f"corpus_logs_{size}.txt",           # fallback to logs
+            corpus_dir / f"corpus_natural_language_{size}.txt" # fallback to natural_language
+        ]
+
+        for existing_file in existing_files_to_try:
+            if existing_file.exists():
+                logger.info(f"✅ Reusing existing corpus file: {existing_file}")
+                # Ensure data directory exists
+                output_file.parent.mkdir(parents=True, exist_ok=True)
+                # Copy existing file to output location
+                import shutil
+                shutil.copy2(existing_file, output_file)
+                logger.info(f"✅ Copied corpus file: {output_file} ({output_file.stat().st_size} bytes)")
+                return output_file
+
+        # No existing file found, generate new one
+        logger.info(f"Generating corpus file: {size} (no existing file found)")
 
         # Generate corpus using corpus manager
         corpus_content = self.corpus_manager.generate_corpus(size, config)

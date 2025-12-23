@@ -1,0 +1,138 @@
+{
+  "phase": "large_corpus_validation",
+  "description": "Validation test for 500MB and 1GB corpus sizes - ensures timeout and memory handling works",
+  "goals": [
+    "Validate that 500MB and 1GB corpus generation and processing works correctly",
+    "Test extended timeout system for large inputs",
+    "Verify memory usage remains within reasonable bounds",
+    "Establish baseline performance for very large inputs"
+  ],
+  "methodology": {
+    "measurement_protocol": {
+      "warmup_runs": 1,
+      "measurement_runs": 2,
+      "discard_outliers": false,
+      "outlier_threshold": "3.0*IQR",
+      "confidence_level": 0.90
+    },
+    "fairness_rules": {
+      "engine_configurations": "best_reasonable",
+      "separate_compilation_scanning": true,
+      "common_subset_comparison": true,
+      "resource_limits": {
+        "max_memory_gb": 12,
+        "timeout_minutes": 90
+      }
+    }
+  },
+  "test_matrix": {
+    "pattern_counts": [10, 100],
+    "input_sizes": ["500MB", "1GB"],
+    "pattern_suites": ["log_mining"],
+    "corpora": ["synthetic_controllable"],
+    "engines": [
+      "re2j",
+      "rmatch"
+    ],
+    "iterations_per_combination": 2,
+    "warmup_iterations": 1
+  },
+  "engine_configurations": {
+    "re2j": {
+      "jvm_flags": ["-Xmx8g", "-XX:+UseG1GC", "-server"],
+      "compilation_strategy": "precompile_patterns",
+      "optimization_level": "production"
+    },
+    "rmatch": {
+      "optimization_flags": "default",
+      "mode": "batch_processing",
+      "notes": "Primary test target for large corpus handling"
+    }
+  },
+  "data_configuration": {
+    "pattern_generation": {
+      "suite": "log_mining",
+      "seed": 12345,
+      "distribution": {
+        "timestamps": 0.25,
+        "ips": 0.20,
+        "urls": 0.25,
+        "error_codes": 0.15,
+        "key_values": 0.15
+      },
+      "complexity_target": "realistic"
+    },
+    "corpus_generation": {
+      "type": "synthetic_controllable",
+      "match_density": "medium",
+      "line_count_target": {
+        "500MB": 10000000,
+        "1GB": 20000000
+      },
+      "character_distribution": "log_like",
+      "unicode_support": false,
+      "generation_timeout_minutes": 30
+    }
+  },
+  "success_criteria": {
+    "correctness": {
+      "match_count_agreement": "exact",
+      "reference_engines": ["re2j"],
+      "tolerance": 0,
+      "validation_required": true
+    },
+    "system_stability": {
+      "completion_rate": {
+        "metric": "successful_completion_percentage",
+        "target": ">80%",
+        "required": true
+      },
+      "memory_usage": {
+        "metric": "peak_memory_gb",
+        "target": "<10GB",
+        "required": true
+      },
+      "timeout_handling": {
+        "metric": "graceful_timeout_rate",
+        "target": "100%",
+        "required": true
+      }
+    },
+    "performance": {
+      "throughput_consistency": {
+        "metric": "throughput_vs_smaller_inputs",
+        "target": "proportional_scaling",
+        "acceptable_overhead": "2x"
+      }
+    }
+  },
+  "execution_plan": {
+    "estimated_duration": "6-12 hours",
+    "parallel_execution": {
+      "max_concurrent_engines": 1,
+      "resource_isolation": true
+    },
+    "checkpoints": [
+      "engine_availability_check",
+      "large_corpus_generation_test",
+      "memory_limit_verification",
+      "timeout_configuration_test",
+      "small_pattern_validation",
+      "large_input_performance_test"
+    ],
+    "failure_handling": {
+      "corpus_generation_failure": "retry_once_then_skip",
+      "memory_exceeded": "record_failure_and_continue",
+      "timeout_exceeded": "record_timeout_and_continue",
+      "engine_crash": "record_crash_and_skip_engine"
+    }
+  },
+  "output_configuration": {
+    "results_format": "structured_json",
+    "include_raw_data": true,
+    "include_debug_info": true,
+    "include_system_metrics": true,
+    "compression": "gzip",
+    "schema_version": "2.0"
+  }
+}

@@ -62,7 +62,7 @@ class HTMLFormatter:
             </div>
         </header>
 
-        {self._generate_summary_section(summary)}
+        {self._generate_summary_section(summary, analysis)}
         {self._generate_engines_section(raw_results)}
         {self._generate_results_section(raw_results, analysis)}
         {self._generate_performance_section(analysis)}
@@ -78,29 +78,28 @@ class HTMLFormatter:
 
         return html
 
-    def _generate_summary_section(self, summary: Dict[str, Any]) -> str:
-        """Generate the summary section."""
-        phase = summary.get('phase', 'unknown')
-        status = summary.get('status', 'unknown')
-        engines = ', '.join(summary.get('engines_tested', []))
-        total = summary.get('total_combinations', 0)
-        successful = summary.get('successful_runs', 0)
-        failed = summary.get('failed_runs', 0)
-        duration = summary.get('duration_seconds', 0)
+    def _generate_summary_section(self, summary: Dict[str, Any], analysis: Dict[str, Any] = None) -> str:
+        """Generate the summary section with throughput statistics."""
+        phase = str(summary.get('phase', 'unknown'))
+        status = str(summary.get('status', 'unknown'))
+        engines_tested = summary.get('engines_tested', [])
+        engines = ', '.join([str(e) for e in engines_tested]) if engines_tested else 'None'
+        total = int(summary.get('total_combinations', 0))
+        successful = int(summary.get('successful_runs', 0))
+        failed = int(summary.get('failed_runs', 0))
+        duration = float(summary.get('duration_seconds', 0))
 
-        status_class = 'status-success' if status == 'completed' else 'status-error'
+        status_class = 'status-success' if status.lower() == 'completed' else 'status-error'
 
-        return f"""
-        <section class="summary">
-            <h2>📊 Benchmark Summary</h2>
-            <div class="summary-grid">
+        # Build main summary cards
+        summary_cards = f"""
                 <div class="summary-card">
                     <div class="card-label">Phase</div>
-                    <div class="card-value">{str(phase).title()}</div>
+                    <div class="card-value">{phase.title()}</div>
                 </div>
                 <div class="summary-card">
                     <div class="card-label">Status</div>
-                    <div class="card-value {status_class}">{str(status).title()}</div>
+                    <div class="card-value {status_class}">{status.title()}</div>
                 </div>
                 <div class="summary-card">
                     <div class="card-label">Duration</div>
@@ -117,8 +116,53 @@ class HTMLFormatter:
                 <div class="summary-card">
                     <div class="card-label">Success Rate</div>
                     <div class="card-value">{(successful/max(total,1)*100):.1f}%</div>
+                </div>"""
+
+        # Add throughput statistics if available
+        throughput_section = ""
+        if analysis and 'summary' in analysis and 'throughput_summary' in analysis['summary']:
+            throughput_data = analysis['summary']['throughput_summary']
+            if throughput_data:
+                throughput_section = """
+            <div class="throughput-summary">
+                <h3>🚀 Throughput Performance Summary</h3>
+                <div class="throughput-grid">"""
+
+                for engine_name, stats in throughput_data.items():
+                    throughput_section += f"""
+                    <div class="throughput-card">
+                        <h4>{engine_name}</h4>
+                        <div class="throughput-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Average:</span>
+                                <span class="stat-value">{stats['average_mean_mbps']:.2f} MB/s</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Median:</span>
+                                <span class="stat-value">{stats['average_median_mbps']:.2f} MB/s</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Std Dev:</span>
+                                <span class="stat-value">{stats['average_std_dev_mbps']:.2f} MB/s</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Peak:</span>
+                                <span class="stat-value">{stats['best_mean_mbps']:.2f} MB/s</span>
+                            </div>
+                        </div>
+                    </div>"""
+
+                throughput_section += """
                 </div>
+            </div>"""
+
+        return f"""
+        <section class="summary">
+            <h2>📊 Benchmark Summary</h2>
+            <div class="summary-grid">
+                {summary_cards}
             </div>
+            {throughput_section}
         </section>"""
 
     def _generate_engines_section(self, raw_results: List[Dict[str, Any]]) -> str:
@@ -196,16 +240,52 @@ class HTMLFormatter:
             compilation_ms = ((result.get('compilation_ns') or 0) / 1_000_000)
             scanning_ms = ((result.get('scanning_ns') or 0) / 1_000_000)
 
+            # Calculate corpus size and MB/sec throughput
+            corpus_size_bytes = result.get('corpus_size_bytes') or 0
+            corpus_size_mb = corpus_size_bytes / (1024 * 1024) if corpus_size_bytes and corpus_size_bytes > 0 else 0
+
+            # Calculate MB/sec scanning throughput
+            scanning_ns = result.get('scanning_ns') or 0
+            mb_per_sec = 0
+            if scanning_ns and scanning_ns > 0 and corpus_size_bytes and corpus_size_bytes > 0:
+                scanning_seconds = scanning_ns / 1_000_000_000  # Convert nanoseconds to seconds
+                mb_per_sec = corpus_size_mb / scanning_seconds
+
+            # Calculate pattern processing rate (regex/sec)
+            patterns_per_sec_display = "-"
+            patterns_compiled = result.get('patterns_compiled', 0)
+            if scanning_ns and scanning_ns > 0 and patterns_compiled and patterns_compiled > 0:
+                scanning_seconds = scanning_ns / 1_000_000_000  # Convert nanoseconds to seconds
+                patterns_per_sec = patterns_compiled / scanning_seconds
+                if patterns_per_sec >= 1000:
+                    patterns_per_sec_display = f"{patterns_per_sec/1000:.1f}K/sec"
+                else:
+                    patterns_per_sec_display = f"{patterns_per_sec:.1f}/sec"
+
+            # Calculate total pattern throughput (patterns × MB/sec)
+            total_throughput_display = "-"
+            if scanning_ns and scanning_ns > 0 and patterns_compiled and patterns_compiled > 0 and corpus_size_mb > 0:
+                scanning_seconds = scanning_ns / 1_000_000_000  # Convert nanoseconds to seconds
+                total_throughput = (patterns_compiled * corpus_size_mb) / scanning_seconds
+                if total_throughput >= 1000:
+                    total_throughput_display = f"{total_throughput/1000:.1f}K p⋅MB/s"
+                else:
+                    total_throughput_display = f"{total_throughput:.1f} p⋅MB/s"
+
             result_rows += f"""
                 <tr class="result-row">
                     <td>{i + 1}</td>
                     <td>{result.get('engine_name', 'Unknown')}</td>
                     <td>{result.get('iteration', 0)}</td>
                     <td class="{status_class}">{result.get('status', 'unknown')}</td>
+                    <td>{corpus_size_mb:.1f} MB</td>
                     <td>{compilation_ms:.3f}</td>
                     <td>{scanning_ms:.3f}</td>
+                    <td>{mb_per_sec:.2f} MB/sec</td>
                     <td>{result.get('match_count', 0)}</td>
                     <td>{result.get('patterns_compiled', 0)}</td>
+                    <td>{patterns_per_sec_display}</td>
+                    <td>{total_throughput_display}</td>
                 </tr>"""
 
         return f"""
@@ -219,10 +299,14 @@ class HTMLFormatter:
                             <th>Engine</th>
                             <th>Iteration</th>
                             <th>Status</th>
+                            <th>Corpus Size</th>
                             <th>Compilation (ms)</th>
                             <th>Scanning (ms)</th>
+                            <th>Throughput</th>
                             <th>Matches</th>
                             <th>Patterns</th>
+                            <th>Regex/sec</th>
+                            <th>Total Throughput</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -424,6 +508,60 @@ class HTMLFormatter:
             border-radius: 6px;
             border-left: 4px solid #9b59b6;
         }
+        .throughput-summary {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .throughput-summary h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        .throughput-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .throughput-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #e74c3c;
+        }
+        .throughput-card h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-weight: 600;
+            text-align: center;
+        }
+        .throughput-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ecf0f1;
+        }
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+        .stat-value {
+            color: #2c3e50;
+            font-weight: 700;
+            font-size: 14px;
+        }
         .performance-card h4 {
             margin: 0 0 15px 0;
             color: #2c3e50;
@@ -511,14 +649,39 @@ class MarkdownFormatter:
 
 ## 🔧 Results
 
-| Engine | Status | Compilation (ms) | Scanning (ms) | Matches | Patterns |
-|--------|--------|------------------|---------------|---------|----------|
+| Engine | Status | Compilation (ms) | Scanning (ms) | Matches | Patterns | Regex/sec | Total Throughput |
+|--------|--------|------------------|---------------|---------|----------|-----------|------------------|
 """
 
         for result in raw_results[:10]:  # Show first 10 results
             comp_ms = ((result.get('compilation_ns') or 0) / 1_000_000)
             scan_ms = ((result.get('scanning_ns') or 0) / 1_000_000)
-            markdown += f"| {result.get('engine_name', 'Unknown')} | {result.get('status', 'unknown')} | {comp_ms:.3f} | {scan_ms:.3f} | {result.get('match_count', 0)} | {result.get('patterns_compiled', 0)} |\n"
+
+            # Calculate pattern processing rate (regex/sec)
+            patterns_per_sec_display = "-"
+            patterns_compiled = result.get('patterns_compiled', 0)
+            scanning_ns = result.get('scanning_ns', 0)
+            if scanning_ns and scanning_ns > 0 and patterns_compiled and patterns_compiled > 0:
+                scanning_seconds = scanning_ns / 1_000_000_000  # Convert nanoseconds to seconds
+                patterns_per_sec = patterns_compiled / scanning_seconds
+                if patterns_per_sec >= 1000:
+                    patterns_per_sec_display = f"{patterns_per_sec/1000:.1f}K/sec"
+                else:
+                    patterns_per_sec_display = f"{patterns_per_sec:.1f}/sec"
+
+            # Calculate total pattern throughput (patterns × MB/sec)
+            total_throughput_display = "-"
+            corpus_size_bytes = result.get('corpus_size_bytes', 0)
+            corpus_size_mb = corpus_size_bytes / (1024 * 1024) if corpus_size_bytes and corpus_size_bytes > 0 else 0
+            if scanning_ns and scanning_ns > 0 and patterns_compiled and patterns_compiled > 0 and corpus_size_mb > 0:
+                scanning_seconds = scanning_ns / 1_000_000_000  # Convert nanoseconds to seconds
+                total_throughput = (patterns_compiled * corpus_size_mb) / scanning_seconds
+                if total_throughput >= 1000:
+                    total_throughput_display = f"{total_throughput/1000:.1f}K p⋅MB/s"
+                else:
+                    total_throughput_display = f"{total_throughput:.1f} p⋅MB/s"
+
+            markdown += f"| {result.get('engine_name', 'Unknown')} | {result.get('status', 'unknown')} | {comp_ms:.3f} | {scan_ms:.3f} | {result.get('match_count', 0)} | {result.get('patterns_compiled', 0)} | {patterns_per_sec_display} | {total_throughput_display} |\n"
 
         if len(raw_results) > 10:
             markdown += f"\n*... and {len(raw_results) - 10} more results*\n"

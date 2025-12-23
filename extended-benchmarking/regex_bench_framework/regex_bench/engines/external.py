@@ -99,7 +99,7 @@ class ExternalEngine(Engine):
 
     def _run_rmatch_file_based(self, patterns_file: Path, corpus_file: Path,
                               iteration: int, output_dir: Path) -> EngineResult:
-        """Execute rmatch using polling-based completion detection to bypass subprocess hanging."""
+        """Execute rmatch using robust file-based completion detection with defensive safeguards."""
 
         # Prepare result
         result = EngineResult(
@@ -108,6 +108,24 @@ class ExternalEngine(Engine):
             status="ok",
             corpus_size_bytes=corpus_file.stat().st_size if corpus_file.exists() else 0
         )
+
+        # Calculate workload-aware settings for large rmatch jobs
+        pattern_count = 0
+        if patterns_file.exists():
+            with open(patterns_file, 'r') as f:
+                pattern_count = len([line.strip() for line in f if line.strip()])
+
+        corpus_size_mb = corpus_file.stat().st_size / (1024 * 1024) if corpus_file.exists() else 0
+
+        # Workload-aware grace period: scale with complexity to prevent data loss
+        if pattern_count >= 10000:
+            grace_period = 30.0  # 30 seconds for 10K+ patterns
+        elif pattern_count >= 1000 and corpus_size_mb >= 1000:  # 1GB+
+            grace_period = 20.0  # 20 seconds for 1K patterns + large corpus
+        elif pattern_count >= 1000:
+            grace_period = 15.0  # 15 seconds for 1K+ patterns
+        else:
+            grace_period = 5.0   # 5 seconds for smaller workloads
 
         try:
             # Create temporary output files
@@ -144,7 +162,7 @@ class ExternalEngine(Engine):
             # Polling-based completion detection
             # rmatch finishes but doesn't signal termination properly
             poll_interval = 0.1  # 100ms
-            max_wait_time = 30.0  # 30 seconds
+            max_wait_time = float(self.config.get('execution_plan', {}).get('timeout_per_job', 7200))
             elapsed = 0.0
 
             completion_detected = False
@@ -174,11 +192,25 @@ class ExternalEngine(Engine):
                         has_completion_msg = "Benchmark completed:" in stderr_content
 
                         if has_results and has_completion_msg:
-                            # rmatch finished! Force process termination
+                            # rmatch appears finished, but wait for internal engines to complete
+                            # Use workload-aware grace period to prevent data loss
+                            grace_start = time.time()
+
+                            while time.time() - grace_start < grace_period:
+                                # Check if process terminated naturally
+                                if process.poll() is not None:
+                                    completion_detected = True
+                                    break
+                                time.sleep(0.1)
+
+                            if completion_detected:
+                                break
+
+                            # Grace period expired, force termination
                             try:
                                 process.terminate()
                                 # Give it a moment to terminate gracefully
-                                time.sleep(0.1)
+                                time.sleep(0.5)
                                 if process.poll() is None:
                                     process.kill()
                             except:
@@ -207,24 +239,58 @@ class ExternalEngine(Engine):
                 result.notes = f"Process timeout after {max_wait_time} seconds"
                 return result
 
-            # Read output from files
-            stdout = ""
-            stderr = ""
-
-            if stdout_file.exists():
-                stdout = stdout_file.read_text()
-                stdout_file.unlink()  # Clean up
-
-            if stderr_file.exists():
-                stderr = stderr_file.read_text()
-                stderr_file.unlink()  # Clean up
+            # Robust output capture with defensive safeguards
+            stdout, stderr = self._read_rmatch_output_defensively(
+                stdout_file, stderr_file, pattern_count, corpus_size_mb
+            )
 
             # Record output
             result.raw_stdout = stdout
             result.raw_stderr = stderr
 
+            # Verify we captured meaningful results before cleanup
+            has_meaningful_output = (
+                "MATCHES=" in stdout and
+                "ELAPSED_NS=" in stdout and
+                "PATTERNS_COMPILED=" in stdout
+            )
+
+            if not has_meaningful_output and completion_detected:
+                # Data loss detected - attempt pipe-based fallback
+                result.notes = f"File-based capture failed for {pattern_count} patterns × {corpus_size_mb:.1f}MB, attempting fallback"
+                try:
+                    # Clean up failed files first
+                    if stdout_file.exists():
+                        stdout_file.unlink()
+                    if stderr_file.exists():
+                        stderr_file.unlink()
+
+                    # Fallback to pipe-based execution (if process still alive, kill it first)
+                    try:
+                        if process.poll() is None:
+                            process.kill()
+                            time.sleep(1.0)
+                    except:
+                        pass
+
+                    return self._run_pipe_based(patterns_file, corpus_file, iteration, output_dir)
+                except Exception as fallback_error:
+                    result.status = "error"
+                    result.notes += f"; fallback failed: {str(fallback_error)}"
+                    return result
+
             # Parse output
             self._parse_output(stdout, stderr, result)
+
+            # Only cleanup files after successful parsing
+            try:
+                if stdout_file.exists():
+                    stdout_file.unlink()
+                if stderr_file.exists():
+                    stderr_file.unlink()
+            except Exception as cleanup_error:
+                # Don't fail the job due to cleanup issues
+                pass
 
             # Get memory usage (approximate)
             try:
@@ -239,6 +305,77 @@ class ExternalEngine(Engine):
             result.status = "error"
             result.notes = f"Execution error: {str(e)}"
             return result
+
+    def _read_rmatch_output_defensively(self, stdout_file: Path, stderr_file: Path,
+                                      pattern_count: int, corpus_size_mb: float) -> tuple:
+        """Defensively read rmatch output files with retries and verification."""
+        max_attempts = 5
+        base_delay = 0.5  # Base delay between attempts
+
+        # Calculate expected file stabilization time based on workload
+        if pattern_count >= 10000:
+            stabilization_delay = 3.0  # Large workloads need more time
+        elif pattern_count >= 1000 and corpus_size_mb >= 1000:
+            stabilization_delay = 2.0  # Medium-large workloads
+        else:
+            stabilization_delay = 1.0  # Smaller workloads
+
+        for attempt in range(max_attempts):
+            try:
+                # Wait for file stabilization on first attempt
+                if attempt == 0:
+                    time.sleep(stabilization_delay)
+
+                # Check if files exist
+                if not stdout_file.exists() or not stderr_file.exists():
+                    if attempt < max_attempts - 1:
+                        time.sleep(base_delay * (attempt + 1))
+                        continue
+                    else:
+                        return "", ""  # Return empty if files never appear
+
+                # Check file sizes to ensure they're not empty or still being written
+                stdout_size = stdout_file.stat().st_size
+                stderr_size = stderr_file.stat().st_size
+
+                # Wait a bit and check if file sizes are stable (not still growing)
+                time.sleep(0.2)
+                stdout_size_after = stdout_file.stat().st_size if stdout_file.exists() else 0
+                stderr_size_after = stderr_file.stat().st_size if stderr_file.exists() else 0
+
+                # If files are still growing, wait and retry
+                if stdout_size != stdout_size_after or stderr_size != stderr_size_after:
+                    if attempt < max_attempts - 1:
+                        time.sleep(base_delay * (attempt + 1))
+                        continue
+
+                # Read file contents
+                stdout_content = stdout_file.read_text() if stdout_size > 0 else ""
+                stderr_content = stderr_file.read_text() if stderr_size > 0 else ""
+
+                # Verify we got meaningful content from rmatch
+                if stdout_content and ("ELAPSED_NS=" in stdout_content or "MATCHES=" in stdout_content):
+                    return stdout_content, stderr_content
+
+                # If content seems incomplete, retry (unless last attempt)
+                if attempt < max_attempts - 1:
+                    time.sleep(base_delay * (attempt + 1))
+                    continue
+                else:
+                    # Last attempt - return what we have
+                    return stdout_content, stderr_content
+
+            except (FileNotFoundError, PermissionError, OSError) as e:
+                # File operation failed, retry if possible
+                if attempt < max_attempts - 1:
+                    time.sleep(base_delay * (attempt + 1))
+                    continue
+                else:
+                    # Final attempt failed - return empty
+                    return "", ""
+
+        # Should never reach here, but defensive fallback
+        return "", ""
 
     def _run_pipe_based(self, patterns_file: Path, corpus_file: Path,
                        iteration: int, output_dir: Path) -> EngineResult:
@@ -264,14 +401,12 @@ class ExternalEngine(Engine):
 
             corpus_size_mb = corpus_file.stat().st_size / (1024 * 1024) if corpus_file.exists() else 0
 
-            # Base timeout: 45 seconds (30 + 15 as requested)
-            # Scale linearly with the product of pattern count and corpus size in MB
-            # Use a scaling factor that gives reasonable timeouts for large workloads
-            # For 10K patterns × 100MB = should be ~145 seconds (45 + 100)
-            base_timeout = 45
-            scaling_factor = (pattern_count * corpus_size_mb) / 10000  # Fixed: was 100000, now 10000 for proper scaling
-            dynamic_timeout = max(base_timeout, base_timeout + scaling_factor)
-            timeout_seconds = int(min(dynamic_timeout, 600))  # Cap at 10 minutes for safety
+            # Use configured timeout from execution plan - critical for rmatch performance measurement
+            # Default to 2 hours if not configured, matching job timeout logic
+            timeout_seconds = self.config.get('execution_plan', {}).get('timeout_per_job', 7200)
+
+            # This accommodates large workloads like 10K patterns × 1GB corpus
+            # No artificial scaling - just use a generous timeout for all workloads
 
             # Start process with resource monitoring
             start_time = time.time_ns()
@@ -291,8 +426,7 @@ class ExternalEngine(Engine):
             psutil_process = psutil.Process(process.pid)
             peak_memory = 0
 
-            # Wait for completion with dynamic timeout based on workload size
-            # For 10K patterns × 100MB = timeout of ~145 seconds instead of 30
+            # Wait for completion with generous timeout for production workloads
             stdout, stderr = process.communicate(timeout=timeout_seconds)
 
             end_time = time.time_ns()
@@ -325,7 +459,7 @@ class ExternalEngine(Engine):
         except subprocess.TimeoutExpired:
             process.kill()
             result.status = "timeout"
-            result.notes = f"Process timeout ({timeout_seconds} seconds, calculated for {pattern_count} patterns × {corpus_size_mb:.1f}MB corpus)"
+            result.notes = f"Process timeout ({timeout_seconds} seconds, for {pattern_count} patterns × {corpus_size_mb:.1f}MB corpus)"
             return result
 
         except Exception as e:

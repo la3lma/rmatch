@@ -254,17 +254,53 @@ class StatisticalAnalyzer:
         """Generate high-level summary of analysis."""
         engines = set()
         total_measurements = 0
+        throughput_stats = {}
 
-        for stats in statistics_by_group.values():
+        # Collect engine throughput statistics
+        for group_key, stats in statistics_by_group.items():
             engines.add(stats['engine_name'])
             total_measurements += stats['sample_size']
+
+            # Aggregate throughput statistics by engine
+            engine_name = stats['engine_name']
+            if 'throughput' in stats and stats['throughput']:
+                if engine_name not in throughput_stats:
+                    throughput_stats[engine_name] = []
+
+                throughput_stats[engine_name].append({
+                    'mean': stats['throughput']['mean'],
+                    'median': stats['throughput']['median'],
+                    'std_dev': stats['throughput']['std_dev'],
+                    'min': stats['throughput']['min'],
+                    'max': stats['throughput']['max'],
+                    'patterns_compiled': stats.get('patterns_compiled', 0),
+                    'corpus_size_mb': stats.get('corpus_size_bytes', 0) / (1024 * 1024) if stats.get('corpus_size_bytes') else 0
+                })
+
+        # Calculate overall engine throughput summaries
+        engine_throughput_summary = {}
+        for engine_name, throughputs in throughput_stats.items():
+            if throughputs:
+                all_means = [t['mean'] for t in throughputs]
+                all_medians = [t['median'] for t in throughputs]
+                all_std_devs = [t['std_dev'] for t in throughputs]
+
+                engine_throughput_summary[engine_name] = {
+                    'configurations_tested': len(throughputs),
+                    'average_mean_mbps': statistics.mean(all_means),
+                    'average_median_mbps': statistics.mean(all_medians),
+                    'average_std_dev_mbps': statistics.mean(all_std_devs),
+                    'best_mean_mbps': max(all_means),
+                    'worst_mean_mbps': min(all_means)
+                }
 
         return {
             'engines_analyzed': len(engines),
             'engine_names': list(engines),
             'total_measurements': total_measurements,
             'test_combinations': len(statistics_by_group),
-            'comparisons_computed': len(comparisons)
+            'comparisons_computed': len(comparisons),
+            'throughput_summary': engine_throughput_summary
         }
 
     def _validate_results(self, statistics_by_group: Dict[str, Dict[str, Any]],

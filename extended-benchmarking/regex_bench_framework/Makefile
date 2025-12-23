@@ -267,8 +267,7 @@ bench-phase1-original: venv build-engines ## Run ORIGINAL Phase 1 benchmarks (ma
 	@mkdir -p $(RESULTS_DIR)/phase1_$(TIMESTAMP)
 	$(REGEX_BENCH) run-phase \
 		--config test_matrix/phase1.json \
-		--output $(RESULTS_DIR)/phase1_$(TIMESTAMP) \
-		--parallel 4
+		--output $(RESULTS_DIR)/phase1_$(TIMESTAMP)
 	@echo "$(GREEN)✓ Phase 1 benchmarks complete$(NC)"
 	@echo "$(BLUE)Results: $(RESULTS_DIR)/phase1_$(TIMESTAMP)$(NC)"
 
@@ -313,12 +312,47 @@ bench-single: venv build-engines ## Run single engine benchmark
 		--iterations 5
 	@echo "$(GREEN)✓ Single engine benchmark complete$(NC)"
 
+##@ Process Management
+
+.PHONY: process-status
+process-status: venv ## Show benchmark process status and cleanup orphans
+	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
+	if [ -z "$$latest_result" ]; then \
+		echo "$(YELLOW)⚠ No benchmark results found - checking current directory$(NC)"; \
+		$(REGEX_BENCH) process-status; \
+	else \
+		echo "$(BLUE)Checking processes for: $$latest_result$(NC)"; \
+		$(REGEX_BENCH) process-status --output "$$latest_result"; \
+	fi
+
+.PHONY: process-cleanup
+process-cleanup: venv ## Clean up orphaned benchmark processes
+	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
+	if [ -z "$$latest_result" ]; then \
+		echo "$(YELLOW)⚠ No benchmark results found - using current directory$(NC)"; \
+		$(REGEX_BENCH) process-status --cleanup; \
+	else \
+		echo "$(BLUE)Cleaning processes for: $$latest_result$(NC)"; \
+		$(REGEX_BENCH) process-status --output "$$latest_result" --cleanup; \
+	fi
+
+.PHONY: process-monitor
+process-monitor: venv ## Monitor and update process status
+	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
+	if [ -z "$$latest_result" ]; then \
+		echo "$(YELLOW)⚠ No benchmark results found - using current directory$(NC)"; \
+		$(REGEX_BENCH) process-status --monitor; \
+	else \
+		echo "$(BLUE)Monitoring processes for: $$latest_result$(NC)"; \
+		$(REGEX_BENCH) process-status --output "$$latest_result" --monitor; \
+	fi
+
 ##@ Analysis and Reporting
 
 .PHONY: report
 report: venv ## Generate benchmark report from latest results
 	@echo "$(BLUE)Generating benchmark report...$(NC)"
-	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
+	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
 	if [ -z "$$latest_result" ]; then \
 		echo "$(RED)✗ No benchmark results found in $(RESULTS_DIR)$(NC)"; \
 		exit 1; \
@@ -335,7 +369,7 @@ report: venv ## Generate benchmark report from latest results
 .PHONY: report-standalone
 report-standalone: ## Generate benchmark report using standalone generator
 	@echo "$(BLUE)Generating benchmark report (standalone)...$(NC)"
-	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
+	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
 	if [ -z "$$latest_result" ]; then \
 		echo "$(RED)✗ No benchmark results found in $(RESULTS_DIR)$(NC)"; \
 		exit 1; \
@@ -343,6 +377,22 @@ report-standalone: ## Generate benchmark report using standalone generator
 	echo "$(BLUE)Analyzing results: $$latest_result$(NC)"; \
 	sed "s|results/quick_20251219_140928|$$latest_result|" standalone_report_test.py | python3
 	@echo "$(GREEN)✓ Report generated: test_reports/benchmark_report.html$(NC)"
+
+.PHONY: report-live
+report-live: venv ## Generate live progress report for running benchmarks
+	@echo "$(BLUE)Generating live progress report...$(NC)"
+	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
+	if [ -z "$$latest_result" ]; then \
+		echo "$(RED)✗ No benchmark results found in $(RESULTS_DIR)$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)Monitoring: $$latest_result$(NC)"; \
+	$(REGEX_BENCH) generate-report \
+		--input "$$latest_result" \
+		--output "reports/live_$(notdir $$latest_result)" \
+		--live
+	@echo "$(GREEN)✓ Live progress report generated$(NC)"
+	@echo "$(CYAN)📄 Open the report in your browser and it will auto-refresh every 30 seconds$(NC)"
 
 .PHONY: compare
 compare: venv ## Compare two benchmark runs
@@ -362,12 +412,12 @@ compare: venv ## Compare two benchmark runs
 
 .PHONY: stats
 stats: venv ## Show statistics from latest benchmark
-	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1)
-	@if [ -z "$$latest_result" ]; then
-		echo "$(RED)✗ No benchmark results found$(NC)"
-		exit 1
-	fi
-	@echo "$(BOLD)Latest Benchmark Statistics:$(NC)"
+	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
+	if [ -z "$$latest_result" ]; then \
+		echo "$(RED)✗ No benchmark results found$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(BOLD)Latest Benchmark Statistics:$(NC)"; \
 	$(REGEX_BENCH) show-stats --input "$$latest_result"
 
 ##@ Pattern and Corpus Management
@@ -484,6 +534,168 @@ docker-build: ## Build Docker image for cross-platform testing
 docker-test: docker-build ## Run tests in Docker container
 	@echo "$(BLUE)Running tests in Docker...$(NC)"
 	docker run --rm -v $(PWD)/results:/app/results regex-bench-framework make test-quick
+
+# ============================================================
+# Lifecycle-Aware Benchmark Targets (Job Queue System)
+# ============================================================
+
+.PHONY: bench-status bench-start bench-continue bench-reset
+.PHONY: bench-phase1-new bench-phase1-resume bench-stop
+
+# Status and control operations
+bench-status: venv ## Show status of benchmark runs and jobs
+	@echo "$(BLUE)=== Benchmark Status ===$(NC)"
+	@LATEST_DB=$$(find results -name "jobs.db" -type f -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || echo ""); \
+	if [ -n "$$LATEST_DB" ]; then \
+		echo "📁 Using latest database: $$LATEST_DB"; \
+		LATEST_DIR=$$(dirname "$$LATEST_DB"); \
+		$(REGEX_BENCH) job-status --output "$$LATEST_DIR"; \
+	else \
+		$(REGEX_BENCH) job-status || echo "💡 No benchmark databases found. Run 'make bench-start' to begin."; \
+	fi
+
+bench-start: venv build-engines ## Resume existing run or start production benchmark with 10K patterns and 1GB corpus
+	@echo "$(BLUE)=== Production Benchmark: Resume or Start ===$(NC)"
+	@LATEST_DB=$$(find results -name "jobs.db" -type f -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || echo ""); \
+	if [ -n "$$LATEST_DB" ]; then \
+		LATEST_DIR=$$(dirname "$$LATEST_DB"); \
+		echo "📁 Found existing database: $$LATEST_DB"; \
+		if $(REGEX_BENCH) job-status --output "$$LATEST_DIR" --quiet | grep -q "RUNNING"; then \
+			echo "$(GREEN)Resuming incomplete benchmark run...$(NC)"; \
+			$(REGEX_BENCH) job-continue --output "$$LATEST_DIR"; \
+		else \
+			echo "$(YELLOW)Latest run is complete, starting fresh...$(NC)"; \
+			$(MAKE) bench-start-fresh; \
+		fi \
+	else \
+		echo "$(BLUE)No existing runs found, starting fresh...$(NC)"; \
+		$(MAKE) bench-start-fresh; \
+	fi
+
+bench-start-fresh: venv build-engines ## Always start fresh production benchmark with 10K patterns and 1GB corpus
+	@echo "$(BLUE)=== Starting Fresh Production Benchmark Run (10K patterns, 1GB corpus, fast engines only) ===$(NC)"
+	@mkdir -p $(RESULTS_DIR)/production_$(TIMESTAMP)
+	$(REGEX_BENCH) job-start \
+		--config test_matrix/production_fast_engines.json \
+		--output $(RESULTS_DIR)/production_$(TIMESTAMP)
+
+bench-continue: venv ## Continue interrupted benchmark run
+	@echo "$(BLUE)=== Continuing Latest Interrupted Run ===$(NC)"
+	@LATEST_DB=$$(find results -name "jobs.db" -type f -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || echo ""); \
+	if [ -n "$$LATEST_DB" ]; then \
+		echo "📁 Using latest database: $$LATEST_DB"; \
+		LATEST_DIR=$$(dirname "$$LATEST_DB"); \
+		$(REGEX_BENCH) job-continue --output "$$LATEST_DIR"; \
+	else \
+		echo "$(RED)No benchmark databases found. Use 'make bench-start' for new run.$(NC)"; \
+		exit 1; \
+	fi
+
+bench-reset: venv ## Reset job queue (clear all jobs)
+	@echo "$(YELLOW)=== Resetting Job Queue ===$(NC)"
+	@read -p "This will clear all queued and failed jobs. Continue? (y/N): " confirm; \
+	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
+		$(REGEX_BENCH) job-reset --confirm; \
+		echo "$(GREEN)Job queue reset completed.$(NC)"; \
+	else \
+		echo "Reset cancelled."; \
+	fi
+
+bench-stop: ## Graceful shutdown request (placeholder for future implementation)
+	@echo "$(YELLOW)=== Graceful Shutdown Requested ===$(NC)"
+	@echo "$(YELLOW)Note: Current jobs will complete, new jobs won't start$(NC)"
+	@echo "$(BLUE)Use 'make bench-status' to monitor progress$(NC)"
+
+bench-cleanup: venv ## Clean up invalid benchmark results and resume the run
+	@echo "$(BLUE)=== Cleaning Invalid Results and Resuming Run ===$(NC)"
+	@latest_dir=$$(find results -maxdepth 1 -type d -name "*" | grep -E "results/[0-9]" | sort | tail -n1); \
+	if [ -z "$$latest_dir" ]; then \
+		echo "$(RED)No benchmark results directories found$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(BLUE)Using latest results directory: $$latest_dir$(NC)"; \
+	$(REGEX_BENCH) cleanup-resume --output-dir "$$latest_dir"
+
+bench-cleanup-dry: venv ## Preview what would be cleaned up without actually doing it
+	@echo "$(YELLOW)=== DRY RUN: Preview Cleanup ===$(NC)"
+	@latest_dir=$$(find results -maxdepth 1 -type d -name "*" | grep -E "results/[0-9]" | sort | tail -n1); \
+	if [ -z "$$latest_dir" ]; then \
+		echo "$(RED)No benchmark results directories found$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(YELLOW)Previewing cleanup for: $$latest_dir$(NC)"; \
+	$(REGEX_BENCH) cleanup-resume --output-dir "$$latest_dir" --dry-run
+
+bench-fix: bench-cleanup bench-continue ## Clean invalid results and immediately resume execution
+	@echo "$(GREEN)=== Fix and Resume Completed ===$(NC)"
+
+# Enhanced phase targets with lifecycle awareness
+bench-phase1-new: bench-reset bench-start-fresh ## Start fresh Phase 1 benchmark
+	@echo "$(GREEN)=== Started fresh Phase 1 benchmark ===$(NC)"
+
+bench-phase1-resume: venv ## Resume or start Phase 1 benchmark
+	@echo "$(BLUE)=== Phase 1: Resume or Start ===$(NC)"
+	@if $(REGEX_BENCH) job-status --run-id-only --quiet >/dev/null 2>&1; then \
+		echo "Found existing run, continuing..."; \
+		$(MAKE) bench-continue; \
+	else \
+		echo "No existing run found, starting new..."; \
+		$(MAKE) bench-start-fresh; \
+	fi
+
+# Maintain backward compatibility
+bench-phase1: bench-phase1-resume ## Resume or start Phase 1 benchmark (default behavior)
+	@echo "$(GREEN)=== Phase 1 completed or continuing ===$(NC)"
+
+# Enhanced reporting with job context
+report-latest: venv ## Generate report from latest benchmark run
+	@echo "$(BLUE)=== Generating Report from Latest Run ===$(NC)"
+	@RUN_ID=$$($(REGEX_BENCH) job-status --latest-run-id --quiet 2>/dev/null); \
+	if [ -n "$$RUN_ID" ]; then \
+		echo "$(GREEN)Generating report for run: $$RUN_ID$(NC)"; \
+		$(REGEX_BENCH) generate-report \
+			--input results \
+			--output reports/report_$(TIMESTAMP) \
+			--format html; \
+	else \
+		echo "$(RED)No completed runs found$(NC)"; \
+		exit 1; \
+	fi
+
+report-partial: venv ## Generate report from partial/incomplete run
+	@echo "$(BLUE)=== Generating Partial Report ===$(NC)"
+	@RUN_ID=$$($(REGEX_BENCH) job-status --latest-run-id --quiet 2>/dev/null); \
+	if [ -n "$$RUN_ID" ]; then \
+		echo "$(YELLOW)Generating partial report for run: $$RUN_ID$(NC)"; \
+		echo "$(YELLOW)Note: This may include incomplete data$(NC)"; \
+		$(REGEX_BENCH) generate-report \
+			--input results \
+			--output reports/partial_report_$(TIMESTAMP) \
+			--format html; \
+	else \
+		echo "$(RED)No runs found$(NC)"; \
+		exit 1; \
+	fi
+
+# Help for new targets
+help-lifecycle: ## Show help for lifecycle-aware benchmark targets
+	@echo "$(BLUE)Lifecycle-Aware Benchmark Targets:$(NC)"
+	@echo "  $(GREEN)bench-status$(NC)          - Show status of benchmark runs and jobs"
+	@echo "  $(GREEN)bench-start$(NC)           - Smart: resume existing run or start new if none found"
+	@echo "  $(GREEN)bench-start-fresh$(NC)     - Always start completely fresh benchmark run"
+	@echo "  $(GREEN)bench-continue$(NC)        - Continue interrupted benchmark run"
+	@echo "  $(GREEN)bench-reset$(NC)           - Reset job queue (clear all jobs)"
+	@echo "  $(GREEN)bench-phase1-new$(NC)      - Start fresh Phase 1 benchmark"
+	@echo "  $(GREEN)bench-phase1-resume$(NC)   - Resume or start Phase 1 benchmark"
+	@echo "  $(GREEN)bench-phase1$(NC)          - Default: resume or start Phase 1"
+	@echo "  $(GREEN)report-latest$(NC)         - Generate report from latest run"
+	@echo "  $(GREEN)report-partial$(NC)        - Generate report including partial data"
+	@echo ""
+	@echo "$(YELLOW)Example workflow:$(NC)"
+	@echo "  1. make bench-start          # Smart start (resume if possible)"
+	@echo "  2. make bench-status         # Check progress"
+	@echo "  3. make bench-continue       # Resume if interrupted"
+	@echo "  4. make report-latest        # Generate final report"
 
 # Include optional local configuration
 -include Makefile.local

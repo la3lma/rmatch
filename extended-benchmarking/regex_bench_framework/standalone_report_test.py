@@ -36,8 +36,8 @@ def generate_html_report(data, output_dir):
 
     <div class="summary">
         <h2>📊 Summary</h2>
-        <p><strong>Phase:</strong> {summary.get('phase', 'unknown').title()}</p>
-        <p><strong>Status:</strong> <span class="{'success' if summary.get('status') == 'completed' else 'error'}">{summary.get('status', 'unknown').title()}</span></p>
+        <p><strong>Phase:</strong> {str(summary.get('phase', 'unknown')).title()}</p>
+        <p><strong>Status:</strong> <span class="{'success' if summary.get('status') == 'completed' else 'error'}">{str(summary.get('status', 'unknown')).title()}</span></p>
         <p><strong>Duration:</strong> {summary.get('duration_seconds', 0):.2f} seconds</p>
         <p><strong>Engines:</strong> {', '.join(summary.get('engines_tested', []))}</p>
         <p><strong>Total Runs:</strong> {summary.get('total_combinations', 0)}</p>
@@ -53,8 +53,10 @@ def generate_html_report(data, output_dir):
                     <th>#</th>
                     <th>Engine</th>
                     <th>Status</th>
+                    <th>Corpus Size</th>
                     <th>Compilation (ms)</th>
                     <th>Scanning (ms)</th>
+                    <th>Throughput</th>
                     <th>Matches</th>
                     <th>Patterns</th>
                 </tr>
@@ -62,17 +64,30 @@ def generate_html_report(data, output_dir):
             <tbody>"""
 
     for i, result in enumerate(raw_results):
-        comp_ms = (result.get('compilation_ns', 0) / 1_000_000)
-        scan_ms = (result.get('scanning_ns', 0) / 1_000_000)
+        comp_ms = ((result.get('compilation_ns') or 0) / 1_000_000)
+        scan_ms = ((result.get('scanning_ns') or 0) / 1_000_000)
         status_class = 'success' if result.get('status') == 'ok' else 'error'
+
+        # Calculate corpus size and MB/sec throughput
+        corpus_size_bytes = result.get('corpus_size_bytes') or 0
+        corpus_size_mb = corpus_size_bytes / (1024 * 1024) if corpus_size_bytes and corpus_size_bytes > 0 else 0
+
+        # Calculate MB/sec scanning throughput
+        scanning_ns = result.get('scanning_ns') or 0
+        mb_per_sec = 0
+        if scanning_ns and scanning_ns > 0 and corpus_size_bytes and corpus_size_bytes > 0:
+            scanning_seconds = scanning_ns / 1_000_000_000  # Convert nanoseconds to seconds
+            mb_per_sec = corpus_size_mb / scanning_seconds
 
         html += f"""
                 <tr>
                     <td>{i + 1}</td>
                     <td>{result.get('engine_name', 'Unknown')}</td>
                     <td class="{status_class}">{result.get('status', 'unknown')}</td>
+                    <td>{corpus_size_mb:.1f} MB</td>
                     <td>{comp_ms:.3f}</td>
                     <td>{scan_ms:.3f}</td>
+                    <td>{mb_per_sec:.2f} MB/sec</td>
                     <td>{result.get('match_count', 0)}</td>
                     <td>{result.get('patterns_compiled', 0)}</td>
                 </tr>"""

@@ -1,6 +1,6 @@
 {
   "phase": 1,
-  "description": "Comprehensive baseline comparison - establish performance characteristics (WORKING ENGINES ONLY)",
+  "description": "Comprehensive baseline comparison - establish performance characteristics",
   "goals": [
     "Validate rmatch 2-10x throughput claims vs java.util.regex",
     "Establish engine characteristics across pattern counts and input sizes",
@@ -31,21 +31,18 @@
     "pattern_suites": ["log_mining"],
     "corpora": ["synthetic_controllable"],
     "engines": [
-      "java-native-optimized",
-      "java-native-unfair",
+      "java-native",
       "re2j",
+      "re2-cpp",
+      "go-re2",
+      "hyperscan",
       "rmatch"
     ],
-    "iterations_per_combination": 3,
+    "iterations_per_combination": 10,
     "warmup_iterations": 5
   },
   "engine_configurations": {
-    "java-native-optimized": {
-      "jvm_flags": ["-Xmx4g", "-XX:+UseG1GC", "-server"],
-      "compilation_strategy": "precompile_patterns",
-      "optimization_level": "production"
-    },
-    "java-native-unfair": {
+    "java-native": {
       "jvm_flags": ["-Xmx4g", "-XX:+UseG1GC", "-server"],
       "compilation_strategy": "precompile_patterns",
       "optimization_level": "production"
@@ -54,6 +51,22 @@
       "jvm_flags": ["-Xmx4g", "-XX:+UseG1GC", "-server"],
       "compilation_strategy": "precompile_patterns",
       "optimization_level": "production"
+    },
+    "re2-cpp": {
+      "compile_flags": ["-O3", "-std=c++17", "-march=native"],
+      "use_re2_set": true,
+      "optimization_level": "maximum"
+    },
+    "go-re2": {
+      "build_flags": ["-ldflags", "-s -w"],
+      "use_builtin_regexp": true,
+      "optimization_level": "production"
+    },
+    "hyperscan": {
+      "mode": "HS_MODE_BLOCK",
+      "flags": ["HS_FLAG_CASELESS", "HS_FLAG_DOTALL"],
+      "optimization_level": "maximum",
+      "platform_notes": "Requires x86_64 architecture"
     },
     "rmatch": {
       "optimization_flags": "default",
@@ -89,7 +102,7 @@
   "success_criteria": {
     "correctness": {
       "match_count_agreement": "exact",
-      "reference_engines": ["java-native-optimized", "re2j"],
+      "reference_engines": ["java-native", "re2j"],
       "tolerance": 0,
       "validation_required": true
     },
@@ -110,7 +123,7 @@
         "memory_efficiency": {
           "metric": "peak_memory_usage",
           "target": "comparable_or_better",
-          "baseline": "java-native-optimized"
+          "baseline": "java-native"
         },
         "compilation_speed": {
           "metric": "compilation_time",

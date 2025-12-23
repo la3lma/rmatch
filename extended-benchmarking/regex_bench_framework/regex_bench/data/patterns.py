@@ -22,7 +22,11 @@ class PatternSuite:
 
     def generate(self, count: int) -> Dict[str, Any]:
         """Generate patterns for the specified suite."""
-        # Use fair patterns for ALL suites to ensure compatibility with rmatch
+        # Check if this is the stable_patterns suite
+        if self.suite_name == "stable_patterns":
+            return self._load_stable_patterns(count)
+
+        # Use fair patterns for ALL other suites to ensure compatibility with rmatch
         generator = FairPatternGenerator(seed=self.seed)
         patterns = generator.generate_patterns(count)
 
@@ -34,6 +38,54 @@ class PatternSuite:
                 "compatible_engines": ["rmatch", "re2j", "java-native"],
                 "note": "Patterns designed for cross-engine compatibility"
             },
+            "patterns": patterns,
+            "pattern_count": len(patterns)
+        }
+
+    def _load_stable_patterns(self, count: int) -> Dict[str, Any]:
+        """Load patterns from the stable patterns file."""
+        import json
+
+        # Path to stable patterns
+        stable_patterns_dir = benchmark_suites_path / "stable_patterns"
+        patterns_file = stable_patterns_dir / "patterns_10000.txt"
+        metadata_file = stable_patterns_dir / "patterns_10000_metadata.json"
+
+        if not patterns_file.exists():
+            raise FileNotFoundError(f"Stable patterns file not found: {patterns_file}")
+
+        # Load patterns from file
+        with open(patterns_file, 'r') as f:
+            all_patterns = [line.strip() for line in f if line.strip()]
+
+        # Take the requested count (or all if count exceeds available)
+        patterns = all_patterns[:count]
+
+        # Load metadata if available
+        suite_metadata = {
+            "suite_name": "stable_patterns",
+            "generator": "StablePatternsForGit",
+            "seed": self.seed,
+            "compatible_engines": ["rmatch", "re2j", "java-native-optimized", "java-native-unfair"],
+            "validation_status": "validated",
+            "note": "Git-stored stable patterns - validated to work with all engines, no invalid syntax",
+            "source_file": str(patterns_file),
+            "total_available_patterns": len(all_patterns),
+            "patterns_used": len(patterns)
+        }
+
+        if metadata_file.exists():
+            try:
+                with open(metadata_file, 'r') as f:
+                    file_metadata = json.load(f)
+                    if 'suite_metadata' in file_metadata:
+                        suite_metadata.update(file_metadata['suite_metadata'])
+            except (json.JSONDecodeError, KeyError):
+                # Continue with default metadata if file is malformed
+                pass
+
+        return {
+            "suite_metadata": suite_metadata,
             "patterns": patterns,
             "pattern_count": len(patterns)
         }

@@ -1,16 +1,16 @@
 {
-  "phase": 1,
-  "description": "Comprehensive baseline comparison - establish performance characteristics (WORKING ENGINES ONLY)",
+  "phase": "extended_scale",
+  "description": "Extended scale testing with large corpus sizes and patterns - requires safe 10K patterns",
   "goals": [
-    "Validate rmatch 2-10x throughput claims vs java.util.regex",
-    "Establish engine characteristics across pattern counts and input sizes",
-    "Identify optimal use cases for each engine",
-    "Create statistical baseline for future comparisons"
+    "Test performance characteristics at very large input sizes (500MB, 1GB)",
+    "Validate engine stability with large datasets",
+    "Measure memory consumption and timeouts at scale",
+    "Test the new 10,000 safe pattern dataset"
   ],
   "methodology": {
     "measurement_protocol": {
-      "warmup_runs": 5,
-      "measurement_runs": 10,
+      "warmup_runs": 3,
+      "measurement_runs": 5,
       "discard_outliers": true,
       "outlier_threshold": "1.5*IQR",
       "confidence_level": 0.95
@@ -20,14 +20,14 @@
       "separate_compilation_scanning": true,
       "common_subset_comparison": true,
       "resource_limits": {
-        "max_memory_gb": 8,
-        "timeout_minutes": 10
+        "max_memory_gb": 16,
+        "timeout_minutes": 60
       }
     }
   },
   "test_matrix": {
-    "pattern_counts": [10, 100, 1000],
-    "input_sizes": ["1MB", "10MB", "100MB"],
+    "pattern_counts": [100, 1000, 10000],
+    "input_sizes": ["100MB", "500MB", "1GB"],
     "pattern_suites": ["log_mining"],
     "corpora": ["synthetic_controllable"],
     "engines": [
@@ -36,29 +36,29 @@
       "re2j",
       "rmatch"
     ],
-    "iterations_per_combination": 3,
-    "warmup_iterations": 5
+    "iterations_per_combination": 5,
+    "warmup_iterations": 3
   },
   "engine_configurations": {
     "java-native-optimized": {
-      "jvm_flags": ["-Xmx4g", "-XX:+UseG1GC", "-server"],
+      "jvm_flags": ["-Xmx8g", "-XX:+UseG1GC", "-server"],
       "compilation_strategy": "precompile_patterns",
       "optimization_level": "production"
     },
     "java-native-unfair": {
-      "jvm_flags": ["-Xmx4g", "-XX:+UseG1GC", "-server"],
+      "jvm_flags": ["-Xmx8g", "-XX:+UseG1GC", "-server"],
       "compilation_strategy": "precompile_patterns",
       "optimization_level": "production"
     },
     "re2j": {
-      "jvm_flags": ["-Xmx4g", "-XX:+UseG1GC", "-server"],
+      "jvm_flags": ["-Xmx8g", "-XX:+UseG1GC", "-server"],
       "compilation_strategy": "precompile_patterns",
       "optimization_level": "production"
     },
     "rmatch": {
       "optimization_flags": "default",
       "mode": "batch_processing",
-      "notes": "Target engine for comparison"
+      "notes": "Target engine for large-scale comparison"
     }
   },
   "data_configuration": {
@@ -72,15 +72,16 @@
         "error_codes": 0.15,
         "key_values": 0.15
       },
-      "complexity_target": "realistic"
+      "complexity_target": "realistic",
+      "safety_validation": "required"
     },
     "corpus_generation": {
       "type": "synthetic_controllable",
       "match_density": "medium",
       "line_count_target": {
-        "1MB": 20000,
-        "10MB": 200000,
-        "100MB": 2000000
+        "100MB": 2000000,
+        "500MB": 10000000,
+        "1GB": 20000000
       },
       "character_distribution": "log_like",
       "unicode_support": false
@@ -95,80 +96,62 @@
     },
     "performance": {
       "primary_claims": {
-        "rmatch_vs_java": {
-          "metric": "scanning_throughput",
-          "target": ">2x",
+        "large_scale_stability": {
+          "metric": "completion_rate",
+          "target": ">95%",
           "required_significance": 0.01
         },
-        "linear_scaling": {
-          "metric": "throughput_vs_pattern_count",
-          "target": "sublinear_degradation",
-          "max_degradation": 0.5
+        "memory_scaling": {
+          "metric": "memory_usage_vs_input_size",
+          "target": "linear_or_sublinear",
+          "max_overhead": "2x"
         }
       },
       "secondary_claims": {
-        "memory_efficiency": {
-          "metric": "peak_memory_usage",
-          "target": "comparable_or_better",
-          "baseline": "java-native-optimized"
+        "timeout_resilience": {
+          "metric": "timeout_rate",
+          "target": "<5%",
+          "baseline": "all_engines"
         },
-        "compilation_speed": {
-          "metric": "compilation_time",
-          "target": "acceptable",
-          "max_overhead": "10x"
+        "throughput_maintenance": {
+          "metric": "throughput_degradation",
+          "target": "gradual_only",
+          "max_degradation": 0.7
         }
       }
     },
     "statistical_validity": {
-      "min_sample_size": 10,
-      "required_confidence": 0.95,
-      "max_coefficient_variation": 0.15,
+      "min_sample_size": 5,
+      "required_confidence": 0.90,
+      "max_coefficient_variation": 0.20,
       "outlier_detection": "required"
     }
   },
-  "deliverables": {
-    "primary_charts": [
-      "throughput_vs_pattern_count.png",
-      "throughput_vs_input_size.png",
-      "compilation_time_comparison.png",
-      "memory_usage_heatmap.png",
-      "speedup_matrix.png"
-    ],
-    "analysis_reports": [
-      "engine_characteristics_summary.md",
-      "statistical_analysis_report.md",
-      "performance_claims_validation.md"
-    ],
-    "data_outputs": [
-      "raw_benchmark_results.json",
-      "statistical_summary.json",
-      "engine_metadata.json"
-    ]
-  },
   "execution_plan": {
-    "estimated_duration": "60-90 minutes",
+    "estimated_duration": "4-8 hours",
     "parallel_execution": {
-      "max_concurrent_engines": 2,
+      "max_concurrent_engines": 1,
       "resource_isolation": true
     },
     "checkpoints": [
       "engine_availability_check",
-      "pattern_generation",
-      "corpus_setup",
-      "correctness_validation",
-      "performance_measurement",
-      "statistical_analysis"
+      "safe_pattern_validation",
+      "large_corpus_setup",
+      "memory_limit_verification",
+      "timeout_configuration",
+      "performance_measurement"
     ],
     "failure_handling": {
       "engine_unavailable": "skip_with_warning",
       "correctness_mismatch": "abort_with_error",
-      "performance_timeout": "record_partial_results"
+      "performance_timeout": "record_partial_results",
+      "memory_exceeded": "record_failure_and_continue"
     }
   },
   "output_configuration": {
     "results_format": "structured_json",
     "include_raw_data": true,
-    "include_debug_info": false,
+    "include_debug_info": true,
     "compression": "gzip",
     "schema_version": "2.0"
   }
