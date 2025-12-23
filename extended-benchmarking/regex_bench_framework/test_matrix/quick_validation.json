@@ -1,0 +1,80 @@
+{
+  "phase": "validation",
+  "description": "Quick validation test for framework development and CI",
+  "goals": [
+    "Verify all engines can be executed",
+    "Validate basic correctness across engines",
+    "Ensure framework pipeline works end-to-end",
+    "Provide fast feedback for development"
+  ],
+  "test_matrix": {
+    "pattern_counts": [10],
+    "input_sizes": ["100KB"],
+    "pattern_suites": ["log_mining"],
+    "corpora": ["synthetic_controllable"],
+    "engines": [
+      "java-native",
+      "re2j",
+      "rmatch"
+    ],
+    "iterations_per_combination": 3,
+    "warmup_iterations": 1
+  },
+  "engine_configurations": {
+    "java-native": {
+      "jvm_flags": ["-Xmx1g"],
+      "compilation_strategy": "simple"
+    },
+    "re2j": {
+      "jvm_flags": ["-Xmx1g"],
+      "compilation_strategy": "simple"
+    },
+    "rmatch": {
+      "optimization_flags": "default"
+    }
+  },
+  "data_configuration": {
+    "pattern_generation": {
+      "suite": "log_mining",
+      "seed": 42,
+      "complexity_target": "simple"
+    },
+    "corpus_generation": {
+      "type": "synthetic_controllable",
+      "match_density": "low",
+      "line_count_target": {
+        "100KB": 2000
+      },
+      "character_distribution": "ascii_only"
+    }
+  },
+  "success_criteria": {
+    "correctness": {
+      "match_count_agreement": "exact",
+      "reference_engines": ["java-native"],
+      "tolerance": 0
+    },
+    "performance": {
+      "basic_functionality": true,
+      "no_crashes": true,
+      "reasonable_timing": "< 30 seconds total"
+    }
+  },
+  "execution_plan": {
+    "estimated_duration": "2-5 minutes",
+    "parallel_execution": {
+      "max_concurrent_engines": 1,
+      "resource_isolation": false
+    },
+    "failure_handling": {
+      "engine_unavailable": "warn_and_continue",
+      "correctness_mismatch": "warn_with_details",
+      "performance_timeout": "abort"
+    }
+  },
+  "output_configuration": {
+    "results_format": "simple_json",
+    "include_raw_data": false,
+    "include_debug_info": true
+  }
+}

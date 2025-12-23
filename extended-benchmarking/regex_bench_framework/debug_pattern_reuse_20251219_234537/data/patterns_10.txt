@@ -1,0 +1,10 @@
+hello
+error
+warning
+info
+debug
+failed
+success
+timeout
+connection
+server

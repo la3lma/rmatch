@@ -1,0 +1,19 @@
+{
+  "phase": 1,
+  "description": "10K patterns with re2j engine only",
+  "test_matrix": {
+    "pattern_counts": [10000],
+    "input_sizes": ["100MB"],
+    "pattern_suites": ["log_mining"],
+    "corpora": ["synthetic_controllable"],
+    "engines": ["re2j"],
+    "iterations_per_combination": 3,
+    "warmup_iterations": 1
+  },
+  "execution_plan": {
+    "parallel_execution": {
+      "max_concurrent_engines": 1,
+      "resource_isolation": true
+    }
+  }
+}

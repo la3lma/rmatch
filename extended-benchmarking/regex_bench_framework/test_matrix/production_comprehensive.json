@@ -1,0 +1,49 @@
+{
+  "phase": "production_comprehensive",
+  "description": "Production-grade comprehensive benchmark with 10K stable patterns across multiple corpus sizes including 1GB",
+  "test_matrix": {
+    "pattern_counts": [10, 100, 1000, 5000, 10000],
+    "input_sizes": ["1MB", "10MB", "100MB", "1GB"],
+    "pattern_suites": ["stable_patterns"],
+    "corpora": ["synthetic_controllable"],
+    "engines": [
+      "java-native-optimized",
+      "java-native-unfair",
+      "re2j",
+      "rmatch"
+    ],
+    "iterations_per_combination": 3,
+    "warmup_iterations": 1
+  },
+  "execution_plan": {
+    "failure_handling": {
+      "engine_unavailable": "skip_with_warning",
+      "correctness_mismatch": "record_with_warning",
+      "performance_timeout": "record_partial_results"
+    },
+    "timeout_per_job": 14400,
+    "resource_limits": {
+      "max_memory_mb": 16384,
+      "max_concurrent_jobs": 2
+    }
+  },
+  "optimization": {
+    "enable_parallel_execution": false,
+    "job_scheduling": "sequential",
+    "result_caching": false,
+    "corpus_pregeneration": true,
+    "enable_adaptive_iterations": true,
+    "adaptive_iteration_threshold_seconds": 100.0
+  },
+  "reporting": {
+    "generate_live_reports": true,
+    "include_charts": true,
+    "detailed_analysis": true,
+    "export_formats": ["html", "markdown"]
+  },
+  "validation": {
+    "cross_engine_correctness": true,
+    "performance_regression_detection": true,
+    "memory_usage_tracking": true
+  }
+}
