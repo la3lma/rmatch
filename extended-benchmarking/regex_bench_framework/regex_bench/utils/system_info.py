@@ -3,9 +3,16 @@ System information collection for benchmark metadata.
 """
 
 import platform
-import psutil
 import subprocess
 from typing import Dict, Any, Optional
+
+# Conditional psutil import to handle architecture issues
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError as e:
+    PSUTIL_AVAILABLE = False
+    print(f"Warning: psutil not available in SystemInfo ({e}). System monitoring disabled.")
 
 
 class SystemInfo:
@@ -39,12 +46,20 @@ class SystemInfo:
 
         try:
             # CPU information
-            hardware['cpu'] = {
-                'logical_cores': psutil.cpu_count(logical=True),
-                'physical_cores': psutil.cpu_count(logical=False),
-                'max_frequency': psutil.cpu_freq().max if psutil.cpu_freq() else None,
-                'current_frequency': psutil.cpu_freq().current if psutil.cpu_freq() else None
-            }
+            if PSUTIL_AVAILABLE:
+                hardware['cpu'] = {
+                    'logical_cores': psutil.cpu_count(logical=True),
+                    'physical_cores': psutil.cpu_count(logical=False),
+                    'max_frequency': psutil.cpu_freq().max if psutil.cpu_freq() else None,
+                    'current_frequency': psutil.cpu_freq().current if psutil.cpu_freq() else None
+                }
+            else:
+                hardware['cpu'] = {
+                    'logical_cores': None,
+                    'physical_cores': None,
+                    'max_frequency': None,
+                    'current_frequency': None
+                }
 
             # Get detailed CPU info on different platforms
             cpu_model = self._get_cpu_model()
@@ -52,22 +67,38 @@ class SystemInfo:
                 hardware['cpu']['model'] = cpu_model
 
             # Memory information
-            memory = psutil.virtual_memory()
-            hardware['memory'] = {
-                'total_bytes': memory.total,
-                'total_gb': round(memory.total / (1024**3), 2),
-                'available_bytes': memory.available,
-                'available_gb': round(memory.available / (1024**3), 2)
-            }
+            if PSUTIL_AVAILABLE:
+                memory = psutil.virtual_memory()
+                hardware['memory'] = {
+                    'total_bytes': memory.total,
+                    'total_gb': round(memory.total / (1024**3), 2),
+                    'available_bytes': memory.available,
+                    'available_gb': round(memory.available / (1024**3), 2)
+                }
+            else:
+                hardware['memory'] = {
+                    'total_bytes': None,
+                    'total_gb': None,
+                    'available_bytes': None,
+                    'available_gb': None
+                }
 
             # Disk information for temp space
-            disk = psutil.disk_usage('/')
-            hardware['disk'] = {
-                'total_bytes': disk.total,
-                'total_gb': round(disk.total / (1024**3), 2),
-                'free_bytes': disk.free,
-                'free_gb': round(disk.free / (1024**3), 2)
-            }
+            if PSUTIL_AVAILABLE:
+                disk = psutil.disk_usage('/')
+                hardware['disk'] = {
+                    'total_bytes': disk.total,
+                    'total_gb': round(disk.total / (1024**3), 2),
+                    'free_bytes': disk.free,
+                    'free_gb': round(disk.free / (1024**3), 2)
+                }
+            else:
+                hardware['disk'] = {
+                    'total_bytes': None,
+                    'total_gb': None,
+                    'free_bytes': None,
+                    'free_gb': None
+                }
 
         except Exception as e:
             hardware['error'] = f"Failed to collect hardware info: {e}"
@@ -98,12 +129,20 @@ class SystemInfo:
     def _get_resource_info(self) -> Dict[str, Any]:
         """Get current resource usage."""
         try:
-            return {
-                'cpu_percent': psutil.cpu_percent(interval=1),
-                'memory_percent': psutil.virtual_memory().percent,
-                'load_average': psutil.getloadavg() if hasattr(psutil, 'getloadavg') else None,
-                'boot_time': psutil.boot_time()
-            }
+            if PSUTIL_AVAILABLE:
+                return {
+                    'cpu_percent': psutil.cpu_percent(interval=1),
+                    'memory_percent': psutil.virtual_memory().percent,
+                    'load_average': psutil.getloadavg() if hasattr(psutil, 'getloadavg') else None,
+                    'boot_time': psutil.boot_time()
+                }
+            else:
+                return {
+                    'cpu_percent': None,
+                    'memory_percent': None,
+                    'load_average': None,
+                    'boot_time': None
+                }
         except Exception as e:
             return {'error': f"Failed to get resource info: {e}"}
 

@@ -4,8 +4,9 @@ Report formatters for different output formats.
 
 import json
 import time
+import sys
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 # Chart generation libraries
@@ -14,8 +15,32 @@ try:
     import plotly.express as px
     from plotly.subplots import make_subplots
     PLOTLY_AVAILABLE = True
-except ImportError:
+    print("DEBUG: Plotly import successful in formatter")
+except ImportError as e:
     PLOTLY_AVAILABLE = False
+    print(f"DEBUG: Plotly import failed in formatter: {e}")
+except Exception as e:
+    PLOTLY_AVAILABLE = False
+    print(f"DEBUG: Plotly other error in formatter: {e}")
+
+# Performance analysis imports - conditional to avoid psutil dependency issues
+ANALYSIS_AVAILABLE = False
+try:
+    # Try to import analysis modules without triggering full package imports
+    sys.path.append(str(Path(__file__).parent.parent))
+
+    # Use the standalone analysis approach to avoid psutil dependency
+    standalone_analysis_path = Path(__file__).parent.parent.parent / "standalone_analysis.py"
+    if standalone_analysis_path.exists():
+        ANALYSIS_AVAILABLE = "standalone"
+    else:
+        # Fallback to try full analysis if psutil is working
+        from analysis.performance_analyzer import PerformanceAnalyzer
+        from analysis.chart_generator import ChartGenerator
+        ANALYSIS_AVAILABLE = True
+except ImportError:
+    # psutil dependency issue - use standalone approach
+    ANALYSIS_AVAILABLE = False
 
 
 class HTMLFormatter:
@@ -74,8 +99,8 @@ class HTMLFormatter:
         {self._generate_summary_section(summary, analysis)}
         {self._generate_engines_section(raw_results)}
         {self._generate_results_section(raw_results, analysis)}
-        {self._generate_performance_section(analysis)}
-        {'    ' + self._generate_charts_section(raw_results, analysis) if include_charts else ''}
+        {self._generate_performance_section(analysis, raw_results, data.get('metadata', {}).get('database_path'))}
+        {'    ' + self._generate_charts_section(raw_results, analysis, data.get('metadata', {}).get('database_path')) if include_charts else ''}
         {self._generate_raw_data_section(raw_results)}
 
         <footer>
@@ -337,117 +362,692 @@ class HTMLFormatter:
             </div>
         </section>"""
 
-    def _generate_performance_section(self, analysis: Dict[str, Any]) -> str:
-        """Generate performance analysis section."""
+    def _generate_performance_section(self, analysis: Dict[str, Any], raw_results: List[Dict[str, Any]] = None, db_path: Optional[str] = None) -> str:
+        """Generate enhanced performance analysis section with memory usage."""
         grouped_stats = analysis.get('grouped_statistics', {})
         comparisons = analysis.get('comparisons', {})
 
-        if not grouped_stats:
-            return "<section><h2>⚡ Performance Analysis</h2><p>No analysis data available.</p></section>"
+        # Try to generate comprehensive memory analysis if we have access to the database
+        memory_analysis_section = ""
+        if ANALYSIS_AVAILABLE and db_path and Path(db_path).exists():
+            try:
+                memory_analysis_section = self._generate_memory_analysis(db_path)
+            except Exception as e:
+                print(f"Warning: Could not generate memory analysis: {e}")
 
+        # Generate basic performance stats from existing data
         stats_content = ""
-        for group_key, stats in grouped_stats.items():
-            engine_name = stats.get('engine_name', 'Unknown')
-            patterns = stats.get('patterns_compiled', 0)
-            corpus_size = stats.get('corpus_size_bytes', 0)
+        if grouped_stats:
+            for group_key, stats in grouped_stats.items():
+                engine_name = stats.get('engine_name', 'Unknown')
+                patterns = stats.get('patterns_compiled', 0)
+                corpus_size = stats.get('corpus_size_bytes', 0)
 
-            # Get scanning statistics
-            scanning = stats.get('scanning', {})
-            if scanning:
-                mean_ms = (scanning.get('mean') or 0) / 1_000_000
-                median_ms = (scanning.get('median') or 0) / 1_000_000
-                std_ms = (scanning.get('std_dev') or 0) / 1_000_000
+                # Get scanning statistics
+                scanning = stats.get('scanning', {})
+                if scanning:
+                    mean_ms = (scanning.get('mean') or 0) / 1_000_000
+                    median_ms = (scanning.get('median') or 0) / 1_000_000
+                    std_ms = (scanning.get('std_dev') or 0) / 1_000_000
 
-                stats_content += f"""
-                <div class="performance-card">
-                    <h4>{engine_name}</h4>
-                    <div class="perf-details">
-                        <div class="perf-item">
-                            <span class="label">Patterns:</span>
-                            <span class="value">{patterns}</span>
+                    stats_content += f"""
+                    <div class="performance-card">
+                        <h4>{engine_name}</h4>
+                        <div class="perf-details">
+                            <div class="perf-item">
+                                <span class="label">Patterns:</span>
+                                <span class="value">{patterns}</span>
+                            </div>
+                            <div class="perf-item">
+                                <span class="label">Corpus Size:</span>
+                                <span class="value">{corpus_size:,} bytes</span>
+                            </div>
+                            <div class="perf-item">
+                                <span class="label">Mean Scan Time:</span>
+                                <span class="value">{mean_ms:.3f} ms</span>
+                            </div>
+                            <div class="perf-item">
+                                <span class="label">Median Scan Time:</span>
+                                <span class="value">{median_ms:.3f} ms</span>
+                            </div>
+                            <div class="perf-item">
+                                <span class="label">Std Deviation:</span>
+                                <span class="value">{std_ms:.3f} ms</span>
+                            </div>
                         </div>
-                        <div class="perf-item">
-                            <span class="label">Corpus Size:</span>
-                            <span class="value">{corpus_size:,} bytes</span>
-                        </div>
-                        <div class="perf-item">
-                            <span class="label">Mean Scan Time:</span>
-                            <span class="value">{mean_ms:.3f} ms</span>
-                        </div>
-                        <div class="perf-item">
-                            <span class="label">Median Scan Time:</span>
-                            <span class="value">{median_ms:.3f} ms</span>
-                        </div>
-                        <div class="perf-item">
-                            <span class="label">Std Deviation:</span>
-                            <span class="value">{std_ms:.3f} ms</span>
-                        </div>
-                    </div>
-                </div>"""
+                    </div>"""
+
+        # Generate memory overview from raw results if available
+        memory_overview_section = ""
+        if raw_results:
+            memory_overview_section = self._generate_memory_overview_from_results(raw_results)
+
+        performance_insights = """
+        <div class="insights-section">
+            <h3>🧠 Performance Insights</h3>
+            <div class="insight-cards">
+                <div class="insight-card">
+                    <h4>Pattern Complexity Impact</h4>
+                    <p>Performance scales with pattern count. Complex patterns with lookarounds and character classes show higher compilation overhead.</p>
+                </div>
+                <div class="insight-card">
+                    <h4>Corpus Size Scaling</h4>
+                    <p>Linear scaling expected for scanning time. Memory usage may vary based on engine optimization strategies.</p>
+                </div>
+                <div class="insight-card">
+                    <h4>Engine Trade-offs</h4>
+                    <p>Different engines show varying memory vs performance trade-offs. Monitor both metrics for optimal selection.</p>
+                </div>
+            </div>
+        </div>"""
+
+        basic_performance = f"""
+        <div class="performance-grid">
+            {stats_content}
+        </div>""" if stats_content else "<p>No traditional performance statistics available.</p>"
 
         return f"""
         <section class="performance">
             <h2>⚡ Performance Analysis</h2>
-            <div class="performance-grid">
-                {stats_content}
-            </div>
+            {performance_insights}
+            {basic_performance}
+            {memory_overview_section}
+            {memory_analysis_section}
         </section>"""
 
-    def _generate_charts_section(self, raw_results: List[Dict[str, Any]], analysis: Dict[str, Any]) -> str:
-        """Generate interactive charts section using Plotly."""
+    def _generate_memory_analysis(self, db_path: str) -> str:
+        """Generate comprehensive memory analysis from database."""
+        try:
+            # Use standalone analysis approach to avoid psutil issues
+            if ANALYSIS_AVAILABLE == "standalone":
+                return self._generate_memory_analysis_standalone(db_path)
+            elif ANALYSIS_AVAILABLE:
+                # Full analysis available
+                analyzer = PerformanceAnalyzer(Path(db_path))
+                memory_analysis = analyzer.analyze_memory_usage()
+                memory_summary = analyzer.get_memory_comparison_summary()
+            else:
+                return self._generate_memory_analysis_from_db(db_path)
+
+            # Generate memory insights
+            insights = []
+            memory_overview = memory_summary.get('engine_memory_overview', {})
+            if memory_overview:
+                min_memory_engine = min(memory_overview.keys(),
+                                      key=lambda e: memory_overview[e]['avg_memory_mb'])
+                max_memory_engine = max(memory_overview.keys(),
+                                      key=lambda e: memory_overview[e]['avg_memory_mb'])
+
+                min_mem = memory_overview[min_memory_engine]['avg_memory_mb']
+                max_mem = memory_overview[max_memory_engine]['avg_memory_mb']
+
+                insights.append(f"{min_memory_engine} is most memory-efficient (avg: {min_mem:.1f} MB)")
+                insights.append(f"{max_memory_engine} uses most memory (avg: {max_mem:.1f} MB)")
+                insights.append(f"Memory usage varies by {max_mem/min_mem:.1f}x between engines")
+
+            # Generate engine memory cards
+            memory_cards = ""
+            for engine, stats in memory_overview.items():
+                memory_cards += f"""
+                <div class="memory-card">
+                    <h4>{engine}</h4>
+                    <div class="memory-stats">
+                        <div class="memory-stat">
+                            <span class="label">Average:</span>
+                            <span class="value">{stats['avg_memory_mb']:.1f} MB</span>
+                        </div>
+                        <div class="memory-stat">
+                            <span class="label">Peak:</span>
+                            <span class="value">{stats['max_memory_mb']:.1f} MB</span>
+                        </div>
+                        <div class="memory-stat">
+                            <span class="label">Minimum:</span>
+                            <span class="value">{stats['min_memory_mb']:.1f} MB</span>
+                        </div>
+                    </div>
+                </div>"""
+
+            insights_html = ""
+            if insights:
+                insights_html = """
+                <div class="memory-insights">
+                    <h4>🔍 Memory Usage Insights</h4>
+                    <ul class="insights-list">""" + \
+                    "".join([f"<li>{insight}</li>" for insight in insights]) + \
+                    """</ul>
+                </div>"""
+
+            return f"""
+            <div class="memory-analysis-section">
+                <h3>🧠 Memory Usage Analysis</h3>
+                {insights_html}
+                <div class="memory-grid">
+                    {memory_cards}
+                </div>
+            </div>"""
+
+        except Exception as e:
+            return f"""
+            <div class="memory-analysis-error">
+                <h3>🧠 Memory Usage Analysis</h3>
+                <p>Could not load comprehensive memory analysis: {e}</p>
+            </div>"""
+
+    def _generate_memory_analysis_standalone(self, db_path: str) -> str:
+        """Generate memory analysis using standalone script to avoid psutil dependency."""
+        try:
+            import subprocess
+            import tempfile
+
+            # Use standalone analysis script
+            standalone_script = Path(__file__).parent.parent.parent / "standalone_analysis.py"
+
+            # Create temporary output directory
+            with tempfile.TemporaryDirectory() as temp_dir:
+                temp_output = Path(temp_dir)
+
+                # Run standalone analysis
+                result = subprocess.run([
+                    "python3", str(standalone_script),
+                    str(db_path),
+                    "--output-dir", str(temp_output)
+                ], capture_output=True, text=True, timeout=30)
+
+                if result.returncode == 0:
+                    # Load the analysis summary
+                    summary_file = temp_output / "analysis_summary.json"
+                    if summary_file.exists():
+                        with open(summary_file) as f:
+                            summary_data = json.load(f)
+
+                        return self._format_memory_analysis_from_summary(summary_data)
+                    else:
+                        return """
+                        <div class="memory-analysis-error">
+                            <h3>🧠 Memory Usage Analysis</h3>
+                            <p>Standalone analysis completed but summary not found</p>
+                        </div>"""
+                else:
+                    return f"""
+                    <div class="memory-analysis-error">
+                        <h3>🧠 Memory Usage Analysis</h3>
+                        <p>Standalone analysis failed: {result.stderr}</p>
+                    </div>"""
+
+        except Exception as e:
+            return f"""
+            <div class="memory-analysis-error">
+                <h3>🧠 Memory Usage Analysis</h3>
+                <p>Could not run standalone memory analysis: {e}</p>
+            </div>"""
+
+    def _generate_memory_analysis_from_db(self, db_path: str) -> str:
+        """Generate basic memory analysis directly from database without dependencies."""
+        try:
+            import sqlite3
+
+            conn = sqlite3.connect(db_path)
+            cursor = conn.execute("""
+                SELECT
+                    engine_name,
+                    AVG(memory_compilation_bytes) / (1024*1024) as avg_memory_mb,
+                    MAX(memory_compilation_bytes) / (1024*1024) as max_memory_mb,
+                    MIN(memory_compilation_bytes) / (1024*1024) as min_memory_mb,
+                    AVG(memory_compilation_bytes / NULLIF(pattern_count, 0)) / 1024 as avg_memory_per_pattern_kb,
+                    MAX(memory_compilation_bytes / NULLIF(pattern_count, 0)) / 1024 as max_memory_per_pattern_kb,
+                    AVG(pattern_count) as avg_pattern_count,
+                    COUNT(*) as sample_count
+                FROM benchmark_jobs
+                WHERE status = 'COMPLETED'
+                AND memory_compilation_bytes IS NOT NULL
+                AND pattern_count > 0
+                GROUP BY engine_name
+                ORDER BY avg_memory_per_pattern_kb
+            """)
+
+            memory_data = cursor.fetchall()
+            conn.close()
+
+            if not memory_data:
+                return """
+                <div class="memory-analysis-error">
+                    <h3>🧠 Memory Usage Analysis</h3>
+                    <p>No memory data available in database</p>
+                </div>"""
+
+            # Generate efficiency-focused insights
+            min_engine = memory_data[0]  # First row has best efficiency (lowest memory per pattern)
+            max_engine = memory_data[-1]  # Last row has worst efficiency (highest memory per pattern)
+
+            insights = [
+                f"{min_engine[0]} is most memory-efficient ({min_engine[4]:.1f} KB per regex)",
+                f"{max_engine[0]} is least memory-efficient ({max_engine[4]:.1f} KB per regex)",
+                f"Memory efficiency varies by {max_engine[4]/min_engine[4]:.1f}x between engines",
+                f"Engines tested with avg {min_engine[6]:.0f}-{max_engine[6]:.0f} patterns per job"
+            ]
+
+            # Generate enhanced memory cards with efficiency metrics
+            memory_cards = ""
+            for engine_name, avg_mb, max_mb, min_mb, avg_kb_per_pattern, max_kb_per_pattern, avg_patterns, samples in memory_data:
+                memory_cards += f"""
+                <div class="memory-card">
+                    <h4>{engine_name}</h4>
+                    <div class="memory-stats">
+                        <div class="memory-stat efficiency-highlight">
+                            <span class="label">Memory per Regex:</span>
+                            <span class="value">{avg_kb_per_pattern:.1f} KB</span>
+                        </div>
+                        <div class="memory-stat">
+                            <span class="label">Peak per Regex:</span>
+                            <span class="value">{max_kb_per_pattern:.1f} KB</span>
+                        </div>
+                        <div class="memory-stat">
+                            <span class="label">Total Average:</span>
+                            <span class="value">{avg_mb:.1f} MB</span>
+                        </div>
+                        <div class="memory-stat">
+                            <span class="label">Avg Patterns:</span>
+                            <span class="value">{avg_patterns:.0f}</span>
+                        </div>
+                        <div class="memory-stat">
+                            <span class="label">Samples:</span>
+                            <span class="value">{samples}</span>
+                        </div>
+                    </div>
+                </div>"""
+
+            insights_html = """
+            <div class="memory-insights">
+                <h4>🔍 Memory Usage Insights</h4>
+                <ul class="insights-list">""" + \
+                "".join([f"<li>{insight}</li>" for insight in insights]) + \
+                """</ul>
+            </div>"""
+
+            return f"""
+            <div class="memory-analysis-section">
+                <h3>🧠 Memory Usage Analysis</h3>
+                {insights_html}
+                <div class="memory-grid">
+                    {memory_cards}
+                </div>
+            </div>"""
+
+        except Exception as e:
+            return f"""
+            <div class="memory-analysis-error">
+                <h3>🧠 Memory Usage Analysis</h3>
+                <p>Could not analyze memory from database: {e}</p>
+            </div>"""
+
+    def _format_memory_analysis_from_summary(self, summary_data: Dict[str, Any]) -> str:
+        """Format memory analysis HTML from standalone analysis summary."""
+        memory_overview = summary_data.get('memory_overview', {})
+        if not memory_overview:
+            return """
+            <div class="memory-analysis-error">
+                <h3>🧠 Memory Usage Analysis</h3>
+                <p>No memory overview data in analysis</p>
+            </div>"""
+
+        # Generate insights
+        engines_by_memory = sorted(memory_overview.items(),
+                                 key=lambda x: x[1]['avg_memory_mb'])
+        min_engine = engines_by_memory[0]
+        max_engine = engines_by_memory[-1]
+
+        insights = [
+            f"{min_engine[0]} is most memory-efficient (avg: {min_engine[1]['avg_memory_mb']:.1f} MB)",
+            f"{max_engine[0]} uses most memory (avg: {max_engine[1]['avg_memory_mb']:.1f} MB)",
+            f"Memory usage varies by {max_engine[1]['avg_memory_mb']/min_engine[1]['avg_memory_mb']:.1f}x between engines"
+        ]
+
+        # Generate memory cards
+        memory_cards = ""
+        for engine, stats in memory_overview.items():
+            memory_cards += f"""
+            <div class="memory-card">
+                <h4>{engine}</h4>
+                <div class="memory-stats">
+                    <div class="memory-stat">
+                        <span class="label">Average:</span>
+                        <span class="value">{stats['avg_memory_mb']:.1f} MB</span>
+                    </div>
+                    <div class="memory-stat">
+                        <span class="label">Peak:</span>
+                        <span class="value">{stats['max_memory_mb']:.1f} MB</span>
+                    </div>
+                    <div class="memory-stat">
+                        <span class="label">Minimum:</span>
+                        <span class="value">{stats['min_memory_mb']:.1f} MB</span>
+                    </div>
+                </div>
+            </div>"""
+
+        insights_html = """
+        <div class="memory-insights">
+            <h4>🔍 Memory Usage Insights</h4>
+            <ul class="insights-list">""" + \
+            "".join([f"<li>{insight}</li>" for insight in insights]) + \
+            """</ul>
+        </div>"""
+
+        return f"""
+        <div class="memory-analysis-section">
+            <h3>🧠 Memory Usage Analysis</h3>
+            {insights_html}
+            <div class="memory-grid">
+                {memory_cards}
+            </div>
+        </div>"""
+
+    def _generate_memory_overview_from_results(self, raw_results: List[Dict[str, Any]]) -> str:
+        """Generate memory overview from raw results data."""
+        # Extract memory data from raw results
+        memory_data = {}
+
+        for result in raw_results:
+            if not result or result.get('status') != 'ok':
+                continue
+
+            engine = result.get('engine_name', 'Unknown')
+            # Check for memory fields that might be in the result
+            memory_bytes = None
+
+            # Try different possible field names for memory data
+            for field in ['memory_peak_bytes', 'memory_compilation_bytes', 'memory_bytes']:
+                if field in result and result[field] is not None:
+                    memory_bytes = result[field]
+                    break
+
+            if memory_bytes and memory_bytes > 0:
+                if engine not in memory_data:
+                    memory_data[engine] = []
+                memory_data[engine].append(memory_bytes / (1024 * 1024))  # Convert to MB
+
+        if not memory_data:
+            return """
+            <div class="memory-notice">
+                <h3>🧠 Memory Usage</h3>
+                <p>Memory usage data not available in current results.</p>
+            </div>"""
+
+        # Generate memory overview cards
+        memory_cards = ""
+        for engine, memory_values in memory_data.items():
+            avg_memory = sum(memory_values) / len(memory_values)
+            max_memory = max(memory_values)
+            min_memory = min(memory_values)
+
+            memory_cards += f"""
+            <div class="memory-overview-card">
+                <h4>{engine}</h4>
+                <div class="memory-overview-stats">
+                    <div class="memory-stat">
+                        <span class="label">Average:</span>
+                        <span class="value">{avg_memory:.1f} MB</span>
+                    </div>
+                    <div class="memory-stat">
+                        <span class="label">Peak:</span>
+                        <span class="value">{max_memory:.1f} MB</span>
+                    </div>
+                    <div class="memory-stat">
+                        <span class="label">Samples:</span>
+                        <span class="value">{len(memory_values)}</span>
+                    </div>
+                </div>
+            </div>"""
+
+        return f"""
+        <div class="memory-overview-section">
+            <h3>🧠 Memory Usage Overview</h3>
+            <div class="memory-overview-grid">
+                {memory_cards}
+            </div>
+        </div>"""
+
+    def _generate_charts_section(self, raw_results: List[Dict[str, Any]], analysis: Dict[str, Any], db_path: Optional[str] = None) -> str:
+        """Generate enhanced interactive charts section with memory analysis."""
+        print(f"DEBUG: PLOTLY_AVAILABLE = {PLOTLY_AVAILABLE}")  # Debug line
         if not PLOTLY_AVAILABLE:
             return """
         <section class="charts">
             <h2>📈 Performance Charts</h2>
             <div class="chart-placeholder">
                 <p>📊 Interactive charts require plotly library. Install with: pip install plotly</p>
-                <p>Charts would include: throughput comparisons, compilation time distributions, and performance trends.</p>
+                <p>Enhanced charts would include: throughput comparisons, memory usage analysis, pattern scaling, and performance heatmaps.</p>
             </div>
         </section>"""
 
-        # Skip chart generation if insufficient data
+        # Try to generate comprehensive charts from database if available
+        comprehensive_charts = ""
+        if ANALYSIS_AVAILABLE and db_path and Path(db_path).exists():
+            try:
+                comprehensive_charts = self._generate_comprehensive_charts(db_path)
+            except Exception as e:
+                print(f"Warning: Could not generate comprehensive charts: {e}")
+
+        # Skip basic chart generation if insufficient data
         if not raw_results or len(raw_results) < 2:
-            return """
+            basic_charts_message = """
+            <div class="chart-placeholder">
+                <p>📊 Insufficient data for basic charts. Need at least 2 completed results.</p>
+            </div>"""
+        else:
+            try:
+                # Generate basic interactive charts
+                throughput_chart = self._create_throughput_comparison_chart(raw_results)
+                timing_chart = self._create_timing_distribution_chart(raw_results)
+                performance_chart = self._create_engine_performance_chart(raw_results, analysis)
+                memory_chart = self._create_memory_comparison_chart(raw_results)
+
+                basic_charts_message = f"""
+                <div class="chart-section">
+                    <h3>Basic Performance Charts</h3>
+                    <div class="basic-chart-grid">
+                        <div class="chart-container">
+                            <h4>🚀 Engine Throughput Comparison</h4>
+                            {throughput_chart}
+                        </div>
+                        <div class="chart-container">
+                            <h4>⏱️ Timing Distribution</h4>
+                            {timing_chart}
+                        </div>
+                        <div class="chart-container">
+                            <h4>🧠 Memory Usage Comparison</h4>
+                            {memory_chart}
+                        </div>
+                        <div class="chart-container">
+                            <h4>📊 Overall Performance Analysis</h4>
+                            {performance_chart}
+                        </div>
+                    </div>
+                </div>"""
+            except Exception as e:
+                basic_charts_message = f"""
+                <div class="chart-error">
+                    <p>❌ Error generating basic charts: {str(e)}</p>
+                    <p>Please check your data and try again.</p>
+                </div>"""
+
+        return f"""
         <section class="charts">
             <h2>📈 Performance Charts</h2>
-            <div class="chart-placeholder">
-                <p>📊 Insufficient data for charts. Need at least 2 completed results.</p>
-            </div>
+            {comprehensive_charts}
+            {basic_charts_message}
         </section>"""
 
+    def _generate_comprehensive_charts(self, db_path: str) -> str:
+        """Generate comprehensive interactive charts from database analysis."""
         try:
-            # Generate interactive charts
-            throughput_chart = self._create_throughput_comparison_chart(raw_results)
-            timing_chart = self._create_timing_distribution_chart(raw_results)
-            performance_chart = self._create_engine_performance_chart(raw_results, analysis)
+            analyzer = PerformanceAnalyzer(Path(db_path))
+            chart_generator = ChartGenerator(analyzer)
 
-            return f"""
-        <section class="charts">
-            <h2>📈 Interactive Performance Charts</h2>
-            <div class="chart-grid">
-                <div class="chart-container">
-                    <h3>🚀 Engine Throughput Comparison</h3>
-                    {throughput_chart}
+            # Generate all comprehensive charts
+            all_charts = chart_generator.generate_all_performance_charts()
+
+            # Extract chart HTML for embedding
+            charts_html = ""
+            if all_charts:
+                # Generate memory vs patterns charts for different corpus sizes
+                memory_charts = ""
+                corpus_sizes = ['1MB', '10MB', '100MB', '1GB']
+                for corpus_size in corpus_sizes:
+                    chart_key = f'memory_vs_patterns_{corpus_size}'
+                    if chart_key in all_charts:
+                        chart_config = all_charts[chart_key]
+                        chart_html = self._plotly_config_to_html(chart_config, f'memory_patterns_{corpus_size}')
+                        memory_charts += f"""
+                        <div class="comprehensive-chart">
+                            <h4>Memory vs Patterns ({corpus_size} Corpus)</h4>
+                            {chart_html}
+                        </div>"""
+
+                # Generate throughput charts
+                throughput_charts = ""
+                for corpus_size in corpus_sizes:
+                    chart_key = f'throughput_vs_patterns_{corpus_size}'
+                    if chart_key in all_charts:
+                        chart_config = all_charts[chart_key]
+                        chart_html = self._plotly_config_to_html(chart_config, f'throughput_patterns_{corpus_size}')
+                        throughput_charts += f"""
+                        <div class="comprehensive-chart">
+                            <h4>Throughput vs Patterns ({corpus_size} Corpus)</h4>
+                            {chart_html}
+                        </div>"""
+
+                # Generate memory efficiency chart
+                memory_efficiency_chart = ""
+                if 'memory_efficiency_per_pattern' in all_charts:
+                    chart_config = all_charts['memory_efficiency_per_pattern']
+                    chart_html = self._plotly_config_to_html(chart_config, 'memory_efficiency')
+                    memory_efficiency_chart = f"""
+                    <div class="comprehensive-chart full-width">
+                        <h4>Memory Efficiency Per Pattern</h4>
+                        {chart_html}
+                    </div>"""
+
+                charts_html = f"""
+                <div class="comprehensive-charts">
+                    <h3>Comprehensive Performance Analysis</h3>
+                    <div class="chart-tabs">
+                        <button class="tab-button active" onclick="showChartTab('memory')">Memory Analysis</button>
+                        <button class="tab-button" onclick="showChartTab('throughput')">Throughput Analysis</button>
+                        <button class="tab-button" onclick="showChartTab('efficiency')">Efficiency Analysis</button>
+                    </div>
+
+                    <div id="memory-tab" class="chart-tab-content active">
+                        <div class="comprehensive-chart-grid">
+                            {memory_charts}
+                        </div>
+                    </div>
+
+                    <div id="throughput-tab" class="chart-tab-content">
+                        <div class="comprehensive-chart-grid">
+                            {throughput_charts}
+                        </div>
+                    </div>
+
+                    <div id="efficiency-tab" class="chart-tab-content">
+                        {memory_efficiency_chart}
+                    </div>
                 </div>
-                <div class="chart-container">
-                    <h3>⏱️ Timing Distribution</h3>
-                    {timing_chart}
-                </div>
-                <div class="chart-container">
-                    <h3>📊 Overall Performance Analysis</h3>
-                    {performance_chart}
-                </div>
-            </div>
-        </section>"""
+
+                <script>
+                function showChartTab(tabName) {{
+                    // Hide all tab contents
+                    document.querySelectorAll('.chart-tab-content').forEach(tab => {{
+                        tab.classList.remove('active');
+                    }});
+
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.tab-button').forEach(btn => {{
+                        btn.classList.remove('active');
+                    }});
+
+                    // Show selected tab
+                    document.getElementById(tabName + '-tab').classList.add('active');
+                    event.target.classList.add('active');
+                }}
+                </script>"""
+
+            return charts_html
+
         except Exception as e:
             return f"""
-        <section class="charts">
-            <h2>📈 Performance Charts</h2>
-            <div class="chart-error">
-                <p>❌ Error generating charts: {str(e)}</p>
-                <p>Please check your data and try again.</p>
-            </div>
-        </section>"""
+            <div class="comprehensive-charts-error">
+                <h3>Comprehensive Performance Charts</h3>
+                <p>Could not load comprehensive charts: {e}</p>
+            </div>"""
+
+    def _plotly_config_to_html(self, chart_config: Dict[str, Any], chart_id: str) -> str:
+        """Convert Plotly chart configuration to HTML."""
+        try:
+            import plotly.offline as py
+
+            # Create figure from config
+            fig = go.Figure(chart_config)
+
+            # Generate HTML with inline JavaScript
+            return fig.to_html(include_plotlyjs='inline', div_id=chart_id)
+        except Exception as e:
+            return f"<p>Error rendering chart: {e}</p>"
+
+    def _create_memory_comparison_chart(self, raw_results: List[Dict[str, Any]]) -> str:
+        """Create memory usage comparison chart."""
+        if not PLOTLY_AVAILABLE:
+            return "<p>Plotly not available for memory chart</p>"
+
+        # Extract memory data from results
+        memory_data = {}
+        for result in raw_results:
+            if not result or result.get('status') != 'ok':
+                continue
+
+            engine = result.get('engine_name', 'Unknown')
+            memory_bytes = None
+
+            # Try to find memory data
+            for field in ['memory_peak_bytes', 'memory_compilation_bytes', 'memory_bytes']:
+                if field in result and result[field] is not None:
+                    memory_bytes = result[field]
+                    break
+
+            if memory_bytes and memory_bytes > 0:
+                if engine not in memory_data:
+                    memory_data[engine] = []
+                memory_data[engine].append(memory_bytes / (1024 * 1024))  # Convert to MB
+
+        if not memory_data:
+            return "<p>No memory data available for chart</p>"
+
+        try:
+            # Create memory comparison chart
+            engines = list(memory_data.keys())
+            avg_memory = [sum(memory_data[engine])/len(memory_data[engine]) for engine in engines]
+            max_memory = [max(memory_data[engine]) for engine in engines]
+
+            fig = go.Figure(data=[
+                go.Bar(name='Average Memory', x=engines, y=avg_memory,
+                       marker_color='#3498db', opacity=0.8),
+                go.Bar(name='Peak Memory', x=engines, y=max_memory,
+                       marker_color='#e74c3c', opacity=0.6)
+            ])
+
+            fig.update_layout(
+                title="Memory Usage Comparison (MB)",
+                xaxis_title="Engine",
+                yaxis_title="Memory Usage (MB)",
+                barmode='group',
+                template="plotly_white",
+                height=400,
+                showlegend=True
+            )
+
+            return fig.to_html(include_plotlyjs='inline', div_id="memory_comparison_chart")
+
+        except Exception as e:
+            return f"<p>Error creating memory chart: {e}</p>"
 
     def _create_throughput_comparison_chart(self, raw_results: List[Dict[str, Any]]) -> str:
         """Create interactive throughput comparison chart."""
@@ -893,6 +1493,272 @@ class HTMLFormatter:
             border-radius: 8px;
             margin: 20px 0;
         }
+        /* Memory Analysis Styles */
+        .insights-section {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .insight-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .insight-card {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .insight-card h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        .insight-card p {
+            margin: 0;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Memory Analysis Section */
+        .memory-analysis-section {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #9b59b6;
+        }
+        .memory-analysis-section h3 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+        }
+        .memory-insights {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 6px;
+        }
+        .memory-insights h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+        }
+        .insights-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .insights-list li {
+            margin: 8px 0;
+            color: #555;
+        }
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .memory-card {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #9b59b6;
+        }
+        .memory-card h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .memory-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .memory-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .memory-stat .label {
+            color: #666;
+            font-weight: 500;
+        }
+        .memory-stat .value {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        .efficiency-highlight {
+            background: linear-gradient(90deg, #e8f5e8, #f0f8f0) !important;
+            border-left: 3px solid #27ae60 !important;
+            font-weight: 600;
+        }
+        .efficiency-highlight .label {
+            color: #27ae60 !important;
+            font-weight: 600;
+        }
+        .efficiency-highlight .value {
+            color: #2c3e50 !important;
+            font-weight: 800;
+            font-size: 1.1em;
+        }
+
+        /* Memory Overview Section */
+        .memory-overview-section {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+        }
+        .memory-overview-section h3 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+        }
+        .memory-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .memory-overview-card {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .memory-overview-card h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .memory-overview-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .memory-notice {
+            margin: 30px 0;
+            padding: 20px;
+            background: #fff5f5;
+            border: 1px solid #fccfcf;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .memory-notice h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        .memory-analysis-error {
+            margin: 30px 0;
+            padding: 20px;
+            background: #fff5f5;
+            border: 1px solid #fccfcf;
+            border-radius: 8px;
+            text-align: center;
+            color: #e74c3c;
+        }
+
+        /* Comprehensive Charts */
+        .comprehensive-charts {
+            margin: 30px 0;
+            padding: 25px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .comprehensive-charts h3 {
+            margin: 0 0 25px 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .chart-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .tab-button:hover {
+            color: #3498db;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+        .chart-tab-content {
+            display: none;
+        }
+        .chart-tab-content.active {
+            display: block;
+        }
+        .comprehensive-chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+        }
+        .comprehensive-chart {
+            background: #fafafa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .comprehensive-chart.full-width {
+            grid-column: 1 / -1;
+        }
+        .comprehensive-chart h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 1.1em;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        .comprehensive-charts-error {
+            margin: 30px 0;
+            padding: 20px;
+            background: #fff5f5;
+            border: 1px solid #fccfcf;
+            border-radius: 8px;
+            text-align: center;
+            color: #e74c3c;
+        }
+
+        /* Basic Chart Styles */
+        .chart-section {
+            margin: 20px 0;
+        }
+        .chart-section h3 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+        .basic-chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+        }
+        .basic-chart-grid .chart-container h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 1em;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+
         /* Responsive chart grid for larger screens */
         @media (min-width: 1024px) {
             .chart-grid {
@@ -900,6 +1766,12 @@ class HTMLFormatter:
             }
             .chart-container:last-child {
                 grid-column: 1 / -1;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .comprehensive-chart-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
         """

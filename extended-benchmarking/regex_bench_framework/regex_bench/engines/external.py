@@ -6,10 +6,17 @@ import subprocess
 import shutil
 import re
 import time
-import psutil
 import os
 from pathlib import Path
 from typing import Dict, Any, Optional, List
+
+# Conditional psutil import to handle architecture issues
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError as e:
+    PSUTIL_AVAILABLE = False
+    print(f"Warning: psutil not available ({e}). Memory monitoring disabled.")
 
 from .base import Engine, EngineResult, EngineError
 
@@ -156,8 +163,13 @@ class ExternalEngine(Engine):
                 start_new_session=True
             )
 
-            # Monitor process with psutil
-            psutil_process = psutil.Process(process.pid)
+            # Monitor process with psutil if available
+            psutil_process = None
+            if PSUTIL_AVAILABLE:
+                try:
+                    psutil_process = psutil.Process(process.pid)
+                except Exception:
+                    psutil_process = None
 
             # Polling-based completion detection
             # rmatch finishes but doesn't signal termination properly
@@ -292,12 +304,13 @@ class ExternalEngine(Engine):
                 # Don't fail the job due to cleanup issues
                 pass
 
-            # Get memory usage (approximate)
-            try:
-                memory_info = psutil_process.memory_info()
-                result.memory_peak_bytes = memory_info.rss
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                pass
+            # Get memory usage (approximate) if psutil available
+            if psutil_process and PSUTIL_AVAILABLE:
+                try:
+                    memory_info = psutil_process.memory_info()
+                    result.memory_peak_bytes = memory_info.rss
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
 
             return result
 
@@ -422,8 +435,13 @@ class ExternalEngine(Engine):
                 preexec_fn=None  # Explicitly disable preexec_fn for compatibility
             )
 
-            # Monitor process
-            psutil_process = psutil.Process(process.pid)
+            # Monitor process if psutil available
+            psutil_process = None
+            if PSUTIL_AVAILABLE:
+                try:
+                    psutil_process = psutil.Process(process.pid)
+                except Exception:
+                    psutil_process = None
             peak_memory = 0
 
             # Wait for completion with generous timeout for production workloads
@@ -447,12 +465,13 @@ class ExternalEngine(Engine):
             # Parse output
             self._parse_output(stdout, stderr, result)
 
-            # Get memory usage (approximate)
-            try:
-                memory_info = psutil_process.memory_info()
-                result.memory_peak_bytes = memory_info.rss
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                pass
+            # Get memory usage (approximate) if psutil available
+            if psutil_process and PSUTIL_AVAILABLE:
+                try:
+                    memory_info = psutil_process.memory_info()
+                    result.memory_peak_bytes = memory_info.rss
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
 
             return result
 

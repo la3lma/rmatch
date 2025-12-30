@@ -715,6 +715,20 @@ report-partial: venv ## Generate report from partial/incomplete run
 		exit 1; \
 	fi
 
+.PHONY: analysis
+analysis: venv ## Generate comprehensive performance analysis with memory usage
+	@echo "$(BLUE)Generating comprehensive performance analysis...$(NC)"
+	@latest_db=$$(find results -name "jobs.db" -type f | sort | tail -1); \
+	if [ -z "$$latest_db" ]; then \
+		echo "$(RED)❌ No database file found in results/$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(CYAN)📊 Analyzing: $$latest_db$(NC)"; \
+	$(PYTHON) generate_performance_analysis.py "$$latest_db" \
+		--output-dir reports/performance_analysis_$(TIMESTAMP)
+	@echo "$(GREEN)✓ Performance analysis complete: reports/performance_analysis_$(TIMESTAMP)$(NC)"
+	@echo "$(CYAN)📄 Open reports/performance_analysis_$(TIMESTAMP)/performance_report.html in your browser$(NC)"
+
 ##@ Database Backup and Management
 
 .PHONY: backup-create
@@ -786,6 +800,7 @@ help-lifecycle: ## Show help for lifecycle-aware benchmark targets
 	@echo "  $(GREEN)bench-phase1$(NC)          - Default: resume or start Phase 1"
 	@echo "  $(GREEN)report-latest$(NC)         - Generate report from latest run"
 	@echo "  $(GREEN)report-partial$(NC)        - Generate report including partial data"
+	@echo "  $(GREEN)analysis$(NC)              - Generate comprehensive performance analysis with memory usage"
 	@echo ""
 	@echo "$(YELLOW)Example workflow:$(NC)"
 	@echo "  1. make bench-start          # Smart start (resume if possible)"
