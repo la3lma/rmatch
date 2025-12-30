@@ -65,10 +65,14 @@ class EnhancedReportGenerator:
         # Load metadata from database
         metadata = self._load_run_metadata(db_path, run_id)
 
-        # Load traditional benchmark data if available
+        # Load traditional benchmark data if available, otherwise load from database
         benchmark_data = self._load_benchmark_data_if_available(output_dir.parent)
 
-        # Combine database metadata with traditional data
+        # If no traditional results.json exists, load benchmark results from database
+        if not benchmark_data:
+            benchmark_data = self._load_benchmark_results_from_db(db_path, metadata.run_id)
+
+        # Combine database metadata with benchmark results data
         enhanced_data = {
             'metadata': metadata,
             'benchmark_results': benchmark_data,
@@ -111,7 +115,12 @@ class EnhancedReportGenerator:
                 run_query = "SELECT * FROM benchmark_runs WHERE run_id = ?"
                 run_params = (run_id,)
             else:
-                run_query = "SELECT * FROM benchmark_runs ORDER BY created_at DESC LIMIT 1"
+                # Prioritize RUNNING runs over creation date for active benchmarks
+                run_query = """
+                    SELECT * FROM benchmark_runs
+                    ORDER BY CASE WHEN status = 'RUNNING' THEN 0 ELSE 1 END, created_at DESC
+                    LIMIT 1
+                """
                 run_params = ()
 
             run_row = conn.execute(run_query, run_params).fetchone()
@@ -207,6 +216,111 @@ class EnhancedReportGenerator:
             except Exception:
                 return None
         return None
+
+    def _load_benchmark_results_from_db(self, db_path: Path, run_id: str) -> Dict[str, Any]:
+        """Load benchmark results directly from database for enhanced reporting."""
+        if not db_path.exists():
+            return {'results': [], 'summary': {}}
+
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+
+        try:
+            # Get completed jobs with performance metrics
+            completed_jobs = conn.execute("""
+                SELECT
+                    engine_name,
+                    pattern_count,
+                    input_size,
+                    compilation_ns,
+                    scanning_ns,
+                    total_ns,
+                    match_count,
+                    throughput_mbps,
+                    memory_peak_bytes,
+                    result_json,
+                    started_at,
+                    completed_at,
+                    duration_seconds
+                FROM benchmark_jobs
+                WHERE run_id = ? AND status = 'COMPLETED'
+                ORDER BY engine_name, pattern_count, input_size
+            """, (run_id,)).fetchall()
+
+            # Convert to results format compatible with traditional reporting
+            results = []
+            for job in completed_jobs:
+                # Parse result_json if available for detailed data
+                result_data = {}
+                if job['result_json']:
+                    try:
+                        result_data = json.loads(job['result_json'])
+                    except Exception:
+                        pass
+
+                # Create result entry in format expected by formatter
+                result = {
+                    'engine': job['engine_name'],
+                    'engine_name': job['engine_name'],  # Formatter expects this field
+                    'pattern_count': job['pattern_count'],
+                    'patterns_compiled': job['pattern_count'],  # Formatter alias
+                    'corpus_size': job['input_size'],
+                    'corpus_size_bytes': self._parse_size_to_bytes(job['input_size']),  # Formatter expects bytes
+                    'status': 'ok',  # Formatter expects 'ok' not 'COMPLETED'
+                    'compilation_time_ns': job['compilation_ns'] or 0,
+                    'compilation_ns': job['compilation_ns'] or 0,  # Formatter expects this field
+                    'scanning_time_ns': job['scanning_ns'] or 0,
+                    'scanning_ns': job['scanning_ns'] or 0,  # Formatter expects this field
+                    'total_time_ns': job['total_ns'] or 0,
+                    'match_count': job['match_count'] or 0,
+                    'throughput_mbps': job['throughput_mbps'] or 0.0,
+                    'memory_peak_bytes': job['memory_peak_bytes'] or 0,
+                    'timestamp': job['completed_at'] or job['started_at'],
+                    'duration_seconds': job['duration_seconds'] or 0,
+                    # Include original result data for detailed analysis
+                    'original_result': result_data
+                }
+                results.append(result)
+
+            # Create engine performance summary
+            engine_summary = conn.execute("""
+                SELECT
+                    engine_name,
+                    COUNT(*) as total_runs,
+                    AVG(CASE WHEN status = 'COMPLETED' THEN 1.0 ELSE 0.0 END) as success_rate,
+                    AVG(compilation_ns) as avg_compilation_ns,
+                    AVG(scanning_ns) as avg_scanning_ns,
+                    AVG(throughput_mbps) as avg_throughput_mbps,
+                    SUM(match_count) as total_matches
+                FROM benchmark_jobs
+                WHERE run_id = ?
+                GROUP BY engine_name
+                ORDER BY success_rate DESC, avg_throughput_mbps DESC
+            """, (run_id,)).fetchall()
+
+            engine_data = {}
+            for engine in engine_summary:
+                engine_data[engine['engine_name']] = {
+                    'total_runs': engine['total_runs'],
+                    'success_rate': engine['success_rate'],
+                    'avg_compilation_time_ns': engine['avg_compilation_ns'] or 0,
+                    'avg_scanning_time_ns': engine['avg_scanning_ns'] or 0,
+                    'avg_throughput_mbps': engine['avg_throughput_mbps'] or 0.0,
+                    'total_matches': engine['total_matches'] or 0
+                }
+
+            return {
+                'results': results,
+                'engines': engine_data,
+                'summary': {
+                    'total_results': len(results),
+                    'engines_tested': list(engine_data.keys()),
+                    'run_id': run_id
+                }
+            }
+
+        finally:
+            conn.close()
 
     def get_failure_summary(self, db_path: Path, run_id: Optional[str] = None) -> Dict[str, Any]:
         """Get summary of failures for troubleshooting."""
@@ -348,3 +462,24 @@ class EnhancedReportGenerator:
         report += "4. Consider running with a smaller engine subset for testing\n"
 
         return report
+
+    def _parse_size_to_bytes(self, size_str: str) -> int:
+        """Parse size string like '1GB', '100MB' to bytes."""
+        if not size_str:
+            return 0
+
+        size_str = size_str.upper().strip()
+        if size_str.endswith("GB"):
+            return int(size_str[:-2]) * 1024 * 1024 * 1024
+        elif size_str.endswith("MB"):
+            return int(size_str[:-2]) * 1024 * 1024
+        elif size_str.endswith("KB"):
+            return int(size_str[:-2]) * 1024
+        elif size_str.endswith("B"):
+            return int(size_str[:-1])
+        else:
+            # Assume it's already in bytes
+            try:
+                return int(size_str)
+            except ValueError:
+                return 0

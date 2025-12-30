@@ -591,6 +591,12 @@ bench-continue: venv ## Continue interrupted benchmark run
 		exit 1; \
 	fi
 
+bench-resume-production: venv ## Resume the specific cleaned production run (20251221_115843_4eeeed1a)
+	@echo "$(BLUE)=== Resuming Cleaned Production Run ===$(NC)"
+	@echo "$(GREEN)Resuming run: 20251221_115843_4eeeed1a$(NC)"
+	@echo "$(GREEN)Output dir: results/production_20251221_115840$(NC)"
+	$(REGEX_BENCH) job-continue --run-id 20251221_115843_4eeeed1a --output results/production_20251221_115840
+
 bench-reset: venv ## Reset job queue (clear all jobs)
 	@echo "$(YELLOW)=== Resetting Job Queue ===$(NC)"
 	@read -p "This will clear all queued and failed jobs. Continue? (y/N): " confirm; \
@@ -608,23 +614,53 @@ bench-stop: ## Graceful shutdown request (placeholder for future implementation)
 
 bench-cleanup: venv ## Clean up invalid benchmark results and resume the run
 	@echo "$(BLUE)=== Cleaning Invalid Results and Resuming Run ===$(NC)"
-	@latest_dir=$$(find results -maxdepth 1 -type d -name "*" | grep -E "results/[0-9]" | sort | tail -n1); \
+	@latest_dir=$$(find results -maxdepth 1 -type d -name "*_*" | grep -v ".DS_Store" | sort | tail -n1); \
 	if [ -z "$$latest_dir" ]; then \
 		echo "$(RED)No benchmark results directories found$(NC)"; \
 		exit 1; \
 	fi; \
 	echo "$(BLUE)Using latest results directory: $$latest_dir$(NC)"; \
-	$(REGEX_BENCH) cleanup-resume --output-dir "$$latest_dir"
+	$(PYTHON) cleanup_and_resume.py "$$latest_dir" --all --report
 
 bench-cleanup-dry: venv ## Preview what would be cleaned up without actually doing it
 	@echo "$(YELLOW)=== DRY RUN: Preview Cleanup ===$(NC)"
-	@latest_dir=$$(find results -maxdepth 1 -type d -name "*" | grep -E "results/[0-9]" | sort | tail -n1); \
+	@latest_dir=$$(find results -maxdepth 1 -type d -name "*_*" | grep -v ".DS_Store" | sort | tail -n1); \
 	if [ -z "$$latest_dir" ]; then \
 		echo "$(RED)No benchmark results directories found$(NC)"; \
 		exit 1; \
 	fi; \
 	echo "$(YELLOW)Previewing cleanup for: $$latest_dir$(NC)"; \
-	$(REGEX_BENCH) cleanup-resume --output-dir "$$latest_dir" --dry-run
+	$(PYTHON) cleanup_and_resume.py "$$latest_dir" --all --dry-run --report
+
+bench-cleanup-suspicious: venv ## Clean up only suspicious results (fast <2s completions)
+	@echo "$(BLUE)=== Cleaning Suspicious Results ===$(NC)"
+	@latest_dir=$$(find results -maxdepth 1 -type d -name "*_*" | grep -v ".DS_Store" | sort | tail -n1); \
+	if [ -z "$$latest_dir" ]; then \
+		echo "$(RED)No benchmark results directories found$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(BLUE)Using latest results directory: $$latest_dir$(NC)"; \
+	$(PYTHON) cleanup_and_resume.py "$$latest_dir" --invalidate-suspicious --report
+
+bench-cleanup-timeouts: venv ## Skip redundant timeout jobs and update timeout values
+	@echo "$(BLUE)=== Optimizing Timeout Handling ===$(NC)"
+	@latest_dir=$$(find results -maxdepth 1 -type d -name "*_*" | grep -v ".DS_Store" | sort | tail -n1); \
+	if [ -z "$$latest_dir" ]; then \
+		echo "$(RED)No benchmark results directories found$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(BLUE)Using latest results directory: $$latest_dir$(NC)"; \
+	$(PYTHON) cleanup_and_resume.py "$$latest_dir" --skip-redundant-timeouts --update-timeouts --report
+
+bench-status-detailed: venv ## Show detailed status report with cleanup recommendations
+	@echo "$(BLUE)=== Detailed Benchmark Status ===$(NC)"
+	@latest_dir=$$(find results -maxdepth 1 -type d -name "*_*" | grep -v ".DS_Store" | sort | tail -n1); \
+	if [ -z "$$latest_dir" ]; then \
+		echo "$(RED)No benchmark results directories found$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(BLUE)Analyzing results directory: $$latest_dir$(NC)"; \
+	$(PYTHON) cleanup_and_resume.py "$$latest_dir" --report
 
 bench-fix: bench-cleanup bench-continue ## Clean invalid results and immediately resume execution
 	@echo "$(GREEN)=== Fix and Resume Completed ===$(NC)"
@@ -656,7 +692,8 @@ report-latest: venv ## Generate report from latest benchmark run
 		$(REGEX_BENCH) generate-report \
 			--input results \
 			--output reports/report_$(TIMESTAMP) \
-			--format html; \
+			--format html \
+			--include-charts; \
 	else \
 		echo "$(RED)No completed runs found$(NC)"; \
 		exit 1; \
@@ -671,11 +708,69 @@ report-partial: venv ## Generate report from partial/incomplete run
 		$(REGEX_BENCH) generate-report \
 			--input results \
 			--output reports/partial_report_$(TIMESTAMP) \
-			--format html; \
+			--format html \
+			--include-charts; \
 	else \
 		echo "$(RED)No runs found$(NC)"; \
 		exit 1; \
 	fi
+
+##@ Database Backup and Management
+
+.PHONY: backup-create
+backup-create: ## Create a backup of all databases
+	@echo "$(BLUE)=== Creating Database Backup ===$(NC)"
+	@./backup_db.py create
+
+.PHONY: backup-create-named
+backup-create-named: ## Create a named backup (usage: make backup-create-named NAME=mybkp)
+	@echo "$(BLUE)=== Creating Named Database Backup ===$(NC)"
+	@if [ -z "$(NAME)" ]; then \
+		echo "$(RED)Error: NAME parameter required. Usage: make backup-create-named NAME=mybkp$(NC)"; \
+		exit 1; \
+	fi
+	@./backup_db.py create --name $(NAME)
+
+.PHONY: backup-list
+backup-list: ## List available database backups
+	@echo "$(BLUE)=== Available Database Backups ===$(NC)"
+	@./backup_db.py list
+
+.PHONY: backup-restore
+backup-restore: ## Restore a backup (usage: make backup-restore NAME=backup_name)
+	@echo "$(BLUE)=== Restoring Database Backup ===$(NC)"
+	@if [ -z "$(NAME)" ]; then \
+		echo "$(RED)Error: NAME parameter required. Usage: make backup-restore NAME=backup_name$(NC)"; \
+		echo "$(YELLOW)Available backups:$(NC)"; \
+		./backup_db.py list; \
+		exit 1; \
+	fi
+	@./backup_db.py restore $(NAME)
+
+.PHONY: backup-restore-dry-run
+backup-restore-dry-run: ## Show what would be restored without actually doing it
+	@echo "$(BLUE)=== Database Backup Dry Run ===$(NC)"
+	@if [ -z "$(NAME)" ]; then \
+		echo "$(RED)Error: NAME parameter required. Usage: make backup-restore-dry-run NAME=backup_name$(NC)"; \
+		echo "$(YELLOW)Available backups:$(NC)"; \
+		./backup_db.py list; \
+		exit 1; \
+	fi
+	@./backup_db.py restore $(NAME) --dry-run
+
+.PHONY: backup-info
+backup-info: ## Show database information (usage: make backup-info DB=path/to/db)
+	@echo "$(BLUE)=== Database Information ===$(NC)"
+	@if [ -z "$(DB)" ]; then \
+		echo "$(RED)Error: DB parameter required. Usage: make backup-info DB=results/production_20251221_115840/jobs.db$(NC)"; \
+		exit 1; \
+	fi
+	@./backup_db.py info $(DB)
+
+.PHONY: backup-auto
+backup-auto: ## Create automatic timestamped backup before risky operations
+	@echo "$(BLUE)=== Creating Automatic Backup ===$(NC)"
+	@./backup_db.py create --name auto
 
 # Help for new targets
 help-lifecycle: ## Show help for lifecycle-aware benchmark targets
@@ -684,6 +779,7 @@ help-lifecycle: ## Show help for lifecycle-aware benchmark targets
 	@echo "  $(GREEN)bench-start$(NC)           - Smart: resume existing run or start new if none found"
 	@echo "  $(GREEN)bench-start-fresh$(NC)     - Always start completely fresh benchmark run"
 	@echo "  $(GREEN)bench-continue$(NC)        - Continue interrupted benchmark run"
+	@echo "  $(GREEN)bench-resume-production$(NC) - Resume specific cleaned production run"
 	@echo "  $(GREEN)bench-reset$(NC)           - Reset job queue (clear all jobs)"
 	@echo "  $(GREEN)bench-phase1-new$(NC)      - Start fresh Phase 1 benchmark"
 	@echo "  $(GREEN)bench-phase1-resume$(NC)   - Resume or start Phase 1 benchmark"

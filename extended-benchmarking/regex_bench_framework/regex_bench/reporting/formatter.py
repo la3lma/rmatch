@@ -8,6 +8,15 @@ from pathlib import Path
 from typing import Dict, Any, List
 from datetime import datetime
 
+# Chart generation libraries
+try:
+    import plotly.graph_objects as go
+    import plotly.express as px
+    from plotly.subplots import make_subplots
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+
 
 class HTMLFormatter:
     """Generate HTML reports with interactive features."""
@@ -170,6 +179,10 @@ class HTMLFormatter:
         # Group results by engine
         engines = {}
         for result in raw_results:
+            # Skip None results (incomplete jobs)
+            if result is None:
+                continue
+
             engine_name = result.get('engine_name', 'unknown')
             if engine_name not in engines:
                 engines[engine_name] = {
@@ -184,9 +197,13 @@ class HTMLFormatter:
             engines[engine_name]['runs'] += 1
             if result.get('status') == 'ok':
                 engines[engine_name]['successful_runs'] += 1
-                engines[engine_name]['avg_compilation_ns'] += result.get('compilation_ns', 0)
-                engines[engine_name]['avg_scanning_ns'] += result.get('scanning_ns', 0)
-                engines[engine_name]['total_matches'] += result.get('match_count', 0)
+                # Handle None values that might come from incomplete jobs
+                compilation_ns = result.get('compilation_ns', 0) or 0
+                scanning_ns = result.get('scanning_ns', 0) or 0
+                match_count = result.get('match_count', 0) or 0
+                engines[engine_name]['avg_compilation_ns'] += compilation_ns
+                engines[engine_name]['avg_scanning_ns'] += scanning_ns
+                engines[engine_name]['total_matches'] += match_count
 
         # Calculate averages
         for engine in engines.values():
@@ -236,6 +253,10 @@ class HTMLFormatter:
 
         result_rows = ""
         for i, result in enumerate(raw_results):
+            # Skip None results (incomplete jobs)
+            if result is None:
+                continue
+
             status_class = 'status-success' if result.get('status') == 'ok' else 'status-error'
             compilation_ms = ((result.get('compilation_ns') or 0) / 1_000_000)
             scanning_ms = ((result.get('scanning_ns') or 0) / 1_000_000)
@@ -373,15 +394,239 @@ class HTMLFormatter:
         </section>"""
 
     def _generate_charts_section(self, raw_results: List[Dict[str, Any]], analysis: Dict[str, Any]) -> str:
-        """Generate charts section (placeholder for now)."""
-        return """
+        """Generate interactive charts section using Plotly."""
+        if not PLOTLY_AVAILABLE:
+            return """
         <section class="charts">
             <h2>📈 Performance Charts</h2>
             <div class="chart-placeholder">
-                <p>📊 Interactive charts would be displayed here when chart dependencies are available.</p>
+                <p>📊 Interactive charts require plotly library. Install with: pip install plotly</p>
                 <p>Charts would include: throughput comparisons, compilation time distributions, and performance trends.</p>
             </div>
         </section>"""
+
+        # Skip chart generation if insufficient data
+        if not raw_results or len(raw_results) < 2:
+            return """
+        <section class="charts">
+            <h2>📈 Performance Charts</h2>
+            <div class="chart-placeholder">
+                <p>📊 Insufficient data for charts. Need at least 2 completed results.</p>
+            </div>
+        </section>"""
+
+        try:
+            # Generate interactive charts
+            throughput_chart = self._create_throughput_comparison_chart(raw_results)
+            timing_chart = self._create_timing_distribution_chart(raw_results)
+            performance_chart = self._create_engine_performance_chart(raw_results, analysis)
+
+            return f"""
+        <section class="charts">
+            <h2>📈 Interactive Performance Charts</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <h3>🚀 Engine Throughput Comparison</h3>
+                    {throughput_chart}
+                </div>
+                <div class="chart-container">
+                    <h3>⏱️ Timing Distribution</h3>
+                    {timing_chart}
+                </div>
+                <div class="chart-container">
+                    <h3>📊 Overall Performance Analysis</h3>
+                    {performance_chart}
+                </div>
+            </div>
+        </section>"""
+        except Exception as e:
+            return f"""
+        <section class="charts">
+            <h2>📈 Performance Charts</h2>
+            <div class="chart-error">
+                <p>❌ Error generating charts: {str(e)}</p>
+                <p>Please check your data and try again.</p>
+            </div>
+        </section>"""
+
+    def _create_throughput_comparison_chart(self, raw_results: List[Dict[str, Any]]) -> str:
+        """Create interactive throughput comparison chart."""
+        if not PLOTLY_AVAILABLE:
+            return "<p>Plotly not available</p>"
+
+        # Extract completed results with valid data
+        valid_results = []
+        for result in raw_results:
+            if (result and result.get('status') == 'ok' and
+                result.get('scanning_ns') and result.get('corpus_size_bytes')):
+                # Calculate throughput in MB/s
+                scanning_s = result['scanning_ns'] / 1_000_000_000
+                corpus_mb = result['corpus_size_bytes'] / (1024 * 1024)
+                if scanning_s > 0:
+                    throughput = corpus_mb / scanning_s
+                    valid_results.append({
+                        'engine': result.get('engine_name', 'Unknown'),
+                        'throughput': throughput,
+                        'patterns': result.get('pattern_count', 0),
+                        'corpus_mb': corpus_mb
+                    })
+
+        if len(valid_results) < 2:
+            return "<p>Not enough valid results for throughput chart</p>"
+
+        # Group by engine and calculate average throughput
+        engines = {}
+        for result in valid_results:
+            engine = result['engine']
+            if engine not in engines:
+                engines[engine] = []
+            engines[engine].append(result['throughput'])
+
+        engine_names = list(engines.keys())
+        avg_throughput = [sum(engines[engine])/len(engines[engine]) for engine in engine_names]
+        max_throughput = [max(engines[engine]) for engine in engine_names]
+
+        # Create bar chart
+        fig = go.Figure(data=[
+            go.Bar(name='Average Throughput', x=engine_names, y=avg_throughput,
+                   marker_color='#3498db', opacity=0.8),
+            go.Bar(name='Peak Throughput', x=engine_names, y=max_throughput,
+                   marker_color='#2ecc71', opacity=0.6)
+        ])
+
+        fig.update_layout(
+            title="Engine Throughput Comparison (MB/s)",
+            xaxis_title="Engine",
+            yaxis_title="Throughput (MB/s)",
+            barmode='group',
+            template="plotly_white",
+            height=400,
+            showlegend=True
+        )
+
+        return fig.to_html(include_plotlyjs='inline', div_id="throughput_chart")
+
+    def _create_timing_distribution_chart(self, raw_results: List[Dict[str, Any]]) -> str:
+        """Create timing distribution chart showing compilation vs scanning times."""
+        if not PLOTLY_AVAILABLE:
+            return "<p>Plotly not available</p>"
+
+        # Extract timing data
+        timing_data = []
+        for result in raw_results:
+            if (result and result.get('status') == 'ok' and
+                result.get('compilation_ns') and result.get('scanning_ns')):
+                timing_data.append({
+                    'engine': result.get('engine_name', 'Unknown'),
+                    'compilation_ms': result['compilation_ns'] / 1_000_000,
+                    'scanning_ms': result['scanning_ns'] / 1_000_000,
+                    'patterns': result.get('pattern_count', 0)
+                })
+
+        if len(timing_data) < 2:
+            return "<p>Not enough timing data for distribution chart</p>"
+
+        # Create stacked bar chart
+        engines = {}
+        for data in timing_data:
+            engine = data['engine']
+            if engine not in engines:
+                engines[engine] = {'compilation': [], 'scanning': []}
+            engines[engine]['compilation'].append(data['compilation_ms'])
+            engines[engine]['scanning'].append(data['scanning_ms'])
+
+        engine_names = list(engines.keys())
+        avg_compilation = [sum(engines[engine]['compilation'])/len(engines[engine]['compilation'])
+                          for engine in engine_names]
+        avg_scanning = [sum(engines[engine]['scanning'])/len(engines[engine]['scanning'])
+                       for engine in engine_names]
+
+        fig = go.Figure(data=[
+            go.Bar(name='Compilation Time', x=engine_names, y=avg_compilation,
+                   marker_color='#e74c3c', opacity=0.8),
+            go.Bar(name='Scanning Time', x=engine_names, y=avg_scanning,
+                   marker_color='#f39c12', opacity=0.8)
+        ])
+
+        fig.update_layout(
+            title="Average Timing Distribution (ms)",
+            xaxis_title="Engine",
+            yaxis_title="Time (ms)",
+            barmode='stack',
+            template="plotly_white",
+            height=400,
+            showlegend=True
+        )
+
+        return fig.to_html(include_plotlyjs='inline', div_id="timing_chart")
+
+    def _create_engine_performance_chart(self, raw_results: List[Dict[str, Any]], analysis: Dict[str, Any]) -> str:
+        """Create overall performance analysis chart."""
+        if not PLOTLY_AVAILABLE:
+            return "<p>Plotly not available</p>"
+
+        # Extract performance metrics
+        performance_data = []
+        for result in raw_results:
+            if (result and result.get('status') == 'ok' and
+                result.get('scanning_ns') and result.get('corpus_size_bytes')):
+
+                scanning_s = result['scanning_ns'] / 1_000_000_000
+                corpus_mb = result['corpus_size_bytes'] / (1024 * 1024)
+                throughput = corpus_mb / scanning_s if scanning_s > 0 else 0
+
+                performance_data.append({
+                    'engine': result.get('engine_name', 'Unknown'),
+                    'throughput': throughput,
+                    'patterns': result.get('pattern_count', 0),
+                    'corpus_size': corpus_mb,
+                    'match_count': result.get('match_count', 0)
+                })
+
+        if len(performance_data) < 2:
+            return "<p>Not enough performance data for analysis chart</p>"
+
+        # Create scatter plot showing throughput vs pattern count
+        engines = {}
+        for data in performance_data:
+            engine = data['engine']
+            if engine not in engines:
+                engines[engine] = {'x': [], 'y': [], 'text': []}
+            engines[engine]['x'].append(data['patterns'])
+            engines[engine]['y'].append(data['throughput'])
+            engines[engine]['text'].append(
+                f"Corpus: {data['corpus_size']:.1f}MB<br>"
+                f"Matches: {data['match_count']}"
+            )
+
+        fig = go.Figure()
+        colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6']
+
+        for i, (engine, data) in enumerate(engines.items()):
+            fig.add_trace(go.Scatter(
+                x=data['x'],
+                y=data['y'],
+                mode='markers',
+                name=engine,
+                text=data['text'],
+                hovertemplate=f'<b>{engine}</b><br>Patterns: %{{x}}<br>Throughput: %{{y:.2f}} MB/s<br>%{{text}}<extra></extra>',
+                marker=dict(
+                    size=10,
+                    color=colors[i % len(colors)],
+                    opacity=0.7
+                )
+            ))
+
+        fig.update_layout(
+            title="Performance Analysis: Throughput vs Pattern Count",
+            xaxis_title="Pattern Count",
+            yaxis_title="Throughput (MB/s)",
+            template="plotly_white",
+            height=400,
+            showlegend=True
+        )
+
+        return fig.to_html(include_plotlyjs='inline', div_id="performance_chart")
 
     def _generate_raw_data_section(self, raw_results: List[Dict[str, Any]]) -> str:
         """Generate raw data section."""
@@ -603,6 +848,60 @@ class HTMLFormatter:
             color: #3498db;
             text-decoration: none;
         }
+
+        /* Chart Styles */
+        .charts {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        .chart-container {
+            background: #fafafa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .chart-container h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 1.2em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .chart-placeholder {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .chart-error {
+            text-align: center;
+            padding: 20px;
+            color: #e74c3c;
+            background: #fff5f5;
+            border: 1px solid #fccfcf;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        /* Responsive chart grid for larger screens */
+        @media (min-width: 1024px) {
+            .chart-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .chart-container:last-child {
+                grid-column: 1 / -1;
+            }
+        }
         """
 
     def _get_chart_scripts(self) -> str:
@@ -611,6 +910,90 @@ class HTMLFormatter:
         <!-- Chart.js would be included here -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         """
+
+    def generate_enhanced_report(
+        self,
+        data: Dict[str, Any],
+        output_dir: Path,
+        include_charts: bool = False
+    ) -> Path:
+        """Generate an HTML report using enhanced database metadata for accurate job counts."""
+
+        # Extract enhanced data structure
+        metadata = data.get('metadata')
+        benchmark_data = data.get('benchmark_results')
+
+        # Create enhanced summary using database metadata for accurate job counts
+        enhanced_summary = {}
+        if metadata:
+            enhanced_summary.update({
+                'run_id': metadata.run_id,
+                'total_combinations': metadata.total_jobs,  # Used by HTML formatter for Total Runs
+                'successful_runs': metadata.completed_jobs,
+                'failed_runs': metadata.failed_jobs,
+                'queued': metadata.queued_jobs,
+                'running': metadata.running_jobs,
+                'skipped_lowvariance': metadata.total_jobs - metadata.completed_jobs - metadata.failed_jobs - metadata.queued_jobs - metadata.running_jobs,
+                'status': metadata.status,
+                'phase': 'production_fast_engines',  # Add phase info
+                'created_at': metadata.created_at,
+                'started_at': metadata.started_at,
+                'completed_at': metadata.completed_at,
+                'duration_seconds': metadata.duration_seconds if metadata.duration_seconds is not None else 0,
+                'actual_execution_duration': metadata.actual_execution_duration if metadata.actual_execution_duration is not None else 'N/A',
+                'config_path': metadata.config_path,
+                'created_by': metadata.created_by,
+            })
+
+            # Add test matrix info if available
+            if metadata.test_matrix:
+                enhanced_summary['test_matrix'] = metadata.test_matrix
+
+        # Merge with benchmark data (traditional or database-sourced)
+        if benchmark_data:
+            # Check if this is database-sourced data (has 'results' key) or traditional data (has 'raw_results' key)
+            if 'results' in benchmark_data and 'raw_results' not in benchmark_data:
+                # Database-sourced data - convert to expected format
+                enhanced_data = {
+                    'summary': {**benchmark_data.get('summary', {}), **enhanced_summary},
+                    'raw_results': benchmark_data.get('results', []),
+                    'engines': benchmark_data.get('engines', {}),
+                    'analysis': {},
+                    'metadata': {
+                        'generated_at': data.get('generated_at'),
+                        'database_path': data.get('database_path'),
+                        'enhanced_reporting': True,
+                        'data_source': 'database'
+                    }
+                }
+            else:
+                # Traditional data structure - use as-is but override job counts with database metadata
+                enhanced_data = benchmark_data.copy()
+                enhanced_data['summary'] = {**benchmark_data.get('summary', {}), **enhanced_summary}
+                if 'metadata' not in enhanced_data:
+                    enhanced_data['metadata'] = {}
+                enhanced_data['metadata'].update({
+                    'generated_at': data.get('generated_at'),
+                    'database_path': data.get('database_path'),
+                    'enhanced_reporting': True,
+                    'data_source': 'traditional'
+                })
+        else:
+            # Create minimal data structure from metadata only
+            enhanced_data = {
+                'summary': enhanced_summary,
+                'raw_results': [],
+                'analysis': {},
+                'metadata': {
+                    'generated_at': data.get('generated_at'),
+                    'database_path': data.get('database_path'),
+                    'enhanced_reporting': True,
+                    'data_source': 'metadata_only'
+                }
+            }
+
+        # Generate report using existing method with enhanced data
+        return self.generate_report(enhanced_data, output_dir, include_charts)
 
     def _copy_assets(self, output_dir: Path) -> None:
         """Copy any additional assets needed for the report."""
@@ -654,6 +1037,10 @@ class MarkdownFormatter:
 """
 
         for result in raw_results[:10]:  # Show first 10 results
+            # Skip None results (incomplete jobs)
+            if result is None:
+                continue
+
             comp_ms = ((result.get('compilation_ns') or 0) / 1_000_000)
             scan_ms = ((result.get('scanning_ns') or 0) / 1_000_000)
 

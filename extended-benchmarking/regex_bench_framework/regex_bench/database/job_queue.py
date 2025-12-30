@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Any
 
 from ..engines.base import EngineResult
 from .schema import init_database
+from ..logging.transaction_log import get_transaction_logger, TransactionLogger
 
 logger = logging.getLogger(__name__)
 
@@ -91,10 +92,15 @@ class BenchmarkJob:
 class JobQueue:
     """SQLite-based job queue for benchmark execution."""
 
-    def __init__(self, db_path: Path):
+    def __init__(self, db_path: Path, output_dir: Optional[str] = None, run_id: Optional[str] = None):
         """Initialize job queue with database connection."""
         self.db_path = db_path
         self.conn = init_database(db_path)
+
+        # Initialize transaction logger if output_dir and run_id are provided
+        self.transaction_logger: Optional[TransactionLogger] = None
+        if output_dir and run_id:
+            self.transaction_logger = get_transaction_logger(output_dir, run_id)
 
     def close(self):
         """Close database connection."""
@@ -244,6 +250,47 @@ class JobQueue:
 
         self.conn.commit()
         logger.debug(f"Updated job {job_id} status to {status}")
+
+        # Log to transaction log if available
+        if self.transaction_logger and status in ['COMPLETED', 'FAILED', 'TIMEOUT']:
+            try:
+                # Get job details for logging
+                cursor = self.conn.execute(
+                    "SELECT * FROM benchmark_jobs WHERE job_id = ?",
+                    (job_id,)
+                )
+                job_row = cursor.fetchone()
+
+                if job_row:
+                    job_data = {
+                        'job_id': job_id,
+                        'run_id': job_row['run_id'],
+                        'engine_name': job_row['engine_name'],
+                        'pattern_count': job_row['pattern_count'],
+                        'input_size': job_row['input_size'],
+                        'corpus_name': job_row['corpus_name'],
+                        'pattern_suite': job_row['pattern_suite'],
+                        'iteration': job_row['iteration']
+                    }
+
+                    if status == 'COMPLETED' and result:
+                        # Log successful completion
+                        result_data = asdict(result)
+                        result_data['duration_seconds'] = duration_seconds
+                        result_data['throughput_mbps'] = throughput_mbps
+                        result_data['matches_per_second'] = matches_per_second
+                        self.transaction_logger.log_job_completion(job_data, result_data)
+                    else:
+                        # Log failure
+                        error_data = {
+                            'status': status,
+                            'error_message': error_message,
+                            'duration_seconds': duration_seconds
+                        }
+                        self.transaction_logger.log_job_failure(job_data, error_data)
+
+            except Exception as e:
+                logger.error(f"Failed to write to transaction log: {e}")
 
     def get_job_count(self, run_id: str) -> int:
         """Get total number of jobs for a run."""

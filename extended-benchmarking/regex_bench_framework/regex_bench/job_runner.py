@@ -35,12 +35,14 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
     def __init__(self, config: Dict[str, Any], output_dir: Path,
                  parallel_engines: int = 1, db_path: Optional[Path] = None):
         """Initialize job-based runner."""
+        # Force sequential execution for fair benchmarking - always use 1 worker
+        parallel_engines = 1
         # Initialize parent with existing logic
         super().__init__(config, output_dir, parallel_engines)
 
         # Database and job queue setup
         self.db_path = db_path or self.output_dir / "jobs.db"
-        self.job_queue = JobQueue(self.db_path)
+        self.job_queue = JobQueue(self.db_path, str(self.output_dir), self.run_id)
 
         # System profiling
         self.system_profiler = SystemProfiler()
@@ -277,6 +279,11 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
                     if not job:
                         break  # No more jobs
 
+                    # Check if job should be skipped based on engine-specific rules
+                    if self._should_skip_job(job):
+                        self._mark_job_as_skipped(job, run_id)
+                        continue  # Get next job instead of executing this one
+
                     # Pass db_path to worker so it can create its own connection
                     future = executor.submit(self._execute_job_with_tracking, job, self.db_path)
                     futures[future] = job
@@ -330,7 +337,7 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
     def _execute_job_with_tracking(self, job: BenchmarkJob, db_path: Path) -> EngineResult:
         """Execute single job with status tracking - wraps existing logic."""
         # Create thread-local database connection to avoid SQLite threading issues
-        thread_job_queue = JobQueue(db_path)
+        thread_job_queue = JobQueue(db_path, str(self.output_dir), job.run_id)
 
         try:
             # Get engine instance with better error handling
@@ -369,6 +376,21 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
                 "skipped": "FAILED"
             }
             db_status = engine_to_db_status.get(result.status, "FAILED")
+
+            # Enhanced validation for specific engines: java-native-unfair, rmatch, re2j
+            # These engines are only considered completed if they terminate correctly AND report match counts
+            if (db_status == "COMPLETED" and
+                job.engine_name in ['java-native-unfair', 'rmatch', 're2j']):
+
+                # Validate proper termination and match count reporting
+                if (result.status != "ok" or
+                    result.match_count is None or
+                    not isinstance(result.match_count, int) or
+                    result.match_count < 0):
+
+                    logger.warning(f"Engine {job.engine_name} failed validation: "
+                                 f"status={result.status}, match_count={result.match_count}")
+                    db_status = "FAILED"
 
             # Update job with result using correct mapped status
             thread_job_queue.update_job_status(job.job_id, db_status, result)
@@ -418,12 +440,18 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
         results = self._analyze_results()
         self._save_results(results)
 
-        # Update run completion
+        # Determine final status based on parameter coverage
+        final_status, coverage_summary = self._determine_final_status(run_id)
+
+        logger.info(f"Run finalized with status: {final_status}")
+        logger.info(f"Parameter coverage: {coverage_summary}")
+
+        # Update run completion with appropriate status
         self.job_queue.conn.execute("""
             UPDATE benchmark_runs
-            SET status = 'COMPLETED', completed_at = ?, duration_seconds = ?
+            SET status = ?, completed_at = ?, duration_seconds = ?, notes = ?
             WHERE run_id = ?
-        """, (datetime.now(), time.time() - self.start_time, run_id))
+        """, (final_status, datetime.now(), time.time() - self.start_time, coverage_summary, run_id))
         self.job_queue.conn.commit()
 
     def _mark_run_failed(self, run_id: str, error_msg: str) -> None:
@@ -435,12 +463,135 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
         """, (datetime.now(), f"Failed: {error_msg}", run_id))
         self.job_queue.conn.commit()
 
+    def _determine_final_status(self, run_id: str) -> tuple[str, str]:
+        """
+        Determine final run status based on parameter coverage.
+
+        Returns:
+            tuple: (status, coverage_summary)
+            - status: 'COMPLETED', 'INCOMPLETE', or 'FAILED'
+            - coverage_summary: Human-readable description of coverage
+        """
+        # Get all unique parameter combinations that were intended to run
+        cursor = self.job_queue.conn.execute("""
+            SELECT DISTINCT engine_name, pattern_count, input_size
+            FROM benchmark_jobs
+            WHERE run_id = ?
+            ORDER BY engine_name, pattern_count, input_size
+        """, (run_id,))
+
+        all_combinations = cursor.fetchall()
+        total_combinations = len(all_combinations)
+
+        if total_combinations == 0:
+            return 'FAILED', 'No jobs found'
+
+        # Check which combinations have at least one successful result
+        successful_combinations = []
+        missing_combinations = []
+
+        for combo in all_combinations:
+            engine_name, pattern_count, input_size = combo['engine_name'], combo['pattern_count'], combo['input_size']
+
+            # Check if this combination has at least one successful job
+            cursor = self.job_queue.conn.execute("""
+                SELECT COUNT(*) as count
+                FROM benchmark_jobs
+                WHERE run_id = ?
+                  AND engine_name = ?
+                  AND pattern_count = ?
+                  AND input_size = ?
+                  AND status = 'COMPLETED'
+            """, (run_id, engine_name, pattern_count, input_size))
+
+            successful_count = cursor.fetchone()['count']
+
+            if successful_count > 0:
+                successful_combinations.append(f"{engine_name}/{pattern_count}pats/{input_size}")
+            else:
+                missing_combinations.append(f"{engine_name}/{pattern_count}pats/{input_size}")
+
+        # Determine status based on coverage
+        successful_count = len(successful_combinations)
+
+        if successful_count == total_combinations:
+            status = 'COMPLETED'
+            summary = f"All {total_combinations} parameter combinations have representative results"
+        elif successful_count == 0:
+            status = 'FAILED'
+            summary = f"No successful results for any of the {total_combinations} parameter combinations"
+        else:
+            status = 'INCOMPLETE'
+            summary = f"{successful_count}/{total_combinations} parameter combinations have results. Missing: {', '.join(missing_combinations[:5])}"
+            if len(missing_combinations) > 5:
+                summary += f" and {len(missing_combinations) - 5} more"
+
+        return status, summary
+
     # Helper methods
+
+    def _should_skip_job(self, job) -> bool:
+        """
+        Check if a job should be skipped based on engine-specific rules.
+
+        Current rules:
+        - java-native-unfair: Skip if pattern_count × corpus_size_mb > 100,000
+        """
+        # Only apply rule to java-native-unfair engine
+        if job.engine_name != "java-native-unfair":
+            return False
+
+        # Convert input size to megabytes
+        corpus_size_mb = self._parse_corpus_size_mb(job.input_size)
+
+        # Calculate complexity factor
+        complexity = job.pattern_count * corpus_size_mb
+
+        # Skip if complexity exceeds threshold
+        if complexity > 100000:
+            logger.info(f"🚫 Skipping java-native-unfair job: {job.pattern_count} patterns × {corpus_size_mb}MB = {complexity} > 100,000 (complexity limit)")
+            return True
+
+        return False
+
+    def _parse_corpus_size_mb(self, input_size: str) -> int:
+        """Parse input size string to megabytes (e.g., '1GB' -> 1000, '100MB' -> 100)."""
+        input_size = input_size.upper()
+        if input_size.endswith('GB'):
+            return int(input_size.replace('GB', '')) * 1000
+        elif input_size.endswith('MB'):
+            return int(input_size.replace('MB', ''))
+        else:
+            # Default to MB if no unit specified
+            return int(input_size)
+
+    def _mark_job_as_skipped(self, job, run_id: str):
+        """Mark a job as completed with skipped status to preserve it in results."""
+        from .database import JobQueue
+
+        # Create thread-local database connection
+        thread_job_queue = JobQueue(self.db_path, str(self.output_dir), run_id)
+
+        try:
+            # Mark job as completed with special status indicating it was skipped
+            thread_job_queue.update_job_status(
+                job_id=job.job_id,
+                status="COMPLETED",
+                result=None,
+                error_message=f"SKIPPED_COMPLEXITY_LIMIT: {job.pattern_count} × {self._parse_corpus_size_mb(job.input_size)}MB > 100,000"
+            )
+
+            logger.info(f"✅ Marked {job.engine_name} job as skipped in database")
+
+        except Exception as e:
+            logger.error(f"Failed to mark job {job.job_id} as skipped: {e}")
+        finally:
+            thread_job_queue.close()
 
     def _calculate_job_timeout(self) -> float:
         """Calculate appropriate timeout respecting config timeout_per_job."""
         # Get configured timeout from config (default to 2 hours if not set)
-        config_timeout = self.config.get('execution_plan', {}).get('timeout_per_job', 7200)
+        config_timeout = self.config.get('execution_plan', {}).get('timeout_per_job', 72000)
 
         # Use config timeout as the minimum - this ensures large workloads get adequate time
         max_timeout = config_timeout

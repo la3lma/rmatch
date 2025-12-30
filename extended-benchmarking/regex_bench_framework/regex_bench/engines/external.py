@@ -162,7 +162,7 @@ class ExternalEngine(Engine):
             # Polling-based completion detection
             # rmatch finishes but doesn't signal termination properly
             poll_interval = 0.1  # 100ms
-            max_wait_time = float(self.config.get('execution_plan', {}).get('timeout_per_job', 7200))
+            max_wait_time = float(self.config.get('execution_plan', {}).get('timeout_per_job', 72000))
             elapsed = 0.0
 
             completion_detected = False
@@ -402,8 +402,8 @@ class ExternalEngine(Engine):
             corpus_size_mb = corpus_file.stat().st_size / (1024 * 1024) if corpus_file.exists() else 0
 
             # Use configured timeout from execution plan - critical for rmatch performance measurement
-            # Default to 2 hours if not configured, matching job timeout logic
-            timeout_seconds = self.config.get('execution_plan', {}).get('timeout_per_job', 7200)
+            # Default to 20 hours if not configured, matching job timeout logic
+            timeout_seconds = self.config.get('execution_plan', {}).get('timeout_per_job', 72000)
 
             # This accommodates large workloads like 10K patterns × 1GB corpus
             # No artificial scaling - just use a generous timeout for all workloads

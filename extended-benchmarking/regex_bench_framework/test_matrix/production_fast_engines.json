@@ -20,7 +20,7 @@
       "correctness_mismatch": "record_with_warning",
       "performance_timeout": "record_partial_results"
     },
-    "timeout_per_job": 14400,
+    "timeout_per_job": 72000,
     "resource_limits": {
       "max_memory_mb": 16384,
       "max_concurrent_jobs": 2

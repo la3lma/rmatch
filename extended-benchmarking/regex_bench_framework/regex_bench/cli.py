@@ -180,7 +180,7 @@ def run_single(engine, patterns, corpus, output, iterations):
               help='Report output directory')
 @click.option('--format', default='html', type=click.Choice(['html', 'pdf', 'markdown']),
               help='Report format')
-@click.option('--include-charts', is_flag=True, help='Include performance charts')
+@click.option('--include-charts', is_flag=True, default=True, help='Include interactive performance charts')
 @click.option('--live', is_flag=True, help='Generate live progress report for running benchmarks')
 def generate_report(input, output, format, include_charts, live):
     """Generate benchmark analysis report."""
@@ -207,20 +207,36 @@ def generate_report(input, output, format, include_charts, live):
 
         console.print(f"📋 Format: {format}")
 
-        from .reporting import ReportGenerator
-
         # Create output directory
         output_path = Path(output)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        # Generate report
-        generator = ReportGenerator()
-        report_file = generator.generate(
-            input_dir=Path(input),
-            output_dir=output_path,
-            format=format,
-            include_charts=include_charts
-        )
+        # Check if database exists to use enhanced reporting
+        input_path = Path(input)
+        db_path = input_path / "jobs.db"
+
+        if db_path.exists():
+            # Use enhanced reporting with database for accurate job counts
+            from .reporting.enhanced_generator import EnhancedReportGenerator
+            console.print(f"📊 [cyan]Using enhanced database reporting for accurate job statistics[/cyan]")
+            generator = EnhancedReportGenerator()
+            report_file = generator.generate_from_database(
+                db_path=db_path,
+                output_dir=output_path,
+                format=format,
+                include_charts=include_charts
+            )
+        else:
+            # Fall back to traditional reporting
+            from .reporting import ReportGenerator
+            console.print(f"📊 [yellow]Using traditional reporting (no database found)[/yellow]")
+            generator = ReportGenerator()
+            report_file = generator.generate(
+                input_dir=input_path,
+                output_dir=output_path,
+                format=format,
+                include_charts=include_charts
+            )
 
         console.print(f"✅ [green]Report generated successfully![/green]")
         console.print(f"📄 Report file: {report_file}")
@@ -857,11 +873,11 @@ def _generate_live_progress_report(results_dir: str, output_dir: str, format_typ
         # Connect to database and get job status
         queue = JobQueue(db_file)
 
-        # Get current run info
+        # Get current run info - prioritize RUNNING runs over latest by creation date
         cursor = queue.conn.execute("""
             SELECT run_id, status, created_at, started_at
             FROM benchmark_runs
-            ORDER BY created_at DESC
+            ORDER BY CASE WHEN status = 'RUNNING' THEN 0 ELSE 1 END, created_at DESC
             LIMIT 1
         """)
 
@@ -993,10 +1009,19 @@ def _generate_live_html_report(run_info, progress, jobs, output_dir: str):
         .status {{ padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase; }}
         .status.completed {{ background: #d4edda; color: #155724; }}
         .status.running {{ background: #cce7ff; color: #004085; }}
+        .status.running-normal {{ background: #d4edda; color: #155724; text-transform: none; }}
+        .status.running-slow {{ background: #fff3cd; color: #856404; text-transform: none; }}
+        .status.running-blocked {{ background: #f8d7da; color: #721c24; text-transform: none; animation: pulse 2s infinite; }}
         .status.queued {{ background: #fff3cd; color: #856404; }}
         .status.failed {{ background: #f8d7da; color: #721c24; }}
         .status.timeout {{ background: #f8d7da; color: #721c24; }}
         .status.skipped_lowvariance {{ background: #4db6ac; color: white; border-radius: 12px; padding: 6px 12px; font-size: 11px; }}
+
+        @keyframes pulse {{
+            0% {{ opacity: 1; }}
+            50% {{ opacity: 0.6; }}
+            100% {{ opacity: 1; }}
+        }}
 
         .auto-refresh {{ text-align: center; margin: 20px 0; color: #666; font-size: 14px; }}
         .timestamp {{ color: #888; font-size: 12px; }}
@@ -1074,6 +1099,36 @@ def _generate_live_html_report(run_info, progress, jobs, output_dir: str):
         status_display = "skipped" if job['status'] == 'SKIPPED_LOWVARIANCE' else job['status']
         duration = f"{job['duration_seconds']:.1f}s" if job['duration_seconds'] else "-"
         started = job['started_at'][:19] if job['started_at'] else "Not started"
+
+        # Enhanced progress indicators for RUNNING jobs
+        progress_indicator = ""
+        runtime_minutes = 0
+        if job['status'] == 'RUNNING' and job['started_at']:
+            try:
+                from datetime import datetime
+                start_time = datetime.fromisoformat(job['started_at'])
+                current_time = datetime.now()
+                runtime_seconds = (current_time - start_time).total_seconds()
+                runtime_minutes = runtime_seconds / 60.0
+
+                # Show current elapsed time in duration column for running jobs
+                duration = f"{runtime_seconds:.1f}s"
+
+                # Categorize running jobs by duration
+                if runtime_minutes < 10:
+                    progress_indicator = "🟢 Running"
+                    status_class += " running-normal"
+                elif runtime_minutes < 60:
+                    progress_indicator = f"🟡 Slow ({runtime_minutes:.0f}m)"
+                    status_class += " running-slow"
+                else:
+                    progress_indicator = f"🔴 Blocked? ({runtime_minutes:.0f}m)"
+                    status_class += " running-blocked"
+
+                # Update status display for running jobs
+                status_display = progress_indicator
+            except:
+                pass
 
         # Parse corpus size from input_size (e.g., "1MB", "500MB", "1GB")
         input_size = job['input_size'] or ""
