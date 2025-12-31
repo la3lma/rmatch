@@ -1,0 +1,30 @@
+{
+  "suite_metadata": {
+    "suite_name": "log_mining",
+    "generator": "StablePatternsFromGit",
+    "seed": 12345,
+    "generation_date": "2025-12-19",
+    "compatible_engines": [
+      "rmatch",
+      "re2j",
+      "java-native-optimized",
+      "java-native-unfair"
+    ],
+    "validation_status": "validated",
+    "note": "Derived from git-stored 10K stable patterns (first 10 patterns)"
+  },
+  "patterns": [
+    "hello",
+    "error",
+    "warning",
+    "info",
+    "debug",
+    "failed",
+    "success",
+    "timeout",
+    "connection",
+    "server"
+  ],
+  "pattern_count": 10,
+  "derived_from": "benchmark_suites/stable_patterns/patterns_10000.txt"
+}

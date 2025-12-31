@@ -1,0 +1,13 @@
+{
+  "run_id": "20251219_234553_e6c3f781",
+  "phase": 1,
+  "status": "completed",
+  "engines_tested": [
+    "rmatch"
+  ],
+  "total_combinations": 90,
+  "successful_runs": 80,
+  "failed_runs": 10,
+  "duration_seconds": 855.3762230873108,
+  "output_directory": "debug_pattern_reuse_20251219_234537"
+}

@@ -1,0 +1,27 @@
+{
+  "phase": 1,
+  "description": "BISECTION 5K TEST: Finding the breaking point between 1K (working) and 10K (failing)",
+  "test_matrix": {
+    "pattern_counts": [5000],
+    "input_sizes": ["100MB"],
+    "pattern_suites": ["log_mining"],
+    "corpora": ["synthetic_controllable"],
+    "engines": ["re2j", "rmatch", "java-native-optimized", "java-native-unfair"],
+    "iterations_per_combination": 3,
+    "warmup_iterations": 1
+  },
+  "execution_plan": {
+    "parallel_execution": {
+      "max_concurrent_engines": 1,
+      "resource_isolation": true
+    }
+  },
+  "methodology": {
+    "measurement_protocol": {
+      "warmup_runs": 1,
+      "measurement_runs": 3,
+      "confidence_level": 0.95
+    }
+  },
+  "notes": "Bisection test to narrow down where engines start failing between 1K and 10K patterns"
+}
