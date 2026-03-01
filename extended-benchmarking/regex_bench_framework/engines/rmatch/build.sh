@@ -4,6 +4,24 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/.build"
 
+find_repo_root() {
+    local dir="$SCRIPT_DIR"
+    while [ "$dir" != "/" ]; do
+        if [ -f "$dir/pom.xml" ] && [ -d "$dir/rmatch" ]; then
+            echo "$dir"
+            return 0
+        fi
+        dir="$(dirname "$dir")"
+    done
+    return 1
+}
+
+REPO_ROOT="$(find_repo_root || true)"
+if [ -z "$REPO_ROOT" ]; then
+    echo "ERROR: Could not locate repository root (expected pom.xml and rmatch/)." >&2
+    exit 1
+fi
+
 echo "Building rmatch benchmark engine..."
 
 # Create build directory
@@ -26,15 +44,30 @@ if ! command -v mvn >/dev/null 2>&1; then
     exit 1
 fi
 
-# Build and install rmatch to local .m2 repository if not already present
-M2_DIR="$HOME/.m2/repository/no/rmz/rmatch/1.1-SNAPSHOT"
-if [ ! -d "$M2_DIR" ]; then
-    echo "rmatch not found in .m2 repository. Building and installing..."
-    cd "$SCRIPT_DIR/../../../../.." && mvn clean install -DskipTests
-    echo "✓ rmatch installed to local .m2 repository"
-else
-    echo "✓ rmatch found in .m2 repository"
+# JVM bytecode is architecture-neutral, so we target a fixed Java release
+# and only require that the runtime JDK used for build is new enough.
+JAVA_RUNTIME_MAJOR="$(java -version 2>&1 | awk -F[\".] '/version/ {print $2; exit}')"
+if ! [[ "$JAVA_RUNTIME_MAJOR" =~ ^[0-9]+$ ]]; then
+    echo "ERROR: Could not detect Java major version from 'java -version' output." >&2
+    exit 1
 fi
+
+RMATCH_JAVA_TARGET="${RMATCH_JAVA_TARGET:-21}"
+if ! [[ "$RMATCH_JAVA_TARGET" =~ ^[0-9]+$ ]]; then
+    echo "ERROR: RMATCH_JAVA_TARGET must be an integer Java major version (e.g. 21)." >&2
+    exit 1
+fi
+
+if [ "$JAVA_RUNTIME_MAJOR" -lt "$RMATCH_JAVA_TARGET" ]; then
+    echo "ERROR: Build JDK ($JAVA_RUNTIME_MAJOR) is older than target ($RMATCH_JAVA_TARGET)." >&2
+    exit 1
+fi
+
+# Build and install rmatch to local .m2 repository.
+M2_DIR="$HOME/.m2/repository/no/rmz/rmatch/1.1-SNAPSHOT"
+echo "Building and installing rmatch (target Java: $RMATCH_JAVA_TARGET, build JDK: $JAVA_RUNTIME_MAJOR)..."
+cd "$REPO_ROOT" && mvn -q -pl rmatch -am clean install -DskipTests -Dmaven.test.skip=true -Djava.version="$RMATCH_JAVA_TARGET"
+echo "✓ rmatch installed to local .m2 repository"
 
 # Find the rmatch JAR file
 RMATCH_JAR=$(find "$M2_DIR" -name "rmatch-1.1-SNAPSHOT.jar" | head -1)
@@ -46,8 +79,7 @@ fi
 echo "✓ Found rmatch JAR: $RMATCH_JAR"
 
 # Copy rmatch dependencies
-RMATCH_SOURCE_DIR="$SCRIPT_DIR/../../../../.."
-RMATCH_TARGET_LIB="$RMATCH_SOURCE_DIR/rmatch/target/lib"
+RMATCH_TARGET_LIB="$REPO_ROOT/rmatch/target/lib"
 echo "Copying rmatch dependencies from $RMATCH_TARGET_LIB..."
 mkdir -p "$BUILD_DIR/lib"
 if [ -d "$RMATCH_TARGET_LIB" ]; then
@@ -55,7 +87,7 @@ if [ -d "$RMATCH_TARGET_LIB" ]; then
     echo "✓ Copied $(ls "$BUILD_DIR/lib" | wc -l) dependency JARs"
 else
     echo "⚠️  rmatch dependencies not found at $RMATCH_TARGET_LIB - rebuilding rmatch..."
-    cd "$RMATCH_SOURCE_DIR/rmatch" && mvn dependency:copy-dependencies -q
+    cd "$REPO_ROOT/rmatch" && mvn -q dependency:copy-dependencies -Djava.version="$RMATCH_JAVA_TARGET"
     if [ -d "$RMATCH_TARGET_LIB" ]; then
         cp "$RMATCH_TARGET_LIB"/*.jar "$BUILD_DIR/lib/"
         echo "✓ Copied $(ls "$BUILD_DIR/lib" | wc -l) dependency JARs"

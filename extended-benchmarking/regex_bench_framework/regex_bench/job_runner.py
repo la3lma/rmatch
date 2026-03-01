@@ -150,7 +150,7 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
 
         cursor = self.job_queue.conn.execute("""
             SELECT run_id FROM benchmark_runs
-            WHERE config_hash = ? AND status IN ('PREPARING', 'RUNNING')
+            WHERE config_hash = ? AND status IN ('PREPARING', 'RUNNING', 'FAILED', 'INCOMPLETE')
             ORDER BY created_at DESC
             LIMIT 1
         """, (config_hash,))
@@ -223,6 +223,11 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
     def _resume_existing_run(self, run_id: str) -> None:
         """Resume existing benchmark run."""
         logger.info("Resuming existing benchmark run...")
+
+        # Recover jobs that were in-flight when a previous process/VM died.
+        recovered_count = self.job_queue.reset_stale_running_jobs(run_id)
+        if recovered_count > 0:
+            logger.info(f"Recovered {recovered_count} stale RUNNING jobs to QUEUED state")
 
         # PRESERVE EXISTING SETUP LOGIC (but skip job creation)
         self._setup_output_directory()
@@ -658,6 +663,15 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
 
             target_pattern_path = data_dir / pattern_file
             target_metadata_path = data_dir / metadata_file
+
+            # Respect pre-staged datasets (for GCP data bundles and resume flows).
+            if target_pattern_path.exists():
+                logger.info(f"✅ Reusing pre-staged {pattern_file}")
+                if target_metadata_path.exists():
+                    logger.info(f"✅ Reusing pre-staged {metadata_file}")
+                else:
+                    logger.warning(f"⚠️  Missing pre-staged {metadata_file} for {pattern_file}")
+                continue
 
             # Copy git-stored pattern file if it exists
             if git_pattern_path.exists():

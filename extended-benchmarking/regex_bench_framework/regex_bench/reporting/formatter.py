@@ -5,6 +5,8 @@ Report formatters for different output formats.
 import json
 import time
 import sys
+import platform
+import html as html_lib
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from datetime import datetime
@@ -26,21 +28,144 @@ except Exception as e:
 # Performance analysis imports - conditional to avoid psutil dependency issues
 ANALYSIS_AVAILABLE = False
 try:
-    # Try to import analysis modules without triggering full package imports
+    # Try to import advanced analysis modules
     sys.path.append(str(Path(__file__).parent.parent))
-
-    # Use the standalone analysis approach to avoid psutil dependency
+    from analysis.advanced_analytics import AdvancedAnalytics
+    from analysis.advanced_chart_generator import AdvancedChartGenerator
+    ANALYSIS_AVAILABLE = True
+    print("DEBUG: Advanced Analytics modules imported successfully")
+except ImportError as e:
+    print(f"DEBUG: Advanced Analytics import failed: {e}")
+    # Fallback to standalone analysis approach
     standalone_analysis_path = Path(__file__).parent.parent.parent / "standalone_analysis.py"
     if standalone_analysis_path.exists():
         ANALYSIS_AVAILABLE = "standalone"
     else:
-        # Fallback to try full analysis if psutil is working
-        from analysis.performance_analyzer import PerformanceAnalyzer
-        from analysis.chart_generator import ChartGenerator
-        ANALYSIS_AVAILABLE = True
-except ImportError:
-    # psutil dependency issue - use standalone approach
-    ANALYSIS_AVAILABLE = False
+        ANALYSIS_AVAILABLE = False
+
+
+def _safe_dict(value: Any) -> Dict[str, Any]:
+    """Safely convert metadata objects into dictionaries."""
+    if isinstance(value, dict):
+        return value
+    if value is None:
+        return {}
+    if hasattr(value, "__dict__"):
+        try:
+            return dict(vars(value))
+        except Exception:
+            return {}
+    return {}
+
+
+def _runtime_environment_snapshot(source: str) -> Dict[str, Any]:
+    """Capture runtime system details for fallback/report-host context."""
+    return {
+        'source': source,
+        'profile_id': None,
+        'hostname': platform.node() or None,
+        'cpu_model': platform.processor() or None,
+        'cpu_architecture': platform.machine() or None,
+        'cpu_physical_cores': None,
+        'cpu_logical_cores': None,
+        'memory_total_gb': None,
+        'os_name': platform.system() or None,
+        'os_version': platform.release() or None,
+        'os_release': platform.version() or None,
+        'kernel_version': platform.version() or None,
+        'python_version': platform.python_version(),
+        'python_implementation': platform.python_implementation(),
+        'python_compiler': platform.python_compiler(),
+        'is_virtualized': None,
+        'virtualization_type': None,
+        'container_runtime': None,
+        'container_image': None,
+        'profiled_at': None,
+        'notes': None,
+    }
+
+
+def _extract_benchmark_environment(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Extract benchmark-host environment from the richest available metadata."""
+    metadata = _safe_dict(data.get('metadata'))
+    analysis = _safe_dict(data.get('analysis'))
+    benchmark_metadata = _safe_dict(analysis.get('benchmark_metadata'))
+
+    # Enhanced database-backed reports provide a joined system profile.
+    system_profile = _safe_dict(metadata.get('system_profile'))
+    if system_profile:
+        return {
+            'source': 'database_system_profile',
+            'profile_id': system_profile.get('profile_id') or metadata.get('system_profile_id'),
+            'hostname': system_profile.get('hostname'),
+            'cpu_model': system_profile.get('cpu_model'),
+            'cpu_architecture': system_profile.get('cpu_architecture') or system_profile.get('os_architecture'),
+            'cpu_physical_cores': system_profile.get('cpu_physical_cores'),
+            'cpu_logical_cores': system_profile.get('cpu_logical_cores'),
+            'memory_total_gb': system_profile.get('memory_total_gb'),
+            'os_name': system_profile.get('os_name'),
+            'os_version': system_profile.get('os_version'),
+            'os_release': system_profile.get('os_release'),
+            'kernel_version': system_profile.get('kernel_version'),
+            'python_version': system_profile.get('python_version'),
+            'python_implementation': system_profile.get('python_implementation'),
+            'python_compiler': system_profile.get('python_compiler'),
+            'is_virtualized': system_profile.get('is_virtualized'),
+            'virtualization_type': system_profile.get('virtualization_type'),
+            'container_runtime': system_profile.get('container_runtime'),
+            'container_image': system_profile.get('container_image'),
+            'profiled_at': system_profile.get('profiled_at'),
+            'notes': None,
+        }
+
+    # Traditional reports store system info in benchmark_metadata.
+    for system_info_candidate in (metadata.get('system_info'), benchmark_metadata.get('system_info')):
+        system_info = _safe_dict(system_info_candidate)
+        if not system_info:
+            continue
+
+        platform_info = _safe_dict(system_info.get('platform'))
+        hardware_info = _safe_dict(system_info.get('hardware'))
+        cpu_info = _safe_dict(hardware_info.get('cpu'))
+        memory_info = _safe_dict(hardware_info.get('memory'))
+        software_info = _safe_dict(system_info.get('software'))
+        python_info = _safe_dict(software_info.get('python'))
+
+        return {
+            'source': 'analysis_benchmark_metadata',
+            'profile_id': metadata.get('system_profile_id'),
+            'hostname': platform_info.get('node'),
+            'cpu_model': cpu_info.get('model') or platform_info.get('processor'),
+            'cpu_architecture': platform_info.get('machine'),
+            'cpu_physical_cores': cpu_info.get('physical_cores'),
+            'cpu_logical_cores': cpu_info.get('logical_cores'),
+            'memory_total_gb': memory_info.get('total_gb'),
+            'os_name': platform_info.get('system'),
+            'os_version': platform_info.get('release'),
+            'os_release': platform_info.get('version'),
+            'kernel_version': platform_info.get('version'),
+            'python_version': python_info.get('version'),
+            'python_implementation': python_info.get('implementation'),
+            'python_compiler': python_info.get('compiler'),
+            'is_virtualized': None,
+            'virtualization_type': None,
+            'container_runtime': None,
+            'container_image': None,
+            'profiled_at': None,
+            'notes': None,
+        }
+
+    fallback = _runtime_environment_snapshot('runtime_fallback')
+    fallback['notes'] = 'No benchmark-host metadata was found; this falls back to the report host.'
+    return fallback
+
+
+def _extract_system_architecture_context(data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    """Build benchmark/report system context for report rendering."""
+    return {
+        'benchmark': _extract_benchmark_environment(data),
+        'report': _runtime_environment_snapshot('report_runtime'),
+    }
 
 
 class HTMLFormatter:
@@ -73,7 +198,7 @@ class HTMLFormatter:
         summary = data.get('summary', {})
         raw_results = data.get('raw_results', [])
         analysis = data.get('analysis', {})
-        metadata = data.get('metadata', {})
+        metadata = _safe_dict(data.get('metadata'))
 
         html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -97,10 +222,11 @@ class HTMLFormatter:
         </header>
 
         {self._generate_summary_section(summary, analysis)}
+        {self._generate_system_architecture_section(data)}
         {self._generate_engines_section(raw_results)}
         {self._generate_results_section(raw_results, analysis)}
-        {self._generate_performance_section(analysis, raw_results, data.get('metadata', {}).get('database_path'))}
-        {'    ' + self._generate_charts_section(raw_results, analysis, data.get('metadata', {}).get('database_path')) if include_charts else ''}
+        {self._generate_performance_section(analysis, raw_results, metadata.get('database_path'))}
+        {'    ' + self._generate_charts_section(raw_results, analysis, metadata.get('database_path')) if include_charts else ''}
         {self._generate_raw_data_section(raw_results)}
 
         <footer>
@@ -198,6 +324,169 @@ class HTMLFormatter:
             </div>
             {throughput_section}
         </section>"""
+
+    def _generate_system_architecture_section(self, data: Dict[str, Any]) -> str:
+        """Generate benchmark/report environment section with architecture details."""
+        context = _extract_system_architecture_context(data)
+        benchmark_env = context.get('benchmark', {})
+        report_env = context.get('report', {})
+
+        benchmark_table = self._render_system_environment_table(
+            title="Benchmark Runtime Environment",
+            environment=benchmark_env,
+            helper_text="Captured from benchmark metadata when available."
+        )
+        report_table = self._render_system_environment_table(
+            title="Report Generation Environment",
+            environment=report_env,
+            helper_text="Runtime used to generate this report."
+        )
+
+        return f"""
+        <section class="system-architecture">
+            <h2>🖥️ System / Architecture</h2>
+            <p class="system-note">
+                The benchmark environment is the source of truth for cross-run comparison.
+                The report environment is shown for traceability.
+            </p>
+            <div class="system-grid">
+                {benchmark_table}
+                {report_table}
+            </div>
+        </section>"""
+
+    def _render_system_environment_table(self, title: str, environment: Dict[str, Any], helper_text: str) -> str:
+        """Render one environment card for the system/architecture section."""
+        source_labels = {
+            'database_system_profile': 'Database system profile',
+            'analysis_benchmark_metadata': 'Run metadata snapshot',
+            'runtime_fallback': 'Fallback (report runtime)',
+            'report_runtime': 'Report runtime'
+        }
+
+        source = environment.get('source')
+        source_display = source_labels.get(source, source or "Unknown")
+
+        cpu_cores_display = self._format_cpu_cores(environment)
+        memory_display = self._format_memory_gb(environment.get('memory_total_gb'))
+        os_display = self._format_os(environment)
+        python_display = self._format_python(environment)
+        virtualization_display = self._format_virtualization(environment)
+
+        rows = [
+            ("Source", source_display),
+            ("Profile ID", environment.get('profile_id')),
+            ("Hostname", environment.get('hostname')),
+            ("CPU Model", environment.get('cpu_model')),
+            ("CPU Architecture", environment.get('cpu_architecture')),
+            ("CPU Cores", cpu_cores_display),
+            ("Memory", memory_display),
+            ("Operating System", os_display),
+            ("Kernel", environment.get('kernel_version') or environment.get('os_release')),
+            ("Python", python_display),
+            ("Virtualization", virtualization_display),
+            ("Profiled At", environment.get('profiled_at')),
+            ("Notes", environment.get('notes')),
+        ]
+
+        row_html = ""
+        for label, value in rows:
+            row_html += f"""
+                    <tr>
+                        <th>{html_lib.escape(str(label))}</th>
+                        <td>{html_lib.escape(self._safe_display(value))}</td>
+                    </tr>"""
+
+        return f"""
+                <div class="system-card">
+                    <h3>{html_lib.escape(title)}</h3>
+                    <p class="system-helper">{html_lib.escape(helper_text)}</p>
+                    <div class="table-container">
+                        <table class="results-table system-table">
+                            <tbody>
+{row_html}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>"""
+
+    def _safe_display(self, value: Any) -> str:
+        """Convert optional values into stable display text."""
+        if value is None:
+            return "N/A"
+        if isinstance(value, bool):
+            return "Yes" if value else "No"
+        text = str(value).strip()
+        return text if text else "N/A"
+
+    def _format_cpu_cores(self, environment: Dict[str, Any]) -> Optional[str]:
+        """Format logical/physical core count for display."""
+        physical = environment.get('cpu_physical_cores')
+        logical = environment.get('cpu_logical_cores')
+        if physical and logical:
+            return f"{logical} logical / {physical} physical"
+        if logical:
+            return f"{logical} logical"
+        if physical:
+            return f"{physical} physical"
+        return None
+
+    def _format_memory_gb(self, memory_gb: Any) -> Optional[str]:
+        """Format memory values in GB."""
+        if memory_gb is None:
+            return None
+        try:
+            return f"{float(memory_gb):.2f} GB"
+        except (TypeError, ValueError):
+            return str(memory_gb)
+
+    def _format_os(self, environment: Dict[str, Any]) -> Optional[str]:
+        """Format OS value with version details."""
+        os_name = environment.get('os_name')
+        os_version = environment.get('os_version')
+        os_release = environment.get('os_release')
+        base = " ".join(part for part in [os_name, os_version] if part)
+        if base and os_release and str(os_release) != str(os_version):
+            return f"{base} ({os_release})"
+        return base or os_release
+
+    def _format_python(self, environment: Dict[str, Any]) -> Optional[str]:
+        """Format Python runtime details."""
+        version = environment.get('python_version')
+        implementation = environment.get('python_implementation')
+        compiler = environment.get('python_compiler')
+        parts = [part for part in [version, implementation] if part]
+        python_info = " / ".join(parts) if parts else None
+        if python_info and compiler:
+            return f"{python_info} ({compiler})"
+        return python_info or compiler
+
+    def _format_virtualization(self, environment: Dict[str, Any]) -> Optional[str]:
+        """Format virtualization/container details."""
+        is_virtualized = environment.get('is_virtualized')
+        virtualization_type = environment.get('virtualization_type')
+        container_runtime = environment.get('container_runtime')
+        container_image = environment.get('container_image')
+
+        details = []
+        if virtualization_type:
+            details.append(str(virtualization_type))
+        if container_runtime:
+            details.append(f"container={container_runtime}")
+        if container_image:
+            details.append(f"image={container_image}")
+
+        if is_virtualized is True:
+            if details:
+                return "Yes (" + ", ".join(details) + ")"
+            return "Yes"
+        if is_virtualized is False:
+            if details:
+                return "No (" + ", ".join(details) + ")"
+            return "No"
+        if details:
+            return ", ".join(details)
+        return None
 
     def _generate_engines_section(self, raw_results: List[Dict[str, Any]]) -> str:
         """Generate the engines overview section."""
@@ -878,106 +1167,215 @@ class HTMLFormatter:
         </section>"""
 
     def _generate_comprehensive_charts(self, db_path: str) -> str:
-        """Generate comprehensive interactive charts from database analysis."""
+        """Generate world-class interactive analytics dashboard from database analysis."""
         try:
-            analyzer = PerformanceAnalyzer(Path(db_path))
-            chart_generator = ChartGenerator(analyzer)
+            print(f"🚀 Generating world-class analytics dashboard from: {db_path}")
 
-            # Generate all comprehensive charts
-            all_charts = chart_generator.generate_all_performance_charts()
+            # Create advanced analytics engine
+            advanced_analytics = AdvancedAnalytics(Path(db_path))
+            chart_generator = AdvancedChartGenerator()
 
-            # Extract chart HTML for embedding
-            charts_html = ""
-            if all_charts:
-                # Generate memory vs patterns charts for different corpus sizes
-                memory_charts = ""
-                corpus_sizes = ['1MB', '10MB', '100MB', '1GB']
-                for corpus_size in corpus_sizes:
-                    chart_key = f'memory_vs_patterns_{corpus_size}'
-                    if chart_key in all_charts:
-                        chart_config = all_charts[chart_key]
-                        chart_html = self._plotly_config_to_html(chart_config, f'memory_patterns_{corpus_size}')
-                        memory_charts += f"""
-                        <div class="comprehensive-chart">
-                            <h4>Memory vs Patterns ({corpus_size} Corpus)</h4>
-                            {chart_html}
-                        </div>"""
+            # Generate complete analysis
+            print("📊 Running comprehensive analysis...")
+            complete_analysis = advanced_analytics.export_complete_analysis()
 
-                # Generate throughput charts
-                throughput_charts = ""
-                for corpus_size in corpus_sizes:
-                    chart_key = f'throughput_vs_patterns_{corpus_size}'
-                    if chart_key in all_charts:
-                        chart_config = all_charts[chart_key]
-                        chart_html = self._plotly_config_to_html(chart_config, f'throughput_patterns_{corpus_size}')
-                        throughput_charts += f"""
-                        <div class="comprehensive-chart">
-                            <h4>Throughput vs Patterns ({corpus_size} Corpus)</h4>
-                            {chart_html}
-                        </div>"""
+            # Generate world-class dashboard
+            print("🎨 Generating advanced visualizations...")
+            dashboard_html = chart_generator.generate_complete_dashboard(complete_analysis)
 
-                # Generate memory efficiency chart
-                memory_efficiency_chart = ""
-                if 'memory_efficiency_per_pattern' in all_charts:
-                    chart_config = all_charts['memory_efficiency_per_pattern']
-                    chart_html = self._plotly_config_to_html(chart_config, 'memory_efficiency')
-                    memory_efficiency_chart = f"""
-                    <div class="comprehensive-chart full-width">
-                        <h4>Memory Efficiency Per Pattern</h4>
-                        {chart_html}
-                    </div>"""
+            # Add performance insights
+            insights = complete_analysis.get('insights', [])
+            insights_html = ""
+            if insights:
+                insights_html = """
+                <div class="performance-insights-section">
+                    <h3>🧠 AI-Powered Performance Insights</h3>
+                    <div class="insights-grid">
+                """
 
-                charts_html = f"""
-                <div class="comprehensive-charts">
-                    <h3>Comprehensive Performance Analysis</h3>
-                    <div class="chart-tabs">
-                        <button class="tab-button active" onclick="showChartTab('memory')">Memory Analysis</button>
-                        <button class="tab-button" onclick="showChartTab('throughput')">Throughput Analysis</button>
-                        <button class="tab-button" onclick="showChartTab('efficiency')">Efficiency Analysis</button>
-                    </div>
-
-                    <div id="memory-tab" class="chart-tab-content active">
-                        <div class="comprehensive-chart-grid">
-                            {memory_charts}
+                for insight in insights:
+                    severity_class = f"insight-{insight['severity']}"
+                    insights_html += f"""
+                    <div class="insight-card {severity_class}">
+                        <h4>{insight['title']}</h4>
+                        <p>{insight['description']}</p>
+                        <div class="insight-data">
+                            <small>Chart Type: {insight['chart_type']}</small>
                         </div>
                     </div>
+                    """
 
-                    <div id="throughput-tab" class="chart-tab-content">
-                        <div class="comprehensive-chart-grid">
-                            {throughput_charts}
-                        </div>
-                    </div>
-
-                    <div id="efficiency-tab" class="chart-tab-content">
-                        {memory_efficiency_chart}
+                insights_html += """
                     </div>
                 </div>
+                """
 
-                <script>
-                function showChartTab(tabName) {{
-                    // Hide all tab contents
-                    document.querySelectorAll('.chart-tab-content').forEach(tab => {{
-                        tab.classList.remove('active');
-                    }});
+            # Add engine profiles
+            engine_profiles = complete_analysis.get('engine_profiles', {})
+            profiles_html = ""
+            if engine_profiles:
+                profiles_html = """
+                <div class="engine-profiles-section">
+                    <h3>🎯 Engine Performance Profiles</h3>
+                    <div class="profiles-grid">
+                """
 
-                    // Remove active class from all buttons
-                    document.querySelectorAll('.tab-button').forEach(btn => {{
-                        btn.classList.remove('active');
-                    }});
+                for engine, profile in engine_profiles.items():
+                    strengths = ', '.join(profile.get('strengths', [])[:3])  # Top 3 strengths
+                    use_cases = ', '.join(profile.get('use_cases', [])[:2])  # Top 2 use cases
 
-                    // Show selected tab
-                    document.getElementById(tabName + '-tab').classList.add('active');
-                    event.target.classList.add('active');
-                }}
-                </script>"""
+                    profiles_html += f"""
+                    <div class="profile-card">
+                        <h4>{engine}</h4>
+                        <div class="profile-metrics">
+                            <div class="metric">
+                                <span class="label">Avg Throughput:</span>
+                                <span class="value">{profile.get('throughput_characteristics', {}).get('mean_throughput', 0):.1f} MB/s</span>
+                            </div>
+                            <div class="metric">
+                                <span class="label">Memory Efficiency:</span>
+                                <span class="value">{profile.get('memory_characteristics', {}).get('memory_efficiency', 0):.1f} MB/s/MB</span>
+                            </div>
+                        </div>
+                        <div class="profile-insights">
+                            <div class="strengths"><strong>Strengths:</strong> {strengths}</div>
+                            <div class="use-cases"><strong>Best for:</strong> {use_cases}</div>
+                        </div>
+                    </div>
+                    """
 
-            return charts_html
+                profiles_html += """
+                    </div>
+                </div>
+                """
+
+            # Combine all sections
+            complete_dashboard = f"""
+            <div class="world-class-analytics-container">
+                <style>
+                    .world-class-analytics-container {{
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        padding: 30px;
+                        border-radius: 16px;
+                        margin: 20px 0;
+                    }}
+
+                    .analytics-header {{
+                        text-align: center;
+                        color: white;
+                        margin-bottom: 30px;
+                    }}
+
+                    .analytics-content {{
+                        background: white;
+                        border-radius: 12px;
+                        padding: 20px;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                    }}
+
+                    .performance-insights-section,
+                    .engine-profiles-section {{
+                        margin: 30px 0;
+                        padding: 20px;
+                        background: #f8f9fa;
+                        border-radius: 12px;
+                        border-left: 4px solid #3498db;
+                    }}
+
+                    .insights-grid,
+                    .profiles-grid {{
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 20px;
+                        margin-top: 20px;
+                    }}
+
+                    .insight-card,
+                    .profile-card {{
+                        background: white;
+                        padding: 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        border-left: 4px solid #3498db;
+                    }}
+
+                    .insight-card.insight-warning {{
+                        border-left-color: #f39c12;
+                    }}
+
+                    .insight-card.insight-critical {{
+                        border-left-color: #e74c3c;
+                    }}
+
+                    .profile-metrics {{
+                        margin: 15px 0;
+                    }}
+
+                    .metric {{
+                        display: flex;
+                        justify-content: space-between;
+                        margin: 8px 0;
+                        padding: 8px;
+                        background: #f8f9fa;
+                        border-radius: 4px;
+                    }}
+
+                    .metric .label {{
+                        color: #666;
+                        font-weight: 500;
+                    }}
+
+                    .metric .value {{
+                        color: #2c3e50;
+                        font-weight: bold;
+                    }}
+
+                    .profile-insights {{
+                        margin-top: 15px;
+                        font-size: 0.9em;
+                    }}
+
+                    .strengths,
+                    .use-cases {{
+                        margin: 8px 0;
+                        padding: 8px;
+                        background: #e8f4fd;
+                        border-radius: 4px;
+                    }}
+                </style>
+
+                <div class="analytics-header">
+                    <h2>🚀 World-Class Regex Engine Analytics</h2>
+                    <p>Advanced Performance Analysis & Interactive Exploration</p>
+                </div>
+
+                <div class="analytics-content">
+                    {insights_html}
+                    {profiles_html}
+                    {dashboard_html}
+                </div>
+            </div>
+            """
+
+            print("✅ World-class analytics dashboard generated successfully!")
+            return complete_dashboard
 
         except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            print(f"❌ Error generating advanced analytics: {e}")
+            print(f"Error details: {error_details}")
+
             return f"""
             <div class="comprehensive-charts-error">
-                <h3>Comprehensive Performance Charts</h3>
-                <p>Could not load comprehensive charts: {e}</p>
+                <h3>🚀 World-Class Analytics Dashboard</h3>
+                <p><strong>Could not load advanced analytics:</strong> {e}</p>
+                <details>
+                    <summary>Error Details</summary>
+                    <pre>{error_details}</pre>
+                </details>
+                <p><em>Ensure all dependencies are installed: <code>pip install plotly scikit-learn scipy numpy pandas</code></em></p>
             </div>"""
 
     def _plotly_config_to_html(self, chart_config: Dict[str, Any], chart_id: str) -> str:
@@ -1291,6 +1689,40 @@ class HTMLFormatter:
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-top: 20px;
+        }
+        .system-note {
+            margin-top: 0;
+            color: #555;
+        }
+        .system-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .system-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .system-card h3 {
+            margin: 0 0 8px 0;
+            color: #2c3e50;
+            font-size: 1.05em;
+        }
+        .system-helper {
+            margin: 0 0 12px 0;
+            color: #666;
+            font-size: 0.92em;
+        }
+        .system-table th {
+            width: 170px;
+            background: #f3f5f7;
+            white-space: nowrap;
+        }
+        .system-table td {
+            word-break: break-word;
         }
         .summary-card {
             text-align: center;
@@ -1835,7 +2267,9 @@ class HTMLFormatter:
                         'generated_at': data.get('generated_at'),
                         'database_path': data.get('database_path'),
                         'enhanced_reporting': True,
-                        'data_source': 'database'
+                        'data_source': 'database',
+                        'system_profile_id': metadata.system_profile_id if metadata else None,
+                        'system_profile': metadata.system_profile if metadata else None
                     }
                 }
             else:
@@ -1848,7 +2282,9 @@ class HTMLFormatter:
                     'generated_at': data.get('generated_at'),
                     'database_path': data.get('database_path'),
                     'enhanced_reporting': True,
-                    'data_source': 'traditional'
+                    'data_source': 'traditional',
+                    'system_profile_id': metadata.system_profile_id if metadata else None,
+                    'system_profile': metadata.system_profile if metadata else None
                 })
         else:
             # Create minimal data structure from metadata only
@@ -1860,7 +2296,9 @@ class HTMLFormatter:
                     'generated_at': data.get('generated_at'),
                     'database_path': data.get('database_path'),
                     'enhanced_reporting': True,
-                    'data_source': 'metadata_only'
+                    'data_source': 'metadata_only',
+                    'system_profile_id': metadata.system_profile_id if metadata else None,
+                    'system_profile': metadata.system_profile if metadata else None
                 }
             }
 
@@ -1886,7 +2324,9 @@ class MarkdownFormatter:
 
         summary = data.get('summary', {})
         raw_results = data.get('raw_results', [])
-        analysis = data.get('analysis', {})
+        system_context = _extract_system_architecture_context(data)
+        benchmark_block = self._render_markdown_environment_block(system_context.get('benchmark', {}))
+        report_block = self._render_markdown_environment_block(system_context.get('report', {}))
 
         markdown = f"""# 🚀 Regex Benchmark Report
 
@@ -1901,6 +2341,14 @@ class MarkdownFormatter:
 - **Engines:** {', '.join(summary.get('engines_tested', []))}
 - **Total Runs:** {summary.get('total_combinations', 0)}
 - **Success Rate:** {(summary.get('successful_runs', 0) / max(summary.get('total_combinations', 1), 1) * 100):.1f}%
+
+## 🖥️ System / Architecture
+
+### Benchmark Runtime Environment
+{benchmark_block}
+
+### Report Generation Environment
+{report_block}
 
 ## 🔧 Results
 
@@ -1962,3 +2410,112 @@ class MarkdownFormatter:
             f.write(markdown)
 
         return report_file
+
+    def _render_markdown_environment_block(self, environment: Dict[str, Any]) -> str:
+        """Render one environment subsection for markdown reports."""
+        source_labels = {
+            'database_system_profile': 'Database system profile',
+            'analysis_benchmark_metadata': 'Run metadata snapshot',
+            'runtime_fallback': 'Fallback (report runtime)',
+            'report_runtime': 'Report runtime'
+        }
+
+        source = source_labels.get(environment.get('source'), environment.get('source') or 'Unknown')
+        lines = [
+            f"- **Source:** {self._safe_markdown_value(source)}",
+            f"- **Profile ID:** {self._safe_markdown_value(environment.get('profile_id'))}",
+            f"- **Hostname:** {self._safe_markdown_value(environment.get('hostname'))}",
+            f"- **CPU Model:** {self._safe_markdown_value(environment.get('cpu_model'))}",
+            f"- **CPU Architecture:** {self._safe_markdown_value(environment.get('cpu_architecture'))}",
+            f"- **CPU Cores:** {self._safe_markdown_value(self._format_cpu_cores(environment))}",
+            f"- **Memory:** {self._safe_markdown_value(self._format_memory_gb(environment.get('memory_total_gb')))}",
+            f"- **Operating System:** {self._safe_markdown_value(self._format_os(environment))}",
+            f"- **Kernel:** {self._safe_markdown_value(environment.get('kernel_version') or environment.get('os_release'))}",
+            f"- **Python:** {self._safe_markdown_value(self._format_python(environment))}",
+            f"- **Virtualization:** {self._safe_markdown_value(self._format_virtualization(environment))}",
+            f"- **Profiled At:** {self._safe_markdown_value(environment.get('profiled_at'))}",
+        ]
+
+        notes = environment.get('notes')
+        if notes:
+            lines.append(f"- **Notes:** {self._safe_markdown_value(notes)}")
+
+        return "\n".join(lines)
+
+    def _safe_markdown_value(self, value: Any) -> str:
+        """Convert optional values into markdown-safe text."""
+        if value is None:
+            return "N/A"
+        if isinstance(value, bool):
+            return "Yes" if value else "No"
+        text = str(value).strip()
+        return text if text else "N/A"
+
+    def _format_cpu_cores(self, environment: Dict[str, Any]) -> Optional[str]:
+        """Format logical/physical core count for display."""
+        physical = environment.get('cpu_physical_cores')
+        logical = environment.get('cpu_logical_cores')
+        if physical and logical:
+            return f"{logical} logical / {physical} physical"
+        if logical:
+            return f"{logical} logical"
+        if physical:
+            return f"{physical} physical"
+        return None
+
+    def _format_memory_gb(self, memory_gb: Any) -> Optional[str]:
+        """Format memory values in GB."""
+        if memory_gb is None:
+            return None
+        try:
+            return f"{float(memory_gb):.2f} GB"
+        except (TypeError, ValueError):
+            return str(memory_gb)
+
+    def _format_os(self, environment: Dict[str, Any]) -> Optional[str]:
+        """Format OS value with version details."""
+        os_name = environment.get('os_name')
+        os_version = environment.get('os_version')
+        os_release = environment.get('os_release')
+        base = " ".join(part for part in [os_name, os_version] if part)
+        if base and os_release and str(os_release) != str(os_version):
+            return f"{base} ({os_release})"
+        return base or os_release
+
+    def _format_python(self, environment: Dict[str, Any]) -> Optional[str]:
+        """Format Python runtime details."""
+        version = environment.get('python_version')
+        implementation = environment.get('python_implementation')
+        compiler = environment.get('python_compiler')
+        parts = [part for part in [version, implementation] if part]
+        python_info = " / ".join(parts) if parts else None
+        if python_info and compiler:
+            return f"{python_info} ({compiler})"
+        return python_info or compiler
+
+    def _format_virtualization(self, environment: Dict[str, Any]) -> Optional[str]:
+        """Format virtualization/container details."""
+        is_virtualized = environment.get('is_virtualized')
+        virtualization_type = environment.get('virtualization_type')
+        container_runtime = environment.get('container_runtime')
+        container_image = environment.get('container_image')
+
+        details = []
+        if virtualization_type:
+            details.append(str(virtualization_type))
+        if container_runtime:
+            details.append(f"container={container_runtime}")
+        if container_image:
+            details.append(f"image={container_image}")
+
+        if is_virtualized is True:
+            if details:
+                return "Yes (" + ", ".join(details) + ")"
+            return "Yes"
+        if is_virtualized is False:
+            if details:
+                return "No (" + ", ".join(details) + ")"
+            return "No"
+        if details:
+            return ", ".join(details)
+        return None

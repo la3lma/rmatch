@@ -342,13 +342,39 @@ class JobQueue:
         """Get the run_id of the latest incomplete run."""
         cursor = self.conn.execute("""
             SELECT run_id FROM benchmark_runs
-            WHERE status IN ('PREPARING', 'RUNNING')
+            WHERE status IN ('PREPARING', 'RUNNING', 'FAILED', 'INCOMPLETE')
             ORDER BY created_at DESC
             LIMIT 1
         """)
 
         row = cursor.fetchone()
         return row['run_id'] if row else None
+
+    def reset_stale_running_jobs(self, run_id: str) -> int:
+        """
+        Reset jobs left in RUNNING state back to QUEUED for safe resume.
+
+        This is used after process/VM interruptions where worker state is lost.
+        """
+        recovered_note = f"Recovered on resume at {datetime.now().isoformat()}"
+        cursor = self.conn.execute("""
+            UPDATE benchmark_jobs
+            SET status = 'QUEUED',
+                started_at = NULL,
+                error_message = CASE
+                    WHEN error_message IS NULL OR error_message = ''
+                        THEN ?
+                    ELSE error_message || ' | ' || ?
+                END
+            WHERE run_id = ?
+              AND status = 'RUNNING'
+        """, (
+            recovered_note,
+            recovered_note,
+            run_id,
+        ))
+        self.conn.commit()
+        return cursor.rowcount
 
     def get_latest_run_id(self) -> Optional[str]:
         """Get the run_id of the most recent run."""

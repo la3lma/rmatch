@@ -24,6 +24,24 @@ regex-bench run-phase test_matrix/phase1.json
 regex-bench report results/phase1_20241219/ --output reports/
 ```
 
+## Canonical Plan
+
+- See `docs/PHASED_BENCHMARKING_PLAN.md` for the active phased plan (A-F).
+- See `docs/FAIRNESS_AND_REPRODUCIBILITY.md` for the fairness/reproducibility protocol and publication checklist.
+- Local Docker smoke test (Phase D):
+  - `./scripts/run_phase4_smoke_local_docker.sh`
+- GCP run control (Phase E operations):
+  - `make gcp-list`, `make gcp-status`, `make gcp-watch`
+  - `make gcp-live` (continuous local monitor view)
+  - `make gcp-list-batches`, `make gcp-status-batch`, `make gcp-watch-batch`
+  - `make gcp-live-batch` (continuous local monitor view for batches)
+  - `make gcp-publish-image`, `make gcp-publish-data`, `make gcp-start`, `make gcp-resume`
+  - `make gcp-start-batch GCP_CONFIGS=test_matrix/a.json,test_matrix/b.json`
+  - `make gcp-cancel-batch`, `make gcp-stop-batch`
+  - `make gcp-cohort-report GCP_BATCH_ID=<batch_id>`
+  - All `gcp-*` make targets run via the project venv (`.venv`) to avoid global Python usage.
+  - details: `docs/GCP_RUN_CONTROL.md`
+
 ## Architecture
 
 ```

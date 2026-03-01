@@ -38,6 +38,7 @@ class BenchmarkRunMetadata:
 
     # System information
     system_profile_id: Optional[str]
+    system_profile: Optional[Dict[str, Any]]
 
     # Configuration details
     test_matrix: Optional[Dict[str, Any]]
@@ -182,6 +183,42 @@ class EnhancedReportGenerator:
                 except Exception:
                     run_duration = None
 
+            # Load associated system profile for architecture reporting
+            system_profile = None
+            system_profile_id = run_row['system_profile_id'] if 'system_profile_id' in run_row.keys() else None
+            if system_profile_id:
+                system_profile_row = conn.execute("""
+                    SELECT
+                        profile_id,
+                        hostname,
+                        cpu_model,
+                        cpu_architecture,
+                        cpu_physical_cores,
+                        cpu_logical_cores,
+                        memory_total_gb,
+                        os_name,
+                        os_version,
+                        os_release,
+                        kernel_version,
+                        os_architecture,
+                        is_virtualized,
+                        virtualization_type,
+                        container_runtime,
+                        container_image,
+                        python_version,
+                        python_implementation,
+                        python_compiler,
+                        profiled_at
+                    FROM system_profiles
+                    WHERE profile_id = ?
+                """, (system_profile_id,)).fetchone()
+
+                if system_profile_row:
+                    system_profile = dict(system_profile_row)
+                    # Normalize integer-backed booleans from SQLite.
+                    if system_profile.get('is_virtualized') is not None:
+                        system_profile['is_virtualized'] = bool(system_profile['is_virtualized'])
+
             return BenchmarkRunMetadata(
                 run_id=run_row['run_id'],
                 config_path=run_row['config_path'],
@@ -199,7 +236,8 @@ class EnhancedReportGenerator:
                 first_job_started=timing_info['first_job_started'] if timing_info else None,
                 last_job_completed=timing_info['last_job_completed'] if timing_info else None,
                 actual_execution_duration=actual_duration,
-                system_profile_id=run_row['system_profile_id'] if 'system_profile_id' in run_row.keys() else None,
+                system_profile_id=system_profile_id,
+                system_profile=system_profile,
                 test_matrix=test_matrix
             )
 

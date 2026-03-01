@@ -9,7 +9,9 @@ SHELL := /bin/bash
 VENV_DIR := .venv
 PYTHON := $(VENV_DIR)/bin/python
 PIP := $(VENV_DIR)/bin/pip
-REGEX_BENCH := arch -x86_64 $(VENV_DIR)/bin/regex-bench
+REGEX_BENCH := $(VENV_DIR)/bin/regex-bench
+GCP_CONTROL := scripts/gcp_benchmark_control.py
+GCP_PYTHON := $(PYTHON)
 
 # Engine directories
 ENGINES_DIR := engines
@@ -24,6 +26,27 @@ TIMESTAMP := $(shell date +%Y%m%d_%H%M%S)
 UNAME_S := $(shell uname -s)
 UNAME_M := $(shell uname -m)
 PLATFORM := $(UNAME_S)_$(UNAME_M)
+
+# GCP benchmark control defaults (override with make VAR=value)
+GCP_ZONE ?= europe-north2-a
+GCP_BUCKET ?= run-cl-rmatch-bench
+GCP_CONFIG ?= test_matrix/canonical_baseline_v1.json
+GCP_IMAGE_URI ?=
+GCP_DATA_URI ?=
+GCP_RUN_ID ?=
+GCP_BATCH_ID ?=
+GCP_MACHINE_TYPE ?= e2-standard-8
+GCP_MACHINE_TIER ?=
+GCP_CONFIGS ?= $(GCP_CONFIG)
+GCP_REQUIRE_ENGINES ?= rmatch,re2j,java-native-naive
+GCP_ARGS ?=
+GCP_CAMPAIGN_ID ?=
+GCP_TIMEOUT_FACTOR ?= 4
+GCP_POLL_SECONDS ?= 60
+GCP_ITERATIONS ?= 2
+GCP_WARMUP ?= 1
+GCP_MAX_LANES ?= 3
+GCP_DETACH ?= 1
 
 # Colors for output
 RED := \033[0;31m
@@ -49,7 +72,31 @@ setup: venv install-deps build-engines ## Complete setup: create venv, install d
 	@echo "  make report         # Generate benchmark report"
 
 .PHONY: venv
-venv: $(VENV_DIR)/pyvenv.cfg ## Create Python virtual environment
+venv: venv-sanity $(VENV_DIR)/pyvenv.cfg ## Create Python virtual environment
+
+.PHONY: venv-sanity
+venv-sanity: ## Validate venv architecture and remove incompatible environments
+	@if [ -f "$(VENV_DIR)/pyvenv.cfg" ]; then \
+		host_arch="$$(uname -m)"; \
+		venv_arch="$$( $(PYTHON) -c 'import platform; print(platform.machine())' 2>/dev/null || echo unknown )"; \
+		if [ "$$venv_arch" != "$$host_arch" ]; then \
+			echo "$(YELLOW)⚠ Rebuilding venv: python arch ($$venv_arch) != host arch ($$host_arch)$(NC)"; \
+			rm -rf "$(VENV_DIR)"; \
+			exit 0; \
+		fi; \
+		numpy_so="$$(find "$(VENV_DIR)"/lib -path '*/site-packages/numpy/_core/_multiarray_umath*.so' -print -quit 2>/dev/null || true)"; \
+		if [ -n "$$numpy_so" ]; then \
+			if command -v lipo >/dev/null 2>&1; then \
+				if ! lipo -archs "$$numpy_so" 2>/dev/null | grep -qw "$$host_arch"; then \
+					echo "$(YELLOW)⚠ Rebuilding venv: NumPy extension arch mismatch for $$host_arch$(NC)"; \
+					rm -rf "$(VENV_DIR)"; \
+				fi; \
+			elif ! file "$$numpy_so" | grep -q "$$host_arch"; then \
+				echo "$(YELLOW)⚠ Rebuilding venv: NumPy extension arch mismatch for $$host_arch$(NC)"; \
+				rm -rf "$(VENV_DIR)"; \
+			fi; \
+		fi; \
+	fi
 
 $(VENV_DIR)/pyvenv.cfg:
 	@echo "$(BLUE)Creating Python virtual environment...$(NC)"
@@ -60,7 +107,6 @@ $(VENV_DIR)/pyvenv.cfg:
 install-deps: venv ## Install Python dependencies
 	@echo "$(BLUE)Installing Python dependencies...$(NC)"
 	$(PIP) install -e .
-	@test -f requirements-dev.txt && $(PIP) install -r requirements-dev.txt || true
 
 .PHONY: clean-venv
 clean-venv: ## Remove virtual environment
@@ -316,55 +362,452 @@ bench-single: venv build-engines ## Run single engine benchmark
 
 .PHONY: process-status
 process-status: venv ## Show benchmark process status and cleanup orphans
-	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
-	if [ -z "$$latest_result" ]; then \
-		echo "$(YELLOW)⚠ No benchmark results found - checking current directory$(NC)"; \
-		$(REGEX_BENCH) process-status; \
+	@latest_db_file=$$(find $(RESULTS_DIR) -maxdepth 2 -type f -name "jobs.db" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2-); \
+	if [ -n "$(OUTPUT)" ]; then \
+		target_dir="$(OUTPUT)"; \
+	elif [ -n "$$latest_db_file" ]; then \
+		target_dir=$$(dirname "$$latest_db_file"); \
 	else \
-		echo "$(BLUE)Checking processes for: $$latest_result$(NC)"; \
-		$(REGEX_BENCH) process-status --output "$$latest_result"; \
+		target_dir=""; \
+	fi; \
+	if [ -n "$$target_dir" ]; then \
+		echo "$(BLUE)Checking processes for: $$target_dir$(NC)"; \
+		$(REGEX_BENCH) process-status --output "$$target_dir"; \
+	else \
+		echo "$(YELLOW)⚠ No jobs.db found under $(RESULTS_DIR).$(NC)"; \
+		echo "$(BLUE)For GCP run progress, use: make gcp-live GCP_RUN_ID=<run_id>$(NC)"; \
+		echo "$(BLUE)Or inspect latest run: make gcp-status$(NC)"; \
 	fi
 
 .PHONY: process-cleanup
 process-cleanup: venv ## Clean up orphaned benchmark processes
-	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
-	if [ -z "$$latest_result" ]; then \
-		echo "$(YELLOW)⚠ No benchmark results found - using current directory$(NC)"; \
-		$(REGEX_BENCH) process-status --cleanup; \
+	@latest_db_file=$$(find $(RESULTS_DIR) -maxdepth 2 -type f -name "jobs.db" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2-); \
+	if [ -n "$(OUTPUT)" ]; then \
+		target_dir="$(OUTPUT)"; \
+	elif [ -n "$$latest_db_file" ]; then \
+		target_dir=$$(dirname "$$latest_db_file"); \
 	else \
-		echo "$(BLUE)Cleaning processes for: $$latest_result$(NC)"; \
-		$(REGEX_BENCH) process-status --output "$$latest_result" --cleanup; \
+		target_dir=""; \
+	fi; \
+	if [ -n "$$target_dir" ]; then \
+		echo "$(BLUE)Cleaning processes for: $$target_dir$(NC)"; \
+		$(REGEX_BENCH) process-status --output "$$target_dir" --cleanup; \
+	else \
+		echo "$(YELLOW)⚠ No jobs.db found under $(RESULTS_DIR); nothing to clean up.$(NC)"; \
 	fi
 
 .PHONY: process-monitor
 process-monitor: venv ## Monitor and update process status
-	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
-	if [ -z "$$latest_result" ]; then \
-		echo "$(YELLOW)⚠ No benchmark results found - using current directory$(NC)"; \
-		$(REGEX_BENCH) process-status --monitor; \
+	@latest_db_file=$$(find $(RESULTS_DIR) -maxdepth 2 -type f -name "jobs.db" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2-); \
+	if [ -n "$(OUTPUT)" ]; then \
+		target_dir="$(OUTPUT)"; \
+	elif [ -n "$$latest_db_file" ]; then \
+		target_dir=$$(dirname "$$latest_db_file"); \
 	else \
-		echo "$(BLUE)Monitoring processes for: $$latest_result$(NC)"; \
-		$(REGEX_BENCH) process-status --output "$$latest_result" --monitor; \
+		target_dir=""; \
+	fi; \
+	if [ -n "$$target_dir" ]; then \
+		echo "$(BLUE)Monitoring processes for: $$target_dir$(NC)"; \
+		$(REGEX_BENCH) process-status --output "$$target_dir" --monitor; \
+	else \
+		echo "$(YELLOW)⚠ No jobs.db found under $(RESULTS_DIR).$(NC)"; \
+		echo "$(BLUE)For GCP run progress, use: make gcp-live GCP_RUN_ID=<run_id>$(NC)"; \
+		echo "$(BLUE)Or inspect latest run: make gcp-status$(NC)"; \
+	fi
+
+##@ GCP Control
+
+.PHONY: gcp
+gcp: venv ## Run GCP control command in project venv (usage: make gcp CMD="list")
+	@if [ -z "$(CMD)" ]; then \
+		echo "$(RED)✗ Missing CMD. Example: make gcp CMD=\"status --run-id <id>\"$(NC)"; \
+		exit 1; \
+	fi
+	$(GCP_PYTHON) $(GCP_CONTROL) $(CMD)
+
+.PHONY: gcp-list
+gcp-list: venv ## List known GCP benchmark runs
+	$(GCP_PYTHON) $(GCP_CONTROL) list
+
+.PHONY: gcp-list-batches
+gcp-list-batches: venv ## List known GCP benchmark batches
+	$(GCP_PYTHON) $(GCP_CONTROL) list-batches
+
+.PHONY: gcp-status
+gcp-status: venv ## Show run status (optional: GCP_RUN_ID=<id>)
+	@cmd="status"; \
+	if [ -n "$(GCP_RUN_ID)" ]; then \
+		cmd="$$cmd --run-id $(GCP_RUN_ID)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-status-batch
+gcp-status-batch: venv ## Show batch status (optional: GCP_BATCH_ID=<id>)
+	@cmd="status-batch"; \
+	if [ -n "$(GCP_BATCH_ID)" ]; then \
+		cmd="$$cmd --batch-id $(GCP_BATCH_ID)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-watch
+gcp-watch: venv ## Watch run status (optional: GCP_RUN_ID=<id>, INTERVAL=<sec>)
+	@cmd="watch"; \
+	if [ -n "$(GCP_RUN_ID)" ]; then \
+		cmd="$$cmd --run-id $(GCP_RUN_ID)"; \
+	fi; \
+	if [ -n "$(INTERVAL)" ]; then \
+		cmd="$$cmd --interval $(INTERVAL)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-watch-batch
+gcp-watch-batch: venv ## Watch batch status (optional: GCP_BATCH_ID=<id>, INTERVAL=<sec>)
+	@cmd="watch-batch"; \
+	if [ -n "$(GCP_BATCH_ID)" ]; then \
+		cmd="$$cmd --batch-id $(GCP_BATCH_ID)"; \
+	fi; \
+	if [ -n "$(INTERVAL)" ]; then \
+		cmd="$$cmd --interval $(INTERVAL)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-live
+gcp-live: venv ## Live TUI-style monitor for run status (optional: GCP_RUN_ID=<id>, INTERVAL=<sec>)
+	@interval="$${INTERVAL:-20}"; \
+	INTERVAL_SECONDS="$$interval" bash scripts/gcp_live_monitor.sh run "$(GCP_RUN_ID)"
+
+.PHONY: gcp-live-batch
+gcp-live-batch: venv ## Live TUI-style monitor for batch status (optional: GCP_BATCH_ID=<id>, INTERVAL=<sec>)
+	@interval="$${INTERVAL:-20}"; \
+	INTERVAL_SECONDS="$$interval" bash scripts/gcp_live_monitor.sh batch "$(GCP_BATCH_ID)"
+
+.PHONY: gcp-publish-image
+gcp-publish-image: venv ## Publish Docker image to Artifact Registry
+	@cmd="publish-image"; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-publish-data
+gcp-publish-data: venv ## Publish dataset bundle to GCS (default uses GCP_CONFIG)
+	@cmd="publish-data --zone $(GCP_ZONE) --bucket $(GCP_BUCKET) --config $(GCP_CONFIG)"; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-start
+gcp-start: venv ## Start GCP run (defaults: GCP_CONFIG, GCP_ZONE, GCP_BUCKET)
+	@cmd="start --zone $(GCP_ZONE) --bucket $(GCP_BUCKET) --config $(GCP_CONFIG) --machine-type $(GCP_MACHINE_TYPE)"; \
+	if [ -n "$(GCP_MACHINE_TIER)" ]; then \
+		cmd="$$cmd --machine-tier $(GCP_MACHINE_TIER)"; \
+	fi; \
+	if [ -n "$(GCP_IMAGE_URI)" ]; then \
+		cmd="$$cmd --image-uri $(GCP_IMAGE_URI)"; \
+	fi; \
+	if [ -n "$(GCP_DATA_URI)" ]; then \
+		cmd="$$cmd --data-uri $(GCP_DATA_URI)"; \
+	fi; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-resume
+gcp-resume: venv ## Resume stopped/terminated GCP run VM (optional: GCP_RUN_ID=<id>)
+	@cmd="resume"; \
+	if [ -n "$(GCP_RUN_ID)" ]; then \
+		cmd="$$cmd --run-id $(GCP_RUN_ID)"; \
+	fi; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-start-batch
+gcp-start-batch: venv ## Start batch runs (one VM per config) using GCP_CONFIGS=cfg1,cfg2,...
+	@cmd="start-batch --zone $(GCP_ZONE) --bucket $(GCP_BUCKET) --configs $(GCP_CONFIGS) --machine-type $(GCP_MACHINE_TYPE)"; \
+	if [ -n "$(GCP_MACHINE_TIER)" ]; then \
+		cmd="$$cmd --machine-tier $(GCP_MACHINE_TIER)"; \
+	fi; \
+	if [ -n "$(GCP_BATCH_ID)" ]; then \
+		cmd="$$cmd --batch-id $(GCP_BATCH_ID)"; \
+	fi; \
+	if [ -n "$(GCP_IMAGE_URI)" ]; then \
+		cmd="$$cmd --image-uri $(GCP_IMAGE_URI)"; \
+	fi; \
+	if [ -n "$(GCP_DATA_URI)" ]; then \
+		cmd="$$cmd --data-uri $(GCP_DATA_URI)"; \
+	fi; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-start-smoke
+gcp-start-smoke: venv ## Start a tiny smoke run on GCP
+	@cmd="start --zone $(GCP_ZONE) --bucket $(GCP_BUCKET) --config test_matrix/smoke_phase4_tiny.json --machine-type e2-standard-4"; \
+	if [ -n "$(GCP_IMAGE_URI)" ]; then \
+		cmd="$$cmd --image-uri $(GCP_IMAGE_URI)"; \
+	fi; \
+	if [ -n "$(GCP_DATA_URI)" ]; then \
+		cmd="$$cmd --data-uri $(GCP_DATA_URI)"; \
+	fi; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-cancel
+gcp-cancel: venv ## Request graceful cancel (optional: GCP_RUN_ID=<id>, GCP_ARGS="--force-stop")
+	@cmd="cancel"; \
+	if [ -n "$(GCP_RUN_ID)" ]; then \
+		cmd="$$cmd --run-id $(GCP_RUN_ID)"; \
+	fi; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-cancel-batch
+gcp-cancel-batch: venv ## Request graceful cancel for a batch (optional: GCP_BATCH_ID=<id>)
+	@cmd="cancel-batch"; \
+	if [ -n "$(GCP_BATCH_ID)" ]; then \
+		cmd="$$cmd --batch-id $(GCP_BATCH_ID)"; \
+	fi; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-stop
+gcp-stop: venv ## Immediately stop VM (optional: GCP_RUN_ID=<id>)
+	@cmd="stop"; \
+	if [ -n "$(GCP_RUN_ID)" ]; then \
+		cmd="$$cmd --run-id $(GCP_RUN_ID)"; \
+	fi; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-stop-batch
+gcp-stop-batch: venv ## Immediately stop VMs in a batch (optional: GCP_BATCH_ID=<id>)
+	@cmd="stop-batch"; \
+	if [ -n "$(GCP_BATCH_ID)" ]; then \
+		cmd="$$cmd --batch-id $(GCP_BATCH_ID)"; \
+	fi; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-cohort-report
+gcp-cohort-report: venv ## Show comparable cohorts and pairwise coverage (optional: GCP_BATCH_ID=<id>)
+	@cmd="cohort-report --require-engines $(GCP_REQUIRE_ENGINES)"; \
+	if [ -n "$(GCP_BATCH_ID)" ]; then \
+		cmd="$$cmd --batch-id $(GCP_BATCH_ID)"; \
+	fi; \
+	if [ -n "$(GCP_MACHINE_TIER)" ]; then \
+		cmd="$$cmd --tier $(GCP_MACHINE_TIER)"; \
+	fi; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	$(GCP_PYTHON) $(GCP_CONTROL) $$cmd
+
+.PHONY: gcp-10k-campaign-start
+gcp-10k-campaign-start: venv ## Start dynamic 10K campaign (rmatch+re2j baseline, java-naive with 4x cutoffs)
+	@campaign_id="$(GCP_CAMPAIGN_ID)"; \
+	if [ -z "$$campaign_id" ]; then \
+		campaign_id="10k_dynamic_$(TIMESTAMP)"; \
+	fi; \
+	log_path="gcp_runs/campaign_$${campaign_id}.log"; \
+	pid_path="gcp_runs/campaign_$${campaign_id}.pid"; \
+	cmd="$(PWD)/$(GCP_PYTHON) $(PWD)/scripts/gcp_10k_dynamic_campaign.py --campaign-id $$campaign_id --zone $(GCP_ZONE) --bucket $(GCP_BUCKET) --machine-type $(GCP_MACHINE_TYPE) --timeout-factor $(GCP_TIMEOUT_FACTOR) --poll-seconds $(GCP_POLL_SECONDS) --iterations $(GCP_ITERATIONS) --warmup $(GCP_WARMUP) --max-lanes $(GCP_MAX_LANES)"; \
+	if [ -n "$(GCP_IMAGE_URI)" ]; then \
+		cmd="$$cmd --image-uri $(GCP_IMAGE_URI)"; \
+	fi; \
+	if [ -n "$(GCP_DATA_URI)" ]; then \
+		cmd="$$cmd --data-uri $(GCP_DATA_URI)"; \
+	fi; \
+	if [ -n "$(GCP_ARGS)" ]; then \
+		cmd="$$cmd $(GCP_ARGS)"; \
+	fi; \
+	echo "$(BLUE)Campaign ID: $$campaign_id$(NC)"; \
+	echo "$(BLUE)Log file: $$log_path$(NC)"; \
+	if [ "$(GCP_DETACH)" = "1" ]; then \
+		nohup bash -lc "cd $(PWD) && $$cmd" > "$$log_path" 2>&1 & \
+		echo $$! > "$$pid_path"; \
+		echo "$(GREEN)✓ Started detached campaign (pid $$(cat $$pid_path))$(NC)"; \
+		echo "$(CYAN)Use: make gcp-10k-campaign-status GCP_CAMPAIGN_ID=$$campaign_id$(NC)"; \
+		echo "$(CYAN)Use: make gcp-10k-campaign-log GCP_CAMPAIGN_ID=$$campaign_id$(NC)"; \
+	else \
+		bash -lc "cd $(PWD) && $$cmd" | tee "$$log_path"; \
+	fi
+
+.PHONY: gcp-10k-campaign-status
+gcp-10k-campaign-status: venv ## Show dynamic 10K campaign status (optional: GCP_CAMPAIGN_ID=<id>)
+	@state_file=""; \
+	if [ -n "$(GCP_CAMPAIGN_ID)" ]; then \
+		state_file="gcp_runs/campaign_$(GCP_CAMPAIGN_ID).json"; \
+	else \
+		state_file="$$(ls -1t gcp_runs/campaign_*.json 2>/dev/null | head -1)"; \
+	fi; \
+	if [ -z "$$state_file" ] || [ ! -f "$$state_file" ]; then \
+		echo "$(RED)✗ No campaign state file found$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(BLUE)Campaign state: $$state_file$(NC)"; \
+	$(GCP_PYTHON) -c "import json,sys; d=json.load(open(sys.argv[1])); print('Campaign:',d.get('campaign_id','-')); print('Updated :',d.get('updated_at','-')); print('Machine :',d.get('machine_type','-')); print('Batch   :',d.get('baseline_batch_id','-')); print('Data URI:',d.get('data_uri','-')); print(''); s=d.get('status_by_run',{}); rows=sorted(s.values(), key=lambda r:(r.get('size',''), r.get('role',''), r.get('run_id',''))); print('Runs:'); [print(f\"  {r.get('run_id','-')}  {r.get('size','-'):<5} {r.get('role','-'):<26} {r.get('status','-'):<12} {r.get('completed_jobs',0):>3}/{r.get('total_jobs',0):<3} eta={r.get('remaining_seconds',-1)}\") for r in rows] if rows else print('  (no run status yet)'); t=d.get('java_timeouts_seconds',{}); print(''); print('Java dynamic timeouts (s):'); [print(f'  {k}: {t[k]}') for k in sorted(t.keys())] if t else print('  (none yet)'); sk=d.get('java_skipped',{}); print('Java skipped:'); [print(f'  {k}: {sk[k]}') for k in sorted(sk.keys())] if sk else print('  (none)')" "$$state_file"
+
+.PHONY: gcp-10k-campaign-log
+gcp-10k-campaign-log: ## Tail dynamic 10K campaign log (optional: GCP_CAMPAIGN_ID=<id>, LINES=80, FOLLOW=1)
+	@log_file=""; \
+	if [ -n "$(GCP_CAMPAIGN_ID)" ]; then \
+		log_file="gcp_runs/campaign_$(GCP_CAMPAIGN_ID).log"; \
+	else \
+		log_file="$$(ls -1t gcp_runs/campaign_*.log 2>/dev/null | head -1)"; \
+	fi; \
+	if [ -z "$$log_file" ] || [ ! -f "$$log_file" ]; then \
+		echo "$(RED)✗ No campaign log found$(NC)"; \
+		exit 1; \
+	fi; \
+	lines="$${LINES:-80}"; \
+	if [ "$${FOLLOW:-0}" = "1" ]; then \
+		echo "$(BLUE)Following log: $$log_file$(NC)"; \
+		tail -n "$$lines" -f "$$log_file"; \
+	else \
+		echo "$(BLUE)Log: $$log_file$(NC)"; \
+		tail -n "$$lines" "$$log_file"; \
 	fi
 
 ##@ Analysis and Reporting
 
 .PHONY: report
-report: venv ## Generate benchmark report from latest results
+report: install-deps ## Generate benchmark report from latest results
 	@echo "$(BLUE)Generating benchmark report...$(NC)"
-	@latest_result=$$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2- || find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" | sort | tail -1); \
+	@latest_result=""; \
+	for candidate in $$(find $(RESULTS_DIR) -maxdepth 1 -type d -name "*_*" -exec stat -f "%m %N" {} \; 2>/dev/null | sort -nr | cut -d' ' -f2-); do \
+		if [ -f "$$candidate/raw_results/benchmark_results.json" ] || [ -f "$$candidate/summary.json" ] || [ -f "$$candidate/jobs.db" ]; then \
+			latest_result="$$candidate"; \
+			break; \
+		fi; \
+	done; \
 	if [ -z "$$latest_result" ]; then \
-		echo "$(RED)✗ No benchmark results found in $(RESULTS_DIR)$(NC)"; \
+		echo "$(RED)✗ No benchmark result directories with benchmark artifacts found in $(RESULTS_DIR)$(NC)"; \
 		exit 1; \
 	fi; \
 	echo "$(BLUE)Analyzing results: $$latest_result$(NC)"; \
-	mkdir -p $(REPORTS_DIR); \
+	report_dir="$(REPORTS_DIR)/report_$(TIMESTAMP)"; \
+	mkdir -p "$$report_dir"; \
 	$(REGEX_BENCH) generate-report \
 		--input "$$latest_result" \
-		--output $(REPORTS_DIR)/report_$(TIMESTAMP) \
+		--output "$$report_dir" \
 		--format html \
-		--include-charts
+		--include-charts; \
+	if command -v gcloud >/dev/null 2>&1; then \
+		echo "$(BLUE)Capturing GCP run status snapshot...$(NC)"; \
+		$(GCP_PYTHON) scripts/gcp_run_status_report.py \
+			--bucket "$(GCP_BUCKET)" \
+			--output "$$report_dir/gcp_run_status_snapshot.md" || \
+			echo "$(YELLOW)⚠ Could not generate GCP run status snapshot$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠ gcloud not found; skipping GCP run status snapshot$(NC)"; \
+	fi
 	@echo "$(GREEN)✓ Report generated: $(REPORTS_DIR)/report_$(TIMESTAMP)$(NC)"
+
+.PHONY: report-workload-compare
+report-workload-compare: venv ## Generate workload-vs-engine comparison report from latest results
+	@echo "$(BLUE)Generating workload engine comparison report...$(NC)"
+	@input_dir="$(RUN)"; \
+	if [ -z "$$input_dir" ]; then \
+		for candidate in $$(find $(RESULTS_DIR) -maxdepth 1 -mindepth 1 -type d 2>/dev/null | while read -r d; do \
+			if [ -f "$$d/run_manifest.json" ]; then \
+				printf "0 %s\n" "$$d"; \
+			else \
+				printf "1 %s\n" "$$d"; \
+			fi; \
+		done | sort -n -k1,1 -k2,2r | cut -d' ' -f2-); do \
+			if [ -f "$$candidate/raw_results/benchmark_results.json" ] || [ -f "$$candidate/raw_results/benchmark_results.partial.json" ] || [ -f "$$candidate/jobs.db" ]; then \
+				input_dir="$$candidate"; \
+				break; \
+			fi; \
+		done; \
+	fi; \
+	if [ -z "$$input_dir" ]; then \
+		echo "$(RED)✗ No benchmark result directories with raw final/partial results or jobs.db found in $(RESULTS_DIR)$(NC)"; \
+		exit 1; \
+	fi; \
+	if [ ! -d "$$input_dir" ]; then \
+		echo "$(RED)✗ RUN directory not found: $$input_dir$(NC)"; \
+		exit 1; \
+	fi; \
+	report_dir="$(OUT)"; \
+	if [ -z "$$report_dir" ]; then \
+		report_dir="$(REPORTS_DIR)/workload_comparison_$(TIMESTAMP)"; \
+	fi; \
+	echo "$(BLUE)Analyzing results: $$input_dir$(NC)"; \
+	mkdir -p "$$report_dir"; \
+	$(GCP_PYTHON) scripts/generate_workload_engine_comparison.py \
+		--input "$$input_dir" \
+		--output "$$report_dir"; \
+	echo "$(GREEN)✓ Workload comparison report generated: $$report_dir$(NC)"
+
+.PHONY: report-workload-web
+report-workload-web: report-workload-compare ## Generate workload comparison webpage (HTML + CSV + Markdown)
+
+.PHONY: report-workload-web-all
+report-workload-web-all: venv ## Generate all-runs workload comparison webpage (aggregates entire results/)
+	@echo "$(BLUE)Generating all-runs workload engine comparison report...$(NC)"
+	@results_root="$(RESULTS_ROOT)"; \
+	if [ -z "$$results_root" ]; then \
+		results_root="$(RESULTS_DIR)"; \
+	fi; \
+	report_dir="$(OUT)"; \
+	if [ -z "$$report_dir" ]; then \
+		report_dir="$(REPORTS_DIR)/workload_comparison_all_$(TIMESTAMP)"; \
+	fi; \
+	mkdir -p "$$report_dir"; \
+	$(GCP_PYTHON) scripts/generate_workload_engine_comparison_all.py \
+		--results-dir "$$results_root" \
+		--output "$$report_dir"; \
+	echo "$(GREEN)✓ All-runs workload report generated: $$report_dir$(NC)"
+
+.PHONY: report-model-paper
+report-model-paper: venv ## Generate a compact LaTeX paper with scaling model + 2D dominance map
+	@echo "$(BLUE)Generating modeling paper (LaTeX)...$(NC)"
+	@report_dir="$(OUT)"; \
+	if [ -z "$$report_dir" ]; then \
+		report_dir="$(REPORTS_DIR)/workload_all_live"; \
+	fi; \
+	if [ ! -f "$$report_dir/all_runs_workload_engine.csv" ]; then \
+		echo "$(YELLOW)No all-runs CSV in $$report_dir; generating workload report first...$(NC)"; \
+		$(MAKE) --no-print-directory report-workload-web-all OUT="$$report_dir"; \
+	fi; \
+	output_tex="$${report_dir}/modeling_dominance_note.tex"; \
+	$(GCP_PYTHON) scripts/generate_modeling_paper.py \
+		--input-csv "$$report_dir/all_runs_workload_engine.csv" \
+		--output-tex "$$output_tex" \
+		$${COHORT:+--cohort "$$COHORT"} \
+		$${ENGINES:+--engines "$$ENGINES"}; \
+	if command -v pdflatex >/dev/null 2>&1; then \
+		echo "$(BLUE)Compiling PDF with pdflatex...$(NC)"; \
+		if ( cd "$$report_dir" && pdflatex -interaction=nonstopmode -halt-on-error "$$(basename "$$output_tex")" >/dev/null && pdflatex -interaction=nonstopmode -halt-on-error "$$(basename "$$output_tex")" >/dev/null ); then \
+			if [ -f "$$report_dir/modeling_dominance_note.pdf" ]; then \
+				echo "$(GREEN)✓ PDF generated: $$report_dir/modeling_dominance_note.pdf$(NC)"; \
+			else \
+				echo "$(YELLOW)⚠ pdflatex completed but PDF file not found. Check $$report_dir/modeling_dominance_note.log$(NC)"; \
+			fi; \
+		else \
+			echo "$(YELLOW)⚠ pdflatex failed. TeX generated: $$output_tex (see $$report_dir/modeling_dominance_note.log)$(NC)"; \
+		fi; \
+	else \
+		echo "$(YELLOW)⚠ pdflatex not found; generated TeX only: $$output_tex$(NC)"; \
+	fi; \
+	echo "$(BLUE)Refreshing web report to expose paper links/status...$(NC)"; \
+	$(MAKE) --no-print-directory report-workload-web-all OUT="$$report_dir"
 
 .PHONY: report-standalone
 report-standalone: ## Generate benchmark report using standalone generator

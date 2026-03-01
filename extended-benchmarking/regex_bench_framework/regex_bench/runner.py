@@ -9,6 +9,7 @@ import json
 import time
 import hashlib
 import tempfile
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
 from pathlib import Path
@@ -308,6 +309,7 @@ class BenchmarkRunner:
             # Collect results as they complete
             completed = 0
             total = len(future_to_combo)
+            self._write_progress_checkpoint(completed, total)
 
             for future in as_completed(future_to_combo):
                 combo = future_to_combo[future]
@@ -319,6 +321,7 @@ class BenchmarkRunner:
                     logger.info(f"[{completed}/{total}] Completed: {combo['engine']} "
                               f"({combo['pattern_count']} patterns, {combo['input_size']}, "
                               f"iter {combo['iteration']})")
+                    self._write_progress_checkpoint(completed, total)
 
                 except Exception as e:
                     logger.error(f"Failed combination {combo}: {e}")
@@ -330,6 +333,7 @@ class BenchmarkRunner:
                         notes=f"Execution failed: {str(e)}"
                     )
                     self.results.append(error_result)
+                    self._write_progress_checkpoint(completed, total)
 
         logger.info(f"Benchmark execution complete: {len(self.results)} results")
 
@@ -447,6 +451,48 @@ class BenchmarkRunner:
                 'timestamp': time.time(),
                 'partial_results': len(self.results)
             }, f, indent=2)
+
+    def _write_progress_checkpoint(self, completed_jobs: int, total_jobs: int) -> None:
+        """Persist partial results so interrupted runs can be recovered."""
+        try:
+            raw_dir = self.output_dir / "raw_results"
+            raw_dir.mkdir(parents=True, exist_ok=True)
+
+            checkpoint = {
+                'run_id': self.run_id,
+                'phase': self.config.get('phase', 'unknown'),
+                'updated_at': datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                'completed_jobs': completed_jobs,
+                'total_jobs': total_jobs,
+                'result_count': len(self.results),
+                'is_partial': completed_jobs < total_jobs if total_jobs > 0 else True,
+                'results': [asdict(result) for result in self.results],
+            }
+
+            checkpoint_file = raw_dir / "benchmark_results.partial.json"
+            tmp_file = raw_dir / "benchmark_results.partial.json.tmp"
+            with open(tmp_file, 'w') as f:
+                json.dump(checkpoint, f, indent=2)
+            tmp_file.replace(checkpoint_file)
+
+            summary_partial = {
+                'run_id': self.run_id,
+                'phase': self.config.get('phase', 'unknown'),
+                'status': 'running',
+                'completed_jobs': completed_jobs,
+                'total_jobs': total_jobs,
+                'successful_runs': len([r for r in self.results if r.status == 'ok']),
+                'failed_runs': len([r for r in self.results if r.status != 'ok']),
+                'duration_seconds': time.time() - self.start_time,
+                'updated_at': checkpoint['updated_at'],
+            }
+            summary_file = self.output_dir / "summary.partial.json"
+            summary_tmp = self.output_dir / "summary.partial.json.tmp"
+            with open(summary_tmp, 'w') as f:
+                json.dump(summary_partial, f, indent=2)
+            summary_tmp.replace(summary_file)
+        except Exception as e:
+            logger.warning(f"Failed to write progress checkpoint: {e}")
 
     def _generate_run_id(self) -> str:
         """Generate a unique run identifier."""

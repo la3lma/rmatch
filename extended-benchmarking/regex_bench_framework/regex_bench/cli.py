@@ -5,7 +5,8 @@ Command-line interface for the regex benchmarking framework.
 import click
 import json
 import sys
-from datetime import datetime
+import platform
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 from rich.console import Console
@@ -78,8 +79,8 @@ def check_engines(output):
         output_path.mkdir(parents=True, exist_ok=True)
         with open(output_path / "engine_status.json", 'w') as f:
             json.dump({
-                "timestamp": "2024-12-19T12:30:00Z",  # TODO: actual timestamp
-                "platform": "darwin_arm64",  # TODO: detect platform
+                "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                "platform": f"{platform.system().lower()}_{platform.machine().lower()}",
                 "engines": results
             }, f, indent=2)
         console.print(f"💾 Status saved to {output_path / 'engine_status.json'}")
@@ -889,17 +890,38 @@ def _generate_live_progress_report(results_dir: str, output_dir: str, format_typ
         run_id = current_run['run_id']
         console.print(f"🏃 [cyan]Run ID: {run_id}[/cyan]")
 
-        # Get job progress breakdown
-        progress = queue.get_run_progress(run_id)
+        # Get job progress breakdown (ALL runs combined) - dynamic calculation
+        status_cursor = queue.conn.execute("""
+            SELECT
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = 'COMPLETED' THEN 1 END) as completed,
+                COUNT(CASE WHEN status = 'RUNNING' THEN 1 END) as running,
+                COUNT(CASE WHEN status = 'QUEUED' THEN 1 END) as queued,
+                COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pending,
+                COUNT(CASE WHEN status IN ('FAILED', 'TIMEOUT') THEN 1 END) as failed
+            FROM benchmark_jobs
+        """)
 
-        # Get detailed job information
+        status_counts = status_cursor.fetchone()
+        progress = {
+            'total': status_counts['total'],
+            'completed': status_counts['completed'],
+            'running': status_counts['running'],
+            'queued': status_counts['queued'] + status_counts['pending'],  # Combine queued and pending
+            'failed': status_counts['failed']
+        }
+
+        # Get detailed job information (ALL jobs regardless of run_id)
         cursor = queue.conn.execute("""
             SELECT job_id, engine_name, pattern_count, input_size, iteration,
                    status, created_at, started_at, completed_at, duration_seconds, match_count
             FROM benchmark_jobs
-            WHERE run_id = ?
-            ORDER BY created_at ASC
-        """, (run_id,))
+            ORDER BY
+                CASE WHEN status = 'COMPLETED' THEN duration_seconds ELSE 0 END DESC,
+                CASE WHEN status = 'RUNNING' THEN 1
+                     WHEN status = 'QUEUED' THEN 2 ELSE 3 END,
+                created_at ASC
+        """)
 
         jobs = cursor.fetchall()
 
