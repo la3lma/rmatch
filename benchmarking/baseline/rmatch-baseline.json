@@ -1,14 +1,14 @@
 # Baseline performance data
-# Generated: 2025-09-07T22:07:00.174379122Z
-# Java: 17.0.16
-# OS: Linux 6.11.0-1018-azure
-# Git: 95a42a8e3b1457837ac55ebf36a92785743d28ce (copilot/fix-147)
-# Architecture: x86_64_Azure_GitHub_Actions_Runner
-# Normalization Score: 1000.0 ops_per_ms (baseline reference)
+# Generated: 2026-03-04T23:04:37.604649201Z
+# Java: 25.0.2
+# OS: Linux 6.14.0-1017-azure
+# Git: e9b099d5949e5f49da3e1133917f4b27c5ed7b2d (main)
+# Architecture: amd64_AMD_EPYC_7763_64_Core_Processor_4
+# Normalization Score: 463857.18
 # Format: matcherTypeName,usedMemoryInMb,durationInMillis
 
-rmatch,294,15123
-rmatch,1168,13664
-rmatch,659,13768
-rmatch,950,13499
-rmatch,1872,13424
+rmatch,321,2501
+rmatch,892,1616
+rmatch,1158,1333
+rmatch,826,1403
+rmatch,1096,1223
