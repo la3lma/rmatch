@@ -66,6 +66,9 @@ Thumbs.db
 *.tmp
 *.temp
 setup_debug.log
+.pytest_cache/
+gcp_runs/*.pid
+gcp_runs/*.nohup.pid
 
 # Coverage
 .coverage
