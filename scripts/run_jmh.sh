@@ -17,10 +17,10 @@ cd "$root_dir"
 
 MVN="./mvnw"; [[ -x "$MVN" ]] || MVN="mvn"
 
-mkdir -p benchmarks/results
+mkdir -p benchmarking/results
 stamp=$(date -u +"%Y%m%dT%H%M%SZ")
-JSON_OUT="benchmarks/results/jmh-${stamp}.json"
-TXT_OUT="benchmarks/results/jmh-${stamp}.txt"
+JSON_OUT="benchmarking/results/jmh-${stamp}.json"
+TXT_OUT="benchmarking/results/jmh-${stamp}.txt"
 
 # Build shaded jar for the JMH module  
 echo "Building JMH module..." >&2
@@ -28,22 +28,22 @@ echo "Building JMH module..." >&2
 # In CI environments, ensure completely clean build to avoid annotation processing issues
 if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]] || [[ -n "${JENKINS_URL:-}" ]]; then
   echo "CI environment detected, performing deep clean..." >&2
-  $MVN -q -B -f benchmarks/jmh/pom.xml clean
+  $MVN -q -B -f benchmarking/jmh/pom.xml clean
   # Remove any potential stale generated sources
-  rm -rf benchmarks/jmh/target/generated-sources || true
-  rm -rf benchmarks/jmh/target/classes || true
+  rm -rf benchmarking/jmh/target/generated-sources || true
+  rm -rf benchmarking/jmh/target/classes || true
   
   # Verify JMH source file exists in CI
-  JMH_SOURCE_DIR="benchmarks/jmh/src/main/java/no/rmz/rmatch/benchmarks"
+  JMH_SOURCE_DIR="benchmarking/jmh/src/main/java/no/rmz/rmatch/benchmarks"
   JMH_SOURCE_FILE="$JMH_SOURCE_DIR/CompileAndMatchBench.java"
   
   echo "CI: Checking for JMH source file at $JMH_SOURCE_FILE" >&2
   if [[ ! -f "$JMH_SOURCE_FILE" ]]; then
     echo "ERROR: JMH source file missing in CI environment: $JMH_SOURCE_FILE" >&2
-    echo "CI: Available files in benchmarks/jmh/:" >&2
-    find benchmarks/jmh/ -type f -name "*.java" 2>/dev/null | head -10 >&2 || true
+    echo "CI: Available files in benchmarking/jmh/:" >&2
+    find benchmarking/jmh/ -type f -name "*.java" 2>/dev/null | head -10 >&2 || true
     echo "CI: Directory structure:" >&2
-    ls -la benchmarks/jmh/src/ 2>/dev/null >&2 || echo "CI: src directory doesn't exist" >&2
+    ls -la benchmarking/jmh/src/ 2>/dev/null >&2 || echo "CI: src directory doesn't exist" >&2
     exit 1
   fi
   echo "CI: JMH source file confirmed: $JMH_SOURCE_FILE" >&2
@@ -57,8 +57,8 @@ if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]] || [[ -n "${JENKINS_URL:
   
   # First ensure all dependencies are available
   echo "CI: Resolving dependencies including parent project..." >&2
-  $MVN -B -f benchmarks/jmh/pom.xml dependency:resolve -U >&2 || true
-  $MVN -B -f benchmarks/jmh/pom.xml dependency:resolve-sources -U >&2 || true
+  $MVN -B -f benchmarking/jmh/pom.xml dependency:resolve -U >&2 || true
+  $MVN -B -f benchmarking/jmh/pom.xml dependency:resolve-sources -U >&2 || true
   
   # Build parent project first to ensure rmatch dependency is available
   echo "CI: Building parent project dependencies..." >&2
@@ -66,30 +66,30 @@ if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]] || [[ -n "${JENKINS_URL:
   
   # Try annotation processing with verbose output in CI
   echo "CI: Attempting annotation processing with verbose output..." >&2
-  $MVN -U -B -f benchmarks/jmh/pom.xml -am -DskipTests compile -X 2>&1 | tee /tmp/ci_compile_log.txt >&2 || true
+  $MVN -U -B -f benchmarking/jmh/pom.xml -am -DskipTests compile -X 2>&1 | tee /tmp/ci_compile_log.txt >&2 || true
   
   # Check compilation results
   echo "CI: Checking annotation processing results..." >&2
-  if [[ -d "benchmarks/jmh/target/generated-sources/annotations" ]]; then
+  if [[ -d "benchmarking/jmh/target/generated-sources/annotations" ]]; then
     echo "CI: Generated sources directory exists" >&2
-    find benchmarks/jmh/target/generated-sources/annotations -name "*.java" | head -3 >&2 || true
+    find benchmarking/jmh/target/generated-sources/annotations -name "*.java" | head -3 >&2 || true
   else
     echo "CI: Generated sources directory missing" >&2
   fi
   
-  if [[ -d "benchmarks/jmh/target/classes" ]]; then
+  if [[ -d "benchmarking/jmh/target/classes" ]]; then
     echo "CI: Classes directory exists" >&2
-    ls -la benchmarks/jmh/target/classes/ >&2 || true
-    if [[ -d "benchmarks/jmh/target/classes/META-INF" ]]; then
+    ls -la benchmarking/jmh/target/classes/ >&2 || true
+    if [[ -d "benchmarking/jmh/target/classes/META-INF" ]]; then
       echo "CI: META-INF directory exists" >&2
-      ls -la benchmarks/jmh/target/classes/META-INF/ >&2 || true
+      ls -la benchmarking/jmh/target/classes/META-INF/ >&2 || true
     fi
   else
     echo "CI: Classes directory missing" >&2
   fi
   
   # Verify annotation processing succeeded before proceeding
-  if [[ ! -f "benchmarks/jmh/target/classes/META-INF/BenchmarkList" ]]; then
+  if [[ ! -f "benchmarking/jmh/target/classes/META-INF/BenchmarkList" ]]; then
     echo "ERROR: CI annotation processing failed to generate BenchmarkList" >&2
     echo "CI: Checking compile log for errors:" >&2
     grep -i "error\|exception\|fail" /tmp/ci_compile_log.txt | tail -10 >&2 || true
@@ -98,17 +98,17 @@ if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]] || [[ -n "${JENKINS_URL:
     
     # Try alternative annotation processing approaches
     echo "CI: Attempting fallback annotation processing with explicit processor..." >&2
-    $MVN -B -f benchmarks/jmh/pom.xml clean compile -Dmaven.compiler.proc=full 2>&1 >&2 || true
+    $MVN -B -f benchmarking/jmh/pom.xml clean compile -Dmaven.compiler.proc=full 2>&1 >&2 || true
     
     # If still failing, try forcing annotation processor discovery
-    if [[ ! -f "benchmarks/jmh/target/classes/META-INF/BenchmarkList" ]]; then
+    if [[ ! -f "benchmarking/jmh/target/classes/META-INF/BenchmarkList" ]]; then
       echo "CI: Attempting explicit annotation processor setup..." >&2
       # Create a temporary Maven configuration to force annotation processing
-      $MVN -B -f benchmarks/jmh/pom.xml dependency:resolve 2>&1 >&2 || true
-      $MVN -B -f benchmarks/jmh/pom.xml clean compile -Dmaven.compiler.forceJavacCompilerUse=true -Dmaven.compiler.verbose=true 2>&1 >&2 || true
+      $MVN -B -f benchmarking/jmh/pom.xml dependency:resolve 2>&1 >&2 || true
+      $MVN -B -f benchmarking/jmh/pom.xml clean compile -Dmaven.compiler.forceJavacCompilerUse=true -Dmaven.compiler.verbose=true 2>&1 >&2 || true
     fi
     
-    if [[ ! -f "benchmarks/jmh/target/classes/META-INF/BenchmarkList" ]]; then
+    if [[ ! -f "benchmarking/jmh/target/classes/META-INF/BenchmarkList" ]]; then
       echo "ERROR: All CI annotation processing attempts failed" >&2
       exit 1
     fi
@@ -116,17 +116,17 @@ if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]] || [[ -n "${JENKINS_URL:
   echo "CI: Step 1 complete - BenchmarkList generated" >&2
   
   echo "CI: Step 2 - Packaging with pre-generated annotations..." >&2
-  $MVN -U -q -B -f benchmarks/jmh/pom.xml -am -DskipTests package
+  $MVN -U -q -B -f benchmarking/jmh/pom.xml -am -DskipTests package
 else
   # Local development - use single command
-  $MVN -U -q -B -f benchmarks/jmh/pom.xml -am -DskipTests clean package
+  $MVN -U -q -B -f benchmarking/jmh/pom.xml -am -DskipTests clean package
 fi
 
 # Verify annotation processing succeeded by checking for BenchmarkList
-BENCHMARK_LIST="benchmarks/jmh/target/classes/META-INF/BenchmarkList"
+BENCHMARK_LIST="benchmarking/jmh/target/classes/META-INF/BenchmarkList"
 if [[ ! -f "$BENCHMARK_LIST" ]]; then
   echo "WARNING: BenchmarkList not found at $BENCHMARK_LIST. Rebuilding with explicit annotation processing..." >&2
-  $MVN -q -B -f benchmarks/jmh/pom.xml clean compile
+  $MVN -q -B -f benchmarking/jmh/pom.xml clean compile
   if [[ ! -f "$BENCHMARK_LIST" ]]; then
     echo "ERROR: Failed to generate BenchmarkList even after explicit compilation" >&2
     exit 1
@@ -135,12 +135,12 @@ fi
 echo "BenchmarkList verified at: $BENCHMARK_LIST" >&2
 
 # Locate the shaded jar (prefer the benchmarks jar)
-JAR=$(ls -t benchmarks/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar 2>/dev/null | head -n1 || true)
+JAR=$(ls -t benchmarking/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar 2>/dev/null | head -n1 || true)
 if [[ -z "$JAR" ]]; then
-  JAR=$(ls -t benchmarks/jmh/target/rmatch-benchmarks-jmh-*.jar 2>/dev/null | head -n1 || true)
+  JAR=$(ls -t benchmarking/jmh/target/rmatch-benchmarks-jmh-*.jar 2>/dev/null | head -n1 || true)
 fi
 if [[ -z "$JAR" ]]; then
-  echo "ERROR: Could not find shaded JAR under benchmarks/jmh/target/" >&2
+  echo "ERROR: Could not find shaded JAR under benchmarking/jmh/target/" >&2
   exit 1
 fi
 
@@ -176,7 +176,7 @@ if [[ $status -ne 0 ]]; then
   
   # First, make sure we have the latest build with annotation processing
   echo "Rebuilding with annotation processing..." >&2
-  $MVN -q -B -f benchmarks/jmh/pom.xml -am -DskipTests clean compile
+  $MVN -q -B -f benchmarking/jmh/pom.xml -am -DskipTests clean compile
   
   # Remove any existing -f flag and add -f 0 for the fallback
   fallback_args=()
@@ -196,7 +196,7 @@ if [[ $status -ne 0 ]]; then
   
   # Try exec:java first
   set +e
-  $MVN -q -B -f benchmarks/jmh/pom.xml -am -DskipTests \
+  $MVN -q -B -f benchmarking/jmh/pom.xml -am -DskipTests \
     exec:java -Dexec.mainClass=org.openjdk.jmh.Main \
     -Dexec.args="$(printf '%s ' "${fallback_args[@]}") \"$include\" ${*:-}"
   fallback_status=$?
@@ -206,18 +206,18 @@ if [[ $status -ne 0 ]]; then
     echo "exec:java also failed. Trying direct classpath execution..." >&2
     
     # Ensure we have the annotation processor output in target/classes
-    if [[ ! -f "benchmarks/jmh/target/classes/META-INF/BenchmarkList" ]]; then
+    if [[ ! -f "benchmarking/jmh/target/classes/META-INF/BenchmarkList" ]]; then
       echo "Re-running annotation processing for classpath execution..." >&2
-      $MVN -q -B -f benchmarks/jmh/pom.xml clean compile
+      $MVN -q -B -f benchmarking/jmh/pom.xml clean compile
     fi
     
     # Build classpath and try to run directly
     echo "Building classpath..." >&2
-    CLASSPATH=$($MVN -q -B -f benchmarks/jmh/pom.xml dependency:build-classpath -Dmdep.outputFile=/dev/stdout)
-    CLASSPATH="$CLASSPATH:benchmarks/jmh/target/classes"
+    CLASSPATH=$($MVN -q -B -f benchmarking/jmh/pom.xml dependency:build-classpath -Dmdep.outputFile=/dev/stdout)
+    CLASSPATH="$CLASSPATH:benchmarking/jmh/target/classes"
     
     # Verify BenchmarkList is accessible in classpath
-    if [[ ! -f "benchmarks/jmh/target/classes/META-INF/BenchmarkList" ]]; then
+    if [[ ! -f "benchmarking/jmh/target/classes/META-INF/BenchmarkList" ]]; then
       echo "ERROR: BenchmarkList still not found in target/classes after recompilation" >&2
       exit 1
     fi

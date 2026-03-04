@@ -291,7 +291,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--matrix-csv",
-        default="extended-benchmarking/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv",
+        default="benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv",
     )
     parser.add_argument("--cohort", default="e2-standard-8|x86_64")
     parser.add_argument("--patterns", type=int, default=10000)

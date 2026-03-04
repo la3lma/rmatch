@@ -5,7 +5,7 @@ rmatch
 
 - Core library: `rmatch/`
 - Tester and harness: `rmatch-tester/`
-- Benchmark platform: `extended-benchmarking/regex_bench_framework/`
+- Benchmark platform: `benchmarking/framework/regex_bench_framework/`
 - Documentation index: `docs/README.md`
 - Papers: `docs/papers/`
 
@@ -16,7 +16,7 @@ Comparable setup used for the snapshot below:
 - Same hardware cohort: `e2-standard-8|x86_64` (GCP)
 - Same pattern suite: `stable_patterns` (`10,000` patterns)
 - Same corpus sizes: `1MB`, `10MB`, `100MB`
-- Source: `extended-benchmarking/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv`
+- Source: `benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv`
 
 | Corpus | Winner | rmatch (ms) | re2j (ms) | java-native-naive (ms) | re2j vs winner | java-native-naive vs winner |
 |---|---:|---:|---:|---:|---:|---:|
@@ -38,7 +38,7 @@ Comparable setup used for the snapshot below:
 More detail:
 
 - Snapshot doc: [docs/benchmarking/GCP_COMPARABLE_SNAPSHOT.md](docs/benchmarking/GCP_COMPARABLE_SNAPSHOT.md)
-- Interactive all-runs report: [extended-benchmarking/regex_bench_framework/reports/workload_all_live/workload_engine_comparison_all.html](extended-benchmarking/regex_bench_framework/reports/workload_all_live/workload_engine_comparison_all.html)
+- Interactive all-runs report: [benchmarking/framework/regex_bench_framework/reports/workload_all_live/workload_engine_comparison_all.html](benchmarking/framework/regex_bench_framework/reports/workload_all_live/workload_engine_comparison_all.html)
 
 ---
 
@@ -50,7 +50,7 @@ than myself, but it's not quite there yet.  Be patient ;)
 
 ### Key Performance Metrics
 
-- **Benchmark Data Sources**: `benchmarks/results/` and `extended-benchmarking/regex_bench_framework/results/`
+- **Benchmark Data Sources**: `benchmarking/results/` and `benchmarking/framework/regex_bench_framework/results/`
 - **JMH Microbenchmarks**: Precise timing measurements with statistical confidence intervals  
 - **Macro Benchmarks**: End-to-end performance testing with real workloads
 - **Automated Tracking**: Performance evolution tracked continuously via GitHub Actions

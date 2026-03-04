@@ -2,7 +2,7 @@
 
 - Cohort: `e2-standard-8|x86_64`
 - Pattern count: `10000`
-- Source matrix: `extended-benchmarking/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv`
+- Source matrix: `benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv`
 
 | Corpus | Winner | rmatch (ms) | re2j (ms) | java-native-naive (ms) | re2j vs winner | java-native-naive vs winner |
 |---|---:|---:|---:|---:|---:|---:|

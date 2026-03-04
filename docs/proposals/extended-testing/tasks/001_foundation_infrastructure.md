@@ -24,7 +24,7 @@ Modernize and establish the foundational infrastructure for the extended testing
    - Remove CSV file dependencies from existing benchmark workflows
 
 2. **Standardize on JMH Infrastructure**  
-   - Extend existing JMH benchmarks in `benchmarks/jmh/` module
+   - Extend existing JMH benchmarks in `benchmarking/jmh/` module
    - Integrate all performance measurements through JMH framework
    - Ensure GitHub Actions compatibility for all measurements
    - Maintain consistency with existing `MatcherBenchmarker` patterns
@@ -97,7 +97,7 @@ public class ModernMatcherBenchmarker {
 ### Integration Points
 - **Remove** dependency on legacy `CSVAppender` and CSV file logging
 - **Modernize** existing `ComprehensivePerformanceTest` class to use only JMH
-- **Enhance** current JMH benchmark infrastructure in `benchmarks/jmh/`
+- **Enhance** current JMH benchmark infrastructure in `benchmarking/jmh/`
 - **Maintain** compatibility with existing baseline management system
 - **Ensure** full GitHub Actions workflow compatibility
 - **Integrate** with current `PerformanceCriteriaEvaluator` for pass/fail determination

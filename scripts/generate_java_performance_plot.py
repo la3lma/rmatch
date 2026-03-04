@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate a performance plot from Java regex benchmark results.
-Reads all java-*.json files from benchmarks/results/ and creates a timeline plot.
+Reads all java-*.json files from benchmarking/results/ and creates a timeline plot.
 This creates the same type of visualization as the rmatch benchmark, allowing direct comparison.
 """
 

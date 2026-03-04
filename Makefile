@@ -68,7 +68,7 @@ charts:
 
 readme-gcp-snapshot: setup-visualization-env
 	@scripts/.venv/bin/python scripts/generate_readme_gcp_snapshot.py \
-		--matrix-csv extended-benchmarking/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv \
+		--matrix-csv benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv \
 		--cohort 'e2-standard-8|x86_64' \
 		--patterns 10000 \
 		--output-dir charts \

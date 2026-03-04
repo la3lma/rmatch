@@ -10,11 +10,11 @@ venv2
 **/*.pyo
 **/*.swp
 **/.DS_Store
-benchmarks/results
+benchmarking/results
 charts
 analysis
-extended-benchmarking/regex_bench_framework/attic
-extended-benchmarking/regex_bench_framework/backups
-extended-benchmarking/regex_bench_framework/results
-extended-benchmarking/regex_bench_framework/reports
-extended-benchmarking/regex_bench_framework/debug_*
+benchmarking/framework/regex_bench_framework/attic
+benchmarking/framework/regex_bench_framework/backups
+benchmarking/framework/regex_bench_framework/results
+benchmarking/framework/regex_bench_framework/reports
+benchmarking/framework/regex_bench_framework/debug_*

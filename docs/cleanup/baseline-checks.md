@@ -52,7 +52,7 @@ engine=fastpath,prefilter=aho,threshold=5000 => 58 ms, 2046 MB
 [ERROR]   mvn <args> -rf :rmatch-tester
 ```
 
-### (cd extended-benchmarking/regex_bench_framework && make test-unit)
+### (cd benchmarking/framework/regex_bench_framework && make test-unit)
 - exit_code: 2
 - duration_seconds: 0
 - tail_output:
@@ -63,7 +63,7 @@ make: .venv/bin/pytest: No such file or directory
 make: *** [test-unit] Error 1
 ```
 
-### (cd extended-benchmarking/regex_bench_framework && make test-quick)
+### (cd benchmarking/framework/regex_bench_framework && make test-quick)
 - exit_code: 2
 - duration_seconds: 11
 - tail_output:
@@ -111,17 +111,17 @@ make: *** [test-unit] Error 1
 Copying rmatch dependencies from /Volumes/SynologyScsi1/git/rmatch/rmatch/target/lib...
 ✓ Copied       20 dependency JARs
 Compiling rmatch benchmark...
-/Volumes/SynologyScsi1/git/rmatch/extended-benchmarking/regex_bench_framework/engines/rmatch/RMatchBenchmark.java:87: warning: [removal] runFinalization() in Runtime has been deprecated and marked for removal
+/Volumes/SynologyScsi1/git/rmatch/benchmarking/framework/regex_bench_framework/engines/rmatch/RMatchBenchmark.java:87: warning: [removal] runFinalization() in Runtime has been deprecated and marked for removal
             runtime.runFinalization();
                    ^
 1 warning
 ✓ rmatch benchmark compiled successfully
 ✓ Build complete!
-  Executable: /Volumes/SynologyScsi1/git/rmatch/extended-benchmarking/regex_bench_framework/engines/rmatch/.build/run_rmatch_benchmark.sh
+  Executable: /Volumes/SynologyScsi1/git/rmatch/benchmarking/framework/regex_bench_framework/engines/rmatch/.build/run_rmatch_benchmark.sh
   rmatch JAR: /Users/rmz/.m2/repository/no/rmz/rmatch/1.1-SNAPSHOT/rmatch-1.1-SNAPSHOT.jar
 
 Test with:
-  /Volumes/SynologyScsi1/git/rmatch/extended-benchmarking/regex_bench_framework/engines/rmatch/.build/run_rmatch_benchmark.sh patterns.txt corpus.txt
+  /Volumes/SynologyScsi1/git/rmatch/benchmarking/framework/regex_bench_framework/engines/rmatch/.build/run_rmatch_benchmark.sh patterns.txt corpus.txt
 \033[0;34mRunning quick validation tests...\033[0m 
 .venv/bin/regex-bench -v run-phase \
 		--config test_matrix/quick_validation.json \
@@ -150,14 +150,14 @@ Timestamp (UTC): 2026-03-04T21:40:00Z
   - core unit/integration tests passed
   - `SequenceLoaderTest` now passes with expected non-zero matches (`very-few`: 533, `some`: 2080)
 
-#### (cd extended-benchmarking/regex_bench_framework && make test-unit)
+#### (cd benchmarking/framework/regex_bench_framework && make test-unit)
 - exit_code: 2
 - summary:
   - fails because framework has no `tests/` directory
   - make target currently executes `.venv/bin/pytest tests/ -v`
   - observed pytest message: `ERROR: file or directory not found: tests/`
 
-#### (cd extended-benchmarking/regex_bench_framework && make test-quick)
+#### (cd benchmarking/framework/regex_bench_framework && make test-quick)
 - exit_code: 2
 - summary:
   - engine build succeeds, but quick run target fails because `.venv/bin/regex-bench` is not present after `venv` bootstrap alone

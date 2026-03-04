@@ -71,7 +71,7 @@ This document describes the fast-path optimizations implemented to improve rmatc
 Run with:
 ```bash
 mvn clean package -DskipTests
-java -jar benchmarks/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar FastPathBench
+java -jar benchmarking/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar FastPathBench
 ```
 
 Tests:
@@ -87,7 +87,7 @@ Tests:
 Run with:
 ```bash
 mvn clean package -DskipTests
-java -jar benchmarks/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar ProductionWorkloadBench
+java -jar benchmarking/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar ProductionWorkloadBench
 ```
 
 Tests three configurations:
@@ -118,12 +118,12 @@ mvn clean package -DskipTests
 2. **Run production workload benchmark**:
 ```bash
 # Full benchmark (recommended)
-java -jar benchmarks/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar \
+java -jar benchmarking/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar \
   ProductionWorkloadBench \
   -p patternCount=5000
 
 # Quick test
-java -jar benchmarks/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar \
+java -jar benchmarking/jmh/target/rmatch-benchmarks-jmh-*-benchmarks.jar \
   ProductionWorkloadBench \
   -p patternCount=1000 \
   -wi 1 -i 3

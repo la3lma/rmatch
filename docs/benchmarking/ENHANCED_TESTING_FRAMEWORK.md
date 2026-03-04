@@ -63,12 +63,12 @@ The following patterns are excluded from git via `.gitignore`:
 
 ```
 # Large benchmark result files (exclude to avoid GitHub file size limits)
-benchmarks/results/*.txt          # JMH text output (can be 100MB+)
-benchmarks/results/*.log          # Detailed execution logs
-benchmarks/results/jmh-*.json     # JMH raw results
-benchmarks/results/macro-*.json   # Macro benchmark results  
-benchmarks/results/java-*.json    # Java native comparison results
-benchmarks/results/enhanced-*/    # Enhanced framework result directories
+benchmarking/results/*.txt          # JMH text output (can be 100MB+)
+benchmarking/results/*.log          # Detailed execution logs
+benchmarking/results/jmh-*.json     # JMH raw results
+benchmarking/results/macro-*.json   # Macro benchmark results  
+benchmarking/results/java-*.json    # Java native comparison results
+benchmarking/results/enhanced-*/    # Enhanced framework result directories
 ```
 
 ### Accessing Results
@@ -142,7 +142,7 @@ JMH_INCLUDE='.*ExtendedTestFramework.*' ./scripts/run_jmh.sh \
 ### Example Output Structure
 
 ```
-benchmarks/results/enhanced-20250106T123456Z/
+benchmarking/results/enhanced-20250106T123456Z/
 ├── jmh-standard-rmatch-simple-20250106T123456Z.json
 ├── jmh-standard-fastpath-simple-20250106T123456Z.json
 ├── jmh-standard-fastpath-complex-20250106T123456Z.json

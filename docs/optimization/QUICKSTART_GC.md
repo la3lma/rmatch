@@ -51,7 +51,7 @@ scripts/run_gc_experiments.sh jmh shenandoah
 
 Find the results directory:
 ```bash
-latest=$(ls -td benchmarks/results/gc-experiments/*/ | head -n1)
+latest=$(ls -td benchmarking/results/gc-experiments/*/ | head -n1)
 echo "Results in: $latest"
 ```
 
@@ -84,7 +84,7 @@ make bench-gc-experiments
 This will:
 1. Run JMH microbenchmarks with each GC configuration
 2. Run macro benchmarks with each GC configuration
-3. Generate a summary report at `benchmarks/results/gc-experiments/<timestamp>/SUMMARY.md`
+3. Generate a summary report at `benchmarking/results/gc-experiments/<timestamp>/SUMMARY.md`
 
 ## Expected Outcomes
 
@@ -163,5 +163,5 @@ scripts/run_gc_experiments.sh macro zgc-generational
 make bench-gc-experiments
 
 # View latest results
-cat $(ls -td benchmarks/results/gc-experiments/*/ | head -n1)SUMMARY.md
+cat $(ls -td benchmarking/results/gc-experiments/*/ | head -n1)SUMMARY.md
 ```

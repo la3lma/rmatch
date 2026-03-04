@@ -17,7 +17,7 @@ cd "$root_dir"
 
 TEST_SUITE=${1:-standard}
 TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
-RESULTS_DIR="benchmarks/results/enhanced-${TIMESTAMP}"
+RESULTS_DIR="benchmarking/results/enhanced-${TIMESTAMP}"
 
 echo "=== Enhanced rmatch Benchmark Suite ==="
 echo "Suite: $TEST_SUITE"

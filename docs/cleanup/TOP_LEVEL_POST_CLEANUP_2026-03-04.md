@@ -15,11 +15,11 @@ This snapshot records the repository root state after executing the cleanup move
 - `Makefile`
 - `README.md`
 - `archive/`
-- `benchmarks/`
+- `benchmarking/`
 - `charts/`
 - `checkstyle-unused-imports.xml`
 - `docs/`
-- `extended-benchmarking/`
+- `benchmarking/framework/`
 - `mvnw`
 - `mvnw.cmd`
 - `plans/`

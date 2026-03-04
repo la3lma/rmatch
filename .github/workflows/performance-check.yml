@@ -53,7 +53,7 @@ jobs:
           echo "Manual campaign mode: collect measurements and update artifacts."
           
           # Create baseline directory
-          mkdir -p benchmarks/baseline
+          mkdir -p benchmarking/baseline
           
           # Run the comprehensive performance test using full Wuthering Heights corpus
           # CRITICAL: These parameters ensure realistic, production-scale validation
@@ -114,9 +114,9 @@ jobs:
         with:
           name: performance-results
           path: |
-            benchmarks/results/*.json
-            benchmarks/results/*.log
-            benchmarks/results/*.md
+            benchmarking/results/*.json
+            benchmarking/results/*.log
+            benchmarking/results/*.md
             charts/*.png
             performance_timeline.png
             java_performance_timeline.png

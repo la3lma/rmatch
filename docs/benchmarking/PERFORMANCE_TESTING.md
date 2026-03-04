@@ -53,7 +53,7 @@ The performance check automatically runs when:
 
 ## Baseline Management
 
-Baselines are stored in `benchmarks/baseline/` directory:
+Baselines are stored in `benchmarking/baseline/` directory:
 - `rmatch-baseline.json`: rmatch performance baseline
 - `java-baseline.json`: Java regexp performance baseline
 

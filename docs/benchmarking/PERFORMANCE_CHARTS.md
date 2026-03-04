@@ -17,7 +17,7 @@ The performance charting system supports multiple data sources and generates dif
   - `simple_performance_evolution.png` - Basic time-series from individual test runs
 
 ### Recent Performance Test Charts (JSON-based)
-- **Source**: `benchmarks/results/performance-check-*.json`
+- **Source**: `benchmarking/results/performance-check-*.json`
 - **Data Period**: Recent automated performance tests
 - **Charts Generated**:
   - `performance_check_evolution.png` - Enhanced 6-panel view showing:
@@ -65,7 +65,7 @@ Run performance tests that generate JSON reports:
   -Dexec.args="100 3"  # 100 regexps, 3 runs
 ```
 
-This generates files in `benchmarks/results/performance-check-*.json` format.
+This generates files in `benchmarking/results/performance-check-*.json` format.
 
 ## Data Format Details
 
@@ -137,7 +137,7 @@ Charts use matplotlib with seaborn styling. Key customization points:
 ## Troubleshooting
 
 ### No Charts Generated
-- Check that data sources exist (`rmatch-tester/logs/*.csv` or `benchmarks/results/*.json`)
+- Check that data sources exist (`rmatch-tester/logs/*.csv` or `benchmarking/results/*.json`)
 - Verify Python dependencies are installed: `pip install pandas matplotlib seaborn numpy`
 - Check for error messages in the script output
 

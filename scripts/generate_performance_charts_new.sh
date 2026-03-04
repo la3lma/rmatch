@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Generate performance charts from benchmarks/results data
+# Generate performance charts from benchmarking/results data
 #
 # This script creates comprehensive performance charts based solely on 
-# benchmark data found in benchmarks/results/. It replaces the previous
+# benchmark data found in benchmarking/results/. It replaces the previous
 # complex multi-source charting system with a clean, focused approach.
 #
 
@@ -19,22 +19,22 @@ echo "📂 Project root: ${PROJECT_ROOT}"
 cd "${PROJECT_ROOT}"
 
 # Check if benchmark data exists
-if [ ! -d "benchmarks/results" ]; then
-    echo "❌ Error: benchmarks/results directory not found"
+if [ ! -d "benchmarking/results" ]; then
+    echo "❌ Error: benchmarking/results directory not found"
     echo "   Run benchmarks first to generate performance data"
     exit 1
 fi
 
 # Count available benchmark files
-JMH_COUNT=$(find benchmarks/results -name "jmh-*.json" 2>/dev/null | wc -l)
-MACRO_COUNT=$(find benchmarks/results -name "macro-*.json" 2>/dev/null | wc -l)
+JMH_COUNT=$(find benchmarking/results -name "jmh-*.json" 2>/dev/null | wc -l)
+MACRO_COUNT=$(find benchmarking/results -name "macro-*.json" 2>/dev/null | wc -l)
 
 echo "📊 Found benchmark data:"
 echo "   - JMH benchmark files: ${JMH_COUNT}"
 echo "   - Macro benchmark files: ${MACRO_COUNT}"
 
 if [ "$JMH_COUNT" -eq 0 ] && [ "$MACRO_COUNT" -eq 0 ]; then
-    echo "❌ Error: No benchmark data found in benchmarks/results/"
+    echo "❌ Error: No benchmark data found in benchmarking/results/"
     echo "   Run './scripts/run_jmh.sh' or other benchmark scripts first"
     exit 1
 fi

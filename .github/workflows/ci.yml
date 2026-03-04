@@ -81,8 +81,8 @@ jobs:
 #          name: perf-artifacts
 #          path: |
 #            profiles/*.svg
-#            benchmarks/results/macro-*.json
-#            benchmarks/results/macro-*.log
+#            benchmarking/results/macro-*.json
+#            benchmarking/results/macro-*.log
 
 
 

@@ -13,7 +13,7 @@ The system automatically generates and updates performance charts whenever bench
 - **File**: `performance_timeline.png`
 - **Location**: Project root (displayed at top of README.md)
 - **Script**: `scripts/generate_macro_performance_plot.py`
-- **Data Source**: All `macro-*.json` files in `benchmarks/results/`
+- **Data Source**: All `macro-*.json` files in `benchmarking/results/`
 
 #### Color Coding
 - 🟢 **Green (Excellent)**: < 2 seconds
@@ -134,7 +134,7 @@ The system automatically generates and updates performance charts whenever bench
 git log --oneline --grep="performance"
 
 # View recent benchmark results  
-ls -la benchmarks/results/macro-*.json | tail -5
+ls -la benchmarking/results/macro-*.json | tail -5
 ```
 
 ### Troubleshooting
@@ -145,7 +145,7 @@ python3 scripts/generate_macro_performance_plot.py
 # Check for malformed JSON files
 python3 -c "
 import json, glob
-for f in glob.glob('benchmarks/results/macro-*.json'):
+for f in glob.glob('benchmarking/results/macro-*.json'):
     try:
         json.load(open(f))
         print(f'✓ {f}')

@@ -10,16 +10,16 @@
 **/target
 
 # Benchmark outputs and historical artifacts
-extended-benchmarking/regex_bench_framework/results
-extended-benchmarking/regex_bench_framework/reports
-extended-benchmarking/regex_bench_framework/attic
-extended-benchmarking/regex_bench_framework/backups
-extended-benchmarking/regex_bench_framework/gcp_runs
-extended-benchmarking/regex_bench_framework/benchmark_results.db
-extended-benchmarking/regex_bench_framework/final_10k_option_a_report
-extended-benchmarking/regex_bench_framework/timeout_fixed_*
-extended-benchmarking/regex_bench_framework/debug_pattern_reuse_*
+benchmarking/framework/regex_bench_framework/results
+benchmarking/framework/regex_bench_framework/reports
+benchmarking/framework/regex_bench_framework/attic
+benchmarking/framework/regex_bench_framework/backups
+benchmarking/framework/regex_bench_framework/gcp_runs
+benchmarking/framework/regex_bench_framework/benchmark_results.db
+benchmarking/framework/regex_bench_framework/final_10k_option_a_report
+benchmarking/framework/regex_bench_framework/timeout_fixed_*
+benchmarking/framework/regex_bench_framework/debug_pattern_reuse_*
 
 # Non-essential local payloads
-extended-benchmarking/regex_bench_framework/large_corpora
-extended-benchmarking/regex_bench_framework/tmp.txt
+benchmarking/framework/regex_bench_framework/large_corpora
+benchmarking/framework/regex_bench_framework/tmp.txt

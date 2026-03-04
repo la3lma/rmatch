@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Enhanced compare and comment script with pass/fail logic and GitHub status checks.
 # Baseline files (choose whichever exists):
-#   benchmarks/baseline/jmh-baseline.json
+#   benchmarking/baseline/jmh-baseline.json
 #   $BASELINE_JSON (env var)
 # If GITHUB_TOKEN and PR context are present, will try to post a PR comment using gh or curl.
 
@@ -13,11 +13,11 @@ cd "$root_dir"
 CURR_JSON=${1:-}
 if [[ -z "$CURR_JSON" ]]; then
   # pick the latest result
-  CURR_JSON=$(ls -t benchmarks/results/jmh-*.json | head -n1 2>/dev/null || echo "")
+  CURR_JSON=$(ls -t benchmarking/results/jmh-*.json | head -n1 2>/dev/null || echo "")
 fi
 
 # Check for the new PR performance summary first
-PR_SUMMARY_FILE="benchmarks/results/pr-performance-summary.md"
+PR_SUMMARY_FILE="benchmarking/results/pr-performance-summary.md"
 if [[ -f "$PR_SUMMARY_FILE" ]]; then
   echo "Using performance summary from GitHubActionPerformanceTestRunner"
   OUT_MD="$PR_SUMMARY_FILE"
@@ -25,8 +25,8 @@ else
   # Fallback to existing JMH comparison logic
   BASELINE_JSON=${BASELINE_JSON:-}
   if [[ -z "$BASELINE_JSON" ]]; then
-    if [[ -f benchmarks/baseline/jmh-baseline.json ]]; then
-      BASELINE_JSON=benchmarks/baseline/jmh-baseline.json
+    if [[ -f benchmarking/baseline/jmh-baseline.json ]]; then
+      BASELINE_JSON=benchmarking/baseline/jmh-baseline.json
     else
       echo "No baseline JSON found. Skipping comparison." >&2
       exit 0
@@ -43,8 +43,8 @@ else
     exit 1
   fi
 
-  mkdir -p benchmarks/results
-  OUT_MD=benchmarks/results/perf-summary.md
+  mkdir -p benchmarking/results
+  OUT_MD=benchmarking/results/perf-summary.md
 
   echo "Comparing $CURR_JSON vs $BASELINE_JSON"
 

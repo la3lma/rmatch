@@ -1,18 +1,18 @@
 # Performance Charts Documentation
 
-This document explains the modern performance visualization system in rmatch, which generates comprehensive charts from benchmark data in `benchmarks/results/`.
+This document explains the modern performance visualization system in rmatch, which generates comprehensive charts from benchmark data in `benchmarking/results/`.
 
 ## Overview
 
 The performance tracking system is completely redesigned to be:
-- **Clean & Focused**: Based solely on data from `benchmarks/results/`
+- **Clean & Focused**: Based solely on data from `benchmarking/results/`
 - **Comprehensive**: Covers both micro and macro benchmark results
 - **Automated**: Charts auto-generated via GitHub Actions
 - **Modern**: Clean, professional visualization style
 
 ## Data Sources
 
-All performance data comes from `benchmarks/results/`:
+All performance data comes from `benchmarking/results/`:
 
 ### JMH Benchmark Results (`jmh-*.json`)
 - **Purpose**: Precise microbenchmark measurements
@@ -90,7 +90,7 @@ The performance section in README.md shows:
 
 ### GitHub Actions Integration
 Charts are automatically regenerated when:
-- New benchmark results are added to `benchmarks/results/`
+- New benchmark results are added to `benchmarking/results/`
 - Performance testing workflows complete
 - Manual workflow triggers are activated
 
@@ -128,7 +128,7 @@ Charts are automatically regenerated when:
 
 The previous performance tracking system used multiple data sources (CSV files, mixed JSON formats). The new system:
 
-- ✅ **Simplified**: Single data source (`benchmarks/results/`)
+- ✅ **Simplified**: Single data source (`benchmarking/results/`)
 - ✅ **Reliable**: Consistent data format and processing
 - ✅ **Maintainable**: Single script for all chart generation
 - ✅ **Professional**: Clean, modern chart styling
@@ -137,7 +137,7 @@ The previous performance tracking system used multiple data sources (CSV files, 
 ## Troubleshooting
 
 ### No Charts Generated
-1. Verify benchmark data exists in `benchmarks/results/`
+1. Verify benchmark data exists in `benchmarking/results/`
 2. Check Python dependencies are installed
 3. Run script with verbose output: `python3 -v scripts/generate_benchmarks_charts.py`
 

@@ -21,9 +21,9 @@ echo "Java version: $(java -version 2>&1 | head -n1)"
 echo ""
 
 # Create output directory for GC experiment results
-mkdir -p benchmarks/results/gc-experiments
+mkdir -p benchmarking/results/gc-experiments
 timestamp=$(date -u +"%Y%m%dT%H%M%SZ")
-experiment_dir="benchmarks/results/gc-experiments/${timestamp}-fast"
+experiment_dir="benchmarking/results/gc-experiments/${timestamp}-fast"
 mkdir -p "$experiment_dir"
 
 # Define GC configurations to test (prioritized list)
@@ -72,7 +72,7 @@ run_benchmark_with_gc() {
     " 2>&1 | tee "$result_dir/jmh-output.log" || status=$?
     
     # Copy results to experiment directory
-    latest_jmh=$(ls -t benchmarks/results/jmh-*.json 2>/dev/null | head -n1 || true)
+    latest_jmh=$(ls -t benchmarking/results/jmh-*.json 2>/dev/null | head -n1 || true)
     if [[ -n "$latest_jmh" ]]; then
       cp "$latest_jmh" "$result_dir/jmh-result.json"
       cp "${latest_jmh%.json}.txt" "$result_dir/jmh-result.txt" 2>/dev/null || true
@@ -88,7 +88,7 @@ run_benchmark_with_gc() {
     " 2>&1 | tee "$result_dir/macro-output.log" || status=$?
     
     # Copy results to experiment directory
-    latest_macro=$(ls -t benchmarks/results/macro-*.json 2>/dev/null | head -n1 || true)
+    latest_macro=$(ls -t benchmarking/results/macro-*.json 2>/dev/null | head -n1 || true)
     if [[ -n "$latest_macro" ]]; then
       cp "$latest_macro" "$result_dir/macro-result.json"
       cp "${latest_macro%.json}.log" "$result_dir/macro-result.log" 2>/dev/null || true

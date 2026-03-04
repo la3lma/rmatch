@@ -13,14 +13,14 @@ No destructive actions are included. It is intended to guide phased moves.
 
 - `rmatch/`
 - `rmatch-tester/`
-- `benchmarks/`
+- `benchmarking/`
 - `pom.xml`
 - `mvnw`, `mvnw.cmd`
 - root `Makefile`
 
 ### Benchmark Harness and Data Platform
 
-- `extended-benchmarking/regex_bench_framework/`
+- `benchmarking/framework/regex_bench_framework/`
 - root `scripts/` (shared scripting and benchmarking helpers)
 
 ### Documentation and Plans

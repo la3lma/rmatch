@@ -54,9 +54,9 @@ Manifest updates:
 ### Phase 5: Harness Clarity Pass (Conservative)
 
 1. Added benchmark harness archival policy:
-   - `extended-benchmarking/regex_bench_framework/docs/RESULTS_ARCHIVE_POLICY.md`
+   - `benchmarking/framework/regex_bench_framework/docs/RESULTS_ARCHIVE_POLICY.md`
 2. Added runtime-noise ignore rules:
-   - `extended-benchmarking/regex_bench_framework/.gitignore`
+   - `benchmarking/framework/regex_bench_framework/.gitignore`
    - `.pytest_cache/`, `gcp_runs/*.pid`, `gcp_runs/*.nohup.pid`
 
 ### Phase 6: Optimization Backlog Consolidation
@@ -110,7 +110,7 @@ Harness command sanity (non-executing):
 
 ## Known Baseline Caveats (Unchanged by Cleanup)
 
-In `extended-benchmarking/regex_bench_framework`:
+In `benchmarking/framework/regex_bench_framework`:
 
 1. `make test-unit` expects `tests/` directory that is currently absent.
 2. `make test-quick` invokes `.venv/bin/regex-bench` but target dependencies only guarantee venv
@@ -124,7 +124,7 @@ These are pre-existing workflow issues and remain recorded in:
 
 1. Core library: `rmatch/`
 2. Testing harness: `rmatch-tester/`
-3. Benchmark platform: `extended-benchmarking/regex_bench_framework/`
+3. Benchmark platform: `benchmarking/framework/regex_bench_framework/`
 4. Documentation and papers: `docs/`
 5. Optimization planning: `plans/optimization-backlog/`
 6. Historical quarantine: `archive/`

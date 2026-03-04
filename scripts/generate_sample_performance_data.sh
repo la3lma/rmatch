@@ -12,7 +12,7 @@ echo "Generating sample performance data..."
 cd "$(dirname "$0")/.."
 
 # Create results directory if it doesn't exist
-mkdir -p benchmarks/results
+mkdir -p benchmarking/results
 
 # Run performance tests with different regex counts to show scaling behavior
 for regex_count in 50 100 150 200; do
@@ -29,7 +29,7 @@ done
 
 echo "Sample performance data generation completed!"
 echo "Generated files:"
-ls -la benchmarks/results/performance-check-*.json | tail -5
+ls -la benchmarking/results/performance-check-*.json | tail -5
 
 echo ""
 echo "Now regenerating charts with the new data..."

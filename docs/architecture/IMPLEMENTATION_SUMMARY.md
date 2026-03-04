@@ -74,7 +74,7 @@ Tests end-to-end performance with realistic workloads:
 Run with:
 ```bash
 mvn clean package -DskipTests
-java -jar benchmarks/jmh/target/*-benchmarks.jar ProductionWorkloadBench -p patternCount=5000
+java -jar benchmarking/jmh/target/*-benchmarks.jar ProductionWorkloadBench -p patternCount=5000
 ```
 
 ## Documentation
@@ -156,16 +156,16 @@ This follows the established methodology documented in:
 ### 2. Micro-Benchmarks
 ```bash
 mvn clean package -DskipTests
-java -jar benchmarks/jmh/target/*-benchmarks.jar FastPathBench
+java -jar benchmarking/jmh/target/*-benchmarks.jar FastPathBench
 ```
 
 ### 3. Production Workload (Critical Test)
 ```bash
 # Full 5000-pattern test (recommended)
-java -jar benchmarks/jmh/target/*-benchmarks.jar ProductionWorkloadBench -p patternCount=5000
+java -jar benchmarking/jmh/target/*-benchmarks.jar ProductionWorkloadBench -p patternCount=5000
 
 # Quick 1000-pattern test
-java -jar benchmarks/jmh/target/*-benchmarks.jar ProductionWorkloadBench -p patternCount=1000 -wi 1 -i 3
+java -jar benchmarking/jmh/target/*-benchmarks.jar ProductionWorkloadBench -p patternCount=1000 -wi 1 -i 3
 ```
 
 ### 4. Compare with Existing Macro Benchmarks
@@ -185,8 +185,8 @@ rmatch.engine=fastpath rmatch.prefilter=aho make bench-macro
 - `rmatch/src/main/java/no/rmz/rmatch/impls/FastPathMatchEngine.java`
 - `rmatch/src/test/java/no/rmz/rmatch/engine/fastpath/AsciiOptimizerTest.java`
 - `rmatch/src/test/java/no/rmz/rmatch/engine/fastpath/StateSetBuffersTest.java`
-- `benchmarks/jmh/src/main/java/no/rmz/rmatch/benchmarks/FastPathBench.java`
-- `benchmarks/jmh/src/main/java/no/rmz/rmatch/benchmarks/ProductionWorkloadBench.java`
+- `benchmarking/jmh/src/main/java/no/rmz/rmatch/benchmarks/FastPathBench.java`
+- `benchmarking/jmh/src/main/java/no/rmz/rmatch/benchmarks/ProductionWorkloadBench.java`
 - `FASTPATH_OPTIMIZATION.md`
 - `scripts/test_fastpath.sh`
 

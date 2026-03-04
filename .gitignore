@@ -12,17 +12,17 @@ rmatch-parent.iml
 measurements.sqlite
 
 # Performance test artifacts (usually generated during CI)
-benchmarks/results/performance-check-*.json
-benchmarks/results/pr-performance-summary.md
-benchmarks/results/gc-experiments/*/
+benchmarking/results/performance-check-*.json
+benchmarking/results/pr-performance-summary.md
+benchmarking/results/gc-experiments/*/
 
 # Large benchmark result files (exclude to avoid GitHub file size limits)
-benchmarks/results/*.txt
-benchmarks/results/*.log
-benchmarks/results/jmh-*.json
-benchmarks/results/macro-*.json
-benchmarks/results/java-*.json
-benchmarks/results/enhanced-*/
+benchmarking/results/*.txt
+benchmarking/results/*.log
+benchmarking/results/jmh-*.json
+benchmarking/results/macro-*.json
+benchmarking/results/java-*.json
+benchmarking/results/enhanced-*/
 **/target/
 scripts/__pycache__/
 

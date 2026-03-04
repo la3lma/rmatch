@@ -22,10 +22,10 @@ Clean up repository structure for accessibility while preserving all essential f
 1. Java modules and builds:
    - `rmatch`
    - `rmatch-tester`
-   - `benchmarks/jmh`
+   - `benchmarking/jmh`
    - root `pom.xml` module wiring
 2. Benchmark harness and GCP orchestration:
-   - `extended-benchmarking/regex_bench_framework`
+   - `benchmarking/framework/regex_bench_framework`
 3. Active scripts used by build/benchmark/report flows:
    - root `Makefile`
    - root `scripts/`
@@ -34,7 +34,7 @@ Clean up repository structure for accessibility while preserving all essential f
 
 ## Proposed High-Level Faces
 1. Core Library: `rmatch/` as primary engineering focus.
-2. Benchmarking Platform: `extended-benchmarking/regex_bench_framework/` as performance lab.
+2. Benchmarking Platform: `benchmarking/framework/regex_bench_framework/` as performance lab.
 3. Optimization Backlog: new `plans/optimization-backlog/` for idea intake and evaluation queue.
 4. Documentation and Papers: `docs/` with paper writeups in `docs/papers/`.
 5. Historical/Legacy: new `archive/` as a quarantine zone for scar tissue and legacy artifacts.
@@ -43,8 +43,8 @@ Clean up repository structure for accessibility while preserving all essential f
 1. Keep:
    - `rmatch/`
    - `rmatch-tester/`
-   - `benchmarks/`
-   - `extended-benchmarking/`
+   - `benchmarking/`
+   - `benchmarking/framework/`
    - `scripts/`
    - `pom.xml`, `Makefile`, `README.md`, `LICENSE`, Maven wrappers
 2. Add:
@@ -76,7 +76,7 @@ Clean up repository structure for accessibility while preserving all essential f
 3. Run baseline checks:
    - `mvn -q -B -DskipTests -Dspotbugs.skip=true package`
    - `mvn -q -B -pl rmatch,rmatch-tester test`
-   - `cd extended-benchmarking/regex_bench_framework && make test-unit && make test-quick`
+   - `cd benchmarking/framework/regex_bench_framework && make test-unit && make test-quick`
 4. Record outputs in `docs/cleanup/baseline-checks.md`.
 5. Commit: `cleanup: baseline validation before repository reorganization`.
 
@@ -133,7 +133,7 @@ Clean up repository structure for accessibility while preserving all essential f
 5. Commit: `cleanup: archive legacy artifacts (non-destructive)`.
 
 ### Phase 5: Benchmark-Harness Clarity Pass (No Functional Changes)
-1. In `extended-benchmarking/regex_bench_framework`, separate:
+1. In `benchmarking/framework/regex_bench_framework`, separate:
    - active configs/results/reports
    - historical campaigns and backups
 2. Standardize archival location for old campaigns under framework `attic/` or root `archive/` (single policy).
@@ -177,9 +177,9 @@ Clean up repository structure for accessibility while preserving all essential f
 2. Root unit tests:
    - `mvn -q -B -pl rmatch,rmatch-tester test`
 3. Framework unit/smoke:
-   - `cd extended-benchmarking/regex_bench_framework && make test-unit && make test-quick`
+   - `cd benchmarking/framework/regex_bench_framework && make test-unit && make test-quick`
 4. Report generation sanity:
-   - `cd extended-benchmarking/regex_bench_framework && make report-workload-web-all OUT=reports/workload_all_live`
+   - `cd benchmarking/framework/regex_bench_framework && make report-workload-web-all OUT=reports/workload_all_live`
 
 ## Non-Goals for This Cleanup
 1. No algorithmic optimization work.

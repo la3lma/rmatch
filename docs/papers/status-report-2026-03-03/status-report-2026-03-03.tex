@@ -28,8 +28,8 @@ This document captures the current state of the rmatch engine and its benchmark 
 This report is built from repository-local artifacts as of 2026-03-03, primarily:
 \begin{itemize}
   \item engine/runtime code in \texttt{rmatch/src/main/java/no/rmz/rmatch}
-  \item benchmark control and protocol docs in \texttt{extended-benchmarking/regex\_bench\_framework/docs}
-  \item aggregated benchmark outputs in \texttt{extended-benchmarking/regex\_bench\_framework/reports/workload\_all\_live}
+  \item benchmark control and protocol docs in \texttt{benchmarking/framework/regex\_bench\_framework/docs}
+  \item aggregated benchmark outputs in \texttt{benchmarking/framework/regex\_bench\_framework/reports/workload\_all\_live}
   \item model and dominance note in \texttt{.../workload\_all\_live/modeling\_dominance\_note.tex}
 \end{itemize}
 
@@ -64,7 +64,7 @@ The current codebase contains several active optimization tracks:
 \end{itemize}
 
 \section{Benchmark Platform and Fairness Controls}
-The current benchmark control plane uses the Python framework under \texttt{extended-benchmarking/regex\_bench\_framework}, containerized execution, and GCP run control.
+The current benchmark control plane uses the Python framework under \texttt{benchmarking/framework/regex\_bench\_framework}, containerized execution, and GCP run control.
 
 \subsection{Canonical comparator set}
 The active canonical set is:
@@ -168,7 +168,7 @@ rmatch            & 12 & 15357.9 & 0.142 & 0.294 & 0.851 \\
 \subsection{Dominance map figure}
 \begin{figure}[h!]
 \centering
-\includegraphics[page=2,width=0.95\linewidth]{../../../extended-benchmarking/regex_bench_framework/reports/workload_all_live/modeling_dominance_note.pdf}
+\includegraphics[page=2,width=0.95\linewidth]{../../../benchmarking/framework/regex_bench_framework/reports/workload_all_live/modeling_dominance_note.pdf}
 \caption{Dominance map and model-equality boundaries from the generated modeling note artifact.}
 \end{figure}
 

@@ -50,7 +50,7 @@ Implement comprehensive CI/CD integration with automated performance monitoring:
          - name: Run JMH Quick Benchmarks
            run: |
              mvn clean compile
-             java -jar benchmarks/jmh/target/benchmarks.jar \
+             java -jar benchmarking/jmh/target/benchmarks.jar \
                -wi 2 -i 3 -f 1 \
                -prof gc \
                -rff results/quick-${{ matrix.corpus }}-${{ matrix.pattern-category }}.json
@@ -71,7 +71,7 @@ Implement comprehensive CI/CD integration with automated performance monitoring:
          - name: Run Comprehensive JMH Benchmarks
            run: |
              mvn clean compile
-             java -jar benchmarks/jmh/target/benchmarks.jar \
+             java -jar benchmarking/jmh/target/benchmarks.jar \
                -wi 5 -i 10 -f 2 \
                -prof gc:churn=false \
                -prof stack:lines=10 \
@@ -85,7 +85,7 @@ Implement comprehensive CI/CD integration with automated performance monitoring:
            run: |
              # Use existing PerformanceCriteriaEvaluator
              java -cp target/classes no.rmz.rmatch.performancetests.PerformanceCriteriaEvaluator \
-               --baseline-dir benchmarks/baseline/ \
+               --baseline-dir benchmarking/baseline/ \
                --results-dir results/ \
                --output-format github-actions
    ```
@@ -129,7 +129,7 @@ Implement comprehensive CI/CD integration with automated performance monitoring:
 2. **Baseline Storage Strategy**
    ```yaml
    # Baseline storage in repository
-   benchmarks/
+   benchmarking/
      baselines/
        main/
          comprehensive-test-baseline.json

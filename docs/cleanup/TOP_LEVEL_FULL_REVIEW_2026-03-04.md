@@ -53,10 +53,10 @@ Recommendation labels:
 | `.mvn/` | Maven wrapper config | KEEP | Required by `mvnw`. |
 | `analysis/` | Technical analysis paper bundle (LaTeX/PlantUML and outputs) | KEEP (RELOCATE) | Keep content, but relocate under `docs/papers/` or `docs/analysis/` to reduce root clutter. |
 | `archive/` | Official attic/quarantine for historical artifacts | KEEP | This is the intended non-destructive attic location. |
-| `benchmarks/` | JMH module, baselines, legacy benchmark result history | KEEP | Active benchmark module exists here. Consider internal archival of older `benchmarks/results/*` batches. |
+| `benchmarking/` | JMH module, baselines, legacy benchmark result history | KEEP | Active benchmark module exists here. Consider internal archival of older `benchmarking/results/*` batches. |
 | `charts/` | Generated chart outputs (+legacy chart set) | KEEP (RELOCATE) | Keep for now due workflow references; later move to `docs/benchmarking/charts/` with workflow path update. |
 | `docs/` | Curated documentation and papers | KEEP | Active docs home. |
-| `extended-benchmarking/` | New large-scale benchmark platform and control plane | KEEP | Core of current benchmarking strategy. |
+| `benchmarking/framework/` | New large-scale benchmark platform and control plane | KEEP | Core of current benchmarking strategy. |
 | `plans/` | Optimization backlog and planning artifacts | KEEP | Active planning home; aligns with cleanup goals. |
 | `prd-repo/` | Legacy PRD docs (single file) | MOVE TO ATTIC | Historical design artifact; no longer primary execution plan. |
 | `proposals/` | Historical proposals and drafts | KEEP (RELOCATE) | Keep for now, but better moved under `docs/proposals/` (or archive stale ones) after curation. |
@@ -71,4 +71,4 @@ Recommendation labels:
 1. Move top-level `MOVE TO ATTIC` entries into `archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/` with manifest.
 2. Remove/ignore local artifacts at root (IDE/venv leftovers and non-owner-kept OS artifacts).
 3. Relocate `analysis/` and possibly `proposals/` under `docs/` in staged commits with quick test checks between steps.
-4. In a separate pass, archive old data inside `benchmarks/results/`, `rmatch-tester/logs/`, and `rmatch-tester/plots/` using the same manifest policy.
+4. In a separate pass, archive old data inside `benchmarking/results/`, `rmatch-tester/logs/`, and `rmatch-tester/plots/` using the same manifest policy.

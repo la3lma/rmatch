@@ -21,7 +21,7 @@ Legend:
 | `README.md` | Primary project landing page and usage docs | Keep (root) | Standard root entrypoint; referenced by users and automation | High |
 | `TODO.md` | Active cross-cutting backlog notes (includes current benchmark correctness notes) | Keep (move) | Content is active, but root clutter is high; move to `plans/` or `docs/cleanup/` later | Medium |
 | `benchmarks.ipynb` | Historical exploratory benchmark analysis notebook | Archive candidate | Not in active build/test path; likely scar tissue from older benchmark flow | Medium |
-| `checkstyle-unused-imports.xml` | Checkstyle configuration for Maven modules | Keep (root) | Referenced by `pom.xml`, `rmatch-tester/pom.xml`, and `benchmarks/jmh/pom.xml` | High |
+| `checkstyle-unused-imports.xml` | Checkstyle configuration for Maven modules | Keep (root) | Referenced by `pom.xml`, `rmatch-tester/pom.xml`, and `benchmarking/jmh/pom.xml` | High |
 | `foo.sh` | Ad hoc script to run `GitHubActionPerformanceTestRunner` | Archive candidate | Not referenced by build/CI and duplicates managed entrypoints | High |
 | `java_performance_timeline.png` | Generated benchmark chart published in README/CI artifacts | Archive candidate | Owner directive: move top-level PNG artifacts to attic | High |
 | `measurements.sqlite` | Local analysis database used by notebook workflows | Archive candidate | Owner directive: move top-level SQLite/DB files to attic | High |

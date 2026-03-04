@@ -61,7 +61,7 @@ Available configurations:
 
 ## Results Location
 
-Results are stored in `benchmarks/results/gc-experiments/<timestamp>/` with:
+Results are stored in `benchmarking/results/gc-experiments/<timestamp>/` with:
 
 ```
 <timestamp>/
@@ -84,7 +84,7 @@ Results are stored in `benchmarks/results/gc-experiments/<timestamp>/` with:
 
 ```bash
 # Find the latest experiment
-latest=$(ls -td benchmarks/results/gc-experiments/*/ | head -n1)
+latest=$(ls -td benchmarking/results/gc-experiments/*/ | head -n1)
 cat "${latest}SUMMARY.md"
 ```
 
@@ -157,7 +157,7 @@ If a GC configuration shows consistent improvement:
 make bench-gc-experiments
 
 # 2. Find latest results
-latest=$(ls -td benchmarks/results/gc-experiments/*/ | head -n1)
+latest=$(ls -td benchmarking/results/gc-experiments/*/ | head -n1)
 
 # 3. View summary
 cat "${latest}SUMMARY.md"
