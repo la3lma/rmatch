@@ -1,0 +1,24 @@
+{
+  "phase": "test",
+  "description": "Quick test of working engines",
+  "test_matrix": {
+    "pattern_counts": [10],
+    "input_sizes": ["1MB"],
+    "pattern_suites": ["log_mining"],
+    "corpora": ["synthetic_controllable"],
+    "engines": [
+      "java-native-optimized",
+      "re2j",
+      "rmatch"
+    ],
+    "iterations_per_combination": 2,
+    "warmup_iterations": 1
+  },
+  "execution_plan": {
+    "failure_handling": {
+      "engine_unavailable": "skip_with_warning",
+      "correctness_mismatch": "abort_with_error",
+      "performance_timeout": "record_partial_results"
+    }
+  }
+}

@@ -1,0 +1,230 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\title{rmatch Status Report: 2026-03-03}
+\author{Repository status snapshot}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document captures the current state of the rmatch engine and its benchmark platform. It focuses on the present architecture, implemented optimization layers, current benchmark evidence, and the modeling work used to estimate regime dominance across pattern count and corpus size. It intentionally avoids the full historical journey and is structured as a reusable baseline for future publication work.
+\end{abstract}
+
+\tableofcontents
+
+\section{Scope and Data Sources}
+This report is built from repository-local artifacts as of 2026-03-03, primarily:
+\begin{itemize}
+  \item engine/runtime code in \texttt{rmatch/src/main/java/no/rmz/rmatch}
+  \item benchmark control and protocol docs in \texttt{extended-benchmarking/regex\_bench\_framework/docs}
+  \item aggregated benchmark outputs in \texttt{extended-benchmarking/regex\_bench\_framework/reports/workload\_all\_live}
+  \item model and dominance note in \texttt{.../workload\_all\_live/modeling\_dominance\_note.tex}
+\end{itemize}
+
+This is a status document, not a final publication. Results should be treated as current evidence with explicit caveats.
+
+\section{System Architecture (Current)}
+\subsection{High-level execution model}
+rmatch is a non-backtracking matcher built around compiled NDFA fragments and lazily materialized DFA states. The default entry point (\texttt{MatcherFactory.newMatcher()}) instantiates a \texttt{MultiMatcher} that partitions regexes across sub-matchers and executes those sub-matchers in parallel.
+
+\subsection{Compilation pipeline}
+\begin{itemize}
+  \item \texttt{NDFACompilerImpl} compiles a regex string through \texttt{SurfaceRegexpParser} and \texttt{ARegexpCompiler}.
+  \item \texttt{ARegexpCompiler} builds NDFA fragments (alternatives, char sets, quantifiers, any-char, etc.) and returns an NDFA start node.
+  \item \texttt{NodeStorageImpl} maintains start-node connectivity and performs subset-construction mapping from NDFA sets to DFA nodes.
+\end{itemize}
+
+\subsection{Matching pipeline}
+\begin{itemize}
+  \item \texttt{MatcherImpl} owns \texttt{RegexpStorage} and one \texttt{MatchEngine}.
+  \item engine selection is property-driven (\texttt{rmatch.engine}), currently defaulting to \texttt{fastpath}.
+  \item \texttt{MultiMatcher} shards regexes by hash and runs all shards concurrently on input clones.
+  \item \texttt{NodeStorageImpl} and \texttt{DFANodeImpl} cache transitions and lazily create new DFA states as needed.
+\end{itemize}
+
+\subsection{Implemented optimization layers}
+The current codebase contains several active optimization tracks:
+\begin{itemize}
+  \item \textbf{FastPath engine}: ASCII fast-lane (\texttt{AsciiOptimizer}), thread-local state buffers (\texttt{StateSetBuffers}), and Aho-Corasick literal prefilter integration.
+  \item \textbf{Prefiltering}: literal extraction (\texttt{LiteralPrefilter}) and candidate start-position narrowing via \texttt{AhoCorasickPrefilter}.
+  \item \textbf{Memory/state representation}: compressed DFA basis representation (\texttt{CompressedDFAState}) with precomputed hash and integer-array storage.
+  \item \textbf{Parallel partitioning}: default partition count heuristics in \texttt{MatcherFactory} and concurrent execution in \texttt{MultiMatcher}.
+\end{itemize}
+
+\section{Benchmark Platform and Fairness Controls}
+The current benchmark control plane uses the Python framework under \texttt{extended-benchmarking/regex\_bench\_framework}, containerized execution, and GCP run control.
+
+\subsection{Canonical comparator set}
+The active canonical set is:
+\begin{itemize}
+  \item \texttt{rmatch}
+  \item \texttt{re2j}
+  \item \texttt{java-native-naive} (\texttt{java.util.regex}-based baseline)
+\end{itemize}
+
+\subsection{Fairness and reproducibility controls in place}
+From \texttt{FAIRNESS\_AND\_REPRODUCIBILITY.md}, the current process enforces:
+\begin{itemize}
+  \item fixed comparator set and standardized metric parsing contract
+  \item canonical matrix and deterministic data inputs
+  \item versioned dataset bundles with content hash
+  \item transfer/setup excluded from timed benchmark metrics
+  \item containerized runtime with architecture/cohort labeling
+  \item run provenance artifacts, periodic checkpoints, and resumable run ledger (\texttt{jobs.db}, transaction logs)
+  \item explicit hard timeout and stall timeout policy with persisted failure evidence
+\end{itemize}
+
+\subsection{Known limitations to disclose}
+Current limitations called out by the repo protocol include warmup semantics not yet fully executed in runner logic, non-randomized run order, incomplete manifest hashing/commit capture, and regex semantic drift risk across engines.
+
+\section{Current Benchmark Evidence}
+\subsection{Primary comparable cohort}
+Primary comparisons in this report use cohort \texttt{e2-standard-8|x86\_64}, from:
+\begin{itemize}
+  \item \texttt{cohort\_workload\_engine\_matrix.csv}
+  \item \texttt{all\_runs\_workload\_engine.csv}
+\end{itemize}
+
+\subsection{Combined workload results (canonical + 10K partial)}
+\begin{table}[h!]
+\centering
+\small
+\begin{tabular}{rrrrrrr}
+\toprule
+Patterns & Input & Winner & Winner ms & Java x & RE2J x & rmatch x \\
+\midrule
+10 & 1MB   & java-native-naive & 125.0   & 1.00 & 2.83  & 52.13 \\
+10 & 10MB  & java-native-naive & 254.4   & 1.00 & 1.73  & 31.29 \\
+10 & 100MB & re2j              & 1072.4  & 1.41 & 1.00  & 20.96 \\
+100 & 1MB   & java-native-naive & 1692.4  & 1.00 & 3.61  & 4.09 \\
+100 & 10MB  & rmatch            & 11175.4 & 1.21 & 5.03  & 1.00 \\
+100 & 100MB & rmatch            & 51477.8 & 2.62 & 10.91 & 1.00 \\
+1000 & 1MB   & java-native-naive & 15244.8 & 1.00 & 3.81  & 1.09 \\
+1000 & 10MB  & rmatch            & 18382.5 & 8.97 & 31.51 & 1.00 \\
+1000 & 100MB & rmatch            & 41215.5 & 36.69 & 139.98 & 1.00 \\
+10000 & 1MB   & rmatch & 17340.1 & 7.92  & 14.74 & 1.00 \\
+10000 & 10MB  & rmatch & 19762.0 & 61.02 & --    & 1.00 \\
+10000 & 100MB & rmatch & 63219.3 & --    & 406.78 & 1.00 \\
+\bottomrule
+\end{tabular}
+\caption{Comparable cohort summary (\texttt{e2-standard-8|x86\_64}) combining canonical and current 10K rows. Multipliers are relative to the winner for that row (1.00 is best). ``--'' denotes currently missing data.}
+\end{table}
+
+Winner count on these nine canonical points is:
+\begin{itemize}
+  \item java-native-naive: 4
+  \item re2j: 1
+  \item rmatch: 4
+\end{itemize}
+
+\textbf{Failure evidence currently captured:} \texttt{all\_runs\_failed\_jobs.csv} contains two logged failures for \texttt{re2j} at 10K/10MB (durations about 2543--2576 seconds) in this campaign line.
+
+\section{Runtime Modeling and Dominance Regions}
+\subsection{Model form}
+The current fitted model uses a log-linear relation:
+\[
+\ln T = \beta_0 + \alpha \ln P + \beta \ln B
+\]
+where:
+\begin{itemize}
+  \item \(T\): runtime (ms)
+  \item \(P\): pattern count
+  \item \(B\): input size (bytes)
+\end{itemize}
+
+Anchored form used in the report artifacts:
+\[
+T \approx K_{100,10\text{MiB}}\left(\frac{P}{100}\right)^{\alpha}\left(\frac{B}{10\text{MiB}}\right)^{\beta}
+\]
+
+\subsection{Current fitted coefficients}
+\begin{table}[h!]
+\centering
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Engine & N & \(K_{100,10\text{MiB}}\) ms & \(\alpha\) & \(\beta\) & \(R^2\) \\
+\midrule
+java-native-naive & 9  & 9384.7  & 1.316 & 0.830 & 0.970 \\
+re2j              & 10 & 22263.6 & 1.289 & 0.851 & 0.888 \\
+rmatch            & 12 & 15357.9 & 0.142 & 0.294 & 0.851 \\
+\bottomrule
+\end{tabular}
+\caption{Fitted coefficients from \texttt{modeling\_dominance\_note.tex} for cohort \texttt{e2-standard-8|x86\_64}.}
+\end{table}
+
+\subsection{Dominance map figure}
+\begin{figure}[h!]
+\centering
+\includegraphics[page=2,width=0.95\linewidth]{../../extended-benchmarking/regex_bench_framework/reports/workload_all_live/modeling_dominance_note.pdf}
+\caption{Dominance map and model-equality boundaries from the generated modeling note artifact.}
+\end{figure}
+
+\subsection{Interpretation}
+Current fit suggests much weaker pattern/input exponents for rmatch than for java-native-naive and re2j in this cohort. This is directionally consistent with observed winner transitions: java-native-naive dominates at lighter workloads, while rmatch dominates more of the heavier-load region.
+
+\section{Memory and Correctness Status}
+\subsection{Memory telemetry}
+The benchmarking API supports memory fields (\texttt{MEMORY\_BYTES} and related fields), but current all-runs aggregation does not yet provide a clean, publication-grade memory series across campaigns/cohorts. In practical terms, the present reporting is runtime-focused; memory is an important missing benchmark dimension in the current campaign outputs. This gap is already recognized and is planned to be addressed in upcoming data test campaigns.
+
+\subsection{Correctness consistency tracking}
+The consolidated consistency audit (\texttt{correctness\_consistency\_audit.csv}) currently reports:
+\begin{itemize}
+  \item same-engine inconsistency: 5 minor, 4 major
+  \item cross-engine mismatch: 6 minor, 3 major
+\end{itemize}
+These discrepancies are tracked and reported; runs are currently retained for performance analysis while investigation continues.
+
+\section{External Baseline Context}
+\subsection{Why java-native-naive is kept}
+The native Java matcher is a practical baseline because it is mature, easy to integrate, and often excellent at small to moderate scales. It serves as a strong ``small-load efficiency'' reference.
+
+\subsection{Why RE2J is kept}
+RE2J provides a non-backtracking Java comparator in the same language/runtime ecosystem, making it operationally convenient and scientifically useful for scaling comparisons.
+
+\subsection{About very high-performance native engines}
+Repository benchmark harness documentation includes placeholders and plans for native engines such as Hyperscan. Those comparisons are important but are not part of the current canonical, publication-ready cohort in this report.
+
+\section{Cost and Operations Snapshot for Outsourced Runs}
+From the phased plan document, current planning envelope for one canonical campaign:
+\begin{itemize}
+  \item warm run wall-clock: about 1.0--2.0 hours
+  \item cold run wall-clock: about 2.0--3.5 hours
+  \item example cost bands: roughly \$0.50--\$8.75 depending on VM hourly rate and warm/cold state
+\end{itemize}
+These are planning estimates only and must be replaced with current GCP region/machine pricing before publication claims.
+
+\section{Candidate Optimization Backlog (Not Yet Executed)}
+Current TODO/proposal themes relevant to performance work:
+\begin{itemize}
+  \item stronger cutoff heuristics based on non-match termination statistics
+  \item deeper investigation of match-count discrepancies and shutdown/flush timing
+  \item engine-level match checksums for stronger cross-engine equality checks
+  \item run-level memory telemetry integration into reports
+  \item continued benchmarking-method cleanup and script hardening
+\end{itemize}
+
+\section{Conclusion}
+The system now has:
+\begin{itemize}
+  \item a concrete non-backtracking multi-pattern engine with parallel partitioning and active optimization layers
+  \item a cloud-ready, resumable, and fairness-documented benchmark control plane
+  \item a current empirical baseline with explicit workload-dependent winner regions
+  \item an initial model-based dominance map suitable for guiding next optimization probes
+\end{itemize}
+
+Primary near-term priorities are to complete missing heavy-load cells, improve memory observability, and close correctness-discrepancy diagnostics before claiming publication-grade finality.
+
+\end{document}

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Regex Benchmark Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .summary { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .results { margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Regex Benchmark Report</h1>
+        <p>Run ID: 20251220_174032_c7a2db79 | Generated: 2025-12-20 19:12:49</p>
+    </div>
+
+    <div class="summary">
+        <h2>📊 Summary</h2>
+        <p><strong>Phase:</strong> Large_Corpus_Validation</p>
+        <p><strong>Status:</strong> <span class="success">Completed</span></p>
+        <p><strong>Duration:</strong> 616.23 seconds</p>
+        <p><strong>Engines:</strong> re2j, rmatch</p>
+        <p><strong>Total Runs:</strong> 16</p>
+        <p><strong>Successful Runs:</strong> 4</p>
+        <p><strong>Success Rate:</strong> 25.0%</p>
+    </div>
+
+    <div class="results">
+        <h2>📋 Detailed Results</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Engine</th>
+                    <th>Status</th>
+                    <th>Corpus Size</th>
+                    <th>Compilation (ms)</th>
+                    <th>Scanning (ms)</th>
+                    <th>Throughput</th>
+                    <th>Matches</th>
+                    <th>Patterns</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>re2j</td>
+                    <td class="success">ok</td>
+                    <td>500.0 MB</td>
+                    <td>118.375</td>
+                    <td>2535.667</td>
+                    <td>197.19 MB/sec</td>
+                    <td>1229499</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>re2j</td>
+                    <td class="success">ok</td>
+                    <td>500.0 MB</td>
+                    <td>117.990</td>
+                    <td>2536.761</td>
+                    <td>197.10 MB/sec</td>
+                    <td>1229499</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>rmatch</td>
+                    <td class="error">timeout</td>
+                    <td>500.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>rmatch</td>
+                    <td class="error">timeout</td>
+                    <td>500.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>re2j</td>
+                    <td class="success">ok</td>
+                    <td>1024.0 MB</td>
+                    <td>132.258</td>
+                    <td>19424.990</td>
+                    <td>52.72 MB/sec</td>
+                    <td>2517353</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>re2j</td>
+                    <td class="success">ok</td>
+                    <td>1024.0 MB</td>
+                    <td>135.535</td>
+                    <td>12716.931</td>
+                    <td>80.52 MB/sec</td>
+                    <td>2517353</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>rmatch</td>
+                    <td class="error">timeout</td>
+                    <td>1024.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>rmatch</td>
+                    <td class="error">timeout</td>
+                    <td>1024.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>re2j</td>
+                    <td class="error">timeout</td>
+                    <td>500.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>re2j</td>
+                    <td class="error">timeout</td>
+                    <td>500.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <td>11</td>
+                    <td>rmatch</td>
+                    <td class="error">timeout</td>
+                    <td>500.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td>rmatch</td>
+                    <td class="error">timeout</td>
+                    <td>500.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <td>13</td>
+                    <td>re2j</td>
+                    <td class="error">timeout</td>
+                    <td>1024.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <td>14</td>
+                    <td>re2j</td>
+                    <td class="error">timeout</td>
+                    <td>1024.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <td>15</td>
+                    <td>rmatch</td>
+                    <td class="error">timeout</td>
+                    <td>1024.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <td>16</td>
+                    <td>rmatch</td>
+                    <td class="error">timeout</td>
+                    <td>1024.0 MB</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>0.00 MB/sec</td>
+                    <td>None</td>
+                    <td>100</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <footer style="margin-top: 40px; text-align: center; color: #666; font-size: 14px;">
+        <p>Generated by Regex Bench Framework v2.0</p>
+    </footer>
+</body>
+</html>

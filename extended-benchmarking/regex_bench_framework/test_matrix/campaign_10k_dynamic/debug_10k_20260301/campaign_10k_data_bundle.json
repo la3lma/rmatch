@@ -1,0 +1,62 @@
+{
+  "phase": "campaign_10k_data_bundle_debug_10k_20260301",
+  "description": "Data bundle definition for dynamic 10K campaign",
+  "test_matrix": {
+    "pattern_counts": [
+      10000
+    ],
+    "input_sizes": [
+      "1MB",
+      "10MB",
+      "100MB"
+    ],
+    "pattern_suites": [
+      "stable_patterns"
+    ],
+    "corpora": [
+      "synthetic_controllable"
+    ],
+    "engines": [
+      "rmatch",
+      "re2j",
+      "java-native-naive"
+    ],
+    "iterations_per_combination": 1,
+    "warmup_iterations": 0
+  },
+  "data_configuration": {
+    "pattern_generation": {
+      "suite": "stable_patterns",
+      "seed": 12345
+    },
+    "corpus_generation": {
+      "type": "synthetic_controllable",
+      "match_density": "medium",
+      "character_distribution": "log_like"
+    }
+  },
+  "execution_plan": {
+    "failure_handling": {
+      "engine_unavailable": "abort",
+      "correctness_mismatch": "record_with_warning",
+      "performance_timeout": "record_partial_results"
+    },
+    "timeout_per_job": 300,
+    "resource_limits": {
+      "max_memory_mb": 16384,
+      "max_concurrent_jobs": 1
+    }
+  },
+  "optimization": {
+    "enable_parallel_execution": false,
+    "enable_adaptive_iterations": false,
+    "result_caching": false,
+    "corpus_pregeneration": true,
+    "job_scheduling": "sequential"
+  },
+  "validation": {
+    "cross_engine_correctness": true,
+    "performance_regression_detection": true,
+    "memory_usage_tracking": true
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "phase": "stable_pattern_validation",
+  "corpus_sizes": ["1MB"],
+  "pattern_sets": [
+    {
+      "name": "stable_10k_patterns",
+      "patterns_file": "benchmark_suites/stable_patterns/patterns_10000.txt",
+      "metadata": {"description": "Validation test for 10K stable patterns across all engines"}
+    }
+  ],
+  "engines": ["java-native-optimized", "re2j", "rmatch"],
+  "iterations": 1,
+  "parallel_jobs": 3
+}
