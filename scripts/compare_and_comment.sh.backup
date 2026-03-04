@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Compare current JMH JSON against a baseline and emit a Markdown summary.
 # Baseline files (choose whichever exists):
-#   benchmarks/baseline/jmh-baseline.json
+#   benchmarking/baseline/jmh-baseline.json
 #   $BASELINE_JSON (env var)
 # If GITHUB_TOKEN and PR context are present, will try to post a PR comment using gh or curl.
 
@@ -13,13 +13,13 @@ cd "$root_dir"
 CURR_JSON=${1:-}
 if [[ -z "$CURR_JSON" ]]; then
   # pick the latest result
-  CURR_JSON=$(ls -t benchmarks/results/jmh-*.json | head -n1)
+  CURR_JSON=$(ls -t benchmarking/results/jmh-*.json | head -n1)
 fi
 
 BASELINE_JSON=${BASELINE_JSON:-}
 if [[ -z "$BASELINE_JSON" ]]; then
-  if [[ -f benchmarks/baseline/jmh-baseline.json ]]; then
-    BASELINE_JSON=benchmarks/baseline/jmh-baseline.json
+  if [[ -f benchmarking/baseline/jmh-baseline.json ]]; then
+    BASELINE_JSON=benchmarking/baseline/jmh-baseline.json
   else
     echo "No baseline JSON found. Skipping comparison." >&2
     exit 0
@@ -31,8 +31,8 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
-mkdir -p benchmarks/results
-OUT_MD=benchmarks/results/perf-summary.md
+mkdir -p benchmarking/results
+OUT_MD=benchmarking/results/perf-summary.md
 
 # Build a map from benchmark name -> score for both files
 jq -r '.[] | [.benchmark, .primaryMetric.score] | @tsv' "$BASELINE_JSON" | sort > /tmp/baseline.tsv

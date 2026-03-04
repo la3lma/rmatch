@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate performance charts from benchmarks/results and CSV comparison data.
+Generate performance charts from benchmarking/results and CSV comparison data.
 Updated version addressing GitHub issue #166 requirements.
 
 Key improvements:
@@ -26,7 +26,7 @@ from pathlib import Path
 plt.style.use('seaborn-v0_8-whitegrid')
 sns.set_palette("husl")
 
-def load_jmh_data(results_dir="benchmarks/results"):
+def load_jmh_data(results_dir="benchmarking/results"):
     """Load and parse JMH benchmark data."""
     results_path = Path(results_dir)
     if not results_path.exists():
@@ -76,7 +76,7 @@ def load_jmh_data(results_dir="benchmarks/results"):
         print("No JMH data found")
         return pd.DataFrame()
 
-def load_macro_data(results_dir="benchmarks/results"):
+def load_macro_data(results_dir="benchmarking/results"):
     """Load and parse macro benchmark data."""
     results_path = Path(results_dir)
     if not results_path.exists():

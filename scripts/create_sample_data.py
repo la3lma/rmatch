@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 
 def create_sample_jmh_data():
     """Create sample JMH data files with 5000 and 10000 pattern counts."""
-    os.makedirs("benchmarks/results", exist_ok=True)
+    os.makedirs("benchmarking/results", exist_ok=True)
     
     # Base timestamp
     base_time = datetime(2025, 9, 7, 12, 0, 0)
@@ -75,7 +75,7 @@ def create_sample_jmh_data():
             jmh_results.append(result)
         
         # Write to file
-        filename = f"benchmarks/results/jmh-{timestamp_str}-sample.json"
+        filename = f"benchmarking/results/jmh-{timestamp_str}-sample.json"
         with open(filename, 'w') as f:
             json.dump(jmh_results, f, indent=2)
         
@@ -83,7 +83,7 @@ def create_sample_jmh_data():
 
 def create_sample_macro_data():
     """Create sample macro data files with proper JSON formatting."""
-    os.makedirs("benchmarks/results", exist_ok=True)
+    os.makedirs("benchmarking/results", exist_ok=True)
     
     base_time = datetime(2025, 9, 7, 14, 0, 0)
     
@@ -103,15 +103,15 @@ def create_sample_macro_data():
             "args": {"max_regexps": pattern_count},
             "duration_ms": int(duration),
             "exit_status": 0,
-            "log": f"benchmarks/results/macro-{timestamp_str}-sample.log"
+            "log": f"benchmarking/results/macro-{timestamp_str}-sample.log"
         }
         
-        filename = f"benchmarks/results/macro-{timestamp_str}-sample.json"
+        filename = f"benchmarking/results/macro-{timestamp_str}-sample.json"
         with open(filename, 'w') as f:
             json.dump(macro_data, f, indent=2)
         
         # Create corresponding log file
-        log_filename = f"benchmarks/results/macro-{timestamp_str}-sample.log"
+        log_filename = f"benchmarking/results/macro-{timestamp_str}-sample.log"
         with open(log_filename, 'w') as f:
             f.write(f"BenchmarkTheWutheringHeightsCorpus, argx = [{pattern_count}]\n")
             f.write(f"Benchmarking wuthering heights for index {pattern_count}\n")

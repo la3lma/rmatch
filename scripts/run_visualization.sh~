@@ -14,5 +14,5 @@ cd /tmp
 # Run the visualization script with absolute paths
 /Users/rmz/git/rmatch/scripts/.venv/bin/python \
     /Users/rmz/git/rmatch/scripts/visualize_benchmarks.py \
-    --results-dir /Users/rmz/git/rmatch/benchmarks/results \
+    --results-dir /Users/rmz/git/rmatch/benchmarking/results \
     --output-dir /Users/rmz/git/rmatch/performance-graphs

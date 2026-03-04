@@ -1,0 +1,19 @@
+{
+  "phase": 1,
+  "description": "Large-scale benchmark using pre-generated patterns - OPTION A DEMO",
+  "test_matrix": {
+    "pattern_counts": [100],
+    "input_sizes": ["100MB"],
+    "pattern_suites": ["log_mining"],
+    "corpora": ["synthetic_controllable"],
+    "engines": ["java-native-optimized", "java-native-unfair", "re2j", "rmatch"],
+    "iterations_per_combination": 5,
+    "warmup_iterations": 2
+  },
+  "execution_plan": {
+    "parallel_execution": {
+      "max_concurrent_engines": 4,
+      "resource_isolation": true
+    }
+  }
+}

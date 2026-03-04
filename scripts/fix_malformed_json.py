@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Fix malformed JSON files in benchmarks/results directory.
+Fix malformed JSON files in benchmarking/results directory.
 Common issues:
 1. Unescaped quotes in Java version strings
 2. Incomplete/truncated JSON structures
@@ -114,7 +114,7 @@ def fix_json_file(file_path):
         return False
 
 def main():
-    """Fix all malformed JSON files in benchmarks/results"""
+    """Fix all malformed JSON files in benchmarking/results"""
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
     results_dir = project_root / "benchmarks" / "results"

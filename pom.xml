@@ -195,7 +195,7 @@
     <modules>
         <module>rmatch</module>
         <module>rmatch-tester</module>
-        <module>benchmarks/jmh</module>
+        <module>benchmarking/jmh</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:la3lma/rmatch.git</connection>

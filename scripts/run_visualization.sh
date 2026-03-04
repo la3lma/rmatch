@@ -18,5 +18,5 @@ source "$SCRIPT_DIR/.venv/bin/activate"
 # Run the visualization script with absolute paths
 "$SCRIPT_DIR/.venv/bin/python" \
     "$SCRIPT_DIR/visualize_benchmarks.py" \
-    --results-dir "$PROJECT_DIR/benchmarks/results" \
+    --results-dir "$PROJECT_DIR/benchmarking/results" \
     --output-dir "$PROJECT_DIR/performance-graphs"

@@ -53,10 +53,10 @@ jobs:
           git config --local user.name "GitHub Action - Performance Data Collection"
           
           # Add all benchmark result files
-          git add benchmarks/results/macro-*.json || echo "No macro results to add"
-          git add benchmarks/results/java-*.json || echo "No java results to add"  
-          git add benchmarks/results/jmh-*.json || echo "No JMH results to add"
-          git add benchmarks/results/jmh-*.txt || echo "No JMH text results to add"
+          git add benchmarking/results/macro-*.json || echo "No macro results to add"
+          git add benchmarking/results/java-*.json || echo "No java results to add"  
+          git add benchmarking/results/jmh-*.json || echo "No JMH results to add"
+          git add benchmarking/results/jmh-*.txt || echo "No JMH text results to add"
           
           # Add updated performance charts
           git add performance_timeline.png || echo "No macro timeline chart to add"
@@ -86,10 +86,10 @@ jobs:
         with: 
           name: perf-artifacts-${{ github.sha }}
           path: |
-            benchmarks/results/macro-*.json
-            benchmarks/results/java-*.json
-            benchmarks/results/jmh-*.json
-            benchmarks/results/jmh-*.txt
+            benchmarking/results/macro-*.json
+            benchmarking/results/java-*.json
+            benchmarking/results/jmh-*.json
+            benchmarking/results/jmh-*.txt
             profiles/*.svg
             performance_timeline.png
             java_performance_timeline.png

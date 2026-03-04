@@ -15,10 +15,10 @@ if [[ ! -x "$MVN" ]]; then
 fi
 
 MAX_REGEXPS=${MAX_REGEXPS:-10000}
-mkdir -p benchmarks/results
+mkdir -p benchmarking/results
 stamp=$(date -u +"%Y%m%dT%H%M%SZ")
-LOG_OUT="benchmarks/results/macro-${stamp}.log"
-JSON_OUT="benchmarks/results/macro-${stamp}.json"
+LOG_OUT="benchmarking/results/macro-${stamp}.log"
+JSON_OUT="benchmarking/results/macro-${stamp}.json"
 
 # Build everything the tester depends on
 $MVN -q -B -DskipTests package

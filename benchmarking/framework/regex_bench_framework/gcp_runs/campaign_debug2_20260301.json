@@ -1,0 +1,141 @@
+{
+  "campaign_id": "debug2_20260301",
+  "started_at": "2026-03-01T11:30:21.808824Z",
+  "updated_at": "2026-03-01T22:19:09.246803Z",
+  "zone": "europe-north2-a",
+  "bucket": "run-cl-rmatch-bench",
+  "machine_type": "e2-standard-8",
+  "timeout_factor": 4.0,
+  "poll_seconds": 60,
+  "iterations": 2,
+  "warmup": 1,
+  "image_uri": "europe-north2-docker.pkg.dev/run-cl/rmatch-bench/regex-bench:20260228-163722",
+  "data_uri": "gs://run-cl-rmatch-bench/datasets/debug2_20260301-data/data_bundle.tar.gz",
+  "baseline_batch_id": null,
+  "baseline_runs": {
+    "100MB": {
+      "run_id": "20260301_181108_69ea8d",
+      "gcs_run_root": "gs://run-cl-rmatch-bench/runs/20260301_181108_69ea8d",
+      "config_name": "baseline_10k_100MB_fastpair.json",
+      "role": "baseline_fastpair",
+      "size": "100MB"
+    },
+    "10MB": {
+      "run_id": "20260301_164010_3ae803",
+      "gcs_run_root": "gs://run-cl-rmatch-bench/runs/20260301_164010_3ae803",
+      "config_name": "baseline_10k_10MB_fastpair.json",
+      "role": "baseline_fastpair",
+      "size": "10MB"
+    },
+    "1MB": {
+      "run_id": "20260301_113023_ebbdcb",
+      "gcs_run_root": "gs://run-cl-rmatch-bench/runs/20260301_113023_ebbdcb",
+      "config_name": "baseline_10k_1MB_fastpair.json",
+      "role": "baseline_fastpair",
+      "size": "1MB"
+    }
+  },
+  "java_runs": {
+    "10MB": {
+      "run_id": "20260301_215425_512486",
+      "gcs_run_root": "gs://run-cl-rmatch-bench/runs/20260301_215425_512486",
+      "config_name": "java_10k_10MB_timeout_120s.json",
+      "role": "java_naive_dynamic_cutoff",
+      "size": "10MB"
+    },
+    "1MB": {
+      "run_id": "20260301_214805_1c9657",
+      "gcs_run_root": "gs://run-cl-rmatch-bench/runs/20260301_214805_1c9657",
+      "config_name": "java_10k_1MB_timeout_120s.json",
+      "role": "java_naive_dynamic_cutoff",
+      "size": "1MB"
+    }
+  },
+  "java_timeouts_seconds": {
+    "10MB": 120,
+    "1MB": 120
+  },
+  "java_skipped": {
+    "100MB": "baseline status is failed; java skipped"
+  },
+  "status_by_run": {
+    "20260301_113023_ebbdcb": {
+      "run_id": "20260301_113023_ebbdcb",
+      "role": "baseline_fastpair",
+      "size": "1MB",
+      "status": "completed",
+      "completed_jobs": 4,
+      "total_jobs": 4,
+      "remaining_seconds": -1,
+      "updated_at": "2026-03-01T16:39:42Z",
+      "memory_congested": false,
+      "recommendation": ""
+    },
+    "20260301_164010_3ae803": {
+      "run_id": "20260301_164010_3ae803",
+      "role": "baseline_fastpair",
+      "size": "10MB",
+      "status": "completed",
+      "completed_jobs": 2,
+      "total_jobs": 4,
+      "remaining_seconds": 2260,
+      "updated_at": "2026-03-01T18:10:41Z",
+      "memory_congested": false,
+      "recommendation": ""
+    },
+    "20260301_181108_69ea8d": {
+      "run_id": "20260301_181108_69ea8d",
+      "role": "baseline_fastpair",
+      "size": "100MB",
+      "status": "failed",
+      "completed_jobs": 2,
+      "total_jobs": 4,
+      "remaining_seconds": 12915,
+      "updated_at": "2026-03-01T21:47:08Z",
+      "memory_congested": false,
+      "recommendation": ""
+    },
+    "20260301_214805_1c9657": {
+      "run_id": "20260301_214805_1c9657",
+      "role": "java_naive_dynamic_cutoff",
+      "size": "1MB",
+      "status": "failed",
+      "completed_jobs": 1,
+      "total_jobs": 2,
+      "remaining_seconds": 282,
+      "updated_at": "2026-03-01T21:53:38Z",
+      "memory_congested": false,
+      "recommendation": ""
+    },
+    "20260301_215425_512486": {
+      "run_id": "20260301_215425_512486",
+      "role": "java_naive_dynamic_cutoff",
+      "size": "10MB",
+      "status": "failed",
+      "completed_jobs": 1,
+      "total_jobs": 2,
+      "remaining_seconds": 1365,
+      "updated_at": "2026-03-01T22:17:55Z",
+      "memory_congested": false,
+      "recommendation": ""
+    }
+  },
+  "campaign_status": "completed",
+  "notes": [
+    "java cutoff per size = ceil(timeout_factor * fastest_mean_seconds_from_rmatch_or_re2j)",
+    "scheduling mode: multi-lane (baseline and java per size with dependency)",
+    "max_lanes: 3",
+    "baseline uses engines: rmatch,re2j",
+    "java engine: java-native-naive"
+  ],
+  "max_lanes": 3,
+  "stopped_runs": [
+    "20260301_113023_ebbdcb",
+    "20260301_164010_3ae803",
+    "20260301_181108_69ea8d",
+    "20260301_214805_1c9657",
+    "20260301_215425_512486"
+  ],
+  "effective_max_lanes": 1,
+  "completed_at": "2026-03-01T22:19:09.246796Z"
+}

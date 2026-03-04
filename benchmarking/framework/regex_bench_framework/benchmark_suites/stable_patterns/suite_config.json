@@ -1,0 +1,28 @@
+{
+  "suite_name": "stable_patterns",
+  "description": "Curated stable pattern set validated across all engines",
+  "pattern_sets": {
+    "patterns_10000": {
+      "description": "10K stable patterns compatible with all regex engines",
+      "file": "benchmark_suites/stable_patterns/patterns_10000.txt",
+      "metadata_file": "benchmark_suites/stable_patterns/patterns_10000_metadata.json",
+      "pattern_count": 10000,
+      "validation_status": "validated",
+      "compatible_engines": [
+        "java-native-optimized",
+        "java-native-unfair",
+        "re2j",
+        "rmatch"
+      ],
+      "recommended_corpus_sizes": ["1MB", "10MB", "100MB", "1GB"],
+      "recommended_iterations": 3
+    }
+  },
+  "generator_info": {
+    "generator": "StablePatternsForGit",
+    "seed": 12345,
+    "generation_date": "2025-12-19",
+    "validation_date": "2025-12-20",
+    "notes": "Git-stored stable patterns avoiding engine-specific features"
+  }
+}

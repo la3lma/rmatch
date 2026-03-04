@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate a performance plot from macro benchmark results.
-Reads all macro-*.json files from benchmarks/results/ and creates a timeline plot.
+Reads all macro-*.json files from benchmarking/results/ and creates a timeline plot.
 """
 
 import glob
