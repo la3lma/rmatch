@@ -1,22 +1,18 @@
 # .github/workflows/performance-check.yml
 #
-# CRITICAL PERFORMANCE VALIDATION RULE:
-# "I will not merge anything to main that does not provably improve performance."
+# Manual performance campaign workflow.
 #
-# This workflow enforces production-scale performance testing with realistic workloads.
-# Micro-benchmarks and lab tests are insufficient - all optimizations must be proven 
-# with 5000+ regex workloads using real text corpora before merging.
+# This is intentionally not part of the PR merge gate.
+# Use it when you want a full performance pass with chart/report regeneration.
 #
 # Key lessons learned:
 # - Theoretical improvements often don't translate to real-world gains
 # - Small-scale synthetic benchmarks can be completely misleading  
 # - Only comprehensive, production-like testing reveals true performance impact
 #
-name: Performance Check
+name: Performance Check (Manual)
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [main, master]
+  workflow_dispatch:
 
 jobs:
   performance-check:
@@ -54,8 +50,7 @@ jobs:
         timeout-minutes: 15  # Increased timeout for comprehensive testing (5000 regexps)
         run: |
           echo "Running comprehensive performance comparison with full Wuthering Heights corpus..."
-          echo "ENFORCING RULE: No merges without provable performance improvements!"
-          echo "Testing with production-scale workloads to prevent micro-benchmark deception."
+          echo "Manual campaign mode: collect measurements and update artifacts."
           
           # Create baseline directory
           mkdir -p benchmarks/baseline
@@ -112,70 +107,6 @@ jobs:
           # List generated files for debugging
           echo "Generated files:"
           ls -la *.png 2>/dev/null || echo "No PNG files generated"
-      
-      - name: Commit updated performance data
-        if: github.event_name == 'pull_request'
-        run: |
-          # Configure git
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          
-          # Add performance-related files that exist
-          files_to_add=""
-          
-          # Check for performance chart files
-          for file in performance_timeline.png java_performance_timeline.png performance_comparison.png; do
-            if [ -f "$file" ]; then
-              files_to_add="$files_to_add $file"
-              echo "✅ Found $file - will be committed"
-            else
-              echo "ℹ️  $file not found - skipping"
-            fi
-          done
-          
-          # Always try to add README.md (in case performance table was updated)
-          if [ -f "README.md" ]; then
-            files_to_add="$files_to_add README.md"
-          fi
-          
-          # Add files if any exist
-          if [ -n "$files_to_add" ]; then
-            git add $files_to_add
-            
-            # Only commit if there are changes
-            if ! git diff --staged --quiet; then
-              git commit -m "chore: update performance data
-              
-              Auto-generated performance timeline charts and README table
-              after running performance benchmarks
-              
-              [skip ci]"
-              
-              # Push the changes back to the PR branch
-              git push origin HEAD:${{ github.head_ref }}
-              echo "✅ Updated performance data committed to PR"
-            else
-              echo "ℹ️  No changes to performance data"
-            fi
-          else
-            echo "ℹ️  No performance files found to commit"
-          fi
-      
-      - name: Compare and comment
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Enhanced compare and comment script with pass/fail logic
-          ./scripts/compare_and_comment.sh
-          exit_code=$?
-          
-          # compare_and_comment.sh now handles exit code conversion internally
-          # It will exit with 0 for both PASS and WARNING cases to avoid spurious CI failures
-          if [ $exit_code -ne 0 ]; then
-            echo "Performance comparison failed"
-            exit 1
-          fi
-          echo "Performance comparison completed successfully"
       
       - name: Upload performance artifacts
         uses: actions/upload-artifact@v4

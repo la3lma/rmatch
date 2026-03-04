@@ -10,6 +10,10 @@ This directory is the landing zone for curated project documentation.
 - `optimization/` - optimization analyses, experiments, and results
 - `papers/` - LaTeX writeups and generated PDFs
 
+## Key Operational Docs
+
+- `benchmarking/MAIN_MERGE_GATE.md` - required compile/smoke merge gate setup for `main`
+
 ## Current Papers
 
 - `papers/status-report-2026-03-03/`
