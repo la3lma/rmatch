@@ -21,3 +21,21 @@ examples-for-visualization.py~,archive/2026-03-repo-cleanup/root/examples-for-vi
 foo.sh~,archive/2026-03-repo-cleanup/root/foo.sh~,legacy-artifact,Tilde backup artifact,Low,moved
 java-maven-files.tgz,archive/2026-03-repo-cleanup/root/java-maven-files.tgz,legacy-artifact,Standalone tarball not used in active workflow,Medium verify no hidden dependency,moved
 rmatch-infra-bootstrap.tgz,archive/2026-03-repo-cleanup/root/rmatch-infra-bootstrap.tgz,legacy-artifact,Standalone tarball not used in active workflow,Medium verify no hidden dependency,moved
+java_performance_timeline.png,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/java_performance_timeline.png,legacy-artifact,Owner directive to archive top-level PNG artifacts,Medium update stale root-level references,moved
+performance_comparison.png,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/performance_comparison.png,legacy-artifact,Owner directive to archive top-level PNG artifacts,Medium update stale root-level references,moved
+performance_timeline.png,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/performance_timeline.png,legacy-artifact,Owner directive to archive top-level PNG artifacts,Medium update stale root-level references,moved
+measurements.sqlite,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/measurements.sqlite,legacy-artifact,Owner directive to archive top-level SQLite/DB files,Low local analysis DB preserved in attic,moved
+benchmarks.ipynb,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/benchmarks.ipynb,legacy-artifact,Top-level MOVE TO ATTIC execution from cleanup review,Low no active pipeline dependency,moved
+foo.sh,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/foo.sh,legacy-artifact,Top-level MOVE TO ATTIC execution from cleanup review,Low no active pipeline dependency,moved
+summarize-large-corpus-trials.sql,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/summarize-large-corpus-trials.sql,legacy-artifact,Top-level MOVE TO ATTIC execution from cleanup review,Low notebook-only legacy use,moved
+test_jit_comparison.sh,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/test_jit_comparison.sh,legacy-artifact,Top-level MOVE TO ATTIC execution from cleanup review,Low ad hoc script,moved
+test_profile_guided.sh,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/test_profile_guided.sh,legacy-artifact,Top-level MOVE TO ATTIC execution from cleanup review,Low ad hoc script,moved
+test_warmup_benchmark.sh,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/test_warmup_benchmark.sh,legacy-artifact,Top-level MOVE TO ATTIC execution from cleanup review,Low ad hoc script,moved
+validate_jit_config.sh,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/validate_jit_config.sh,legacy-artifact,Top-level MOVE TO ATTIC execution from cleanup review,Low ad hoc script,moved
+.ipynb_checkpoints/benchmarks-checkpoint.ipynb,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/.ipynb_checkpoints/benchmarks-checkpoint.ipynb,legacy-artifact,Top-level MOVE TO ATTIC execution from cleanup review,Low notebook autosave artifact,moved
+prd-repo/PRD_PERFORMANCE_GITHUB_ACTION.md,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/prd-repo/PRD_PERFORMANCE_GITHUB_ACTION.md,legacy-artifact,Top-level MOVE TO ATTIC execution from cleanup review,Low historical PRD,moved
+.idea/dictionaries/rmz.xml,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/.idea/dictionaries/rmz.xml,legacy-artifact,Tracked IDE dictionary moved while pruning local IDE state,Low no runtime dependency,moved
+analysis/,docs/analysis/,curated-relocation,Top-level KEEP(RELOCATE) execution from cleanup review,Low docs path updates only,moved
+proposals/,docs/proposals/,curated-relocation,Top-level KEEP(RELOCATE) execution from cleanup review,Low docs path updates only,moved
+TODO.md,plans/TODO.md,curated-relocation,Top-level KEEP(RELOCATE) execution from cleanup review,Low path updates only,moved
+.gitignore-performance,docs/cleanup/legacy-root-files/.gitignore-performance,curated-relocation,Top-level KEEP(RELOCATE) execution from cleanup review,Low historical ignore file,moved

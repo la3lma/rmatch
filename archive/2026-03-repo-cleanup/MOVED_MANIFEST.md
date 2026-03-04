@@ -34,6 +34,42 @@ This file tracks non-destructive moves performed in the 2026-03 cleanup campaign
    - Risk: hidden dependency on tarballs.
    - Mitigation: no runtime/build/test scripts reference these files; kept intact under archive.
 
+4. Root PNG and SQLite artifacts -> `archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/`
+   - Reason: owner directive to move top-level PNG and SQLite files to attic.
+   - Scope:
+     - `java_performance_timeline.png`
+     - `performance_comparison.png`
+     - `performance_timeline.png`
+     - `measurements.sqlite`
+   - Risk: stale references from docs/workflows expecting root-level PNG paths.
+   - Mitigation: updated root `README.md` paths; follow-up planned to retarget script/workflow outputs.
+
+5. Additional root historical artifacts -> `archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/`
+   - Reason: execute top-level `MOVE TO ATTIC` recommendations from cleanup review.
+   - Scope:
+     - `benchmarks.ipynb`
+     - `foo.sh`
+     - `summarize-large-corpus-trials.sql`
+     - `test_jit_comparison.sh`
+     - `test_profile_guided.sh`
+     - `test_warmup_benchmark.sh`
+     - `validate_jit_config.sh`
+     - `.ipynb_checkpoints/benchmarks-checkpoint.ipynb`
+     - `prd-repo/PRD_PERFORMANCE_GITHUB_ACTION.md`
+     - `.idea/dictionaries/rmz.xml`
+   - Risk: stale references from historical docs and PR markdown links.
+   - Mitigation: updated active PR summary link target and cleanup inventory docs.
+
+6. Root keep-but-relocate artifacts moved into curated locations
+   - Reason: reduce top-level clutter while preserving content in active doc/plan paths.
+   - Scope:
+     - `analysis/` -> `docs/analysis/`
+     - `proposals/` -> `docs/proposals/`
+     - `TODO.md` -> `plans/TODO.md`
+     - `.gitignore-performance` -> `docs/cleanup/legacy-root-files/.gitignore-performance`
+   - Risk: stale path references.
+   - Mitigation: updated docs index, repository inventory notes, and ignore-path rules.
+
 ## Pending Move Groups
 
 Pending groups are tracked in:

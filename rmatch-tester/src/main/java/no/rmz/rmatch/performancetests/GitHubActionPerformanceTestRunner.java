@@ -455,7 +455,7 @@ public final class GitHubActionPerformanceTestRunner {
 
       markdown.append("\n---\n");
       markdown.append(
-          "*Performance check powered by [rmatch automated testing](PRD_PERFORMANCE_GITHUB_ACTION.md)*\n");
+          "*Performance check powered by [rmatch automated testing](docs/benchmarking/MAIN_MERGE_GATE.md)*\n");
 
       // Write summary for PR comment script
       String filename = "benchmarks/results/pr-performance-summary.md";

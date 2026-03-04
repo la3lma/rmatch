@@ -27,7 +27,7 @@ No destructive actions are included. It is intended to guide phased moves.
 
 - `README.md`
 - root topical markdown documents (performance and optimization notes)
-- `proposals/`
+- `docs/proposals/` (relocated from top-level during cleanup)
 - `docs/` (new home for curated docs and papers)
 
 ### Historical and Legacy Candidates
@@ -51,4 +51,3 @@ See `docs/cleanup/baseline-checks.md` for pre-move command outcomes. Current bas
 - module tests and framework quick/unit entrypoints currently fail due pre-existing issues
 
 This is recorded as baseline state before structural cleanup changes.
-

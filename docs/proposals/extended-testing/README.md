@@ -85,7 +85,7 @@ The proposal is designed for incremental implementation:
 ## Files and Structure
 
 ```
-proposals/extended-testing/
+docs/proposals/extended-testing/
 ├── proposal.tex              # Main LaTeX document
 ├── Makefile                  # Build automation
 ├── requirements.txt          # Python dependencies

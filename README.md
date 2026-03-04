@@ -9,31 +9,36 @@ rmatch
 - Documentation index: `docs/README.md`
 - Papers: `docs/papers/`
 
-## Current Performance Comparison
+## GCP Comparable Snapshot (10K Patterns)
 
-| Metric | rmatch | Java Regex | Ratio (rmatch/java) |
-|--------|--------|------------|---------------------|
-| **5000 patterns** | 3.9s | 3.9s | 1.0x faster |
-| **Peak Memory** | 112MB | 19MB | 5.9x more memory |
-| **Pattern Loading** | 20MB | 1MB | 20.0x more memory |
-| **Matching Phase** | 78MB | 4MB | 19.5x more memory |
+Comparable setup used for the snapshot below:
 
-*Latest benchmark comparison between rmatch and native Java regex (java.util.regex.Pattern) on 5000 regex patterns against Wuthering Heights corpus. Updated: 2026-03-04 22:02 UTC*
+- Same hardware cohort: `e2-standard-8|x86_64` (GCP)
+- Same pattern suite: `stable_patterns` (`10,000` patterns)
+- Same corpus sizes: `1MB`, `10MB`, `100MB`
+- Source: `extended-benchmarking/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv`
 
----
+| Corpus | Winner | rmatch (ms) | re2j (ms) | java-native-naive (ms) | re2j vs winner | java-native-naive vs winner |
+|---|---:|---:|---:|---:|---:|---:|
+| 1MB | rmatch | 17,340.1 | 255,653.6 | 137,385.1 | 14.74x | 7.92x |
+| 10MB | rmatch | 19,762.0 | - | 1,205,972.5 | - | 61.02x |
+| 100MB | rmatch | 63,219.3 | 25,716,382.9 | - | 406.78x | - |
 
-## Performance Timeline Charts
+`-` means no successful completed run yet for that engine/workload combination.
 
-### rmatch Performance History
-![rmatch Benchmark Performance](performance_timeline.png)
+### Comparable Plot 1: Runtime Scaling
+![Comparable runtime scaling](charts/gcp_e2_10k_runtime_seconds.png)
 
-### Java Regex Performance History  
-![Java Regex Benchmark Performance](java_performance_timeline.png)
+### Comparable Plot 2: Relative Slowdown vs Winner
+![Relative slowdown vs winner](charts/gcp_e2_10k_relative_x_vs_winner.png)
 
-### Performance Comparison (rmatch vs Java Regex)
-![Performance Comparison](performance_comparison.png)
+### Comparable Plot 3: Throughput Trend
+![Throughput trend](charts/gcp_e2_10k_throughput_mib_s.png)
 
-*Live performance tracking from macro benchmarks. Individual charts show execution time and memory usage patterns over time, while the comparison chart shows rmatch performance ratios relative to Java regex (values > 1.0 mean rmatch is slower/uses more memory).*
+More detail:
+
+- Snapshot doc: [docs/benchmarking/GCP_COMPARABLE_SNAPSHOT.md](docs/benchmarking/GCP_COMPARABLE_SNAPSHOT.md)
+- Interactive all-runs report: [extended-benchmarking/regex_bench_framework/reports/workload_all_live/workload_engine_comparison_all.html](extended-benchmarking/regex_bench_framework/reports/workload_all_live/workload_engine_comparison_all.html)
 
 ---
 
@@ -45,7 +50,7 @@ than myself, but it's not quite there yet.  Be patient ;)
 
 ### Key Performance Metrics
 
-- **Benchmark Data Sources**: All performance data is sourced from `benchmarks/results/`
+- **Benchmark Data Sources**: `benchmarks/results/` and `extended-benchmarking/regex_bench_framework/results/`
 - **JMH Microbenchmarks**: Precise timing measurements with statistical confidence intervals  
 - **Macro Benchmarks**: End-to-end performance testing with real workloads
 - **Automated Tracking**: Performance evolution tracked continuously via GitHub Actions
@@ -60,26 +65,10 @@ than myself, but it's not quite there yet.  Be patient ;)
 
 ---
 
-## 🚨 CRITICAL: Performance Validation Rule
+## Performance Evaluation Practice
 
-> **"I will not merge anything to main that does not provably improve performance."**
-
-### Development Guidelines for Performance Changes
-
-**ALL performance optimizations MUST:**
-
-1. **✅ Use Production-Scale Testing**: Test with 5000+ regex workloads against real text corpora
-2. **✅ Show Measurable Improvement**: Demonstrate clear performance gains in comprehensive benchmarks  
-3. **❌ Never Trust Micro-Benchmarks**: Small-scale synthetic tests are insufficient and often misleading
-4. **❌ Never Trust Theoretical Improvements**: Code that "should be faster" must prove it IS faster
-
-### Lessons Learned
-
-- **Enum switching** theoretical 13.6% improvement → **Actually slower** in production
-- **Pattern matching instanceof** → **1.7% performance regression**  
-- **Character classification optimizations** → **2-9% performance regression**
-
-**The Rule Exists Because:** Brilliant optimization ideas are necessary, but they must be proven in our specific use case with realistic workloads before adoption.
+Performance work is measured with production-like workloads and compared on matched hardware cohorts.
+Performance checks are maintained as benchmark reports and campaigns (including GCP runs), while merge gating is currently focused on compile + smoke correctness.
 
 ---
 

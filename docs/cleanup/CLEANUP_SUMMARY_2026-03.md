@@ -73,6 +73,27 @@ Updated backlog index:
 
 1. `plans/optimization-backlog/README.md`
 
+### Phase 7: Top-Level Declutter Execution
+
+Executed the top-level review move recommendations:
+
+1. Root `MOVE TO ATTIC` entries archived under:
+   - `archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/`
+2. Root `KEEP (RELOCATE)` entries moved into curated locations:
+   - `analysis/` -> `docs/analysis/`
+   - `proposals/` -> `docs/proposals/`
+   - `TODO.md` -> `plans/TODO.md`
+   - `.gitignore-performance` -> `docs/cleanup/legacy-root-files/.gitignore-performance`
+3. Root chart PNG and SQLite artifacts archived per owner directive.
+4. Tracked IDE/notebook remnants moved to archive:
+   - `.idea/dictionaries/rmz.xml`
+   - `.ipynb_checkpoints/benchmarks-checkpoint.ipynb`
+
+Manifest updates:
+
+1. `archive/2026-03-repo-cleanup/MOVED_MANIFEST.md`
+2. `docs/cleanup/repo-move-manifest-draft.csv`
+
 ## Validation Results
 
 Executed and passing:

@@ -10,7 +10,7 @@ Legend:
 
 | File | Purpose (best estimate) | Recommendation | Rationale | Confidence |
 |---|---|---|---|---|
-| `.DS_Store` | macOS Finder metadata | Remove local | Editor/OS artifact, already ignored in `.gitignore` | High |
+| `.DS_Store` | macOS Finder metadata | Keep (root) | Owner preference: keep locally; ignore enforced in `.gitignore` and `.dockerignore` (including subdirectories) | High |
 | `.dockerignore` | Controls Docker build context | Keep (root) | Needed for deterministic/small image build payloads | High |
 | `.gcloudignore` | Controls Cloud Build upload payload | Keep (root) | Used by GCP image publishing workflow; prevents huge uploads | High |
 | `.gitignore` | Primary repository ignore rules | Keep (root) | Standard project control file | High |
@@ -23,12 +23,12 @@ Legend:
 | `benchmarks.ipynb` | Historical exploratory benchmark analysis notebook | Archive candidate | Not in active build/test path; likely scar tissue from older benchmark flow | Medium |
 | `checkstyle-unused-imports.xml` | Checkstyle configuration for Maven modules | Keep (root) | Referenced by `pom.xml`, `rmatch-tester/pom.xml`, and `benchmarks/jmh/pom.xml` | High |
 | `foo.sh` | Ad hoc script to run `GitHubActionPerformanceTestRunner` | Archive candidate | Not referenced by build/CI and duplicates managed entrypoints | High |
-| `java_performance_timeline.png` | Generated benchmark chart published in README/CI artifacts | Keep (root) | Referenced by README and CI workflows that `git add` this exact path | High |
-| `measurements.sqlite` | Local analysis database used by notebook workflows | Remove local | Ignored by `.gitignore`; should not live at root in working tree | High |
+| `java_performance_timeline.png` | Generated benchmark chart published in README/CI artifacts | Archive candidate | Owner directive: move top-level PNG artifacts to attic | High |
+| `measurements.sqlite` | Local analysis database used by notebook workflows | Archive candidate | Owner directive: move top-level SQLite/DB files to attic | High |
 | `mvnw` | Maven wrapper (Unix) | Keep (root) | Standard project bootstrap binary | High |
 | `mvnw.cmd` | Maven wrapper (Windows) | Keep (root) | Standard project bootstrap binary for Windows | High |
-| `performance_comparison.png` | Generated benchmark chart published in README/CI artifacts | Keep (root) | Referenced by README and CI workflows that `git add` this exact path | High |
-| `performance_timeline.png` | Generated benchmark chart published in README/CI artifacts | Keep (root) | Referenced by README and CI workflows that `git add` this exact path | High |
+| `performance_comparison.png` | Generated benchmark chart published in README/CI artifacts | Archive candidate | Owner directive: move top-level PNG artifacts to attic | High |
+| `performance_timeline.png` | Generated benchmark chart published in README/CI artifacts | Archive candidate | Owner directive: move top-level PNG artifacts to attic | High |
 | `pom.xml` | Root Maven parent/build configuration | Keep (root) | Core build definition | High |
 | `requirements.txt` | Python deps for root chart-generation workflows | Keep (root) | Used by GitHub workflows and docs/scripts; can be split later if desired | High |
 | `rmatch-parent.iml` | IntelliJ module metadata | Remove local | IDE artifact; already ignored in `.gitignore` | High |
@@ -46,4 +46,4 @@ Legend:
 
 1. Move archive candidates from root into `archive/2026-03-repo-cleanup/root/legacy-benchmark-scripts-and-notebooks/` with manifest update.
 2. Move `TODO.md` into `plans/` (or `docs/cleanup/`) and leave a short pointer in `README.md`.
-3. Keep chart PNGs in root for now (to avoid breaking CI paths), and revisit later as a dedicated migration with workflow updates.
+3. Move top-level chart PNGs to attic and then retarget chart scripts/workflows to `charts/` paths if needed.

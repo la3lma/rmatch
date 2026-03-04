@@ -4,7 +4,7 @@
 # G1 with Compact Object Headers provides 5-12% performance improvement
 JAVA_GC_OPTS := -XX:+UseCompactObjectHeaders
 
-.PHONY: build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch bench-enhanced bench-enhanced-quick bench-enhanced-full bench-enhanced-arch
+.PHONY: build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts readme-gcp-snapshot profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch bench-enhanced bench-enhanced-quick bench-enhanced-full bench-enhanced-arch
 
 build:
 	mvn -q -B spotless:apply
@@ -65,6 +65,14 @@ charts:
 	python3 scripts/generate_java_performance_plot.py
 	python3 scripts/generate_performance_comparison_plot.py
 	python3 scripts/update_readme_performance_table.py
+
+readme-gcp-snapshot: setup-visualization-env
+	@scripts/.venv/bin/python scripts/generate_readme_gcp_snapshot.py \
+		--matrix-csv extended-benchmarking/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv \
+		--cohort 'e2-standard-8|x86_64' \
+		--patterns 10000 \
+		--output-dir charts \
+		--md-output docs/benchmarking/GCP_COMPARABLE_SNAPSHOT.md
 
 profile:
 	DUR=30; scripts/profile_async_profiler.sh $$DUR
