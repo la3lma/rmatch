@@ -1,0 +1,167 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\title{But What About Rust?}
+\author{Design Study for Codex-Assisted rmatch Portability}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper proposes a practical research program for deriving a Rust-compatible implementation from the current Java-based rmatch codebase using automated or semi-automated generation. The objective is not blind transpilation, but controlled migration with semantic compatibility, measurable performance, and reproducible evidence. We define the scaffolding artifacts required for Codex to execute this migration reliably, connect those requirements to literature on translation validation, formal language semantics, and performance methodology, and provide an experimental plan that can be run with the existing benchmark infrastructure.
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+rmatch is currently implemented in Java as a non-backtracking, multi-pattern matcher with NDFA compilation, lazy DFA construction, and parallel partition execution. The immediate question is whether this implementation can be used as scaffolding for a Rust implementation that is API-compatible, semantically aligned (within declared engine boundaries), and performance-competitive.
+
+The broader context is favorable: robust migration and verification ideas exist in compiler correctness and translation validation \cite{pnueli1998,leroy2009}, while Rust-specific formalization and migration studies are maturing \cite{jung2018rustbelt,nguyen2022inrustwetrust,c2rust2025cacm,rustmap2025,safetrans2025,c2saferust2025,c2rustbench2025}.
+
+\section{Algorithmic and Systems Context}
+\subsection{Regex engine background}
+The core algorithmic context for this work follows classical automata-based matching \cite{thompson1968,aho1975}, and modern high-throughput matcher engineering (for example Hyperscan in native settings) \cite{wang2019hyperscan}. rmatch specifically targets large pattern sets where scaling behavior differs from low-pattern-count baselines.
+
+\subsection{Why Rust is attractive here}
+Rust offers memory safety and explicit control over allocation and concurrency behavior, which is relevant for high-load matching pipelines. However, these benefits are only useful if semantic drift is controlled. Prior research emphasizes that migration quality depends heavily on scaffolding and verification, not just language choice \cite{c2rust2025cacm,rustmap2025,c2rustbench2025}.
+
+\section{Research Questions and Hypotheses}
+We propose the following questions:
+\begin{itemize}
+  \item \textbf{RQ1}: Can we generate a Rust implementation that preserves rmatch semantics for compatible regex subsets?
+  \item \textbf{RQ2}: Which scaffolding artifacts most reduce manual porting effort while keeping defect rate low?
+  \item \textbf{RQ3}: Can generated Rust code match or exceed Java rmatch performance in heavy-load regimes?
+  \item \textbf{RQ4}: Can translation-validation techniques provide fast reject/accept feedback during iterative generation?
+\end{itemize}
+
+Working hypotheses:
+\begin{itemize}
+  \item \textbf{H1}: A contract-first scaffold (API + trace schema + oracle harness) reduces semantic regressions versus direct code translation.
+  \item \textbf{H2}: Differential testing against stable corpora/pattern bundles catches most migration defects before expensive benchmarks.
+  \item \textbf{H3}: Rust performance gains, if any, will emerge first in memory-pressure regimes, not necessarily at tiny workloads.
+\end{itemize}
+
+\section{What Scaffolding Codex Needs}
+This section is the core answer to ``what sort of scaffolding is needed from the data that is here?''
+
+\subsection{Scaffolding contract}
+\begin{longtable}{p{0.19\linewidth}p{0.31\linewidth}p{0.44\linewidth}}
+\toprule
+\textbf{Scaffold} & \textbf{Purpose} & \textbf{Minimum concrete artifact} \\
+\midrule
+\endhead
+S1: API contract freeze & Prevent interface drift during generation & Versioned matcher API spec (method signatures, threading expectations, action callback semantics) \\
+S2: Semantic oracle corpus & Define correctness targets independent of implementation language & Fixed pattern/corpus bundles with hashes and expected outputs (counts + checksums) \\
+S3: Regex-feature compatibility table & Avoid invalid equivalence claims across engines & Machine-readable matrix of supported constructs and known semantic deltas \\
+S4: Execution trace schema & Enable translation validation at internal-state granularity & Optional NDFA/DFA transition trace format (JSONL/protobuf) from Java baseline and Rust candidate \\
+S5: IR snapshot export & Decouple front-end parse from backend execution & Canonical serialized automata/intermediate representation for cross-language replay \\
+S6: Differential harness & Fast reject for semantic mismatches & Runner that executes Java and Rust on identical workloads and diffs outputs deterministically \\
+S7: Failure taxonomy & Preserve evidence and accelerate triage & Standard status classes: ok, timeout, stall, oom, semantic-mismatch, compile-failure \\
+S8: Performance telemetry schema & Comparable benchmarking across campaigns & Standard fields for compile time, scan time, allocations, RSS peaks, CPU time, machine metadata \\
+S9: Safety boundary policy & Keep unsafe Rust auditable & Explicit list of modules allowed to use \texttt{unsafe}, with justification and tests \\
+S10: Generation ledger & Make LLM-driven changes reproducible & Per-module prompt + patch + test outcome log tied to commit SHA \\
+\bottomrule
+\end{longtable}
+
+\subsection{Why these scaffolds are necessary}
+S1--S3 establish a stable contract and avoid ambiguous ``compatibility'' definitions. S4--S6 support translation validation and differential correctness \cite{pnueli1998,claessen2000quickcheck,cadar2008klee}. S7--S8 enable reproducible analysis and publication-grade reporting \cite{georges2007,kalibera2013}. S9--S10 address Rust-specific trust and audit concerns observed in migration literature \cite{jung2018rustbelt,nguyen2022inrustwetrust,c2saferust2025}.
+
+\section{Method: Codex-Assisted Migration Protocol}
+We propose a phased method.
+
+\subsection{Phase A: Baseline freeze and observability}
+\begin{itemize}
+  \item Freeze canonical Java baselines and dataset IDs.
+  \item Ensure deterministic result exports (counts + checksums).
+  \item Add optional internal trace emission for NDFA/DFA transitions.
+\end{itemize}
+
+\subsection{Phase B: Rust compatibility shell}
+\begin{itemize}
+  \item Create Rust crate with API mirror of Java matcher surface.
+  \item Add CLI adapter so existing benchmark framework can invoke Rust candidate exactly like existing engines.
+  \item Implement no-op/stub internals that compile and run smoke tests.
+\end{itemize}
+
+\subsection{Phase C: Module-by-module generation}
+Generate and validate in dependency order:
+\begin{enumerate}
+  \item regex parser + compiler data structures
+  \item NDFA node graph + epsilon-closure logic
+  \item DFA caching and transition mechanics
+  \item match-set runtime and action callbacks
+  \item partitioned multi-matcher scheduling
+\end{enumerate}
+Each step is accepted only if differential tests pass against Java oracle for the targeted feature subset.
+
+\subsection{Phase D: Translation validation loop}
+For every generated module:
+\begin{itemize}
+  \item run property-based equivalence checks (Java vs Rust outputs) \cite{claessen2000quickcheck}
+  \item run corpus-level differential tests
+  \item run bounded symbolic/fuzz campaigns on parser and state transitions \cite{cadar2008klee}
+\end{itemize}
+Reject modules with unexplained semantic drift; keep all artifacts for postmortem.
+
+\subsection{Phase E: Performance characterization}
+Integrate Rust engine into the existing containerized/GCP workflow and run comparable cohorts only (same machine type, architecture, dataset URI, image policy), following the project fairness protocol and rigorous benchmarking guidance \cite{georges2007,kalibera2013}.
+
+\section{Experimental Design}
+\subsection{Dependent variables}
+\begin{itemize}
+  \item \textbf{Correctness}: match-count equality, checksum equality, and mismatch rate.
+  \item \textbf{Performance}: mean total runtime, compile/scan split, variance, timeout/stall rate.
+  \item \textbf{Engineering cost}: automated patch acceptance rate, manual edits per module, defect discovery latency.
+\end{itemize}
+
+\subsection{Acceptance criteria}
+Define:
+\[
+\text{CompatibilityScore} = 1 - \frac{\text{mismatching scenarios}}{\text{scenarios tested}}
+\]
+\[
+\text{PerformanceRatio}_{\text{Rust/Java}} = \frac{T_{\text{Rust}}}{T_{\text{Java-rmatch}}}
+\]
+Recommended stage gates:
+\begin{itemize}
+  \item Stage 1: \(\text{CompatibilityScore} \ge 0.999\) on canonical non-RE2J-equivalence subset.
+  \item Stage 2: No unexplained major mismatches on heavy-load scenarios.
+  \item Stage 3: Median \(\text{PerformanceRatio}_{\text{Rust/Java}} \le 1.05\) on targeted production cohorts.
+\end{itemize}
+
+\section{Threats to Validity}
+\begin{itemize}
+  \item \textbf{Semantic confounding}: regex dialect differences can masquerade as migration bugs.
+  \item \textbf{Benchmark confounding}: architecture or memory pressure differences can distort comparisons.
+  \item \textbf{Tooling confounding}: generated code quality may vary by prompt/template evolution.
+  \item \textbf{Observability gaps}: missing memory or trace detail can hide root causes.
+\end{itemize}
+Mitigation is scaffold-driven: stricter cohorting, stronger trace/checksum evidence, and explicit validity checklists.
+
+\section{Concrete Deliverables}
+To make Codex effective, the repository should add:
+\begin{enumerate}
+  \item \texttt{rust-port/api\_contract.md} and \texttt{rust-port/compat\_matrix.json}
+  \item \texttt{rust-port/oracle/} with hashed datasets and expected outputs
+  \item \texttt{rust-port/trace\_schema.json} and Java trace emitter
+  \item \texttt{engines/rmatch-rust/} benchmark adapter wired into existing framework
+  \item \texttt{rust-port/generation\_ledger/} for reproducible Codex iterations
+\end{enumerate}
+
+\section{Conclusion}
+The migration is feasible if treated as a scientific engineering program rather than raw transpilation. The key is scaffolding: explicit contracts, reproducible oracles, traceable generation, and rigorous cross-language validation. With this in place, the current Java implementation can serve as high-value scaffolding for a Rust-compatible engine while preserving comparability to existing benchmark campaigns.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

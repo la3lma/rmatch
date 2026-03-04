@@ -1,0 +1,46 @@
+{
+  "phase": "phase4_smoke_tiny",
+  "description": "Tiny Docker smoke matrix for pipeline stability checks (not performance analysis)",
+  "test_matrix": {
+    "pattern_counts": [5, 10],
+    "input_sizes": ["100KB"],
+    "pattern_suites": ["stable_patterns"],
+    "corpora": ["synthetic_controllable"],
+    "engines": [
+      "java-native-naive",
+      "re2j",
+      "rmatch"
+    ],
+    "iterations_per_combination": 1,
+    "warmup_iterations": 0
+  },
+  "data_configuration": {
+    "pattern_generation": {
+      "suite": "stable_patterns",
+      "seed": 12345
+    },
+    "corpus_generation": {
+      "type": "synthetic_controllable",
+      "match_density": "low",
+      "character_distribution": "ascii_only"
+    }
+  },
+  "execution_plan": {
+    "failure_handling": {
+      "engine_unavailable": "abort",
+      "correctness_mismatch": "warn_with_details",
+      "performance_timeout": "abort"
+    },
+    "timeout_per_job": 300
+  },
+  "optimization": {
+    "enable_parallel_execution": false,
+    "enable_adaptive_iterations": false,
+    "result_caching": false
+  },
+  "output_configuration": {
+    "results_format": "structured_json",
+    "include_raw_data": true,
+    "include_debug_info": true
+  }
+}

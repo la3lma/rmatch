@@ -1,0 +1,5 @@
+The quick brown fox jumps over the lazy dog.
+Regex engines differ in performance and features.
+Email addresses like example@example.com should be matched.
+URLs such as https://example.org or http://localhost:8080 are common.
+Whitespace, digits 12345, and punctuation!?

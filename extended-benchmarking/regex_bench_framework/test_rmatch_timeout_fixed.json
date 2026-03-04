@@ -1,0 +1,14 @@
+{
+  "phase": "timeout_verification",
+  "corpus_sizes": ["100MB"],
+  "pattern_sets": [
+    {
+      "name": "medium_patterns",
+      "patterns": ["error", "timeout", "debug", "warning", "info", "trace", "fatal", "success", "failed", "completed"],
+      "metadata": {"description": "Medium pattern set for timeout verification"}
+    }
+  ],
+  "engines": ["rmatch"],
+  "iterations": 2,
+  "parallel_jobs": 1
+}

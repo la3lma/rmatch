@@ -1,0 +1,60 @@
+{
+  "name": "re2j",
+  "version": "1.7",
+  "description": "Google RE2J - Java port of RE2 with linear-time guarantees",
+  "type": "external",
+  "command": ["bash", "runner.sh", "{patterns}", "{corpus}"],
+  "requires": ["java", "javac"],
+  "build_command": ["bash", "build.sh"],
+  "output_format": {
+    "match_pattern": "MATCHES=(\\d+)",
+    "time_pattern": "ELAPSED_NS=(\\d+)",
+    "compilation_pattern": "COMPILATION_NS=(\\d+)",
+    "memory_pattern": "MEMORY_BYTES=(\\d+)",
+    "patterns_compiled_pattern": "PATTERNS_COMPILED=(\\d+)",
+    "patterns_failed_pattern": "PATTERNS_FAILED=(\\d+)",
+    "throughput_pattern": "THROUGHPUT_MBPS=([\\d\\.]+)"
+  },
+  "characteristics": {
+    "backtracking": false,
+    "linear_time_guarantee": true,
+    "supports_backrefs": false,
+    "supports_lookaround": false,
+    "supports_atomic_groups": false,
+    "supports_possessive_quantifiers": false,
+    "multi_pattern_optimized": false,
+    "memory_profile": "moderate",
+    "compilation_cost": "moderate",
+    "scanning_speed": "high"
+  },
+  "platform_requirements": {
+    "java_version": "8+",
+    "memory_mb": 512
+  },
+  "feature_compatibility": {
+    "syntax": "RE2",
+    "unsupported_features": [
+      "backreferences",
+      "lookahead/lookbehind",
+      "conditional expressions",
+      "recursive patterns",
+      "named groups (partial support)"
+    ],
+    "notes": "RE2J uses RE2 syntax, not full PCRE. Some patterns may be rejected."
+  },
+  "benchmarking_notes": {
+    "warmup_recommended": 5,
+    "compilation_expensive": false,
+    "memory_efficient": true,
+    "best_for": [
+      "Large input sizes",
+      "Untrusted patterns",
+      "DoS protection",
+      "Consistent performance"
+    ],
+    "worst_for": [
+      "Complex pattern features",
+      "Small inputs with compilation overhead"
+    ]
+  }
+}
