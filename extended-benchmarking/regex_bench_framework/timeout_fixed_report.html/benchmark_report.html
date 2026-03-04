@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex Benchmark Report - 20251219_215803_0df09c5d</title>
+    <style>
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        .metadata {
+            margin-top: 10px;
+            color: #666;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        section {
+            background: white;
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .summary-card {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        .card-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .card-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .status-success {
+            color: #27ae60 !important;
+        }
+        .status-error {
+            color: #e74c3c !important;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .results-table th,
+        .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .results-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+        .engine-name {
+            font-weight: 600;
+            color: #3498db;
+        }
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .performance-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #9b59b6;
+        }
+        .performance-card h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+        }
+        .perf-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
+        .perf-item .label {
+            color: #666;
+        }
+        .perf-item .value {
+            font-weight: 600;
+        }
+        .chart-placeholder {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            color: #666;
+        }
+        .raw-json {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 14px;
+        }
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Regex Benchmark Report</h1>
+            <div class="metadata">
+                <span class="run-id">Run ID: 20251219_215803_0df09c5d</span>
+                <span class="timestamp">Generated: 2025-12-19 22:17:02</span>
+            </div>
+        </header>
+
+        
+        <section class="summary">
+            <h2>📊 Benchmark Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="card-label">Phase</div>
+                    <div class="card-value">1</div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-label">Status</div>
+                    <div class="card-value status-success">Completed</div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-label">Duration</div>
+                    <div class="card-value">550.43s</div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-label">Engines Tested</div>
+                    <div class="card-value">java-native-optimized, rmatch, java-native-unfair, re2j</div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-label">Total Runs</div>
+                    <div class="card-value">12</div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-label">Success Rate</div>
+                    <div class="card-value">25.0%</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="engines">
+            <h2>🔧 Engine Performance Overview</h2>
+            <div class="table-container">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Engine</th>
+                            <th>Total Runs</th>
+                            <th>Success Rate</th>
+                            <th>Avg Compilation</th>
+                            <th>Avg Scanning</th>
+                            <th>Total Matches</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td class="engine-name">java-native-optimized</td>
+                    <td>3</td>
+                    <td>0.0%</td>
+                    <td>0 ns</td>
+                    <td>0 ns</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td class="engine-name">re2j</td>
+                    <td>3</td>
+                    <td>0.0%</td>
+                    <td>0 ns</td>
+                    <td>0 ns</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td class="engine-name">java-native-unfair</td>
+                    <td>3</td>
+                    <td>0.0%</td>
+                    <td>0 ns</td>
+                    <td>0 ns</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td class="engine-name">rmatch</td>
+                    <td>3</td>
+                    <td>100.0%</td>
+                    <td>41,711,902 ns</td>
+                    <td>14,593,479,722 ns</td>
+                    <td>3719243</td>
+                </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <section class="detailed-results">
+            <h2>📋 Detailed Results</h2>
+            <div class="table-container">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Engine</th>
+                            <th>Iteration</th>
+                            <th>Status</th>
+                            <th>Compilation (ms)</th>
+                            <th>Scanning (ms)</th>
+                            <th>Matches</th>
+                            <th>Patterns</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr class="result-row">
+                    <td>1</td>
+                    <td>java-native-optimized</td>
+                    <td>0</td>
+                    <td class="status-error">timeout</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>None</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>2</td>
+                    <td>java-native-optimized</td>
+                    <td>1</td>
+                    <td class="status-error">timeout</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>None</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>3</td>
+                    <td>java-native-optimized</td>
+                    <td>2</td>
+                    <td class="status-error">timeout</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>None</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>4</td>
+                    <td>re2j</td>
+                    <td>0</td>
+                    <td class="status-error">timeout</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>None</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>5</td>
+                    <td>re2j</td>
+                    <td>1</td>
+                    <td class="status-error">timeout</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>None</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>6</td>
+                    <td>re2j</td>
+                    <td>2</td>
+                    <td class="status-error">timeout</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>None</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>7</td>
+                    <td>java-native-unfair</td>
+                    <td>0</td>
+                    <td class="status-error">timeout</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>None</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>8</td>
+                    <td>java-native-unfair</td>
+                    <td>1</td>
+                    <td class="status-error">timeout</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>None</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>9</td>
+                    <td>java-native-unfair</td>
+                    <td>2</td>
+                    <td class="status-error">timeout</td>
+                    <td>0.000</td>
+                    <td>0.000</td>
+                    <td>None</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>10</td>
+                    <td>rmatch</td>
+                    <td>0</td>
+                    <td class="status-success">ok</td>
+                    <td>41.214</td>
+                    <td>16224.060</td>
+                    <td>1240074</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>11</td>
+                    <td>rmatch</td>
+                    <td>1</td>
+                    <td class="status-success">ok</td>
+                    <td>44.562</td>
+                    <td>13618.487</td>
+                    <td>1239509</td>
+                    <td>10000</td>
+                </tr>
+                <tr class="result-row">
+                    <td>12</td>
+                    <td>rmatch</td>
+                    <td>2</td>
+                    <td class="status-success">ok</td>
+                    <td>39.359</td>
+                    <td>13937.893</td>
+                    <td>1239660</td>
+                    <td>10000</td>
+                </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <section class="performance">
+            <h2>⚡ Performance Analysis</h2>
+            <div class="performance-grid">
+                
+                <div class="performance-card">
+                    <h4>rmatch</h4>
+                    <div class="perf-details">
+                        <div class="perf-item">
+                            <span class="label">Patterns:</span>
+                            <span class="value">10000</span>
+                        </div>
+                        <div class="perf-item">
+                            <span class="label">Corpus Size:</span>
+                            <span class="value">104,857,602 bytes</span>
+                        </div>
+                        <div class="perf-item">
+                            <span class="label">Mean Scan Time:</span>
+                            <span class="value">14593.480 ms</span>
+                        </div>
+                        <div class="perf-item">
+                            <span class="label">Median Scan Time:</span>
+                            <span class="value">13937.893 ms</span>
+                        </div>
+                        <div class="perf-item">
+                            <span class="label">Std Deviation:</span>
+                            <span class="value">1160.345 ms</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        
+        <section class="raw-data">
+            <h2>🔍 Raw Data</h2>
+            <details>
+                <summary>Click to expand raw benchmark data</summary>
+                <pre class="raw-json">[
+  {
+    "engine_name": "java-native-optimized",
+    "iteration": 0,
+    "status": "timeout",
+    "compilation_ns": null,
+    "scanning_ns": null,
+    "total_ns": null,
+    "match_count": null,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": null,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "Process timeout (55 seconds, calculated for 10000 patterns \u00d7 100.0MB corpus)",
+    "raw_stdout": "",
+    "raw_stderr": ""
+  },
+  {
+    "engine_name": "java-native-optimized",
+    "iteration": 1,
+    "status": "timeout",
+    "compilation_ns": null,
+    "scanning_ns": null,
+    "total_ns": null,
+    "match_count": null,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": null,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "Process timeout (55 seconds, calculated for 10000 patterns \u00d7 100.0MB corpus)",
+    "raw_stdout": "",
+    "raw_stderr": ""
+  },
+  {
+    "engine_name": "java-native-optimized",
+    "iteration": 2,
+    "status": "timeout",
+    "compilation_ns": null,
+    "scanning_ns": null,
+    "total_ns": null,
+    "match_count": null,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": null,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "Process timeout (55 seconds, calculated for 10000 patterns \u00d7 100.0MB corpus)",
+    "raw_stdout": "",
+    "raw_stderr": ""
+  },
+  {
+    "engine_name": "re2j",
+    "iteration": 0,
+    "status": "timeout",
+    "compilation_ns": null,
+    "scanning_ns": null,
+    "total_ns": null,
+    "match_count": null,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": null,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "Process timeout (55 seconds, calculated for 10000 patterns \u00d7 100.0MB corpus)",
+    "raw_stdout": "",
+    "raw_stderr": ""
+  },
+  {
+    "engine_name": "re2j",
+    "iteration": 1,
+    "status": "timeout",
+    "compilation_ns": null,
+    "scanning_ns": null,
+    "total_ns": null,
+    "match_count": null,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": null,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "Process timeout (55 seconds, calculated for 10000 patterns \u00d7 100.0MB corpus)",
+    "raw_stdout": "",
+    "raw_stderr": ""
+  },
+  {
+    "engine_name": "re2j",
+    "iteration": 2,
+    "status": "timeout",
+    "compilation_ns": null,
+    "scanning_ns": null,
+    "total_ns": null,
+    "match_count": null,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": null,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "Process timeout (55 seconds, calculated for 10000 patterns \u00d7 100.0MB corpus)",
+    "raw_stdout": "",
+    "raw_stderr": ""
+  },
+  {
+    "engine_name": "java-native-unfair",
+    "iteration": 0,
+    "status": "timeout",
+    "compilation_ns": null,
+    "scanning_ns": null,
+    "total_ns": null,
+    "match_count": null,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": null,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "Process timeout (55 seconds, calculated for 10000 patterns \u00d7 100.0MB corpus)",
+    "raw_stdout": "",
+    "raw_stderr": ""
+  },
+  {
+    "engine_name": "java-native-unfair",
+    "iteration": 1,
+    "status": "timeout",
+    "compilation_ns": null,
+    "scanning_ns": null,
+    "total_ns": null,
+    "match_count": null,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": null,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "Process timeout (55 seconds, calculated for 10000 patterns \u00d7 100.0MB corpus)",
+    "raw_stdout": "",
+    "raw_stderr": ""
+  },
+  {
+    "engine_name": "java-native-unfair",
+    "iteration": 2,
+    "status": "timeout",
+    "compilation_ns": null,
+    "scanning_ns": null,
+    "total_ns": null,
+    "match_count": null,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": null,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "Process timeout (55 seconds, calculated for 10000 patterns \u00d7 100.0MB corpus)",
+    "raw_stdout": "",
+    "raw_stderr": ""
+  },
+  {
+    "engine_name": "rmatch",
+    "iteration": 0,
+    "status": "ok",
+    "compilation_ns": 41214416,
+    "scanning_ns": 16224060042,
+    "total_ns": 17657747000,
+    "match_count": 1240074,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": 1054521712,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "PATTERNS_COMPILED=10000 PATTERNS_FAILED=0 Loaded 10000 patterns",
+    "raw_stdout": "COMPILATION_NS=41214416\nELAPSED_NS=16224060042\nMATCHES=1240074\nMEMORY_BYTES=1054521712\nPATTERNS_COMPILED=10000\nPATTERNS_FAILED=0\n",
+    "raw_stderr": "Loaded 10000 patterns\nLoaded corpus: 104857602 chars\nBenchmark completed: 10000 patterns, 1240074 matches\n"
+  },
+  {
+    "engine_name": "rmatch",
+    "iteration": 1,
+    "status": "ok",
+    "compilation_ns": 44562458,
+    "scanning_ns": 13618486500,
+    "total_ns": 14620333000,
+    "match_count": 1239509,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": 1054158216,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "PATTERNS_COMPILED=10000 PATTERNS_FAILED=0 Loaded 10000 patterns",
+    "raw_stdout": "COMPILATION_NS=44562458\nELAPSED_NS=13618486500\nMATCHES=1239509\nMEMORY_BYTES=1054158216\nPATTERNS_COMPILED=10000\nPATTERNS_FAILED=0\n",
+    "raw_stderr": "Loaded 10000 patterns\nLoaded corpus: 104857602 chars\nBenchmark completed: 10000 patterns, 1239509 matches\n"
+  },
+  {
+    "engine_name": "rmatch",
+    "iteration": 2,
+    "status": "ok",
+    "compilation_ns": 39358833,
+    "scanning_ns": 13937892625,
+    "total_ns": 14532844000,
+    "match_count": 1239660,
+    "match_checksum": null,
+    "memory_peak_bytes": null,
+    "memory_compilation_bytes": 1054064200,
+    "cpu_user_ms": null,
+    "cpu_system_ms": null,
+    "patterns_compiled": 10000,
+    "patterns_failed": null,
+    "corpus_size_bytes": 104857602,
+    "notes": "PATTERNS_COMPILED=10000 PATTERNS_FAILED=0 Loaded 10000 patterns",
+    "raw_stdout": "COMPILATION_NS=39358833\nELAPSED_NS=13937892625\nMATCHES=1239660\nMEMORY_BYTES=1054064200\nPATTERNS_COMPILED=10000\nPATTERNS_FAILED=0\n",
+    "raw_stderr": "Loaded 10000 patterns\nLoaded corpus: 104857602 chars\nBenchmark completed: 10000 patterns, 1239660 matches\n"
+  }
+]</pre>
+            </details>
+        </section>
+
+        <footer>
+            <p>Generated by Regex Bench Framework v2.0 • <a href="https://github.com/anthropics/claude-code">Powered by Claude Code</a></p>
+        </footer>
+    </div>
+</body>
+</html>

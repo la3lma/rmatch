@@ -176,7 +176,8 @@ public final class MatchEngineImpl implements MatchEngine {
       final Buffer b,
       final Character currentChar,
       final int currentPos,
-      final Set<MatchSet> activeMatchSets) {
+      final Set<MatchSet> activeMatchSets,
+      final boolean prefilterActive) {
 
     checkNotNull(currentChar, "currentChar can't be null");
     checkArgument(currentPos >= 0, "Pos in buf must be non-negative");
@@ -207,11 +208,8 @@ public final class MatchEngineImpl implements MatchEngine {
 
     // Use prefilter to decide whether to start matches at this position
     // Only check prefilter if it's enabled and configured
-    if (prefilterEnabled && prefilter != null && candidatePositions != null) {
+    if (prefilterActive && candidatePositions != null) {
       shouldStartMatch = candidatePositions.contains(currentPos);
-    } else if (prefilterEnabled && prefilter != null) {
-      // If prefilter is configured but no candidates found, don't start matches
-      shouldStartMatch = false;
     }
 
     if (shouldStartMatch) {
@@ -220,8 +218,7 @@ public final class MatchEngineImpl implements MatchEngine {
         Set<Regexp> candidateRegexps;
 
         // OPTIMIZATION: Use prefilter-specific regexps if available
-        if (prefilterEnabled
-            && prefilter != null
+        if (prefilterActive
             && positionToRegexps != null
             && positionToRegexps.containsKey(currentPos)) {
           // Use only the regexps identified by the prefilter for this position
@@ -272,20 +269,14 @@ public final class MatchEngineImpl implements MatchEngine {
     // Synchronization is unnecessary since match() is not called concurrently
     final Set<MatchSet> activeMatchSets = new HashSet<>();
 
-    // Only do prefiltering work if actually enabled and configured
-    if (prefilterEnabled && prefilter != null) {
-      final String fullText = collectBufferText(b);
-      if (fullText != null) {
-        runPrefilterScan(fullText);
-        // Note: collectBufferText() doesn't consume the buffer, so no reset needed
-      }
-    }
+    // Only activate prefiltering for this invocation if we can safely extract text.
+    final boolean prefilterActive = preparePrefilterForMatch(b);
 
     // Advance all match sets forward one character.
     while (b.hasNext()) {
       final Character nextChar = b.getNext();
       final int currentPos = b.getCurrentPos();
-      matcherProgress(b, nextChar, currentPos, activeMatchSets);
+      matcherProgress(b, nextChar, currentPos, activeMatchSets, prefilterActive);
     }
 
     // Handle the stragglers
@@ -299,17 +290,34 @@ public final class MatchEngineImpl implements MatchEngine {
 
   /** Collects the full text from the buffer for prefilter scanning without consuming it. */
   private String collectBufferText(final Buffer b) {
-    // This method should only be called when prefilter is actually configured
-    assert prefilterEnabled && prefilter != null;
+    try {
+      return b.clone().getCurrentRestString();
+    } catch (RuntimeException ex) {
+      return null;
+    }
+  }
 
-    // For StringBuffer, we can access the content directly without consuming the buffer
-    if (b instanceof no.rmz.rmatch.utils.StringBuffer sb) {
-      return sb.getCurrentRestString();
+  /**
+   * Prepare prefilter candidates for a match invocation.
+   *
+   * @return true when prefilter candidates are prepared and can be used
+   */
+  private boolean preparePrefilterForMatch(final Buffer b) {
+    if (!prefilterEnabled || prefilter == null) {
+      candidatePositions = null;
+      positionToRegexps = null;
+      return false;
     }
 
-    // For other buffer types, we need to consume and restore, but this is not safe
-    // For now, disable prefiltering for non-StringBuffer types
-    return null;
+    final String fullText = collectBufferText(b);
+    if (fullText == null) {
+      candidatePositions = null;
+      positionToRegexps = null;
+      return false;
+    }
+
+    runPrefilterScan(fullText);
+    return true;
   }
 
   /** Runs the prefilter scan to identify candidate positions. */

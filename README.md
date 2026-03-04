@@ -1,16 +1,24 @@
 rmatch
 ======
 
+## Repository Navigation
+
+- Core library: `rmatch/`
+- Tester and harness: `rmatch-tester/`
+- Benchmark platform: `extended-benchmarking/regex_bench_framework/`
+- Documentation index: `docs/README.md`
+- Papers: `docs/papers/`
+
 ## Current Performance Comparison
 
 | Metric | rmatch | Java Regex | Ratio (rmatch/java) |
 |--------|--------|------------|---------------------|
-| **5000 patterns** | 2.4s | 4.1s | 1.7x faster |
-| **Peak Memory** | 39MB | 19MB | 2.1x more memory |
+| **5000 patterns** | 3.9s | 4.3s | 1.1x faster |
+| **Peak Memory** | 112MB | 19MB | 5.9x more memory |
 | **Pattern Loading** | 20MB | 1MB | 20.0x more memory |
-| **Matching Phase** | 5MB | 4MB | 1.2x more memory |
+| **Matching Phase** | 78MB | 4MB | 19.5x more memory |
 
-*Latest benchmark comparison between rmatch and native Java regex (java.util.regex.Pattern) on 5000 regex patterns against Wuthering Heights corpus. Updated: 2025-12-18 21:42 UTC*
+*Latest benchmark comparison between rmatch and native Java regex (java.util.regex.Pattern) on 5000 regex patterns against Wuthering Heights corpus. Updated: 2026-03-04 21:50 UTC*
 
 ---
 
@@ -100,7 +108,7 @@ make bench-gc-experiments
 
 ### Documentation
 
-See [GC_EXPERIMENTS.md](GC_EXPERIMENTS.md) for:
+See [GC_EXPERIMENTS.md](docs/optimization/GC_EXPERIMENTS.md) for:
 - Detailed usage instructions
 - How to analyze results
 - Applying findings to improve performance
@@ -131,7 +139,7 @@ export JAVA_OPTS="-Drmatch.engine=fastpath -Drmatch.prefilter=aho -XX:+TieredCom
 | **Baseline** | 10,230ms | 21,656ms |
 | **Optimized** | **9,895ms** (+3.3%) | **19,297ms** (+10.9%) |
 
-*Performance characteristics may vary across different architectures. See [FASTPATH_PERFORMANCE_ANALYSIS.md](FASTPATH_PERFORMANCE_ANALYSIS.md) for detailed architecture specifications and cross-platform considerations.*
+*Performance characteristics may vary across different architectures. See [FASTPATH_PERFORMANCE_ANALYSIS.md](docs/optimization/FASTPATH_PERFORMANCE_ANALYSIS.md) for detailed architecture specifications and cross-platform considerations.*
 
 ### Key Benefits
 
@@ -154,7 +162,7 @@ export JAVA_OPTS="-Drmatch.engine=fastpath -Drmatch.prefilter.threshold=5000 -XX
 
 ### Documentation
 
-See [FASTPATH_PERFORMANCE_ANALYSIS.md](FASTPATH_PERFORMANCE_ANALYSIS.md) for:
+See [FASTPATH_PERFORMANCE_ANALYSIS.md](docs/optimization/FASTPATH_PERFORMANCE_ANALYSIS.md) for:
 - Complete performance analysis and validation methodology
 - JIT technique explanations and benchmark results
 - Component-by-component optimization breakdown
@@ -194,11 +202,10 @@ Based on empirical testing:
 
 ### Documentation
 
-See [DISPATCH_OPTIMIZATION_RESULTS.md](DISPATCH_OPTIMIZATION_RESULTS.md) for:
+See [DISPATCH_OPTIMIZATION_RESULTS.md](docs/optimization/DISPATCH_OPTIMIZATION_RESULTS.md) for:
 - Detailed benchmark results
 - Performance analysis
 - Specific recommendations for code changes
 - Examples of patterns to refactor
 
 These experiments follow the same methodology as GC experiments to provide data-driven guidance on whether modern language features improve performance.
-

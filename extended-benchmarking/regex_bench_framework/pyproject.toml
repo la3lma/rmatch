@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "regex-bench-framework"
+version = "2.0.0"
+description = "High-performance regex engine benchmarking framework"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    {name = "Regex Benchmarking Project", email = "benchmarks@example.com"}
+]
+keywords = ["regex", "benchmark", "performance", "rmatch", "re2", "hyperscan"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Testing",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.21.0",
+    "matplotlib>=3.5.0",
+    "pandas>=1.3.0",
+    "scipy>=1.7.0",
+    "plotly>=5.0.0",
+    "jsonschema>=4.0.0",
+    "click>=8.0.0",
+    "rich>=12.0.0",
+    "psutil>=5.8.0"
+]
+
+[tool.setuptools]
+packages = ["regex_bench"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+regex_bench = ["**/*.json", "**/*.txt", "**/*.md"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["engines/*", "test_matrix/*", "benchmark_suites/*", "results/*", "reports/*"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "mypy>=0.950",
+    "flake8>=4.0.0"
+]
+
+[project.scripts]
+regex-bench = "regex_bench.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/regex-bench/framework"
+Repository = "https://github.com/regex-bench/framework.git"
+Documentation = "https://regex-bench.readthedocs.io/"

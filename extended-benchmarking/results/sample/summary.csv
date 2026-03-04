@@ -1,0 +1,6 @@
+engine,iteration,status,wall_time_ms,match_count,notes
+python-re-baseline,0,ok,0.136,6,python.re baseline
+java-util-regex,0,ok,1300.618,6,MATCHES=6 ELAPSED_NS=2025304
+rmatch,0,skipped,0.000,,disabled in config
+re2j,0,skipped,0.000,,disabled in config
+hyperscan,0,skipped,0.000,,disabled in config

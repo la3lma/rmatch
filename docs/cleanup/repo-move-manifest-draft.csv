@@ -1,0 +1,23 @@
+source_path,destination_path,category,reason,risk_notes,status
+papers/,docs/papers/,docs,Place papers under docs per cleanup amendment,Low if internal relative paths are updated,moved
+ARCHITECTURE_AWARE_BENCHMARKING.md,docs/architecture/ARCHITECTURE_AWARE_BENCHMARKING.md,active-doc,Reduce root clutter and centralize docs,Medium link churn if references not updated,moved
+DISPATCH_OPTIMIZATION_GUIDE.md,docs/optimization/DISPATCH_OPTIMIZATION_GUIDE.md,active-doc,Group optimization docs by theme,Medium link churn if references not updated,moved
+DISPATCH_OPTIMIZATION_RESULTS.md,docs/optimization/DISPATCH_OPTIMIZATION_RESULTS.md,active-doc,Group optimization docs by theme,Medium link churn if references not updated,moved
+ENHANCED_TESTING_FRAMEWORK.md,docs/benchmarking/ENHANCED_TESTING_FRAMEWORK.md,active-doc,Keep framework docs together,Medium link churn if references not updated,moved
+FASTPATH_OPTIMIZATION.md,docs/optimization/FASTPATH_OPTIMIZATION.md,active-doc,Group optimization docs by theme,Medium link churn if references not updated,moved
+FASTPATH_PERFORMANCE_ANALYSIS.md,docs/optimization/FASTPATH_PERFORMANCE_ANALYSIS.md,active-doc,Group optimization docs by theme,Medium link churn if references not updated,moved
+GC_EXPERIMENTS.md,docs/optimization/GC_EXPERIMENTS.md,active-doc,Group optimization docs by theme,Medium link churn if references not updated,moved
+GC_OPTIMIZATION_RESULTS.md,docs/optimization/GC_OPTIMIZATION_RESULTS.md,active-doc,Group optimization docs by theme,Medium link churn if references not updated,moved
+IMPLEMENTATION_SUMMARY.md,docs/architecture/IMPLEMENTATION_SUMMARY.md,active-doc,Centralize architecture docs,Low,moved
+OPTIMAL_CONFIGURATION_GUIDE.md,docs/benchmarking/OPTIMAL_CONFIGURATION_GUIDE.md,active-doc,Benchmark operation docs should be grouped,Low,moved
+PERFORMANCE_AUTOMATION.md,docs/benchmarking/PERFORMANCE_AUTOMATION.md,active-doc,Benchmark operation docs should be grouped,Low,moved
+PERFORMANCE_CHARTS.md,docs/benchmarking/PERFORMANCE_CHARTS.md,active-doc,Benchmark operation docs should be grouped,Low,moved
+PERFORMANCE_TESTING.md,docs/benchmarking/PERFORMANCE_TESTING.md,active-doc,Benchmark operation docs should be grouped,Low,moved
+PERFORMANCE_TESTING_LESSONS.md,docs/benchmarking/PERFORMANCE_TESTING_LESSONS.md,active-doc,Benchmark operation docs should be grouped,Low,moved
+PERFORMANCE_TRACKING.md,docs/benchmarking/PERFORMANCE_TRACKING.md,active-doc,Benchmark operation docs should be grouped,Low,moved
+QUICKSTART_GC.md,docs/optimization/QUICKSTART_GC.md,active-doc,Group optimization docs by theme,Low,moved
+README.md.backup,archive/2026-03-repo-cleanup/root/README.md.backup,legacy-artifact,Backup artifact not part of active workflow,Low,moved
+examples-for-visualization.py~,archive/2026-03-repo-cleanup/root/examples-for-visualization.py~,legacy-artifact,Tilde backup artifact,Low,moved
+foo.sh~,archive/2026-03-repo-cleanup/root/foo.sh~,legacy-artifact,Tilde backup artifact,Low,moved
+java-maven-files.tgz,archive/2026-03-repo-cleanup/root/java-maven-files.tgz,legacy-artifact,Standalone tarball not used in active workflow,Medium verify no hidden dependency,moved
+rmatch-infra-bootstrap.tgz,archive/2026-03-repo-cleanup/root/rmatch-infra-bootstrap.tgz,legacy-artifact,Standalone tarball not used in active workflow,Medium verify no hidden dependency,moved

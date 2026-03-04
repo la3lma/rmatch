@@ -1,0 +1,42 @@
+{
+  "engines": [
+    {
+      "name": "python-re-baseline",
+      "type": "python_re",
+      "description": "Built-in baseline using Python's re module."
+    },
+    {
+      "name": "java-util-regex",
+      "type": "external",
+      "description": "Java baseline using java.util.regex with a small runner script.",
+      "command": [
+        "bash",
+        "extended-benchmarking/scripts/java_regex_runner.sh",
+        "{patterns}",
+        "{corpus}"
+      ],
+      "requires": ["bash", "javac", "java"]
+    },
+    {
+      "name": "rmatch",
+      "type": "external",
+      "description": "Placeholder hook for the rmatch CLI once a benchmark-friendly entry point is available.",
+      "disabled": true,
+      "command": ["echo", "Enable this entry with a concrete rmatch invocation (e.g., java -jar ...)"]
+    },
+    {
+      "name": "re2j",
+      "type": "external",
+      "description": "Placeholder for RE2J. Point this command at a thin wrapper that exposes the same interface as the Java baseline.",
+      "disabled": true,
+      "command": ["echo", "Enable this entry with a concrete RE2J invocation"]
+    },
+    {
+      "name": "hyperscan",
+      "type": "external",
+      "description": "Placeholder for Hyperscan benchmarks.",
+      "disabled": true,
+      "command": ["echo", "Enable this entry with a concrete Hyperscan invocation"]
+    }
+  ]
+}

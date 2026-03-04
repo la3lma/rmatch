@@ -1,0 +1,53 @@
+{
+  "name": "java-native-unfair",
+  "version": "1.0",
+  "description": "Java Native Regex (Unfair) - Sequential pattern matching like rmatch unfair tests",
+  "type": "external",
+  "command": ["bash", ".build/run_java_native_unfair.sh", "{patterns}", "{corpus}"],
+  "requires": ["java", "javac"],
+  "build_command": ["bash", "build.sh"],
+  "output_format": {
+    "match_pattern": "MATCHES=(\\d+)",
+    "time_pattern": "ELAPSED_NS=(\\d+)",
+    "compilation_pattern": "COMPILATION_NS=(\\d+)",
+    "memory_pattern": "MEMORY_BYTES=([-+]?\\d+)",
+    "patterns_compiled_pattern": "PATTERNS_COMPILED=(\\d+)",
+    "patterns_failed_pattern": "PATTERNS_FAILED=(\\d+)"
+  },
+  "characteristics": {
+    "backtracking": true,
+    "linear_time_guarantee": false,
+    "supports_backrefs": true,
+    "supports_lookaround": true,
+    "supports_atomic_groups": true,
+    "supports_possessive_quantifiers": true,
+    "multi_pattern_optimized": false,
+    "memory_profile": "high",
+    "compilation_cost": "moderate",
+    "scanning_speed": "low"
+  },
+  "platform_requirements": {
+    "java_version": "8+",
+    "memory_mb": 1024
+  },
+  "feature_compatibility": {
+    "syntax": "Java",
+    "unsupported_features": [],
+    "notes": "Full Java regex support with unfair sequential pattern matching approach"
+  },
+  "benchmarking_notes": {
+    "warmup_recommended": 3,
+    "compilation_expensive": false,
+    "memory_efficient": false,
+    "best_for": [
+      "Complex pattern features",
+      "Full regex compatibility"
+    ],
+    "worst_for": [
+      "Large pattern sets",
+      "Multi-pattern workloads",
+      "Performance-critical applications"
+    ],
+    "notes": "Intentionally unfair implementation that processes patterns sequentially to highlight rmatch advantages"
+  }
+}

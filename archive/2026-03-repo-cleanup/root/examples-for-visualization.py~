@@ -1,0 +1,217 @@
+[200~# Synthetic benchmark visualizations for A vs B implementations
+# - Generates a realistic fake dataset
+# - Produces 4 representative plots:
+#   1) Snapshot scatter: runtime(A) vs runtime(B) with diagonal, memory size, and crash markers
+#   2) Snapshot ratio bar chart grouped by class (time(B)/time(A))
+#   3) Evolution timeline: per-class median ratio over runs
+#   4) Evolution heatmap: per-test ratio over time (crashes masked)
+#
+# A CSV is also saved at /mnt/data/fake_benchmarks.csv so you can inspect the data.
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
+import textwrap
+import os
+
+rng = np.random.default_rng(42)
+
+# --- 1) Generate fake but structured dataset ---
+classes = ["Parsing", "Matching", "IO", "Graph", "RegexVM"]
+variants_per_class = {
+    "Parsing": ["small", "medium", "large", "huge"],
+    "Matching": ["text-short", "text-long", "mixed"],
+    "IO": ["cold-cache", "warm-cache", "streaming", "chunked", "scatter"],
+    "Graph": ["dense", "sparse", "scale-free"],
+    "RegexVM": ["literals", "backrefs", "lookahead", "unicode"]
+}
+n_runs = 12  # historical runs over time
+rows = []
+
+for cls in classes:
+    for var in variants_per_class[cls]:
+        # Base characteristics per test
+        base_time_a = rng.uniform(5, 150)  # ms
+        base_ratio = rng.normal(loc=1.0, scale=0.15)  # B/A around parity
+        # Some tests systematically favor A or B
+        bias = rng.normal(0, 0.12)
+        drift = rng.normal(0, 0.015)       # trend over runs
+        mem_base = rng.uniform(30, 800)    # MB
+        mem_slope = rng.normal(0.0, 1.0)   # MB per run small drift
+
+        for run in range(n_runs):
+            # Implementation A: add some noise and slight drift noise
+            time_a = abs(base_time_a * (1 + rng.normal(0, 0.05)) * (1 + 0.01 * np.sin(run/3)))
+            mem_a = abs(mem_base + mem_slope * run + rng.normal(0, mem_base*0.03))
+
+            # Implementation B: apply ratio with bias + drift over runs
+            ratio = abs((base_ratio + bias) + drift * (run - n_runs/2) + rng.normal(0, 0.05))
+            time_b = time_a * ratio
+
+            # Memory for B scaled similarly with some noise
+            mem_b = abs(mem_a * (0.9 + rng.normal(0, 0.05)) * (0.9 + 0.2*(ratio-1)))
+
+            # Random crashes more likely when ratio is large or mem high
+            crash_prob = min(0.02 + 0.03*max(0, ratio-1) + 0.0002*mem_b, 0.25)
+            crashed = rng.random() < crash_prob
+
+            if crashed:
+                time_b = np.nan
+                mem_b = np.nan
+
+            rows.append({
+                "run": run,
+                "class": cls,
+                "variant": var,
+                "test_id": f"{cls}:{var}",
+                "time_ms_A": time_a,
+                "time_ms_B": time_b,
+                "mem_MB_A": mem_a,
+                "mem_MB_B": mem_b,
+                "crashed_B": crashed
+            })
+
+df = pd.DataFrame(rows)
+df["ratio_B_over_A"] = df["time_ms_B"] / df["time_ms_A"]
+
+# Save to CSV for inspection
+os.makedirs("/mnt/data", exist_ok=True)
+csv_path = "/mnt/data/fake_benchmarks.csv"
+df.to_csv(csv_path, index=False)
+
+# --- 2) Prepare snapshot (latest run) ---
+latest_run = df["run"].max()
+snap = df[df["run"] == latest_run].copy()
+
+# --- 3) Plot 1: Snapshot scatter A vs B runtime ---
+fig1 = plt.figure(figsize=(8, 6))
+ax1 = plt.gca()
+
+# Successful points
+ok_mask = ~snap["time_ms_B"].isna()
+ax1.scatter(
+    snap.loc[ok_mask, "time_ms_A"],
+    snap.loc[ok_mask, "time_ms_B"],
+    s=np.clip(snap.loc[ok_mask, "mem_MB_B"], 30, 1200) / 2.5,  # bubble size ~ memory
+    alpha=0.8,
+    label="Success"
+)
+
+# Reference diagonal
+lims = [
+    0,
+    np.nanmax([snap["time_ms_A"].max(), snap["time_ms_B"].max()]) * 1.05
+]
+ax1.plot(lims, lims, linestyle="--", linewidth=1)
+ax1.set_xlim(lims)
+ax1.set_ylim(lims)
+
+# Crashed points: place at top of plot for visibility
+cr_mask = snap["crashed_B"]
+if cr_mask.any():
+    x_crash = snap.loc[cr_mask, "time_ms_A"]
+    y_crash = np.full_like(x_crash, ax1.get_ylim()[1] * 0.98)
+    ax1.scatter(x_crash, y_crash, marker="x", s=100, linewidths=2, label="Crash (B)")
+
+# Labels
+for _, r in snap.iterrows():
+    label = f"{r['class']}:{r['variant']}"
+    if not np.isnan(r["time_ms_B"]):
+        ax1.annotate(label, (r["time_ms_A"], r["time_ms_B"]), fontsize=8, alpha=0.6)
+    else:
+        ax1.annotate(label, (r["time_ms_A"], ax1.get_ylim()[1] * 0.98), fontsize=8, alpha=0.6)
+
+ax1.set_title(f"Snapshot (run={latest_run}) — Runtime: A vs B\nPoint size ~ mem(B); x marker = B crashed")
+ax1.set_xlabel("Runtime A (ms)")
+ax1.set_ylabel("Runtime B (ms)")
+ax1.legend(loc="upper left")
+plt.tight_layout()
+plt.show()
+
+# --- 4) Plot 2: Snapshot ratio bar chart grouped by class ---
+# Sort by class then variant for grouped grouping
+snap_sorted = snap.sort_values(["class", "variant"]).copy()
+indices = np.arange(len(snap_sorted))
+
+fig2 = plt.figure(figsize=(10, 5))
+ax2 = plt.gca()
+
+bars = ax2.bar(indices, snap_sorted["ratio_B_over_A"])
+ax2.axhline(1.0, linestyle="--", linewidth=1)
+
+# Mark crashes explicitly above bars
+for i, (ratio, crashed, test_label) in enumerate(zip(snap_sorted["ratio_B_over_A"],
+                                                     snap_sorted["crashed_B"],
+                                                     snap_sorted["test_id"])):
+    if pd.isna(ratio) and crashed:
+        ax2.text(i, ax2.get_ylim()[1]*0.9, "CRASH", rotation=90, ha="center", va="center", fontsize=8)
+
+# X tick labels: class:variant
+labels = [f"{c}:{v}" for c, v in zip(snap_sorted["class"], snap_sorted["variant"])]
+ax2.set_xticks(indices)
+ax2.set_xticklabels(labels, rotation=75, ha="right")
+ax2.set_ylabel("Ratio time(B)/time(A) — lower is better for B")
+ax2.set_title(f"Snapshot (run={latest_run}) — Relative performance per test")
+plt.tight_layout()
+plt.show()
+
+# --- 5) Plot 3: Evolution timeline — per-class median ratio over runs ---
+class_run = (
+    df.groupby(["class", "run"])["ratio_B_over_A"]
+    .median()
+    .reset_index()
+    .pivot(index="run", columns="class", values="ratio_B_over_A")
+)
+
+fig3 = plt.figure(figsize=(9, 5))
+ax3 = plt.gca()
+for cls in class_run.columns:
+    ax3.plot(class_run.index, class_run[cls], label=cls)
+ax3.axhline(1.0, linestyle="--", linewidth=1)
+ax3.set_xlabel("Run")
+ax3.set_ylabel("Median time(B)/time(A) in class")
+ax3.set_title("Evolution over time — class-level median relative performance")
+ax3.legend(ncol=3, fontsize=8)
+plt.tight_layout()
+plt.show()
+
+# --- 6) Plot 4: Evolution heatmap — per-test ratio over time ---
+# Order tests by class, then variant
+tests_order = (
+    df[["class", "variant", "test_id"]]
+    .drop_duplicates()
+    .sort_values(["class", "variant"])["test_id"]
+    .tolist()
+)
+
+heat = (
+    df.pivot_table(index="test_id", columns="run", values="ratio_B_over_A", aggfunc="mean")
+    .reindex(tests_order)
+)
+
+# Mask crashes (NaNs)
+data = np.ma.masked_invalid(heat.values)
+
+fig4 = plt.figure(figsize=(10, max(4, 0.35 * len(tests_order))))
+ax4 = plt.gca()
+im = ax4.imshow(data, aspect="auto", interpolation="nearest")
+cbar = plt.colorbar(im, ax=ax4)
+cbar.set_label("time(B)/time(A)")
+
+ax4.set_yticks(np.arange(len(tests_order)))
+ax4.set_yticklabels(tests_order, fontsize=8)
+ax4.set_xticks(np.arange(n_runs))
+ax4.set_xlabel("Run")
+ax4.set_title("Evolution heatmap — per-test relative performance (NaN/crash masked)")
+plt.tight_layout()
+plt.show()
+
+# --- 7) Show a small snapshot table for reference ---
+from caas_jupyter_tools import display_dataframe_to_user
+display_dataframe_to_user("Fake Benchmarks (latest run snapshot)", snap_sorted.reset_index(drop=True))
+
+csv_path
+[201~
+
+

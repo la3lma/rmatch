@@ -1,0 +1,8 @@
+{
+  "dataset_id": "debug2_20260301-data",
+  "dataset_root": "gs://run-cl-rmatch-bench/datasets/debug2_20260301-data",
+  "data_uri": "gs://run-cl-rmatch-bench/datasets/debug2_20260301-data/data_bundle.tar.gz",
+  "manifest_uri": "gs://run-cl-rmatch-bench/datasets/debug2_20260301-data/dataset_manifest.json",
+  "config": "/Volumes/SynologyScsi1/git/rmatch/extended-benchmarking/regex_bench_framework/test_matrix/campaign_10k_dynamic/debug2_20260301/campaign_10k_data_bundle.json",
+  "published_at": "2026-03-01T11:30:21.799111Z"
+}

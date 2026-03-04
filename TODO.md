@@ -32,14 +32,18 @@
 * Introduce more tests that stress the scale more.  The "unfair comparison" may be a little too unfair.
 * Refactor a bunch of code to be more java-20 compliant.  Do use chat-gpt for that.
 * Find some better way to interpret benchmarking results.
+* Investigate match-count discrepancy between engines in high-load benchmark runs (for example 10K patterns x 100MB corpus).
+  * Hypothesis (not yet confirmed): termination/timing race where the process ends before all worker threads flush/report final match totals.
+  * Add diagnostics around per-thread match aggregation and shutdown/flush ordering to confirm or reject this.
+* Add engine-level `MATCH_CHECKSUM` emission (order-independent fingerprint of full match tuples) so java-native vs rmatch can be verified on match-content equality, not only match-count equality.
 * Would it make sense to write a piece of code that uses chat-gpt to generate attempts at refactoring after running them through unit tests?
 
 # Some time in the future
 
+* Add run-level memory usage logging in benchmark executions (VM + container + engine process where possible), and surface it in reports for later analysis. Not urgent now; schedule for days/weeks out.
 * Do everything in http://maven.apache.org/guides/mini/guide-central-repository-upload.html
   that is necessary to get released through maven central, then decide that it isn't worth it
   and instead set up a micro-repo at GitHub, at least for now.
 * Or perhaps use sonatype's stuff. https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-1a.TermsofServiceRepository%3ACentralRepositoryTermsofServiceforSubmitters
 * Tag a release.
 * Write a minimal set of documentation for that release.
-
