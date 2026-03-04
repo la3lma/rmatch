@@ -1,0 +1,34 @@
+{
+  "phase": "production_10k_stable",
+  "description": "Production-grade 10K pattern benchmark across all engines with multiple corpus sizes",
+  "test_matrix": {
+    "pattern_counts": [10000],
+    "input_sizes": ["1MB", "10MB", "100MB"],
+    "pattern_suites": ["stable_patterns"],
+    "corpora": ["synthetic_controllable"],
+    "engines": [
+      "java-native-optimized",
+      "re2j",
+      "rmatch"
+    ],
+    "iterations_per_combination": 3,
+    "warmup_iterations": 2
+  },
+  "execution_plan": {
+    "failure_handling": {
+      "engine_unavailable": "skip_with_warning",
+      "correctness_mismatch": "record_with_warning",
+      "performance_timeout": "record_partial_results"
+    },
+    "timeout_per_job": 300,
+    "resource_limits": {
+      "max_memory_mb": 8192,
+      "max_concurrent_jobs": 3
+    }
+  },
+  "optimization": {
+    "enable_parallel_execution": true,
+    "job_scheduling": "round_robin",
+    "result_caching": false
+  }
+}

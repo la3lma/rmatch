@@ -50,16 +50,16 @@ echo ""
 echo "=== Mini Test Suite Complete ==="
 echo "Suite: ${SUITE_NAME}"
 echo "Run ID: ${RUN_ID}"
-echo "Results location: benchmarks/results/jmh-${RUN_ID}-*.{json,txt}"
+echo "Results location: benchmarking/results/jmh-${RUN_ID}-*.{json,txt}"
 
 # Count results files for this run
-result_count=$(ls benchmarks/results/jmh-${RUN_ID}-*.json 2>/dev/null | wc -l || echo 0)
+result_count=$(ls benchmarking/results/jmh-${RUN_ID}-*.json 2>/dev/null | wc -l || echo 0)
 echo "Generated ${result_count} result files"
 
 # List all result files from this run
 echo ""
 echo "Result files:"
-ls -lt benchmarks/results/jmh-${RUN_ID}-* 2>/dev/null | head -10 || echo "  No files found"
+ls -lt benchmarking/results/jmh-${RUN_ID}-* 2>/dev/null | head -10 || echo "  No files found"
 
 echo ""
 echo "✅ Mini JMH test suite '${SUITE_NAME}' completed successfully!"

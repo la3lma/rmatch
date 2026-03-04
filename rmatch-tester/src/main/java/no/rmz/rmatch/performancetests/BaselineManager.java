@@ -25,7 +25,7 @@ public final class BaselineManager {
   private static final Logger LOG = Logger.getLogger(BaselineManager.class.getName());
 
   /** Default baseline directory */
-  public static final String DEFAULT_BASELINE_DIR = "benchmarks/baseline";
+  public static final String DEFAULT_BASELINE_DIR = "benchmarking/baseline";
 
   /** Baseline file for rmatch results */
   private static final String RMATCH_BASELINE_FILE = "rmatch-baseline.json";

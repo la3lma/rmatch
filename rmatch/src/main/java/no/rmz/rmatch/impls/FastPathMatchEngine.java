@@ -23,7 +23,6 @@ import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
 import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.utils.StringBuffer;
 
 /**
  * Enhanced MatchEngine with fast-path optimizations for common cases.
@@ -52,8 +51,12 @@ public final class FastPathMatchEngine implements MatchEngine {
   /** Whether prefiltering is enabled. */
   private final boolean prefilterEnabled;
 
-  /** Minimum pattern count threshold for prefilter activation. */
-  private final int prefilterActivationThreshold;
+  /**
+   * Minimum pattern count threshold for prefilter activation. Default 5000 is optimal based on
+   * testing.
+   */
+  private static final int PREFILTER_ACTIVATION_THRESHOLD =
+      Integer.parseInt(System.getProperty("rmatch.prefilter.threshold", "5000"));
 
   /** Set of positions where matches should be started (when using prefilter). */
   private Set<Integer> candidatePositions;
@@ -139,13 +142,8 @@ public final class FastPathMatchEngine implements MatchEngine {
 
     final Set<MatchSet> activeMatchSets = new HashSet<>();
 
-    // Run prefilter if enabled
-    if (prefilterEnabled && prefilter != null) {
-      final String fullText = collectBufferText(b);
-      if (fullText != null) {
-        runPrefilterScan(fullText);
-      }
-    }
+    // Only activate prefiltering for this invocation if we can safely extract text.
+    final boolean prefilterActive = preparePrefilterForMatch(b);
 
     // Get a reusable holder for runnable matches
     final RunnableMatchesHolder runnableMatches = new RunnableMatchesHolderImpl();
@@ -157,9 +155,11 @@ public final class FastPathMatchEngine implements MatchEngine {
 
       // Use ASCII fast-path if applicable
       if (AsciiOptimizer.isAscii(nextChar)) {
-        matcherProgressAscii(b, nextChar, currentPos, activeMatchSets, runnableMatches);
+        matcherProgressAscii(
+            b, nextChar, currentPos, activeMatchSets, runnableMatches, prefilterActive);
       } else {
-        matcherProgressUnicode(b, nextChar, currentPos, activeMatchSets, runnableMatches);
+        matcherProgressUnicode(
+            b, nextChar, currentPos, activeMatchSets, runnableMatches, prefilterActive);
       }
     }
 
@@ -181,7 +181,8 @@ public final class FastPathMatchEngine implements MatchEngine {
       final Character currentChar,
       final int currentPos,
       final Set<MatchSet> activeMatchSets,
-      final RunnableMatchesHolder runnableMatches) {
+      final RunnableMatchesHolder runnableMatches,
+      final boolean prefilterActive) {
 
     checkNotNull(currentChar);
     checkArgument(currentPos >= 0);
@@ -204,10 +205,8 @@ public final class FastPathMatchEngine implements MatchEngine {
     // Check if we should start new matches at this position
     boolean shouldStartMatch = true;
 
-    if (prefilterEnabled && prefilter != null && candidatePositions != null) {
+    if (prefilterActive && candidatePositions != null) {
       shouldStartMatch = candidatePositions.contains(currentPos);
-    } else if (prefilterEnabled && prefilter != null) {
-      shouldStartMatch = false;
     }
 
     if (shouldStartMatch) {
@@ -215,8 +214,7 @@ public final class FastPathMatchEngine implements MatchEngine {
       if (startNode != null) {
         Set<Regexp> candidateRegexps;
 
-        if (prefilterEnabled
-            && prefilter != null
+        if (prefilterActive
             && positionToRegexps != null
             && positionToRegexps.containsKey(currentPos)) {
           candidateRegexps = positionToRegexps.get(currentPos);
@@ -258,18 +256,44 @@ public final class FastPathMatchEngine implements MatchEngine {
       final Character currentChar,
       final int currentPos,
       final Set<MatchSet> activeMatchSets,
-      final RunnableMatchesHolder runnableMatches) {
+      final RunnableMatchesHolder runnableMatches,
+      final boolean prefilterActive) {
     // For now, use the same logic as ASCII
     // Could be optimized differently for Unicode in the future
-    matcherProgressAscii(b, currentChar, currentPos, activeMatchSets, runnableMatches);
+    matcherProgressAscii(
+        b, currentChar, currentPos, activeMatchSets, runnableMatches, prefilterActive);
   }
 
-  /** Collect buffer text for prefilter scanning. */
-  private String collectBufferText(final Buffer b) {
-    if (b instanceof StringBuffer sb) {
-      return sb.getCurrentRestString();
+  /**
+   * Prepare prefilter candidates for a match invocation.
+   *
+   * @return true when prefilter candidates are prepared and can be used
+   */
+  private boolean preparePrefilterForMatch(final Buffer b) {
+    if (!prefilterEnabled || prefilter == null) {
+      candidatePositions = null;
+      positionToRegexps = null;
+      return false;
     }
-    return null;
+
+    final String fullText = collectBufferText(b);
+    if (fullText == null) {
+      candidatePositions = null;
+      positionToRegexps = null;
+      return false;
+    }
+
+    runPrefilterScan(fullText);
+    return true;
+  }
+
+  /** Collect buffer text for prefilter scanning without consuming the original buffer. */
+  private String collectBufferText(final Buffer b) {
+    try {
+      return b.clone().getCurrentRestString();
+    } catch (RuntimeException ex) {
+      return null;
+    }
   }
 
   /** Run prefilter scan to identify candidate positions. */

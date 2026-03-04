@@ -134,11 +134,13 @@ public class FastCounterTest {
   @Test
   public void testLegacyCompatibility() {
     final FastCounter fastCounter = FastCounters.newCounter(CounterType.KNOWN_DFA_EDGES);
+    final long initialValue = fastCounter.get();
     fastCounter.inc();
     fastCounter.inc();
     fastCounter.inc();
     fastCounter.inc();
     fastCounter.inc();
+    final long expectedValue = initialValue + 5;
 
     final Collection<Counter> legacyCounters = FastCounters.getCounters();
     assertFalse(legacyCounters.isEmpty());
@@ -148,7 +150,7 @@ public class FastCounterTest {
     for (final Counter c : legacyCounters) {
       if (c.toString().contains("Known DFA Edges")) {
         found = true;
-        assertTrue(c.toString().contains("5"));
+        assertTrue(c.toString().contains(String.valueOf(expectedValue)));
         break;
       }
     }

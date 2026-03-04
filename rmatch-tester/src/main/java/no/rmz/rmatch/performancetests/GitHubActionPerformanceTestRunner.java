@@ -100,8 +100,8 @@ public final class GitHubActionPerformanceTestRunner {
         } else {
           LOG.info("✨ BASELINE UPDATE: Updating baseline for main branch with current results");
         }
-        BaselineManager.saveRmatchBaseline("benchmarks/baseline", result.getRmatchResults());
-        BaselineManager.saveJavaBaseline("benchmarks/baseline", result.getJavaResults());
+        BaselineManager.saveRmatchBaseline("benchmarking/baseline", result.getRmatchResults());
+        BaselineManager.saveJavaBaseline("benchmarking/baseline", result.getJavaResults());
       } else {
         LOG.info(
             "📊 BASELINE COMPARISON: Comparing current results against existing baseline ("
@@ -208,9 +208,9 @@ public final class GitHubActionPerformanceTestRunner {
       jsonReport.append("}\n");
 
       // Write to results directory
-      java.nio.file.Files.createDirectories(java.nio.file.Paths.get("benchmarks/results"));
+      java.nio.file.Files.createDirectories(java.nio.file.Paths.get("benchmarking/results"));
       String timestamp = java.time.Instant.now().toString().replaceAll("[:.]+", "-");
-      String filename = "benchmarks/results/performance-check-" + timestamp + ".json";
+      String filename = "benchmarking/results/performance-check-" + timestamp + ".json";
       java.nio.file.Files.writeString(java.nio.file.Paths.get(filename), jsonReport.toString());
 
       LOG.info("Generated performance report: " + filename);
@@ -455,10 +455,10 @@ public final class GitHubActionPerformanceTestRunner {
 
       markdown.append("\n---\n");
       markdown.append(
-          "*Performance check powered by [rmatch automated testing](PRD_PERFORMANCE_GITHUB_ACTION.md)*\n");
+          "*Performance check powered by [rmatch automated testing](docs/benchmarking/MAIN_MERGE_GATE.md)*\n");
 
       // Write summary for PR comment script
-      String filename = "benchmarks/results/pr-performance-summary.md";
+      String filename = "benchmarking/results/pr-performance-summary.md";
       java.nio.file.Files.writeString(java.nio.file.Paths.get(filename), markdown.toString());
 
       LOG.info("Generated PR summary: " + filename);

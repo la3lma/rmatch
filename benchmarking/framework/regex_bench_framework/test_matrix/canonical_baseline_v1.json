@@ -1,0 +1,46 @@
+{
+  "phase": "canonical_baseline_v1",
+  "description": "Canonical baseline matrix for reproducible comparisons (container/cloud execution only)",
+  "test_matrix": {
+    "pattern_counts": [10, 100, 1000],
+    "input_sizes": ["1MB", "10MB", "100MB"],
+    "pattern_suites": ["stable_patterns"],
+    "corpora": ["synthetic_controllable"],
+    "engines": [
+      "java-native-naive",
+      "re2j",
+      "rmatch"
+    ],
+    "iterations_per_combination": 3,
+    "warmup_iterations": 1
+  },
+  "data_configuration": {
+    "pattern_generation": {
+      "suite": "stable_patterns",
+      "seed": 12345
+    },
+    "corpus_generation": {
+      "type": "synthetic_controllable",
+      "match_density": "medium",
+      "character_distribution": "log_like"
+    }
+  },
+  "execution_plan": {
+    "failure_handling": {
+      "engine_unavailable": "abort",
+      "correctness_mismatch": "record_with_warning",
+      "performance_timeout": "record_partial_results"
+    },
+    "timeout_per_job": 7200
+  },
+  "optimization": {
+    "enable_parallel_execution": false,
+    "enable_adaptive_iterations": false,
+    "result_caching": false
+  },
+  "validation": {
+    "cross_engine_correctness": true,
+    "performance_regression_detection": true,
+    "memory_usage_tracking": true
+  }
+}

@@ -16,7 +16,7 @@ fi
 root_dir=$(git rev-parse --show-toplevel)
 cd "$root_dir"
 
-mkdir -p benchmarks/results profiles
+mkdir -p benchmarking/results profiles
 stamp=$(date -u +"%Y%m%dT%H%M%SZ")
 SVG_OUT="profiles/macro-cpu-${stamp}.svg"
 

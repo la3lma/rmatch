@@ -8,7 +8,7 @@ set -euo pipefail
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-RESULTS_DIR="${PROJECT_ROOT}/benchmarks/results/dispatch-experiments"
+RESULTS_DIR="${PROJECT_ROOT}/benchmarking/results/dispatch-experiments"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 OUTPUT_DIR="${RESULTS_DIR}/${TIMESTAMP}"
 
@@ -49,7 +49,7 @@ echo ""
 # Build the benchmarks
 echo "Building benchmarks..."
 cd "${PROJECT_ROOT}"
-mvn clean package -pl benchmarks/jmh -am -DskipTests -q
+mvn clean package -pl benchmarking/jmh -am -DskipTests -q
 
 # Run the benchmarks
 echo ""
@@ -57,7 +57,7 @@ echo "Running dispatch optimization benchmarks..."
 echo "Note: Command-line JMH parameters override benchmark annotations for reproducibility"
 echo ""
 
-JMH_JAR="${PROJECT_ROOT}/benchmarks/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar"
+JMH_JAR="${PROJECT_ROOT}/benchmarking/jmh/target/rmatch-benchmarks-jmh-1.1-SNAPSHOT-benchmarks.jar"
 
 if [ ! -f "${JMH_JAR}" ]; then
     echo "ERROR: JMH jar not found at ${JMH_JAR}"

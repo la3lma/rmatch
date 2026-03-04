@@ -629,8 +629,8 @@ def generate_run_visualizations(result_files, run_id, output_dir):
 
 def main():
     parser = argparse.ArgumentParser(description='Generate JMH benchmark visualizations')
-    parser.add_argument('--results-dir', default='benchmarks/results', 
-                       help='Directory containing JMH results (default: benchmarks/results)')
+    parser.add_argument('--results-dir', default='benchmarking/results', 
+                       help='Directory containing JMH results (default: benchmarking/results)')
     parser.add_argument('--output-dir', default='performance-graphs',
                        help='Output directory for graphs (default: performance-graphs)')
     parser.add_argument('--json-file', help='Specific JSON file to process (overrides --results-dir)')

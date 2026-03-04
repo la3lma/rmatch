@@ -4,7 +4,7 @@ Generate performance evolution charts from historical CSV data and recent JSON p
 
 This script reads existing performance logs from CSV files and generates charts
 showing the evolution of performance metrics over time for both rmatch and Java regex.
-It also processes newer JSON performance check reports from the benchmarks/results directory.
+It also processes newer JSON performance check reports from the benchmarking/results directory.
 
 The generated charts are saved as PNG files that can be included in documentation.
 """
@@ -25,7 +25,7 @@ plt.style.use('default')
 sns.set_palette("husl")
 
 def load_performance_data():
-    """Load performance data from CSV files in the logs directory and JSON files in benchmarks/results."""
+    """Load performance data from CSV files in the logs directory and JSON files in benchmarking/results."""
     dataframes = []
     
     # Load legacy CSV data
@@ -62,8 +62,8 @@ def load_performance_data():
                 print(f"Error loading {csv_file}: {e}")
                 continue
     
-    # Load new JSON data from benchmarks/results
-    results_dir = Path("benchmarks/results")
+    # Load new JSON data from benchmarking/results
+    results_dir = Path("benchmarking/results")
     if results_dir.exists():
         json_files = list(results_dir.glob("performance-check-*.json"))
         for json_file in json_files:

@@ -34,7 +34,9 @@ public final class MatcherImpl implements Matcher {
   /** Our precious MatchEngine. */
   private final MatchEngine me;
 
-  /** Engine type from system property. Default "fastpath" is optimal based on comprehensive testing. */
+  /**
+   * Engine type from system property. Default "fastpath" is optimal based on comprehensive testing.
+   */
   private final String engineType = System.getProperty("rmatch.engine", "fastpath");
 
   /** Flag to enable Bloom filter optimization. */
