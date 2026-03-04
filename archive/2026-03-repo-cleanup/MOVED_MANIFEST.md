@@ -23,6 +23,17 @@ This file tracks non-destructive moves performed in the 2026-03 cleanup campaign
    - Mitigation: updated root `README.md` and `docs/README.md`; move manifest status switched to
      `moved`.
 
+3. Root legacy artifacts -> `archive/2026-03-repo-cleanup/root/`
+   - Reason: quarantine non-essential files without deletion.
+   - Scope:
+     - `README.md.backup`
+     - `examples-for-visualization.py~`
+     - `foo.sh~`
+     - `java-maven-files.tgz`
+     - `rmatch-infra-bootstrap.tgz`
+   - Risk: hidden dependency on tarballs.
+   - Mitigation: no runtime/build/test scripts reference these files; kept intact under archive.
+
 ## Pending Move Groups
 
 Pending groups are tracked in:

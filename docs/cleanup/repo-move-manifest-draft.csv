@@ -16,8 +16,8 @@ PERFORMANCE_TESTING.md,docs/benchmarking/PERFORMANCE_TESTING.md,active-doc,Bench
 PERFORMANCE_TESTING_LESSONS.md,docs/benchmarking/PERFORMANCE_TESTING_LESSONS.md,active-doc,Benchmark operation docs should be grouped,Low,moved
 PERFORMANCE_TRACKING.md,docs/benchmarking/PERFORMANCE_TRACKING.md,active-doc,Benchmark operation docs should be grouped,Low,moved
 QUICKSTART_GC.md,docs/optimization/QUICKSTART_GC.md,active-doc,Group optimization docs by theme,Low,moved
-README.md.backup,archive/2026-03-repo-cleanup/root/README.md.backup,legacy-artifact,Backup artifact not part of active workflow,Low,planned
-examples-for-visualization.py~,archive/2026-03-repo-cleanup/root/examples-for-visualization.py~,legacy-artifact,Tilde backup artifact,Low,planned
-foo.sh~,archive/2026-03-repo-cleanup/root/foo.sh~,legacy-artifact,Tilde backup artifact,Low,planned
-java-maven-files.tgz,archive/2026-03-repo-cleanup/root/java-maven-files.tgz,legacy-artifact,Standalone tarball not used in active workflow,Medium verify no hidden dependency,planned
-rmatch-infra-bootstrap.tgz,archive/2026-03-repo-cleanup/root/rmatch-infra-bootstrap.tgz,legacy-artifact,Standalone tarball not used in active workflow,Medium verify no hidden dependency,planned
+README.md.backup,archive/2026-03-repo-cleanup/root/README.md.backup,legacy-artifact,Backup artifact not part of active workflow,Low,moved
+examples-for-visualization.py~,archive/2026-03-repo-cleanup/root/examples-for-visualization.py~,legacy-artifact,Tilde backup artifact,Low,moved
+foo.sh~,archive/2026-03-repo-cleanup/root/foo.sh~,legacy-artifact,Tilde backup artifact,Low,moved
+java-maven-files.tgz,archive/2026-03-repo-cleanup/root/java-maven-files.tgz,legacy-artifact,Standalone tarball not used in active workflow,Medium verify no hidden dependency,moved
+rmatch-infra-bootstrap.tgz,archive/2026-03-repo-cleanup/root/rmatch-infra-bootstrap.tgz,legacy-artifact,Standalone tarball not used in active workflow,Medium verify no hidden dependency,moved
