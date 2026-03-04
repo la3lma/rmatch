@@ -130,3 +130,44 @@ make: .venv/bin/regex-bench: No such file or directory
 make: *** [test-quick] Error 1
 ```
 
+---
+
+## Baseline Refresh After Prefilter Fix
+
+Timestamp (UTC): 2026-03-04T21:40:00Z
+
+### Commands
+
+#### mvn -q -B -DskipTests -Dspotbugs.skip=true package
+- exit_code: 0
+- summary:
+  - package/build succeeded
+  - warning spam only (Unsafe + deprecations)
+
+#### mvn -q -B -pl rmatch,rmatch-tester test
+- exit_code: 0
+- summary:
+  - core unit/integration tests passed
+  - `SequenceLoaderTest` now passes with expected non-zero matches (`very-few`: 533, `some`: 2080)
+
+#### (cd extended-benchmarking/regex_bench_framework && make test-unit)
+- exit_code: 2
+- summary:
+  - fails because framework has no `tests/` directory
+  - make target currently executes `.venv/bin/pytest tests/ -v`
+  - observed pytest message: `ERROR: file or directory not found: tests/`
+
+#### (cd extended-benchmarking/regex_bench_framework && make test-quick)
+- exit_code: 2
+- summary:
+  - engine build succeeds, but quick run target fails because `.venv/bin/regex-bench` is not present after `venv` bootstrap alone
+  - observed make tail:
+    - `.venv/bin/regex-bench -v run-phase ...`
+    - `No such file or directory`
+
+### Notes
+
+1. Core Java baseline gate is now green and suitable for cleanup-step regression checks.
+2. Framework Make targets are currently inconsistent:
+   - `test-unit` assumes a `tests/` tree that is absent.
+   - `test-quick` assumes package install (`regex-bench`) even though it only depends on `venv` and `build-engines`.
