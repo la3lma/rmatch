@@ -103,6 +103,9 @@ make gcp-cohort-report GCP_BATCH_ID=<batch_id>
 - The VM periodically publishes progress and ETA to the run state JSON.
 - ETA is stall-aware and based on recent+global progress rates (`eta_model`, `eta_confidence`, `no_progress_seconds`).
 - Run state also reports whether the benchmark process is alive (`benchmark_process_alive`) to separate slow compute from idle/crash cases.
+- Engine execution now supports both hard timeout (`timeout_per_job`) and stall timeout (`stall_timeout_seconds`, default 1200s).
+  - Hard timeout: absolute wall clock cutoff per job.
+  - Stall timeout: cut off jobs with no measurable CPU/output progress and mark them as timeout with diagnostics.
 - During execution, partial artifacts are checkpointed to GCS (`output/raw_results/benchmark_results.partial.json`, `output/summary.partial.json`, rolling `logs/run.log`).
 - Durable run state is also synced continuously: `output/jobs.db` (SQLite backup snapshot) and `output/logs/transaction_log_*.jsonl`.
 - `resume` starts a terminated/stopped VM for a prior run so it can continue from the synced `jobs.db` state instead of rerunning completed jobs.

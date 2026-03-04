@@ -1,7 +1,7 @@
 {
   "campaign_id": "debug2_20260301",
   "started_at": "2026-03-01T11:30:21.808824Z",
-  "updated_at": "2026-03-01T20:47:16.557825Z",
+  "updated_at": "2026-03-01T22:19:09.246803Z",
   "zone": "europe-north2-a",
   "bucket": "run-cl-rmatch-bench",
   "machine_type": "e2-standard-8",
@@ -35,11 +35,29 @@
       "size": "1MB"
     }
   },
-  "java_runs": {},
+  "java_runs": {
+    "10MB": {
+      "run_id": "20260301_215425_512486",
+      "gcs_run_root": "gs://run-cl-rmatch-bench/runs/20260301_215425_512486",
+      "config_name": "java_10k_10MB_timeout_120s.json",
+      "role": "java_naive_dynamic_cutoff",
+      "size": "10MB"
+    },
+    "1MB": {
+      "run_id": "20260301_214805_1c9657",
+      "gcs_run_root": "gs://run-cl-rmatch-bench/runs/20260301_214805_1c9657",
+      "config_name": "java_10k_1MB_timeout_120s.json",
+      "role": "java_naive_dynamic_cutoff",
+      "size": "1MB"
+    }
+  },
   "java_timeouts_seconds": {
+    "10MB": 120,
     "1MB": 120
   },
-  "java_skipped": {},
+  "java_skipped": {
+    "100MB": "baseline status is failed; java skipped"
+  },
   "status_by_run": {
     "20260301_113023_ebbdcb": {
       "run_id": "20260301_113023_ebbdcb",
@@ -69,16 +87,40 @@
       "run_id": "20260301_181108_69ea8d",
       "role": "baseline_fastpair",
       "size": "100MB",
-      "status": "running_benchmark",
+      "status": "failed",
       "completed_jobs": 2,
       "total_jobs": 4,
-      "remaining_seconds": 4324,
-      "updated_at": "2026-03-01T20:46:56Z",
+      "remaining_seconds": 12915,
+      "updated_at": "2026-03-01T21:47:08Z",
+      "memory_congested": false,
+      "recommendation": ""
+    },
+    "20260301_214805_1c9657": {
+      "run_id": "20260301_214805_1c9657",
+      "role": "java_naive_dynamic_cutoff",
+      "size": "1MB",
+      "status": "failed",
+      "completed_jobs": 1,
+      "total_jobs": 2,
+      "remaining_seconds": 282,
+      "updated_at": "2026-03-01T21:53:38Z",
+      "memory_congested": false,
+      "recommendation": ""
+    },
+    "20260301_215425_512486": {
+      "run_id": "20260301_215425_512486",
+      "role": "java_naive_dynamic_cutoff",
+      "size": "10MB",
+      "status": "failed",
+      "completed_jobs": 1,
+      "total_jobs": 2,
+      "remaining_seconds": 1365,
+      "updated_at": "2026-03-01T22:17:55Z",
       "memory_congested": false,
       "recommendation": ""
     }
   },
-  "campaign_status": "running",
+  "campaign_status": "completed",
   "notes": [
     "java cutoff per size = ceil(timeout_factor * fastest_mean_seconds_from_rmatch_or_re2j)",
     "scheduling mode: multi-lane (baseline and java per size with dependency)",
@@ -89,7 +131,11 @@
   "max_lanes": 3,
   "stopped_runs": [
     "20260301_113023_ebbdcb",
-    "20260301_164010_3ae803"
+    "20260301_164010_3ae803",
+    "20260301_181108_69ea8d",
+    "20260301_214805_1c9657",
+    "20260301_215425_512486"
   ],
-  "effective_max_lanes": 1
+  "effective_max_lanes": 1,
+  "completed_at": "2026-03-01T22:19:09.246796Z"
 }

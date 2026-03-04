@@ -110,6 +110,16 @@ Why this helps:
 - Enables independent audit and post-hoc validity checks.
 - Allows interrupted long runs to resume and reuse already completed jobs.
 
+### 9) Explicit timeout and stall policy
+
+- Jobs use an explicit hard wall-clock timeout (`execution_plan.timeout_per_job`).
+- Jobs can also use a stall timeout (`execution_plan.stall_timeout_seconds`) that terminates runs with no measurable progress.
+- Timeout/stall outcomes are persisted as timeout failures with notes and raw output/log context where available.
+
+Why this helps:
+- Prevents campaign deadlocks caused by hung jobs.
+- Preserves failure evidence for later hole-filling/rerun decisions.
+
 ## Publication Rules (Recommended)
 
 For tables/plots intended for publication:

@@ -248,8 +248,39 @@ class HTMLFormatter:
         successful = int(summary.get('successful_runs', 0))
         failed = int(summary.get('failed_runs', 0))
         duration = float(summary.get('duration_seconds', 0))
+        correctness_status = str(
+            summary.get(
+                'correctness_status',
+                ((analysis or {}).get('validation', {}).get('correctness', {}) or {}).get('status', 'unknown')
+            )
+        ).lower()
+        correctness_issues = summary.get(
+            'correctness_issues',
+            ((analysis or {}).get('validation', {}).get('correctness', {}) or {}).get('issues', [])
+        ) or []
+        correctness_issue_count = int(summary.get('correctness_issue_count', len(correctness_issues)))
+        correctness_major_issue_count = int(
+            summary.get(
+                'correctness_major_issue_count',
+                ((analysis or {}).get('validation', {}).get('correctness', {}) or {}).get('major_issue_count', 0),
+            )
+        )
+        correctness_minor_issue_count = int(
+            summary.get(
+                'correctness_minor_issue_count',
+                ((analysis or {}).get('validation', {}).get('correctness', {}) or {}).get('minor_issue_count', 0),
+            )
+        )
 
         status_class = 'status-success' if status.lower() == 'completed' else 'status-error'
+        if correctness_status in {'pass', 'ok'}:
+            correctness_class = 'status-success'
+        elif correctness_status in {'warning', 'warn'}:
+            correctness_class = 'status-warning'
+        elif correctness_status in {'fail', 'error'}:
+            correctness_class = 'status-error'
+        else:
+            correctness_class = ''
 
         # Build main summary cards
         summary_cards = f"""
@@ -276,7 +307,38 @@ class HTMLFormatter:
                 <div class="summary-card">
                     <div class="card-label">Success Rate</div>
                     <div class="card-value">{(successful/max(total,1)*100):.1f}%</div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-label">Correctness</div>
+                    <div class="card-value {correctness_class}">{correctness_status.title()}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-label">Correctness Issues</div>
+                    <div class="card-value">{correctness_issue_count}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-label">Correctness Major</div>
+                    <div class="card-value status-error">{correctness_major_issue_count}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-label">Correctness Minor</div>
+                    <div class="card-value status-warning">{correctness_minor_issue_count}</div>
                 </div>"""
+
+        correctness_details = ""
+        if correctness_issue_count > 0:
+            issues_html = "".join(
+                f"<li>{str(issue)}</li>" for issue in correctness_issues[:8]
+            )
+            truncation_note = ""
+            if len(correctness_issues) > 8:
+                truncation_note = f"<p class=\"small-note\">Showing 8 of {len(correctness_issues)} issues.</p>"
+            correctness_details = f"""
+            <div class="validation-summary">
+                <h3>⚠️ Correctness Validation Issues</h3>
+                <ul>{issues_html}</ul>
+                {truncation_note}
+            </div>"""
 
         # Add throughput statistics if available
         throughput_section = ""
@@ -322,6 +384,7 @@ class HTMLFormatter:
             <div class="summary-grid">
                 {summary_cards}
             </div>
+            {correctness_details}
             {throughput_section}
         </section>"""
 

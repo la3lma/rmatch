@@ -44,6 +44,7 @@ BASELINE_TIMEOUTS = {
     "10MB": 3600,  # 60m
     "100MB": 7200, # 120m
 }
+STALL_TIMEOUT_SECONDS = 1200  # 20m without measurable progress
 
 TERMINAL_STATUSES = {"completed", "failed", "cancelled", "stopped"}
 
@@ -172,6 +173,7 @@ def _build_common_config(
                 "performance_timeout": "record_partial_results",
             },
             "timeout_per_job": timeout_per_job,
+            "stall_timeout_seconds": STALL_TIMEOUT_SECONDS,
             "resource_limits": {
                 "max_memory_mb": 16384,
                 "max_concurrent_jobs": 1,

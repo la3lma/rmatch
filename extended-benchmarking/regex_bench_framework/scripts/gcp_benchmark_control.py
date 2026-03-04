@@ -536,6 +536,9 @@ EMA_RATE_JOBS_PER_SEC=0
 ETA_MODEL="insufficient_progress"
 ETA_CONFIDENCE="low"
 BENCH_PROCESS_ALIVE=0
+BENCH_CPU_PERCENT=0
+BENCH_CPU_ACTIVE=0
+CPU_ACTIVE_THRESHOLD_PCT=50
 echo "$STATUS" > "$STATUS_FILE"
 
 set_status() {{
@@ -681,7 +684,7 @@ estimate_remaining_seconds() {{
     rem_global="$(awk -v jobs="$remaining_jobs" -v r="$global_rate" 'BEGIN {{ printf "%.0f", jobs/r }}')"
   fi
 
-  if [[ "$rem_recent" -ge 0 && "$NO_PROGRESS_SECONDS" -le "$STALL_THRESHOLD_SECONDS" ]]; then
+  if [[ "$rem_recent" -ge 0 && ( "$NO_PROGRESS_SECONDS" -le "$STALL_THRESHOLD_SECONDS" || "$BENCH_CPU_ACTIVE" -eq 1 ) ]]; then
     if [[ "$rem_global" -ge 0 ]]; then
       rem_blended="$(awk -v recent="$rem_recent" -v global="$rem_global" 'BEGIN {{ printf "%.0f", (0.75 * recent) + (0.25 * global) }}')"
       remaining="$rem_blended"
@@ -690,7 +693,10 @@ estimate_remaining_seconds() {{
       remaining="$rem_recent"
       ETA_MODEL="recent_rate"
     fi
-    if [[ "$COMPLETED" -ge 10 ]]; then
+    if [[ "$BENCH_CPU_ACTIVE" -eq 1 && "$NO_PROGRESS_SECONDS" -gt "$STALL_THRESHOLD_SECONDS" ]]; then
+      ETA_MODEL="${{ETA_MODEL}}_cpu_active"
+      ETA_CONFIDENCE="low"
+    elif [[ "$COMPLETED" -ge 10 ]]; then
       ETA_CONFIDENCE="medium"
     fi
     return
@@ -716,12 +722,34 @@ estimate_remaining_seconds() {{
 
 detect_benchmark_liveness() {{
   BENCH_PROCESS_ALIVE=0
-  if [[ -n "$BENCH_PID" ]] && kill -0 "$BENCH_PID" >/dev/null 2>&1; then
-    BENCH_PROCESS_ALIVE=1
-    return
-  fi
+  BENCH_CPU_PERCENT=0
+  BENCH_CPU_ACTIVE=0
+
+  local container_alive=0
   if docker ps --format '{{{{.Names}}}}' | grep -q "^$CONTAINER_NAME$"; then
+    container_alive=1
     BENCH_PROCESS_ALIVE=1
+  fi
+
+  if [[ "$BENCH_PROCESS_ALIVE" -eq 0 && -n "$BENCH_PID" ]] && kill -0 "$BENCH_PID" >/dev/null 2>&1; then
+    BENCH_PROCESS_ALIVE=1
+  fi
+
+  local bench_cpu_raw=""
+  local bench_cpu_numeric=""
+
+  if [[ "$container_alive" -eq 1 ]]; then
+    bench_cpu_raw="$(docker stats --no-stream --format '{{{{.CPUPerc}}}}' "$CONTAINER_NAME" 2>/dev/null | head -1 || true)"
+  elif [[ -n "$BENCH_PID" ]] && kill -0 "$BENCH_PID" >/dev/null 2>&1; then
+    bench_cpu_raw="$(ps -p "$BENCH_PID" -o %cpu= 2>/dev/null | head -1 || true)"
+  fi
+
+  bench_cpu_numeric="$(echo "$bench_cpu_raw" | tr -d ' %' | tr ',' '.' | sed -E 's/[^0-9.]//g')"
+  if [[ -n "$bench_cpu_numeric" ]] && awk -v v="$bench_cpu_numeric" 'BEGIN {{ exit !(v+0 >= 0) }}'; then
+    BENCH_CPU_PERCENT="$(awk -v v="$bench_cpu_numeric" 'BEGIN {{ printf "%.2f", v+0 }}')"
+    if awk -v cpu="$BENCH_CPU_PERCENT" -v threshold="$CPU_ACTIVE_THRESHOLD_PCT" 'BEGIN {{ exit !(cpu >= threshold) }}'; then
+      BENCH_CPU_ACTIVE=1
+    fi
   fi
 }}
 
@@ -734,9 +762,9 @@ write_state() {{
   elapsed="$(( $(date +%s) - START_EPOCH ))"
   remaining=-1
 
+  detect_benchmark_liveness
   update_progress_rate
   estimate_remaining_seconds "$elapsed"
-  detect_benchmark_liveness
   detect_memory_congestion
 
   cat > "$STATE_FILE" <<EOF
@@ -763,6 +791,9 @@ write_state() {{
   "stall_threshold_seconds": $STALL_THRESHOLD_SECONDS,
   "ema_jobs_per_second": $EMA_RATE_JOBS_PER_SEC,
   "benchmark_process_alive": $BENCH_PROCESS_ALIVE,
+  "benchmark_cpu_percent": $BENCH_CPU_PERCENT,
+  "benchmark_cpu_active": $BENCH_CPU_ACTIVE,
+  "cpu_active_threshold_pct": $CPU_ACTIVE_THRESHOLD_PCT,
   "memory_total_mb": $MEM_TOTAL_MB,
   "memory_available_mb": $MEM_AVAILABLE_MB,
   "swap_used_mb": $SWAP_USED_MB,
@@ -1429,6 +1460,10 @@ def _run_status_snapshot(manifest: dict[str, Any]) -> dict[str, Any]:
     ema_jobs_per_second = float((state or {}).get("ema_jobs_per_second", 0.0) or 0.0)
     benchmark_process_alive_raw = (state or {}).get("benchmark_process_alive", None)
     benchmark_process_alive = None if benchmark_process_alive_raw is None else bool(benchmark_process_alive_raw)
+    benchmark_cpu_percent = float((state or {}).get("benchmark_cpu_percent", 0.0) or 0.0)
+    benchmark_cpu_active_raw = (state or {}).get("benchmark_cpu_active", None)
+    benchmark_cpu_active = None if benchmark_cpu_active_raw is None else bool(benchmark_cpu_active_raw)
+    cpu_active_threshold_pct = float((state or {}).get("cpu_active_threshold_pct", 0.0) or 0.0)
 
     pct = (completed / total) * 100.0 if total > 0 else 0.0
     return {
@@ -1458,6 +1493,9 @@ def _run_status_snapshot(manifest: dict[str, Any]) -> dict[str, Any]:
         "stall_threshold_seconds": stall_threshold_seconds,
         "ema_jobs_per_second": ema_jobs_per_second,
         "benchmark_process_alive": benchmark_process_alive,
+        "benchmark_cpu_percent": benchmark_cpu_percent,
+        "benchmark_cpu_active": benchmark_cpu_active,
+        "cpu_active_threshold_pct": cpu_active_threshold_pct,
     }
 
 
@@ -1488,9 +1526,13 @@ def _print_run_status(snapshot: dict[str, Any]) -> None:
         _out(f"Progress:     {snapshot['completed_jobs']}/? (estimating total...)")
     _out(f"Elapsed:      {_human_duration(snapshot['elapsed_seconds'])}")
     eta_suffix = ""
+    cpu_active = snapshot.get("benchmark_cpu_active")
     if snapshot.get("no_progress_seconds", -1) >= 0 and snapshot.get("stall_threshold_seconds", -1) > 0:
         if snapshot["no_progress_seconds"] > snapshot["stall_threshold_seconds"]:
-            eta_suffix = f" (low confidence; no progress for {_human_duration(snapshot['no_progress_seconds'])})"
+            if cpu_active:
+                eta_suffix = f" (compute active; no completed job for {_human_duration(snapshot['no_progress_seconds'])})"
+            else:
+                eta_suffix = f" (low confidence; no progress for {_human_duration(snapshot['no_progress_seconds'])})"
         elif snapshot.get("eta_confidence") == "low":
             eta_suffix = " (low confidence)"
     _out(f"ETA:          {_human_duration(snapshot['remaining_seconds'])}{eta_suffix}")
@@ -1504,6 +1546,14 @@ def _print_run_status(snapshot: dict[str, Any]) -> None:
         _out("Proc Alive:   unknown")
     else:
         _out(f"Proc Alive:   {'yes' if proc_alive else 'no'}")
+    if cpu_active is None:
+        _out("Bench CPU:    unknown")
+    else:
+        threshold = snapshot.get("cpu_active_threshold_pct", 0.0)
+        _out(
+            f"Bench CPU:    {snapshot.get('benchmark_cpu_percent', 0.0):.1f}% "
+            f"({'active' if cpu_active else 'idle'}, threshold={threshold:.0f}%)"
+        )
     if snapshot["memory_total_mb"] > 0:
         _out(
             "Memory:       "

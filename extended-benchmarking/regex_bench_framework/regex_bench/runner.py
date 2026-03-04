@@ -390,6 +390,7 @@ class BenchmarkRunner:
 
         # Organize results by engine and test parameters
         analysis = self.analyzer.analyze_results(self.results, self.config)
+        self._apply_correctness_mismatch_policy(analysis)
 
         # Add metadata
         analysis['benchmark_metadata'] = {
@@ -404,6 +405,45 @@ class BenchmarkRunner:
 
         logger.info("Statistical analysis complete")
         return analysis
+
+    def _apply_correctness_mismatch_policy(self, analysis: Dict[str, Any]) -> None:
+        """Record correctness mismatches without aborting benchmark runs."""
+        correctness = analysis.get('validation', {}).get('correctness', {}) or {}
+        status = str(correctness.get('status', 'pass')).lower()
+        issues = [str(i) for i in correctness.get('issues', []) if i]
+
+        if status == 'pass':
+            correctness['enforcement_mode'] = 'non_blocking'
+            return
+
+        handling = str(
+            self.config.get('execution_plan', {})
+            .get('failure_handling', {})
+            .get('correctness_mismatch', 'record_with_warning')
+        ).lower()
+
+        issue_count = len(issues)
+        major_issue_count = int(correctness.get('major_issue_count', 0) or 0)
+        minor_issue_count = int(correctness.get('minor_issue_count', 0) or 0)
+        issue_preview = issues[:5]
+        suffix = f" (showing {len(issue_preview)} of {issue_count})" if issue_count > len(issue_preview) else ""
+        details = "\n".join(f"  - {issue}" for issue in issue_preview) if issue_preview else "  - no issue details"
+        message = (
+            f"Correctness validation status={status}; policy={handling}; "
+            f"issues={issue_count} (major={major_issue_count}, minor={minor_issue_count}){suffix}\n{details}"
+        )
+
+        # Correctness discrepancies are always non-fatal:
+        # preserve run results and report issues for follow-up.
+        correctness['enforcement_mode'] = 'non_blocking'
+        if status == 'fail' and handling in {'abort', 'abort_with_error', 'abort_if_mismatch'}:
+            logger.warning(
+                "Configured correctness abort policy '%s' overridden by non-blocking enforcement.",
+                handling
+            )
+
+        if handling in {'warn_with_details', 'record_with_warning'} or status in {'warning', 'fail'}:
+            logger.warning(message)
 
     def _save_results(self, analysis: Dict[str, Any]) -> None:
         """Save results and analysis to files."""
@@ -429,6 +469,7 @@ class BenchmarkRunner:
 
     def _generate_summary(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
         """Generate a high-level summary of results."""
+        correctness = analysis.get('validation', {}).get('correctness', {}) or {}
         return {
             'run_id': self.run_id,
             'phase': self.config.get('phase', 'unknown'),
@@ -438,7 +479,12 @@ class BenchmarkRunner:
             'successful_runs': len([r for r in self.results if r.status == 'ok']),
             'failed_runs': len([r for r in self.results if r.status != 'ok']),
             'duration_seconds': time.time() - self.start_time,
-            'output_directory': str(self.output_dir)
+            'output_directory': str(self.output_dir),
+            'correctness_status': correctness.get('status', 'unknown'),
+            'correctness_issue_count': len(correctness.get('issues', [])),
+            'correctness_major_issue_count': correctness.get('major_issue_count', 0),
+            'correctness_minor_issue_count': correctness.get('minor_issue_count', 0),
+            'correctness_issues': correctness.get('issues', []),
         }
 
     def _save_error_state(self, error: str) -> None:

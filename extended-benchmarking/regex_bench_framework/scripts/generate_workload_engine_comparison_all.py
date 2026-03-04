@@ -52,6 +52,32 @@ def _safe_stdev(values: list[float]) -> float:
     return statistics.stdev(values)
 
 
+def _to_int(value: Any, default: int = 0) -> int:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return int(value)
+    text = str(value).strip()
+    if not text:
+        return default
+    try:
+        return int(text)
+    except Exception:
+        try:
+            return int(float(text))
+        except Exception:
+            return default
+
+
+def _is_failure_status(status: str) -> bool:
+    s = str(status or "").strip().lower()
+    if not s:
+        return False
+    if s in {"ok", "completed", "queued", "running"}:
+        return False
+    return True
+
+
 def _geomean(values: list[float]) -> float:
     positive = [v for v in values if v > 0]
     if not positive:
@@ -167,9 +193,13 @@ def _rows_from_jobs_db(run_dir: Path) -> tuple[list[dict[str, Any]], str] | None
                 scanning_ns,
                 total_ns,
                 match_count,
+                result_json,
                 pattern_count,
                 input_size,
-                input_size_bytes
+                input_size_bytes,
+                pattern_suite,
+                corpus_name,
+                error_message
             FROM benchmark_jobs
             """
         ).fetchall()
@@ -185,6 +215,14 @@ def _rows_from_jobs_db(run_dir: Path) -> tuple[list[dict[str, Any]], str] | None
         corpus_size_bytes = int(r["input_size_bytes"] or 0)
         if corpus_size_bytes <= 0:
             corpus_size_bytes = _parse_input_size_to_bytes(str(r["input_size"] or ""))
+        match_checksum = None
+        try:
+            payload = json.loads(str(r["result_json"] or "{}"))
+            checksum = payload.get("match_checksum")
+            if checksum:
+                match_checksum = str(checksum)
+        except Exception:
+            match_checksum = None
         mapped.append(
             {
                 "run_id": str(r["run_id"] or "").strip(),
@@ -195,8 +233,12 @@ def _rows_from_jobs_db(run_dir: Path) -> tuple[list[dict[str, Any]], str] | None
                 "scanning_ns": r["scanning_ns"] or 0,
                 "total_ns": r["total_ns"] or 0,
                 "match_count": r["match_count"] or 0,
+                "match_checksum": match_checksum,
                 "patterns_compiled": r["pattern_count"] or 0,
                 "corpus_size_bytes": corpus_size_bytes,
+                "pattern_suite": str(r["pattern_suite"] or "unknown"),
+                "corpus_name": str(r["corpus_name"] or "unknown"),
+                "error_message": str(r["error_message"] or ""),
             }
         )
     return mapped, str(path)
@@ -274,6 +316,16 @@ def _build_rows(results_dir: Path) -> tuple[list[dict[str, Any]], list[dict[str,
                     "scanning_ns": float(row.get("scanning_ns", 0) or 0),
                     "total_ns": float(row.get("total_ns", 0) or 0),
                     "match_count": float(row.get("match_count", 0) or 0),
+                    "match_checksum": row.get("match_checksum"),
+                    "pattern_suite": str(row.get("pattern_suite") or "unknown"),
+                    "corpus_name": str(row.get("corpus_name") or "unknown"),
+                    "iteration": _to_int(row.get("iteration"), -1),
+                    "error_message": str(
+                        row.get("error_message")
+                        or row.get("error")
+                        or row.get("stderr")
+                        or ""
+                    ),
                 }
             )
 
@@ -352,12 +404,14 @@ def _write_all_runs_workload_csv(output_dir: Path, rows: list[dict[str, Any]]) -
             continue
         key = (
             r["run_id"], r["cohort"], r["machine_type"], r["architecture"],
+            r["pattern_suite"], r["corpus_name"],
             r["patterns_compiled"], r["input_label"], r["corpus_size_bytes"], r["engine_name"],
         )
         grouped[key].append(r)
 
     fields = [
         "run_id", "cohort", "machine_type", "architecture",
+        "pattern_suite", "corpus_name",
         "patterns", "input_label", "input_bytes", "engine", "samples",
         "mean_total_ms", "median_total_ms", "std_total_ms", "mean_scan_ms", "mean_compile_ms", "mean_matches",
     ]
@@ -378,10 +432,12 @@ def _write_all_runs_workload_csv(output_dir: Path, rows: list[dict[str, Any]]) -
                     "cohort": key[1],
                     "machine_type": key[2],
                     "architecture": key[3],
-                    "patterns": key[4],
-                    "input_label": key[5],
-                    "input_bytes": key[6],
-                    "engine": key[7],
+                    "pattern_suite": key[4],
+                    "corpus_name": key[5],
+                    "patterns": key[6],
+                    "input_label": key[7],
+                    "input_bytes": key[8],
+                    "engine": key[9],
                     "samples": len(total_ms),
                     "mean_total_ms": f"{statistics.fmean(total_ms):.6f}",
                     "median_total_ms": f"{statistics.median(total_ms):.6f}",
@@ -391,6 +447,378 @@ def _write_all_runs_workload_csv(output_dir: Path, rows: list[dict[str, Any]]) -
                     "mean_matches": f"{statistics.fmean(matches):.2f}" if matches else "0.00",
                 }
             )
+    return out
+
+
+def _write_failed_jobs_csv(output_dir: Path, rows: list[dict[str, Any]]) -> Path:
+    out = output_dir / "all_runs_failed_jobs.csv"
+    fields = [
+        "run_id",
+        "cohort",
+        "machine_type",
+        "architecture",
+        "pattern_suite",
+        "corpus_name",
+        "patterns",
+        "input_label",
+        "input_bytes",
+        "engine",
+        "status",
+        "iteration",
+        "total_ms",
+        "scan_ms",
+        "compile_ms",
+        "matches",
+        "error_message",
+        "run_dir",
+        "source",
+    ]
+    with out.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields)
+        w.writeheader()
+        failed_rows = [
+            r for r in rows
+            if _is_failure_status(str(r.get("status", "")))
+        ]
+        for r in sorted(
+            failed_rows,
+            key=lambda x: (
+                str(x.get("run_id", "")),
+                int(x.get("patterns_compiled", 0) or 0),
+                int(x.get("corpus_size_bytes", 0) or 0),
+                str(x.get("engine_name", "")),
+                str(x.get("status", "")),
+                _to_int(x.get("iteration"), -1),
+            ),
+        ):
+            w.writerow(
+                {
+                    "run_id": r.get("run_id", ""),
+                    "cohort": r.get("cohort", ""),
+                    "machine_type": r.get("machine_type", ""),
+                    "architecture": r.get("architecture", ""),
+                    "pattern_suite": r.get("pattern_suite", ""),
+                    "corpus_name": r.get("corpus_name", ""),
+                    "patterns": int(r.get("patterns_compiled", 0) or 0),
+                    "input_label": r.get("input_label", ""),
+                    "input_bytes": int(r.get("corpus_size_bytes", 0) or 0),
+                    "engine": r.get("engine_name", ""),
+                    "status": r.get("status", ""),
+                    "iteration": _to_int(r.get("iteration"), -1),
+                    "total_ms": (
+                        f"{(float(r.get('total_ns', 0.0) or 0.0) / 1_000_000.0):.6f}"
+                        if float(r.get("total_ns", 0.0) or 0.0) > 0
+                        else ""
+                    ),
+                    "scan_ms": (
+                        f"{(float(r.get('scanning_ns', 0.0) or 0.0) / 1_000_000.0):.6f}"
+                        if float(r.get("scanning_ns", 0.0) or 0.0) > 0
+                        else ""
+                    ),
+                    "compile_ms": (
+                        f"{(float(r.get('compilation_ns', 0.0) or 0.0) / 1_000_000.0):.6f}"
+                        if float(r.get("compilation_ns", 0.0) or 0.0) > 0
+                        else ""
+                    ),
+                    "matches": int(float(r.get("match_count", 0.0) or 0.0)),
+                    "error_message": str(r.get("error_message", "")),
+                    "run_dir": r.get("run_dir", ""),
+                    "source": r.get("source", ""),
+                }
+            )
+    return out
+
+
+def _count_map_text(values: list[float]) -> str:
+    counts: dict[str, int] = {}
+    for v in values:
+        key = str(int(v))
+        counts[key] = counts.get(key, 0) + 1
+    return ", ".join(f"{k}:{counts[k]}" for k in sorted(counts.keys(), key=lambda x: int(x)))
+
+
+def _checksum_map_text(values: list[str]) -> str:
+    counts: dict[str, int] = {}
+    for v in values:
+        key = str(v)
+        counts[key] = counts.get(key, 0) + 1
+    return ", ".join(f"{k}:{counts[k]}" for k in sorted(counts.keys()))
+
+
+def _compute_consistency_audit(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    minor_discrepancy_max_absolute = 10
+    minor_discrepancy_max_relative = 0.001
+
+    def _classify_delta(a: int, b: int) -> tuple[str, int, float]:
+        delta = abs(int(a) - int(b))
+        denom = max(abs(int(a)), abs(int(b)), 1)
+        rel = float(delta) / float(denom)
+        severity = "minor" if (delta <= minor_discrepancy_max_absolute or rel <= minor_discrepancy_max_relative) else "major"
+        return severity, delta, rel
+
+    def _classify_span(values: list[int]) -> tuple[str, int, float]:
+        if not values:
+            return "major", 0, 0.0
+        lo = min(values)
+        hi = max(values)
+        return _classify_delta(lo, hi)
+
+    ok_rows = [r for r in rows if r.get("status") == "ok"]
+    same_engine_groups: dict[tuple[Any, ...], list[dict[str, Any]]] = defaultdict(list)
+    for row in ok_rows:
+        key = (
+            row.get("engine_name"),
+            row.get("pattern_suite", "unknown"),
+            row.get("corpus_name", "unknown"),
+            int(row.get("patterns_compiled", 0) or 0),
+            int(row.get("corpus_size_bytes", 0) or 0),
+        )
+        same_engine_groups[key].append(row)
+
+    same_engine_issues: list[dict[str, Any]] = []
+    same_engine_checked = 0
+    for key, vals in same_engine_groups.items():
+        if len(vals) < 2:
+            continue
+        same_engine_checked += 1
+        counts = [float(v.get("match_count", 0) or 0) for v in vals]
+        checksums = [str(v.get("match_checksum")) for v in vals if v.get("match_checksum")]
+
+        unique_counts = sorted(set(int(c) for c in counts))
+        unique_checksums = sorted(set(checksums))
+        if len(unique_counts) <= 1 and len(unique_checksums) <= 1:
+            continue
+
+        severity, delta_abs, delta_rel = _classify_span(unique_counts)
+        run_ids = sorted({str(v.get("run_id", "")) for v in vals if v.get("run_id")})
+        same_engine_issues.append(
+            {
+                "issue_type": "same_engine_inconsistency",
+                "severity": severity,
+                "engine_name": str(key[0]),
+                "pattern_suite": str(key[1]),
+                "corpus_name": str(key[2]),
+                "patterns_compiled": int(key[3]),
+                "corpus_size_bytes": int(key[4]),
+                "input_label": _bytes_label(int(key[4])),
+                "run_ids": run_ids,
+                "run_count": len(run_ids),
+                "samples": len(vals),
+                "delta_abs": delta_abs,
+                "delta_rel_pct": delta_rel * 100.0,
+                "match_count_values": _count_map_text(counts),
+                "checksum_values": _checksum_map_text(checksums) if checksums else "",
+            }
+        )
+
+    strict_reference_engine = "rmatch"
+    strict_java_engines = {
+        "java-native-naive",
+        "java-native-unfair",
+        "java-native-optimized",
+        "java-native",
+    }
+    cross_engine_issues: list[dict[str, Any]] = []
+    cross_engine_pairs_checked = 0
+
+    by_run_workload: dict[tuple[Any, ...], dict[str, list[dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
+    for row in ok_rows:
+        run_key = (
+            str(row.get("run_id", "")),
+            str(row.get("pattern_suite", "unknown")),
+            str(row.get("corpus_name", "unknown")),
+            int(row.get("patterns_compiled", 0) or 0),
+            int(row.get("corpus_size_bytes", 0) or 0),
+        )
+        by_run_workload[run_key][str(row.get("engine_name", ""))].append(row)
+
+    for run_key, engine_map in by_run_workload.items():
+        if strict_reference_engine not in engine_map:
+            continue
+
+        java_present = sorted(
+            e for e in engine_map.keys() if (e in strict_java_engines or e.startswith("java-native"))
+        )
+        if not java_present:
+            continue
+
+        ref_rows = engine_map[strict_reference_engine]
+        ref_counts = sorted({int(float(v.get("match_count", 0) or 0)) for v in ref_rows})
+        ref_checksums = sorted({str(v.get("match_checksum")) for v in ref_rows if v.get("match_checksum")})
+
+        for java_engine in java_present:
+            if java_engine == strict_reference_engine:
+                continue
+            cross_engine_pairs_checked += 1
+
+            j_rows = engine_map[java_engine]
+            j_counts = sorted({int(float(v.get("match_count", 0) or 0)) for v in j_rows})
+            j_checksums = sorted({str(v.get("match_checksum")) for v in j_rows if v.get("match_checksum")})
+
+            mismatch_reasons: list[str] = []
+            mismatch_severity = "minor"
+            delta_abs = 0
+            delta_rel_pct = 0.0
+            if len(ref_counts) != 1:
+                mismatch_reasons.append(f"{strict_reference_engine} non-deterministic count set={ref_counts}")
+                sev, d_abs, d_rel = _classify_span(ref_counts)
+                mismatch_severity = "major" if sev == "major" else mismatch_severity
+                delta_abs = max(delta_abs, d_abs)
+                delta_rel_pct = max(delta_rel_pct, d_rel * 100.0)
+            if len(j_counts) != 1:
+                mismatch_reasons.append(f"{java_engine} non-deterministic count set={j_counts}")
+                sev, d_abs, d_rel = _classify_span(j_counts)
+                mismatch_severity = "major" if sev == "major" else mismatch_severity
+                delta_abs = max(delta_abs, d_abs)
+                delta_rel_pct = max(delta_rel_pct, d_rel * 100.0)
+            if len(ref_counts) == 1 and len(j_counts) == 1 and ref_counts[0] != j_counts[0]:
+                mismatch_reasons.append(
+                    f"count mismatch {strict_reference_engine}={ref_counts[0]} vs {java_engine}={j_counts[0]}"
+                )
+                sev, d_abs, d_rel = _classify_delta(ref_counts[0], j_counts[0])
+                mismatch_severity = "major" if sev == "major" else mismatch_severity
+                delta_abs = max(delta_abs, d_abs)
+                delta_rel_pct = max(delta_rel_pct, d_rel * 100.0)
+
+            if len(ref_checksums) == 1 and len(j_checksums) == 1 and ref_checksums[0] != j_checksums[0]:
+                mismatch_reasons.append(
+                    f"checksum mismatch {strict_reference_engine}!={java_engine}"
+                )
+                mismatch_severity = "major"
+
+            if not mismatch_reasons:
+                continue
+
+            run_id, pattern_suite, corpus_name, patterns_compiled, corpus_size_bytes = run_key
+            cross_engine_issues.append(
+                {
+                    "issue_type": "cross_engine_mismatch",
+                    "severity": mismatch_severity,
+                    "run_id": run_id,
+                    "pattern_suite": pattern_suite,
+                    "corpus_name": corpus_name,
+                    "patterns_compiled": patterns_compiled,
+                    "corpus_size_bytes": corpus_size_bytes,
+                    "input_label": _bytes_label(corpus_size_bytes),
+                    "reference_engine": strict_reference_engine,
+                    "compare_engine": java_engine,
+                    "delta_abs": delta_abs,
+                    "delta_rel_pct": delta_rel_pct,
+                    "reference_counts": ",".join(str(v) for v in ref_counts),
+                    "compare_counts": ",".join(str(v) for v in j_counts),
+                    "reference_checksums": ",".join(ref_checksums),
+                    "compare_checksums": ",".join(j_checksums),
+                    "details": "; ".join(mismatch_reasons),
+                }
+            )
+
+    same_minor = sum(1 for i in same_engine_issues if str(i.get("severity")) == "minor")
+    same_major = sum(1 for i in same_engine_issues if str(i.get("severity")) == "major")
+    cross_minor = sum(1 for i in cross_engine_issues if str(i.get("severity")) == "minor")
+    cross_major = sum(1 for i in cross_engine_issues if str(i.get("severity")) == "major")
+
+    return {
+        "strict_reference_engine": strict_reference_engine,
+        "strict_java_engines": sorted(strict_java_engines),
+        "minor_discrepancy_max_absolute": minor_discrepancy_max_absolute,
+        "minor_discrepancy_max_relative": minor_discrepancy_max_relative,
+        "same_engine_groups_checked": same_engine_checked,
+        "same_engine_issue_count": len(same_engine_issues),
+        "same_engine_minor_issue_count": same_minor,
+        "same_engine_major_issue_count": same_major,
+        "same_engine_issues": same_engine_issues,
+        "cross_engine_pairs_checked": cross_engine_pairs_checked,
+        "cross_engine_issue_count": len(cross_engine_issues),
+        "cross_engine_minor_issue_count": cross_minor,
+        "cross_engine_major_issue_count": cross_major,
+        "cross_engine_issues": cross_engine_issues,
+    }
+
+
+def _write_consistency_audit_csv(output_dir: Path, audit: dict[str, Any]) -> Path:
+    out = output_dir / "correctness_consistency_audit.csv"
+    fields = [
+        "issue_type",
+        "severity",
+        "run_id",
+        "engine_name",
+        "reference_engine",
+        "compare_engine",
+        "pattern_suite",
+        "corpus_name",
+        "patterns_compiled",
+        "input_label",
+        "corpus_size_bytes",
+        "delta_abs",
+        "delta_rel_pct",
+        "details",
+        "match_count_values",
+        "checksum_values",
+        "reference_counts",
+        "compare_counts",
+        "reference_checksums",
+        "compare_checksums",
+        "run_ids",
+        "samples",
+    ]
+    with out.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields)
+        w.writeheader()
+
+        for issue in audit.get("same_engine_issues", []):
+            row = {
+                "issue_type": issue.get("issue_type", "same_engine_inconsistency"),
+                "severity": issue.get("severity", "major"),
+                "run_id": "",
+                "engine_name": issue.get("engine_name", ""),
+                "reference_engine": "",
+                "compare_engine": "",
+                "pattern_suite": issue.get("pattern_suite", ""),
+                "corpus_name": issue.get("corpus_name", ""),
+                "patterns_compiled": issue.get("patterns_compiled", ""),
+                "input_label": issue.get("input_label", ""),
+                "corpus_size_bytes": issue.get("corpus_size_bytes", ""),
+                "delta_abs": issue.get("delta_abs", ""),
+                "delta_rel_pct": f"{float(issue.get('delta_rel_pct', 0.0)):.6f}",
+                "details": "same engine produced multiple match outputs across runs",
+                "match_count_values": issue.get("match_count_values", ""),
+                "checksum_values": issue.get("checksum_values", ""),
+                "reference_counts": "",
+                "compare_counts": "",
+                "reference_checksums": "",
+                "compare_checksums": "",
+                "run_ids": ",".join(issue.get("run_ids", [])),
+                "samples": issue.get("samples", ""),
+            }
+            w.writerow(row)
+
+        for issue in audit.get("cross_engine_issues", []):
+            row = {
+                "issue_type": issue.get("issue_type", "cross_engine_mismatch"),
+                "severity": issue.get("severity", "major"),
+                "run_id": issue.get("run_id", ""),
+                "engine_name": "",
+                "reference_engine": issue.get("reference_engine", ""),
+                "compare_engine": issue.get("compare_engine", ""),
+                "pattern_suite": issue.get("pattern_suite", ""),
+                "corpus_name": issue.get("corpus_name", ""),
+                "patterns_compiled": issue.get("patterns_compiled", ""),
+                "input_label": issue.get("input_label", ""),
+                "corpus_size_bytes": issue.get("corpus_size_bytes", ""),
+                "delta_abs": issue.get("delta_abs", ""),
+                "delta_rel_pct": f"{float(issue.get('delta_rel_pct', 0.0)):.6f}",
+                "details": issue.get("details", ""),
+                "match_count_values": "",
+                "checksum_values": "",
+                "reference_counts": issue.get("reference_counts", ""),
+                "compare_counts": issue.get("compare_counts", ""),
+                "reference_checksums": issue.get("reference_checksums", ""),
+                "compare_checksums": issue.get("compare_checksums", ""),
+                "run_ids": "",
+                "samples": "",
+            }
+            w.writerow(row)
+
     return out
 
 
@@ -473,6 +901,7 @@ def _write_html(
     *,
     results_dir: Path,
     run_inventory: list[dict[str, Any]],
+    consistency_audit: dict[str, Any],
     engines: list[str],
     overall_summary: dict[str, dict[str, float]],
     cohort_summary: dict[str, dict[str, float]],
@@ -549,6 +978,7 @@ def _write_html(
     lines.append("th,td{border-bottom:1px solid #d1d5db;padding:6px 8px;text-align:left;vertical-align:top} .num{text-align:right;font-variant-numeric:tabular-nums} .mono{font-family:ui-monospace,Menlo,monospace}")
     lines.append(".table-wrap{overflow:auto;max-height:70vh;border:1px solid #d1d5db;border-radius:8px} thead th{position:sticky;top:0;background:#f3f4f6;z-index:1}")
     lines.append(".cell{min-width:145px} .winner{font-weight:700} .small{font-size:.82rem;color:#4b5563} .ratio{font-size:.78rem;color:#374151}")
+    lines.append(".status-success{color:#047857} .status-warning{color:#b45309} .status-error{color:#b91c1c}")
     lines.append(".rank-1{background:rgba(16,185,129,0.14)} .rank-2{background:rgba(245,158,11,0.14)} .rank-3{background:rgba(239,68,68,0.14)}")
     lines.append(".sortable-ratio{cursor:pointer;user-select:none} .sortable-ratio:hover{background:#e5e7eb} .sorted-ratio{background:#dbeafe !important}")
     lines.append(".controls{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:10px} .ctrl{display:flex;flex-direction:column;gap:4px;min-width:180px}")
@@ -566,8 +996,20 @@ def _write_html(
     lines.append("<h1>All-Runs Workload vs Engine</h1>")
     lines.append(f"<p>Source root: <span class=\"mono\">{_escape(results_dir)}</span></p>")
     lines.append(f"<p>Generated (UTC): <span class=\"mono\">{_escape(generated)}</span></p>")
-    lines.append(f"<p>Runs scanned: <b>{totals['runs']}</b> | Runs with data: <b>{totals['runs_with_data']}</b> | Rows (ok): <b>{totals['rows_ok']}</b> | Engines: <b>{_escape(', '.join(engines))}</b></p>")
-    lines.append("<p><a href=\"all_runs_inventory.csv\">Run inventory CSV</a> | <a href=\"all_runs_workload_engine.csv\">All runs workload CSV</a> | <a href=\"overall_workload_engine_matrix.csv\">Overall matrix CSV</a> | <a href=\"cohort_workload_engine_matrix.csv\">Cohort matrix CSV</a></p>")
+    lines.append(
+        f"<p>Runs scanned: <b>{totals['runs']}</b> | Runs with data: <b>{totals['runs_with_data']}</b> | "
+        f"Rows (ok): <b>{totals['rows_ok']}</b> | Rows (terminal non-ok): <b>{totals['rows_failed']}</b> | "
+        f"Engines: <b>{_escape(', '.join(engines))}</b></p>"
+    )
+    lines.append(
+        "<p><a href=\"all_runs_inventory.csv\">Run inventory CSV</a> | "
+        "<a href=\"all_runs_workload_engine.csv\">All runs workload CSV</a> | "
+        "<a href=\"all_runs_failed_jobs.csv\">Failed jobs CSV</a> | "
+        "<a href=\"overall_workload_engine_matrix.csv\">Overall matrix CSV</a> | "
+        "<a href=\"cohort_workload_engine_matrix.csv\">Cohort matrix CSV</a> | "
+        "<a href=\"correctness_consistency_audit.csv\">Correctness audit CSV</a></p>"
+    )
+    lines.append(f"<p class=\"small\">Failure breakdown: <span class=\"mono\">{_escape(totals['rows_failed_breakdown'])}</span></p>")
     lines.append("<p id=\"auto-refresh-status\" class=\"small\">Auto-refresh: initializing...</p>")
     lines.append("</div>")
 
@@ -588,6 +1030,101 @@ def _write_html(
             f"<tr><td class=\"mono\">{_escape(r['run_id'])}</td><td class=\"mono\">{_escape(r['cohort'])}</td><td>{_escape(r['machine_type'])}</td><td>{_escape(r['architecture'])}</td><td class=\"num\">{r['rows_total']}</td><td class=\"num\">{r['rows_ok']}</td><td class=\"mono\">{_escape(r['engines'])}</td></tr>"
         )
     lines.append("</tbody></table></div>")
+
+    same_engine_issue_count = int(consistency_audit.get("same_engine_issue_count", 0))
+    cross_engine_issue_count = int(consistency_audit.get("cross_engine_issue_count", 0))
+    same_engine_minor = int(consistency_audit.get("same_engine_minor_issue_count", 0))
+    same_engine_major = int(consistency_audit.get("same_engine_major_issue_count", 0))
+    cross_engine_minor = int(consistency_audit.get("cross_engine_minor_issue_count", 0))
+    cross_engine_major = int(consistency_audit.get("cross_engine_major_issue_count", 0))
+    same_engine_checked = int(consistency_audit.get("same_engine_groups_checked", 0))
+    cross_engine_checked = int(consistency_audit.get("cross_engine_pairs_checked", 0))
+    total_issues = same_engine_issue_count + cross_engine_issue_count
+    total_major = same_engine_major + cross_engine_major
+    total_minor = same_engine_minor + cross_engine_minor
+    issue_class = "status-success" if total_issues == 0 else ("status-warning" if total_major == 0 else "status-error")
+    lines.append("<div class=\"card\" id=\"consistency-audit-card\"><h2>Correctness Consistency Audit</h2>")
+    lines.append(
+        f"<p>Status: <b class=\"{issue_class}\">{'clean' if total_issues == 0 else 'issues found'}</b> | "
+        f"same-engine groups checked: <b>{same_engine_checked}</b>, issues: <b>{same_engine_issue_count}</b> "
+        f"(major={same_engine_major}, minor={same_engine_minor}) | "
+        f"java-vs-rmatch pairs checked: <b>{cross_engine_checked}</b>, issues: <b>{cross_engine_issue_count}</b> "
+        f"(major={cross_engine_major}, minor={cross_engine_minor})</p>"
+    )
+    lines.append(
+        "<p class=\"small\">Policy: mismatches are recorded for analysis; runs are not invalidated. "
+        f"Minor discrepancy threshold: abs≤{int(consistency_audit.get('minor_discrepancy_max_absolute', 10))} "
+        f"or rel≤{float(consistency_audit.get('minor_discrepancy_max_relative', 0.001)):.6f}.</p>"
+    )
+
+    issue_rows: list[dict[str, Any]] = []
+    for issue in consistency_audit.get("same_engine_issues", []):
+        issue_rows.append(
+            {
+                "issue_type": "same_engine_inconsistency",
+                "severity": issue.get("severity", "major"),
+                "run_id": ",".join(issue.get("run_ids", [])),
+                "engine": issue.get("engine_name", ""),
+                "suite": issue.get("pattern_suite", ""),
+                "corpus": issue.get("corpus_name", ""),
+                "patterns": issue.get("patterns_compiled", ""),
+                "input": issue.get("input_label", ""),
+                "delta_abs": issue.get("delta_abs", ""),
+                "delta_rel_pct": issue.get("delta_rel_pct", ""),
+                "details": f"match_count={issue.get('match_count_values', '')}"
+                + (f"; checksum={issue.get('checksum_values', '')}" if issue.get("checksum_values") else ""),
+            }
+        )
+    for issue in consistency_audit.get("cross_engine_issues", []):
+        issue_rows.append(
+            {
+                "issue_type": "java_vs_rmatch_mismatch",
+                "severity": issue.get("severity", "major"),
+                "run_id": issue.get("run_id", ""),
+                "engine": f"{issue.get('reference_engine', '')} vs {issue.get('compare_engine', '')}",
+                "suite": issue.get("pattern_suite", ""),
+                "corpus": issue.get("corpus_name", ""),
+                "patterns": issue.get("patterns_compiled", ""),
+                "input": issue.get("input_label", ""),
+                "delta_abs": issue.get("delta_abs", ""),
+                "delta_rel_pct": issue.get("delta_rel_pct", ""),
+                "details": issue.get("details", ""),
+            }
+        )
+
+    if not issue_rows:
+        lines.append("<p><b>No consistency issues detected in the scanned rows.</b></p>")
+    else:
+        lines.append("<div class=\"table-wrap\"><table><thead><tr><th>severity</th><th>type</th><th>run_id(s)</th><th>engine(s)</th><th>suite</th><th>corpus</th><th class=\"num\">patterns</th><th>input</th><th class=\"num\">delta_abs</th><th class=\"num\">delta_rel_%</th><th>details</th></tr></thead><tbody>")
+        for item in issue_rows[:200]:
+            sev = str(item.get("severity", "major")).lower()
+            sev_class = "status-warning" if sev == "minor" else "status-error"
+            delta_rel_raw = item.get("delta_rel_pct", "")
+            delta_rel_text = ""
+            if delta_rel_raw != "":
+                try:
+                    delta_rel_text = f"{float(delta_rel_raw):.6f}"
+                except Exception:
+                    delta_rel_text = str(delta_rel_raw)
+            lines.append(
+                "<tr>"
+                f"<td class=\"mono {sev_class}\"><b>{_escape(sev)}</b></td>"
+                f"<td class=\"mono\">{_escape(item['issue_type'])}</td>"
+                f"<td class=\"mono\">{_escape(item['run_id'])}</td>"
+                f"<td class=\"mono\">{_escape(item['engine'])}</td>"
+                f"<td class=\"mono\">{_escape(item['suite'])}</td>"
+                f"<td class=\"mono\">{_escape(item['corpus'])}</td>"
+                f"<td class=\"num\">{_escape(item['patterns'])}</td>"
+                f"<td class=\"mono\">{_escape(item['input'])}</td>"
+                f"<td class=\"num\">{_escape(item.get('delta_abs', ''))}</td>"
+                f"<td class=\"num\">{_escape(delta_rel_text)}</td>"
+                f"<td>{_escape(item['details'])}</td>"
+                "</tr>"
+            )
+        lines.append("</tbody></table></div>")
+        if len(issue_rows) > 200:
+            lines.append(f"<p class=\"small\">Showing 200 of {len(issue_rows)} issues. See correctness_consistency_audit.csv for full list.</p>")
+    lines.append("</div>")
 
     def summary_block(title: str, summary: dict[str, dict[str, float]], block_id: str) -> None:
         lines.append(f"<div class=\"card\" id=\"{_escape(block_id)}\"><h2>{_escape(title)}</h2><table><thead><tr><th>engine</th><th class=\"num\">wins</th><th class=\"num\">mean_x_vs_winner</th><th class=\"num\">geomean_x_vs_winner</th></tr></thead><tbody>")
@@ -625,7 +1162,7 @@ def _write_html(
     lines.append("<p>Each point is one observed workload scenario: x=corpus size, y=pattern count, color=fastest engine for that scenario.</p>")
     lines.append("<div class=\"controls\">")
     lines.append("<label class=\"ctrl\"><span>Cohort</span><select id=\"dom-cohort\"></select></label>")
-    lines.append("<label class=\"ctrl\"><span>Comparable Rows</span><select id=\"dom-compare\"><option value=\"two_plus\">at least 2 selected engines</option><option value=\"selected\">all selected engines</option><option value=\"all\">all available points</option></select></label>")
+    lines.append("<label class=\"ctrl\"><span>Comparable Rows</span><select id=\"dom-compare\"><option value=\"selected\">all selected engines</option><option value=\"two_plus\">at least 2 selected engines</option><option value=\"all\">all available points</option></select></label>")
     lines.append("<label class=\"ctrl\"><span>Model Boundaries</span><select id=\"dom-boundary\"><option value=\"on\">show equal-runtime lines</option><option value=\"off\">hide</option></select></label>")
     lines.append("<label class=\"ctrl\"><span>X Scale</span><select id=\"dom-x-scale\"><option value=\"log\">log10</option><option value=\"linear\">linear</option></select></label>")
     lines.append("<label class=\"ctrl\"><span>Y Scale</span><select id=\"dom-y-scale\"><option value=\"log\">log10</option><option value=\"linear\">linear</option></select></label>")
@@ -726,7 +1263,9 @@ def _write_html(
                     current_rank = idx
                     last_ratio = ratio
                 rank_by_engine[e] = current_rank
-        lines.append("<tr>")
+        lines.append(
+            f"<tr data-sort-patterns=\"{int(patterns)}\" data-sort-input-bytes=\"{int(ibytes)}\">"
+        )
         lines.append(f"<td class=\"mono\">{_escape(cohort)}</td>")
         lines.append(f"<td class=\"num\">{patterns}</td>")
         lines.append(f"<td class=\"mono\">{_escape(ilabel)} ({ibytes})</td>")
@@ -806,7 +1345,14 @@ def _write_html(
   }
 
   function bytesLabel(bytes) {
-    const mib = bytes / (1024 * 1024);
+    if (bytes < 1024) {
+      return String(Math.round(bytes)) + "B";
+    }
+    const kib = bytes / 1024;
+    if (kib < 1024) {
+      return Math.round(kib) + "KB";
+    }
+    const mib = kib / 1024;
     if (mib < 1024) {
       return Math.round(mib) + "MB";
     }
@@ -2098,14 +2644,6 @@ def _write_html(
       cohortSel.appendChild(opt);
     });
 
-    if (cohortIds.length) {
-      if (preferredCohort && cohortIds.includes(preferredCohort)) {
-        cohortSel.value = preferredCohort;
-      } else {
-        cohortSel.value = cohortIds[0];
-      }
-    }
-
     const priorSelected = new Set(Array.from(selectedEngines.entries()).filter((pair) => pair[1]).map((pair) => pair[0]));
     const preferredSelected = new Set(Array.isArray(preferredSelectedEngines) ? preferredSelectedEngines.map((v) => String(v)) : []);
     engineNames = Array.from(new Set(data.map((r) => String(r.engine || "")).filter(Boolean))).sort();
@@ -2116,11 +2654,53 @@ def _write_html(
         selected = preferredSelected.has(e);
       } else if (priorSelected.size > 0) {
         selected = priorSelected.has(e);
+      } else if (String(e).includes("unfair")) {
+        selected = false;
       }
       selectedEngines.set(e, selected);
     });
     if (engineNames.length > 0 && !engineNames.some((e) => selectedEngines.get(e))) {
       selectedEngines.set(engineNames[0], true);
+    }
+
+    function recommendedCohort() {
+      const active = engineNames.filter((e) => selectedEngines.get(e));
+      const counts = new Map();
+      data.forEach((r) => {
+        const c = String(r.cohort || "");
+        if (!c || c === "__overall__") {
+          return;
+        }
+        const e = String(r.engine || "");
+        if (!active.includes(e)) {
+          return;
+        }
+        counts.set(c, (counts.get(c) || 0) + 1);
+      });
+      let best = "";
+      let bestCount = -1;
+      Array.from(counts.keys()).sort().forEach((c) => {
+        const n = Number(counts.get(c) || 0);
+        if (n > bestCount) {
+          best = c;
+          bestCount = n;
+        }
+      });
+      if (best && cohortIds.includes(best)) {
+        return best;
+      }
+      if (cohortIds.length && cohortIds[0] === "__overall__" && cohortIds.length > 1) {
+        return cohortIds[1];
+      }
+      return cohortIds.length ? cohortIds[0] : "";
+    }
+
+    if (cohortIds.length) {
+      if (preferredCohort && cohortIds.includes(preferredCohort)) {
+        cohortSel.value = preferredCohort;
+      } else {
+        cohortSel.value = recommendedCohort();
+      }
     }
   }
 
@@ -2354,10 +2934,14 @@ def _write_html(
         .map((e) => {
           const row = s.byEngine.get(e);
           const ratio = toNum(row.mean_total_ms) / s.winner_ms;
-          return e + ":" + (Number.isFinite(ratio) ? ratio.toFixed(2) + "x" : "-");
+          const ms = toNum(row.mean_total_ms);
+          const msTxt = Number.isFinite(ms) ? msLabel(ms) : "-";
+          return e + ":" + msTxt + " (" + (Number.isFinite(ratio) ? ratio.toFixed(2) + "x" : "-") + ")";
         });
       const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
       title.textContent =
+        "cohort=" + (cohortMap.get(cohortSel.value) || cohortSel.value) +
+        " | " +
         "patterns=" + patternLabel(s.patterns) +
         " | input=" + (s.input_label || bytesLabel(s.input_bytes)) +
         " | winner=" + s.winner +
@@ -2556,11 +3140,21 @@ def _write_html(
     return Number.isFinite(num) ? num : Number.POSITIVE_INFINITY;
   }
 
-  function toWinnerMs(row) {
-    if (!row || !row.cells || row.cells.length < 5) {
+  function toPatterns(row) {
+    if (!row) {
       return Number.POSITIVE_INFINITY;
     }
-    const n = Number(String(row.cells[4].textContent || "").trim());
+    const raw = row.dataset ? row.dataset.sortPatterns : "";
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
+  }
+
+  function toInputBytes(row) {
+    if (!row) {
+      return Number.POSITIVE_INFINITY;
+    }
+    const raw = row.dataset ? row.dataset.sortInputBytes : "";
+    const n = Number(raw);
     return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
   }
 
@@ -2597,10 +3191,16 @@ def _write_html(
         return aRatio - bRatio;
       }
 
-      const aWinner = toWinnerMs(a);
-      const bWinner = toWinnerMs(b);
-      if (aWinner !== bWinner) {
-        return aWinner - bWinner;
+      const aPatterns = toPatterns(a);
+      const bPatterns = toPatterns(b);
+      if (aPatterns !== bPatterns) {
+        return aPatterns - bPatterns;
+      }
+
+      const aInput = toInputBytes(a);
+      const bInput = toInputBytes(b);
+      if (aInput !== bInput) {
+        return aInput - bInput;
       }
 
       const ai = Number(a.dataset.sortBaseIndex || 0);
@@ -2701,6 +3301,7 @@ def _write_html(
         "report-header-card",
         "modeling-paper-card",
         "run-inventory-card",
+        "consistency-audit-card",
         "overall-summary-card",
         "cohort-summary-card",
         "scenario-overall-card",
@@ -2777,6 +3378,9 @@ def generate(results_dir: Path, output_dir: Path) -> dict[str, str]:
 
     inventory_csv = _write_run_inventory_csv(output_dir, run_inventory)
     all_runs_csv = _write_all_runs_workload_csv(output_dir, all_rows)
+    failed_jobs_csv = _write_failed_jobs_csv(output_dir, all_rows)
+    consistency_audit = _compute_consistency_audit(all_rows)
+    consistency_audit_csv = _write_consistency_audit_csv(output_dir, consistency_audit)
 
     overall_engines, overall_agg = _aggregate(all_rows, include_cohort=False)
     cohort_engines, cohort_agg = _aggregate(all_rows, include_cohort=True)
@@ -2799,10 +3403,21 @@ def generate(results_dir: Path, output_dir: Path) -> dict[str, str]:
         include_cohort=True,
     )
 
+    failed_counts: dict[str, int] = defaultdict(int)
+    for row in all_rows:
+        status = str(row.get("status", "")).lower()
+        if _is_failure_status(status):
+            failed_counts[status] += 1
+    failed_breakdown = ", ".join(
+        f"{status}:{count}" for status, count in sorted(failed_counts.items())
+    ) if failed_counts else "none"
+
     totals = {
         "runs": len(_find_run_dirs(results_dir)),
         "runs_with_data": len(run_inventory),
         "rows_ok": sum(1 for r in all_rows if r["status"] == "ok"),
+        "rows_failed": sum(1 for r in all_rows if _is_failure_status(str(r.get("status", "")))),
+        "rows_failed_breakdown": failed_breakdown,
     }
     model_artifacts = {
         "tex": (output_dir / "modeling_dominance_note.tex").is_file(),
@@ -2812,6 +3427,7 @@ def generate(results_dir: Path, output_dir: Path) -> dict[str, str]:
         output_dir,
         results_dir=results_dir,
         run_inventory=run_inventory,
+        consistency_audit=consistency_audit,
         engines=engines,
         overall_summary=overall_summary,
         cohort_summary=cohort_summary,
@@ -2825,6 +3441,8 @@ def generate(results_dir: Path, output_dir: Path) -> dict[str, str]:
         "html": str(html_file),
         "inventory_csv": str(inventory_csv),
         "all_runs_csv": str(all_runs_csv),
+        "failed_jobs_csv": str(failed_jobs_csv),
+        "consistency_audit_csv": str(consistency_audit_csv),
         "overall_matrix": str(overall_matrix),
         "cohort_matrix": str(cohort_matrix),
         "runs_with_data": str(len(run_inventory)),
@@ -2845,6 +3463,8 @@ def main() -> int:
     print(f"HTML: {result['html']}")
     print(f"Run inventory CSV: {result['inventory_csv']}")
     print(f"All runs workload CSV: {result['all_runs_csv']}")
+    print(f"Failed jobs CSV: {result['failed_jobs_csv']}")
+    print(f"Correctness audit CSV: {result['consistency_audit_csv']}")
     print(f"Overall matrix CSV: {result['overall_matrix']}")
     print(f"Cohort matrix CSV: {result['cohort_matrix']}")
     return 0

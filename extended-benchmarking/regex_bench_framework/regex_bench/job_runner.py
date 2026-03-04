@@ -8,7 +8,7 @@ import hashlib
 import logging
 import os
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
@@ -273,9 +273,14 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
     def _execute_job_queue(self, run_id: str) -> None:
         """Execute jobs from queue with controlled parallelism."""
         logger.info("Starting job queue execution...")
+        max_timeout = self._calculate_job_timeout()
+        logger.info(
+            f"Queue watchdog active: waiting for job completions; per-job hard timeout is {max_timeout}s"
+        )
 
         with ThreadPoolExecutor(max_workers=self.parallel_engines) as executor:
             futures = {}
+            poll_seconds = 5.0
 
             while True:
                 # Fill up to max_workers with jobs
@@ -296,48 +301,34 @@ class JobBasedBenchmarkRunner(BenchmarkRunner):
                 if not futures:
                     break  # All jobs completed
 
-                # Calculate appropriate timeout based on largest input size
-                max_timeout = self._calculate_job_timeout()
+                # Poll for at least one completion. Engine-level watchdogs enforce timeout/stall cutoffs.
+                done_futures, _ = wait(
+                    set(futures.keys()),
+                    timeout=poll_seconds,
+                    return_when=FIRST_COMPLETED,
+                )
 
-                # Wait for completed jobs with appropriate timeout
-                try:
-                    done_futures = list(as_completed(futures.keys(), timeout=max_timeout))
+                if not done_futures:
+                    continue
 
-                    for future in done_futures:
-                        job = futures.pop(future)
+                for future in done_futures:
+                    job = futures.pop(future)
 
-                        try:
-                            result = future.result()
-                            self.results.append(result)  # PRESERVE existing results collection
+                    try:
+                        result = future.result()
+                        self.results.append(result)  # PRESERVE existing results collection
 
-                            # Log progress (preserve existing format) - use main thread connection
-                            progress = self.job_queue.get_run_progress(run_id)
-                            completed = progress['COMPLETED']
-                            total = progress['total']
+                        # Log progress (preserve existing format) - use main thread connection
+                        progress = self.job_queue.get_run_progress(run_id)
+                        completed = progress['COMPLETED']
+                        total = progress['total']
 
-                            logger.info(f"[{completed}/{total}] Completed: {job.engine_name} "
-                                       f"({job.pattern_count} patterns, {job.input_size}, "
-                                       f"iter {job.iteration})")
+                        logger.info(f"[{completed}/{total}] Completed: {job.engine_name} "
+                                   f"({job.pattern_count} patterns, {job.input_size}, "
+                                   f"iter {job.iteration})")
 
-                        except Exception as e:
-                            logger.error(f"Job {job.job_id} failed: {e}")
-
-                except Exception as timeout_error:
-                    # Handle timeout or other issues
-                    remaining_count = len(futures)
-                    logger.warning(f"Timeout waiting for jobs after {max_timeout}s: {timeout_error}")
-
-                    if remaining_count > 0:
-                        logger.error(f"{remaining_count} (of {remaining_count}) futures unfinished after {max_timeout}s timeout")
-
-                        # Log which jobs were hanging
-                        for future, job in futures.items():
-                            logger.error(f"   Hanging job: {job.engine_name} - {job.pattern_count} patterns, {job.input_size}, iter {job.iteration}")
-
-                        # Cancel remaining futures
-                        for future in futures.keys():
-                            future.cancel()
-                        break
+                    except Exception as e:
+                        logger.error(f"Job {job.job_id} failed: {e}")
 
     def _execute_job_with_tracking(self, job: BenchmarkJob, db_path: Path) -> EngineResult:
         """Execute single job with status tracking - wraps existing logic."""

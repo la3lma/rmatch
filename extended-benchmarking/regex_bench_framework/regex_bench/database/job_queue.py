@@ -176,7 +176,7 @@ class JobQueue:
                          result: Optional[EngineResult] = None,
                          error_message: Optional[str] = None):
         """Update job status and optionally store results."""
-        completed_at = datetime.now() if status in ['COMPLETED', 'FAILED'] else None
+        completed_at = datetime.now() if status in ['COMPLETED', 'FAILED', 'TIMEOUT'] else None
 
         # Calculate duration if job is completing
         duration_seconds = None

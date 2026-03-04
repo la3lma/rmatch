@@ -3,7 +3,7 @@ Statistical analysis of benchmark results.
 """
 
 import numpy as np
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from collections import defaultdict
 import statistics
 
@@ -29,7 +29,7 @@ class StatisticalAnalyzer:
             'grouped_statistics': statistics_by_group,
             'comparisons': comparisons,
             'summary': self._generate_summary(statistics_by_group, comparisons),
-            'validation': self._validate_results(statistics_by_group, config)
+            'validation': self._validate_results(grouped_results, statistics_by_group, config)
         }
 
     def _group_results(self, results: List[Any]) -> Dict[str, List[Any]]:
@@ -43,6 +43,23 @@ class StatisticalAnalyzer:
                 groups[group_key].append(result)
 
         return dict(groups)
+
+    def _parse_group_key(self, group_key: str) -> Tuple[str, int, int]:
+        """Parse group key into (engine_name, pattern_count, corpus_size_bytes)."""
+        parts = group_key.rsplit('_', 2)
+        if len(parts) != 3:
+            return group_key, 0, 0
+
+        engine_name = parts[0]
+        try:
+            pattern_count = int(parts[1])
+        except (TypeError, ValueError):
+            pattern_count = 0
+        try:
+            corpus_size_bytes = int(parts[2])
+        except (TypeError, ValueError):
+            corpus_size_bytes = 0
+        return engine_name, pattern_count, corpus_size_bytes
 
     def _compute_group_statistics(self, results: List[Any]) -> Dict[str, Any]:
         """Compute statistics for a group of results."""
@@ -303,7 +320,8 @@ class StatisticalAnalyzer:
             'throughput_summary': engine_throughput_summary
         }
 
-    def _validate_results(self, statistics_by_group: Dict[str, Dict[str, Any]],
+    def _validate_results(self, grouped_results: Dict[str, List[Any]],
+                         statistics_by_group: Dict[str, Dict[str, Any]],
                          config: Dict[str, Any]) -> Dict[str, Any]:
         """Validate results against success criteria."""
         validation = {
@@ -313,10 +331,20 @@ class StatisticalAnalyzer:
         }
 
         success_criteria = config.get('success_criteria', {})
+        validation_config = config.get('validation', {})
 
         # Validate correctness (match count consistency)
-        correctness_criteria = success_criteria.get('correctness', {})
-        validation['correctness'] = self._validate_correctness(statistics_by_group, correctness_criteria)
+        correctness_criteria = {}
+        if isinstance(validation_config.get('correctness'), dict):
+            correctness_criteria.update(validation_config.get('correctness', {}))
+        if 'cross_engine_correctness' in validation_config:
+            correctness_criteria['cross_engine_correctness'] = bool(validation_config.get('cross_engine_correctness'))
+        correctness_criteria.update(success_criteria.get('correctness', {}))
+        validation['correctness'] = self._validate_correctness(
+            grouped_results,
+            statistics_by_group,
+            correctness_criteria
+        )
 
         # Validate performance claims
         performance_criteria = success_criteria.get('performance', {})
@@ -328,17 +356,182 @@ class StatisticalAnalyzer:
 
         return validation
 
-    def _validate_correctness(self, statistics_by_group: Dict[str, Dict[str, Any]],
+    def _validate_correctness(self, grouped_results: Dict[str, List[Any]],
+                             statistics_by_group: Dict[str, Dict[str, Any]],
                              criteria: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate correctness criteria."""
-        # Simple validation - check if match counts are consistent
-        validation = {'status': 'pass', 'issues': []}
+        """Validate correctness criteria with engine-semantics-aware policy."""
+        validation = {
+            'status': 'pass',
+            'issues': [],
+            'minor_issue_count': 0,
+            'major_issue_count': 0,
+            'intra_engine_groups_checked': 0,
+            'cross_engine_workloads_checked': 0,
+            'cross_engine_pairs_checked': 0,
+            'policy': {}
+        }
 
+        # Explicit default policy:
+        # - rmatch and java-native family must agree exactly on identical workloads.
+        # - re2j is allowed to differ due to matcher semantics.
+        default_strict_engines = [
+            'rmatch',
+            'java-native-naive',
+            'java-native-unfair',
+            'java-native-optimized',
+            'java-native',
+        ]
+        default_semantics_different = ['re2j']
+
+        strict_reference_engine = str(criteria.get('strict_reference_engine', 'rmatch'))
+        strict_equivalence_engines = list(criteria.get('strict_equivalence_engines', default_strict_engines))
+        semantics_different_engines = set(criteria.get('semantics_different_engines', default_semantics_different))
+        cross_engine_correctness = bool(criteria.get('cross_engine_correctness', False))
+        minor_discrepancy_max_absolute = int(criteria.get('minor_discrepancy_max_absolute', 10))
+        minor_discrepancy_max_relative = float(criteria.get('minor_discrepancy_max_relative', 0.001))
+
+        # Never require strict equality for engines explicitly marked with different semantics.
+        strict_equivalence_engines = [e for e in strict_equivalence_engines if e not in semantics_different_engines]
+        strict_equivalence_set = set(strict_equivalence_engines)
+
+        validation['policy'] = {
+            'cross_engine_correctness': cross_engine_correctness,
+            'strict_reference_engine': strict_reference_engine,
+            'strict_equivalence_engines': strict_equivalence_engines,
+            'semantics_different_engines': sorted(semantics_different_engines),
+            'minor_discrepancy_max_absolute': minor_discrepancy_max_absolute,
+            'minor_discrepancy_max_relative': minor_discrepancy_max_relative,
+        }
+
+        def _add_issue(message: str, severity: str = 'major') -> None:
+            sev = 'minor' if severity == 'minor' else 'major'
+            validation['issues'].append(f"[{sev}] {message}")
+            if sev == 'major':
+                validation['major_issue_count'] += 1
+                validation['status'] = 'fail'
+            else:
+                validation['minor_issue_count'] += 1
+                if validation['status'] == 'pass':
+                    validation['status'] = 'warning'
+
+        def _is_minor_delta(a: int, b: int) -> Tuple[bool, int, float]:
+            delta = abs(int(a) - int(b))
+            denom = max(abs(int(a)), abs(int(b)), 1)
+            relative = float(delta) / float(denom)
+            is_minor = (delta <= minor_discrepancy_max_absolute) or (relative <= minor_discrepancy_max_relative)
+            return is_minor, delta, relative
+
+        # Intra-engine consistency: identical workload + engine should yield same match count/checksum.
         for group_key, stats in statistics_by_group.items():
+            engine_name, pattern_count, corpus_size = self._parse_group_key(group_key)
+            group_label = f"{engine_name} @ patterns={pattern_count}, corpus_bytes={corpus_size}"
+            group_results = grouped_results.get(group_key, [])
+
             if 'matches' in stats:
-                if not stats['matches']['consistent']:
-                    validation['status'] = 'fail'
-                    validation['issues'].append(f"Inconsistent match counts for {group_key}")
+                validation['intra_engine_groups_checked'] += 1
+                match_stats = stats['matches']
+                if not match_stats.get('consistent', True):
+                    values = sorted(int(v) for v in match_stats.get('values', []))
+                    if values:
+                        low = values[0]
+                        high = values[-1]
+                        is_minor, delta, relative = _is_minor_delta(low, high)
+                        sev = 'minor' if is_minor else 'major'
+                        _add_issue(
+                            f"Inconsistent match counts within engine workload ({group_label}): "
+                            f"values={values}, delta={delta}, rel={relative:.6f}",
+                            severity=sev,
+                        )
+                    else:
+                        _add_issue(
+                            f"Inconsistent match counts within engine workload ({group_label})",
+                            severity='major',
+                        )
+
+            checksums = {str(r.match_checksum) for r in group_results if r.match_checksum}
+            if len(checksums) > 1:
+                _add_issue(
+                    f"Inconsistent match checksums within engine workload ({group_label})",
+                    severity='major',
+                )
+
+        if not cross_engine_correctness:
+            return validation
+
+        # Cross-engine strict equivalence for selected engines on identical workloads.
+        by_workload: Dict[Tuple[int, int], Dict[str, Dict[str, Any]]] = defaultdict(dict)
+        for group_key, group_results in grouped_results.items():
+            engine_name, pattern_count, corpus_size = self._parse_group_key(group_key)
+            if pattern_count <= 0 or corpus_size <= 0:
+                continue
+
+            counts = [int(r.match_count) for r in group_results if r.match_count is not None]
+            checksums = [str(r.match_checksum) for r in group_results if r.match_checksum]
+            by_workload[(pattern_count, corpus_size)][engine_name] = {
+                'counts': counts,
+                'checksums': checksums,
+            }
+
+        for (pattern_count, corpus_size), engines_data in by_workload.items():
+            strict_present = sorted([e for e in engines_data.keys() if e in strict_equivalence_set])
+            if len(strict_present) < 2:
+                continue
+
+            validation['cross_engine_workloads_checked'] += 1
+
+            if strict_reference_engine in strict_present:
+                reference_engine = strict_reference_engine
+            else:
+                reference_engine = strict_present[0]
+
+            reference_counts = set(engines_data[reference_engine].get('counts', []))
+            if len(reference_counts) != 1:
+                _add_issue(
+                    f"Reference engine {reference_engine} is not internally consistent at "
+                    f"patterns={pattern_count}, corpus_bytes={corpus_size}: counts={sorted(reference_counts)}"
+                    ,
+                    severity='major',
+                )
+                continue
+            reference_count = next(iter(reference_counts))
+
+            reference_checksums = set(engines_data[reference_engine].get('checksums', []))
+            reference_checksum = next(iter(reference_checksums)) if len(reference_checksums) == 1 else None
+
+            for engine_name in strict_present:
+                if engine_name == reference_engine:
+                    continue
+                validation['cross_engine_pairs_checked'] += 1
+
+                engine_counts = set(engines_data[engine_name].get('counts', []))
+                if len(engine_counts) != 1:
+                    _add_issue(
+                        f"Engine {engine_name} is not internally consistent at "
+                        f"patterns={pattern_count}, corpus_bytes={corpus_size}: counts={sorted(engine_counts)}"
+                        ,
+                        severity='major',
+                    )
+                    continue
+
+                engine_count = next(iter(engine_counts))
+                if engine_count != reference_count:
+                    is_minor, delta, relative = _is_minor_delta(reference_count, engine_count)
+                    sev = 'minor' if is_minor else 'major'
+                    _add_issue(
+                        f"Cross-engine match-count mismatch at patterns={pattern_count}, corpus_bytes={corpus_size}: "
+                        f"{reference_engine}={reference_count}, {engine_name}={engine_count}, "
+                        f"delta={delta}, rel={relative:.6f}",
+                        severity=sev,
+                    )
+
+                engine_checksums = set(engines_data[engine_name].get('checksums', []))
+                engine_checksum = next(iter(engine_checksums)) if len(engine_checksums) == 1 else None
+                if reference_checksum and engine_checksum and engine_checksum != reference_checksum:
+                    _add_issue(
+                        f"Cross-engine checksum mismatch at patterns={pattern_count}, corpus_bytes={corpus_size}: "
+                        f"{reference_engine}!={engine_name}",
+                        severity='major',
+                    )
 
         return validation
 

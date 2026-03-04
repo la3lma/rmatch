@@ -7,6 +7,7 @@ import shutil
 import re
 import time
 import os
+import signal
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
@@ -104,6 +105,92 @@ class ExternalEngine(Engine):
         # Standard pipe-based execution for other engines
         return self._run_pipe_based(patterns_file, corpus_file, iteration, output_dir)
 
+    def _get_hard_timeout_seconds(self) -> float:
+        """Get per-job hard timeout from config."""
+        return float(self.config.get('execution_plan', {}).get('timeout_per_job', 72000))
+
+    def _get_stall_timeout_seconds(self, hard_timeout_seconds: float) -> float:
+        """
+        Get per-job stall timeout from config.
+
+        Stall timeout can be disabled by setting <= 0.
+        It is bounded below hard timeout to avoid conflicting cutoffs.
+        """
+        raw = self.config.get('execution_plan', {}).get('stall_timeout_seconds', 1200)
+        try:
+            stall_timeout = float(raw)
+        except (TypeError, ValueError):
+            stall_timeout = 1200.0
+
+        if stall_timeout <= 0:
+            return 0.0
+
+        # Keep a small margin for the hard timeout watchdog.
+        return min(stall_timeout, max(1.0, hard_timeout_seconds - 30.0))
+
+    def _get_process_cpu_seconds(self, psutil_process) -> Optional[float]:
+        """Return cumulative CPU seconds for a process, if available."""
+        if not PSUTIL_AVAILABLE or psutil_process is None:
+            return None
+        try:
+            cpu_times = psutil_process.cpu_times()
+            return float(cpu_times.user + cpu_times.system)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, AttributeError, ValueError):
+            return None
+
+    def _terminate_process_tree(self, process: subprocess.Popen, grace_seconds: float = 2.0) -> None:
+        """Terminate process tree started in a separate session/process-group."""
+        if process.poll() is not None:
+            return
+
+        pgid = None
+        try:
+            pgid = os.getpgid(process.pid)
+        except Exception:
+            pgid = None
+
+        try:
+            if pgid is not None:
+                os.killpg(pgid, signal.SIGTERM)
+            else:
+                process.terminate()
+        except ProcessLookupError:
+            return
+        except Exception:
+            try:
+                process.terminate()
+            except Exception:
+                pass
+
+        deadline = time.monotonic() + max(0.0, grace_seconds)
+        while time.monotonic() < deadline:
+            if process.poll() is not None:
+                return
+            time.sleep(0.1)
+
+        try:
+            if pgid is not None:
+                os.killpg(pgid, signal.SIGKILL)
+            else:
+                process.kill()
+        except ProcessLookupError:
+            return
+        except Exception:
+            try:
+                process.kill()
+            except Exception:
+                pass
+
+    def _collect_process_output(self, process: subprocess.Popen, timeout_seconds: float = 2.0) -> tuple[str, str]:
+        """Collect stdout/stderr if available after process termination."""
+        if process.stdout is None and process.stderr is None:
+            return "", ""
+        try:
+            stdout, stderr = process.communicate(timeout=timeout_seconds)
+            return stdout or "", stderr or ""
+        except Exception:
+            return "", ""
+
     def _run_rmatch_file_based(self, patterns_file: Path, corpus_file: Path,
                               iteration: int, output_dir: Path) -> EngineResult:
         """Execute rmatch using robust file-based completion detection with defensive safeguards."""
@@ -174,12 +261,17 @@ class ExternalEngine(Engine):
             # Polling-based completion detection
             # rmatch finishes but doesn't signal termination properly
             poll_interval = 0.1  # 100ms
-            max_wait_time = float(self.config.get('execution_plan', {}).get('timeout_per_job', 72000))
-            elapsed = 0.0
+            max_wait_time = self._get_hard_timeout_seconds()
+            stall_timeout = self._get_stall_timeout_seconds(max_wait_time)
+            start_monotonic = time.monotonic()
+            last_progress_at = start_monotonic
+            last_cpu_seconds = self._get_process_cpu_seconds(psutil_process)
+            last_stdout_size = 0
+            last_stderr_size = 0
 
             completion_detected = False
 
-            while elapsed < max_wait_time:
+            while (time.monotonic() - start_monotonic) < max_wait_time:
                 # Check if process is still alive
                 poll_result = process.poll()
                 if poll_result is not None:
@@ -219,14 +311,7 @@ class ExternalEngine(Engine):
                                 break
 
                             # Grace period expired, force termination
-                            try:
-                                process.terminate()
-                                # Give it a moment to terminate gracefully
-                                time.sleep(0.5)
-                                if process.poll() is None:
-                                    process.kill()
-                            except:
-                                pass
+                            self._terminate_process_tree(process, grace_seconds=0.5)
                             completion_detected = True
                             break
 
@@ -234,19 +319,52 @@ class ExternalEngine(Engine):
                         # Files not ready yet
                         pass
 
+                now = time.monotonic()
+                made_progress = False
+
+                # CPU progress indicates active compute.
+                current_cpu_seconds = self._get_process_cpu_seconds(psutil_process)
+                if current_cpu_seconds is not None:
+                    if last_cpu_seconds is None or current_cpu_seconds > (last_cpu_seconds + 0.05):
+                        made_progress = True
+                    last_cpu_seconds = current_cpu_seconds
+
+                # Output-file growth also indicates progress.
+                stdout_size = 0
+                stderr_size = 0
+                try:
+                    if stdout_file.exists():
+                        stdout_size = stdout_file.stat().st_size
+                    if stderr_file.exists():
+                        stderr_size = stderr_file.stat().st_size
+                except OSError:
+                    pass
+
+                if stdout_size > last_stdout_size or stderr_size > last_stderr_size:
+                    made_progress = True
+                last_stdout_size = max(last_stdout_size, stdout_size)
+                last_stderr_size = max(last_stderr_size, stderr_size)
+
+                if made_progress:
+                    last_progress_at = now
+                elif stall_timeout > 0 and (now - last_progress_at) >= stall_timeout:
+                    self._terminate_process_tree(process)
+                    result.status = "timeout"
+                    result.notes = (
+                        f"Process stall timeout ({stall_timeout:.0f} seconds without CPU/output progress, "
+                        f"hard timeout {max_wait_time:.0f} seconds)"
+                    )
+                    return result
+
                 # Sleep before next poll
                 time.sleep(poll_interval)
-                elapsed += poll_interval
 
             end_time = time.time_ns()
             result.total_ns = end_time - start_time
 
             if not completion_detected:
                 # Timeout - kill process and report
-                try:
-                    process.kill()
-                except:
-                    pass
+                self._terminate_process_tree(process)
                 result.status = "timeout"
                 result.notes = f"Process timeout after {max_wait_time} seconds"
                 return result
@@ -416,7 +534,8 @@ class ExternalEngine(Engine):
 
             # Use configured timeout from execution plan - critical for rmatch performance measurement
             # Default to 20 hours if not configured, matching job timeout logic
-            timeout_seconds = self.config.get('execution_plan', {}).get('timeout_per_job', 72000)
+            timeout_seconds = self._get_hard_timeout_seconds()
+            stall_timeout = self._get_stall_timeout_seconds(timeout_seconds)
 
             # This accommodates large workloads like 10K patterns × 1GB corpus
             # No artificial scaling - just use a generous timeout for all workloads
@@ -444,8 +563,59 @@ class ExternalEngine(Engine):
                     psutil_process = None
             peak_memory = 0
 
-            # Wait for completion with generous timeout for production workloads
-            stdout, stderr = process.communicate(timeout=timeout_seconds)
+            # Watch process in short communicate windows so we can detect stalls.
+            start_monotonic = time.monotonic()
+            last_progress_at = start_monotonic
+            last_cpu_seconds = self._get_process_cpu_seconds(psutil_process)
+            poll_timeout = 5.0
+            if stall_timeout > 0:
+                poll_timeout = min(5.0, max(1.0, stall_timeout / 6.0))
+
+            stdout = ""
+            stderr = ""
+            while True:
+                elapsed_seconds = time.monotonic() - start_monotonic
+                remaining_hard_timeout = timeout_seconds - elapsed_seconds
+                if remaining_hard_timeout <= 0:
+                    self._terminate_process_tree(process)
+                    stdout, stderr = self._collect_process_output(process)
+                    result.raw_stdout = stdout
+                    result.raw_stderr = stderr
+                    result.status = "timeout"
+                    result.notes = (
+                        f"Process timeout ({timeout_seconds:.0f} seconds, "
+                        f"for {pattern_count} patterns x {corpus_size_mb:.1f}MB corpus)"
+                    )
+                    return result
+
+                try:
+                    stdout, stderr = process.communicate(timeout=min(poll_timeout, remaining_hard_timeout))
+                    break
+                except subprocess.TimeoutExpired:
+                    now = time.monotonic()
+                    current_cpu_seconds = self._get_process_cpu_seconds(psutil_process)
+
+                    if current_cpu_seconds is None:
+                        # Without CPU telemetry we cannot safely enforce stall cutoffs.
+                        last_progress_at = now
+                        continue
+
+                    if last_cpu_seconds is None or current_cpu_seconds > (last_cpu_seconds + 0.05):
+                        last_progress_at = now
+                    elif stall_timeout > 0 and (now - last_progress_at) >= stall_timeout:
+                        self._terminate_process_tree(process)
+                        stdout, stderr = self._collect_process_output(process)
+                        result.raw_stdout = stdout
+                        result.raw_stderr = stderr
+                        result.status = "timeout"
+                        result.notes = (
+                            f"Process stall timeout ({stall_timeout:.0f} seconds without CPU progress, "
+                            f"hard timeout {timeout_seconds:.0f} seconds, "
+                            f"for {pattern_count} patterns x {corpus_size_mb:.1f}MB corpus)"
+                        )
+                        return result
+
+                    last_cpu_seconds = current_cpu_seconds
 
             end_time = time.time_ns()
             result.total_ns = end_time - start_time
@@ -476,9 +646,12 @@ class ExternalEngine(Engine):
             return result
 
         except subprocess.TimeoutExpired:
-            process.kill()
+            self._terminate_process_tree(process)
             result.status = "timeout"
-            result.notes = f"Process timeout ({timeout_seconds} seconds, for {pattern_count} patterns × {corpus_size_mb:.1f}MB corpus)"
+            result.notes = (
+                f"Process timeout ({timeout_seconds:.0f} seconds, "
+                f"for {pattern_count} patterns x {corpus_size_mb:.1f}MB corpus)"
+            )
             return result
 
         except Exception as e:
@@ -512,6 +685,12 @@ class ExternalEngine(Engine):
             if match:
                 result.match_count = int(match.group(1))
 
+        # Parse optional order-independent match checksum/fingerprint.
+        checksum_pattern = self.output_format.get("checksum_pattern", r"MATCH_CHECKSUM=([0-9a-fA-F_\-:]+)")
+        checksum_match = re.search(checksum_pattern, combined_output)
+        if checksum_match:
+            result.match_checksum = str(checksum_match.group(1))
+
         # Parse timing
         if "time_pattern" in self.output_format:
             pattern = self.output_format["time_pattern"]
@@ -542,9 +721,15 @@ class ExternalEngine(Engine):
                     pass
 
         # Parse patterns compiled count
-        pattern_compiled_match = re.search(r"PATTERNS_COMPILED=(\d+)", combined_output)
+        pattern_compiled_regex = self.output_format.get("patterns_compiled_pattern", r"PATTERNS_COMPILED=(\d+)")
+        pattern_compiled_match = re.search(pattern_compiled_regex, combined_output)
         if pattern_compiled_match:
             result.patterns_compiled = int(pattern_compiled_match.group(1))
+
+        pattern_failed_regex = self.output_format.get("patterns_failed_pattern", r"PATTERNS_FAILED=(\d+)")
+        pattern_failed_match = re.search(pattern_failed_regex, combined_output)
+        if pattern_failed_match:
+            result.patterns_failed = int(pattern_failed_match.group(1))
 
         # Extract notes from output
         notes_lines = []
