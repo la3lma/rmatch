@@ -1,0 +1,1142 @@
+{
+  "grouped_statistics": {
+    "rmatch_10_1048587": {
+      "sample_size": 10,
+      "engine_name": "rmatch",
+      "patterns_compiled": 10,
+      "corpus_size_bytes": 1048587,
+      "scanning": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 415335579.2,
+        "median": 423614917.0,
+        "std_dev": 47288643.66184971,
+        "min": 352582125.0,
+        "max": 500319375.0,
+        "percentiles": {
+          "p50": 423614917.0,
+          "p90": 464967186.9,
+          "p95": 482643280.9499999,
+          "p99": 496784156.19
+        },
+        "coefficient_of_variation": 0.11385647180271646
+      },
+      "compilation": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 29810108.3,
+        "median": 29316291.5,
+        "std_dev": 1593487.0511001996,
+        "min": 28022708.0,
+        "max": 34078917.0,
+        "percentiles": {
+          "p50": 29316291.5,
+          "p90": 31002754.799999997,
+          "p95": 32540835.899999995,
+          "p99": 33771300.78
+        },
+        "coefficient_of_variation": 0.05345458778827045
+      },
+      "matches": {
+        "count": 10,
+        "unique_values": 1,
+        "consistent": true,
+        "values": [
+          2432
+        ],
+        "mean": 2432,
+        "mode": 2432
+      },
+      "throughput": {
+        "unit": "MB/s",
+        "count": 10,
+        "mean": 2.4391065540813224,
+        "median": 2.361996626994875,
+        "min": 1.998744282924243,
+        "max": 2.8362484071405505,
+        "std_dev": 0.2770061251472774
+      }
+    },
+    "rmatch_10_10485789": {
+      "sample_size": 10,
+      "engine_name": "rmatch",
+      "patterns_compiled": 10,
+      "corpus_size_bytes": 10485789,
+      "scanning": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 1606078287.6,
+        "median": 1574190896.5,
+        "std_dev": 122646450.93122585,
+        "min": 1473487959.0,
+        "max": 1821244833.0,
+        "percentiles": {
+          "p50": 1574190896.5,
+          "p90": 1770954333.3,
+          "p95": 1796099583.1499999,
+          "p99": 1816215783.03
+        },
+        "coefficient_of_variation": 0.07636393062414118
+      },
+      "compilation": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 29454358.6,
+        "median": 29429229.5,
+        "std_dev": 758352.7190548208,
+        "min": 28414500.0,
+        "max": 31423292.0,
+        "percentiles": {
+          "p50": 29429229.5,
+          "p90": 29849266.7,
+          "p95": 30636279.349999998,
+          "p99": 31265889.47
+        },
+        "coefficient_of_variation": 0.025746706263528034
+      },
+      "matches": {
+        "count": 10,
+        "unique_values": 1,
+        "consistent": true,
+        "values": [
+          24726
+        ],
+        "mean": 24726,
+        "mode": 24726
+      },
+      "throughput": {
+        "unit": "MB/s",
+        "count": 10,
+        "mean": 6.261465124411474,
+        "median": 6.352527622037267,
+        "min": 5.490765148847605,
+        "max": 6.786636833694802,
+        "std_dev": 0.4602818438276695
+      }
+    },
+    "rmatch_10_104857613": {
+      "sample_size": 10,
+      "engine_name": "rmatch",
+      "patterns_compiled": 10,
+      "corpus_size_bytes": 104857613,
+      "scanning": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 14774568533.0,
+        "median": 14136115458.0,
+        "std_dev": 2996401991.718851,
+        "min": 12010621750.0,
+        "max": 23324892333.0,
+        "percentiles": {
+          "p50": 14136115458.0,
+          "p90": 15760397620.499996,
+          "p95": 19542644976.749992,
+          "p99": 22568442861.75
+        },
+        "coefficient_of_variation": 0.20280808776419995
+      },
+      "compilation": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 31555508.2,
+        "median": 30337791.5,
+        "std_dev": 3382057.986797086,
+        "min": 28352292.0,
+        "max": 39336666.0,
+        "percentiles": {
+          "p50": 30337791.5,
+          "p90": 36952003.5,
+          "p95": 38144334.75,
+          "p99": 39098199.75
+        },
+        "coefficient_of_variation": 0.10717805479035467
+      },
+      "matches": {
+        "count": 10,
+        "unique_values": 1,
+        "consistent": true,
+        "values": [
+          245531
+        ],
+        "mean": 245531,
+        "mode": 245531
+      },
+      "throughput": {
+        "unit": "MB/s",
+        "count": 10,
+        "mean": 6.9733044944908755,
+        "median": 7.07432697184775,
+        "min": 4.287265766122587,
+        "max": 8.325964673541243,
+        "std_dev": 1.0330625721927151
+      }
+    },
+    "rmatch_100_1048587": {
+      "sample_size": 10,
+      "engine_name": "rmatch",
+      "patterns_compiled": 100,
+      "corpus_size_bytes": 1048587,
+      "scanning": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 1022951229.2,
+        "median": 1027903770.5,
+        "std_dev": 45889751.23252213,
+        "min": 946402000.0,
+        "max": 1094832917.0,
+        "percentiles": {
+          "p50": 1027903770.5,
+          "p90": 1086846354.8,
+          "p95": 1090839635.9,
+          "p99": 1094034260.78
+        },
+        "coefficient_of_variation": 0.04486015552120726
+      },
+      "compilation": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 33562587.5,
+        "median": 33273854.0,
+        "std_dev": 1121259.820622522,
+        "min": 31587000.0,
+        "max": 35221625.0,
+        "percentiles": {
+          "p50": 33273854.0,
+          "p90": 34962200.0,
+          "p95": 35091912.5,
+          "p99": 35195682.5
+        },
+        "coefficient_of_variation": 0.03340802673877638
+      },
+      "matches": {
+        "count": 10,
+        "unique_values": 10,
+        "consistent": false,
+        "values": [
+          1060704,
+          1060739,
+          1060644,
+          1060965,
+          1061003,
+          1060722,
+          1060950,
+          1060984,
+          1060922,
+          1060732
+        ],
+        "mean": 1060836.5,
+        "mode": 1060984
+      },
+      "throughput": {
+        "unit": "MB/s",
+        "count": 10,
+        "mean": 0.9795599232109913,
+        "median": 0.9729319146615155,
+        "min": 0.9133909612049785,
+        "max": 1.056644523593019,
+        "std_dev": 0.04432043409032533
+      }
+    },
+    "rmatch_100_10485789": {
+      "sample_size": 10,
+      "engine_name": "rmatch",
+      "patterns_compiled": 100,
+      "corpus_size_bytes": 10485789,
+      "scanning": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 6646732866.6,
+        "median": 6618094646.0,
+        "std_dev": 269170606.7007388,
+        "min": 6206936750.0,
+        "max": 7199463041.0,
+        "percentiles": {
+          "p50": 6618094646.0,
+          "p90": 6940188191.599999,
+          "p95": 7069825616.299999,
+          "p99": 7173535556.06
+        },
+        "coefficient_of_variation": 0.040496678910224876
+      },
+      "compilation": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 35117312.6,
+        "median": 34346000.0,
+        "std_dev": 2308699.314674226,
+        "min": 32956625.0,
+        "max": 41205459.0,
+        "percentiles": {
+          "p50": 34346000.0,
+          "p90": 37154933.4,
+          "p95": 39180196.199999996,
+          "p99": 40800406.44
+        },
+        "coefficient_of_variation": 0.06574248266008334
+      },
+      "matches": {
+        "count": 10,
+        "unique_values": 10,
+        "consistent": false,
+        "values": [
+          10608230,
+          10607625,
+          10608489,
+          10607794,
+          10608061,
+          10607475,
+          10608728,
+          10607769,
+          10608317,
+          10608383
+        ],
+        "mean": 10608087.1,
+        "mode": 10608230
+      },
+      "throughput": {
+        "unit": "MB/s",
+        "count": 10,
+        "mean": 1.50695030489829,
+        "median": 1.5110136292537506,
+        "min": 1.3889963181429403,
+        "max": 1.6111051327460646,
+        "std_dev": 0.06052557574483508
+      }
+    },
+    "rmatch_1000_1048587": {
+      "sample_size": 10,
+      "engine_name": "rmatch",
+      "patterns_compiled": 1000,
+      "corpus_size_bytes": 1048587,
+      "scanning": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 580207350.2,
+        "median": 598724646.0,
+        "std_dev": 69017252.8007007,
+        "min": 455023125.0,
+        "max": 684454292.0,
+        "percentiles": {
+          "p50": 598724646.0,
+          "p90": 653971666.4,
+          "p95": 669212979.1999999,
+          "p99": 681406029.44
+        },
+        "coefficient_of_variation": 0.11895273780470059
+      },
+      "compilation": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 72550416.7,
+        "median": 70658541.5,
+        "std_dev": 11625398.889137698,
+        "min": 61594667.0,
+        "max": 104459958.0,
+        "percentiles": {
+          "p50": 70658541.5,
+          "p90": 78989283.89999999,
+          "p95": 91724620.94999997,
+          "p99": 101912890.59
+        },
+        "coefficient_of_variation": 0.1602388989329912
+      },
+      "matches": {
+        "count": 10,
+        "unique_values": 9,
+        "consistent": false,
+        "values": [
+          12387,
+          12453,
+          12442,
+          12393,
+          12364,
+          12396,
+          12440,
+          12314,
+          12446
+        ],
+        "mean": 12408.1,
+        "mode": 12446
+      },
+      "throughput": {
+        "unit": "MB/s",
+        "count": 10,
+        "mean": 1.7495614609160577,
+        "median": 1.6706473549557699,
+        "min": 1.4610332670943067,
+        "max": 2.1977135566845765,
+        "std_dev": 0.22025154528881116
+      }
+    },
+    "rmatch_1000_10485789": {
+      "sample_size": 10,
+      "engine_name": "rmatch",
+      "patterns_compiled": 1000,
+      "corpus_size_bytes": 10485789,
+      "scanning": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 2340408400.0,
+        "median": 2316717729.0,
+        "std_dev": 197588800.56392428,
+        "min": 2022586958.0,
+        "max": 2583784334.0,
+        "percentiles": {
+          "p50": 2316717729.0,
+          "p90": 2581661459.0,
+          "p95": 2582722896.5,
+          "p99": 2583572046.5
+        },
+        "coefficient_of_variation": 0.0844249236859363
+      },
+      "compilation": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 70544779.2,
+        "median": 70787021.0,
+        "std_dev": 6800187.98882685,
+        "min": 53458625.0,
+        "max": 78878875.0,
+        "percentiles": {
+          "p50": 70787021.0,
+          "p90": 76773399.7,
+          "p95": 77826137.35,
+          "p99": 78668327.47
+        },
+        "coefficient_of_variation": 0.09639534017886402
+      },
+      "matches": {
+        "count": 10,
+        "unique_values": 10,
+        "consistent": false,
+        "values": [
+          124033,
+          123974,
+          123944,
+          124040,
+          123978,
+          123957,
+          124059,
+          123868,
+          124062,
+          123967
+        ],
+        "mean": 123988.2,
+        "mode": 123944
+      },
+      "throughput": {
+        "unit": "MB/s",
+        "count": 10,
+        "mean": 4.303703119364533,
+        "median": 4.320752569447555,
+        "min": 3.8703027667460015,
+        "max": 4.944176870616989,
+        "std_dev": 0.3671694777665522
+      }
+    },
+    "rmatch_1000_104857613": {
+      "sample_size": 10,
+      "engine_name": "rmatch",
+      "patterns_compiled": 1000,
+      "corpus_size_bytes": 104857613,
+      "scanning": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 21413965862.5,
+        "median": 20950293000.0,
+        "std_dev": 1858010858.7234263,
+        "min": 19085686167.0,
+        "max": 24507420458.0,
+        "percentiles": {
+          "p50": 20950293000.0,
+          "p90": 24498456570.5,
+          "p95": 24502938514.25,
+          "p99": 24506524069.25
+        },
+        "coefficient_of_variation": 0.08676631272571342
+      },
+      "compilation": {
+        "unit": "nanoseconds",
+        "count": 10,
+        "mean": 82251321.0,
+        "median": 76044687.5,
+        "std_dev": 27697376.706536807,
+        "min": 46556125.0,
+        "max": 153004959.0,
+        "percentiles": {
+          "p50": 76044687.5,
+          "p90": 101820083.39999998,
+          "p95": 127412521.19999994,
+          "p99": 147886471.44
+        },
+        "coefficient_of_variation": 0.3367408130324959
+      },
+      "matches": {
+        "count": 10,
+        "unique_values": 10,
+        "consistent": false,
+        "values": [
+          1238017,
+          1239045,
+          1238794,
+          1239083,
+          1238511,
+          1239056,
+          1239126,
+          1239384,
+          1239289,
+          1239259
+        ],
+        "mean": 1238956.4,
+        "mode": 1238017
+      },
+      "throughput": {
+        "unit": "MB/s",
+        "count": 10,
+        "mean": 4.703865014253898,
+        "median": 4.777618103338663,
+        "min": 4.0803973053444285,
+        "max": 5.239529326992214,
+        "std_dev": 0.39303454809065447
+      }
+    }
+  },
+  "comparisons": {
+    "patterns_10_corpus_1048587": {
+      "baseline_engine": "rmatch",
+      "engines": {
+        "rmatch": {
+          "engine": "rmatch",
+          "baseline": "rmatch",
+          "throughput_speedup": 1.0,
+          "throughput_improvement": 0.0,
+          "compilation_speedup": 1.0
+        }
+      }
+    },
+    "patterns_10_corpus_10485789": {
+      "baseline_engine": "rmatch",
+      "engines": {
+        "rmatch": {
+          "engine": "rmatch",
+          "baseline": "rmatch",
+          "throughput_speedup": 1.0,
+          "throughput_improvement": 0.0,
+          "compilation_speedup": 1.0
+        }
+      }
+    },
+    "patterns_10_corpus_104857613": {
+      "baseline_engine": "rmatch",
+      "engines": {
+        "rmatch": {
+          "engine": "rmatch",
+          "baseline": "rmatch",
+          "throughput_speedup": 1.0,
+          "throughput_improvement": 0.0,
+          "compilation_speedup": 1.0
+        }
+      }
+    },
+    "patterns_100_corpus_1048587": {
+      "baseline_engine": "rmatch",
+      "engines": {
+        "rmatch": {
+          "engine": "rmatch",
+          "baseline": "rmatch",
+          "throughput_speedup": 1.0,
+          "throughput_improvement": 0.0,
+          "compilation_speedup": 1.0
+        }
+      }
+    },
+    "patterns_100_corpus_10485789": {
+      "baseline_engine": "rmatch",
+      "engines": {
+        "rmatch": {
+          "engine": "rmatch",
+          "baseline": "rmatch",
+          "throughput_speedup": 1.0,
+          "throughput_improvement": 0.0,
+          "compilation_speedup": 1.0
+        }
+      }
+    },
+    "patterns_1000_corpus_1048587": {
+      "baseline_engine": "rmatch",
+      "engines": {
+        "rmatch": {
+          "engine": "rmatch",
+          "baseline": "rmatch",
+          "throughput_speedup": 1.0,
+          "throughput_improvement": 0.0,
+          "compilation_speedup": 1.0
+        }
+      }
+    },
+    "patterns_1000_corpus_10485789": {
+      "baseline_engine": "rmatch",
+      "engines": {
+        "rmatch": {
+          "engine": "rmatch",
+          "baseline": "rmatch",
+          "throughput_speedup": 1.0,
+          "throughput_improvement": 0.0,
+          "compilation_speedup": 1.0
+        }
+      }
+    },
+    "patterns_1000_corpus_104857613": {
+      "baseline_engine": "rmatch",
+      "engines": {
+        "rmatch": {
+          "engine": "rmatch",
+          "baseline": "rmatch",
+          "throughput_speedup": 1.0,
+          "throughput_improvement": 0.0,
+          "compilation_speedup": 1.0
+        }
+      }
+    }
+  },
+  "summary": {
+    "engines_analyzed": 1,
+    "engine_names": [
+      "rmatch"
+    ],
+    "total_measurements": 80,
+    "test_combinations": 8,
+    "comparisons_computed": 8
+  },
+  "validation": {
+    "correctness": {
+      "status": "fail",
+      "issues": [
+        "Inconsistent match counts for rmatch_100_1048587",
+        "Inconsistent match counts for rmatch_100_10485789",
+        "Inconsistent match counts for rmatch_1000_1048587",
+        "Inconsistent match counts for rmatch_1000_10485789",
+        "Inconsistent match counts for rmatch_1000_104857613"
+      ]
+    },
+    "performance": {
+      "status": "pass",
+      "notes": "Performance validation not yet implemented"
+    },
+    "statistical_validity": {
+      "status": "warning",
+      "issues": [
+        "High variance for rmatch_10_104857613: CV=0.203"
+      ]
+    }
+  },
+  "benchmark_metadata": {
+    "run_id": "20251219_234553_e6c3f781",
+    "start_time": 1766184353.031277,
+    "duration_seconds": 851.724081993103,
+    "config": {
+      "phase": 1,
+      "description": "Comprehensive baseline comparison - establish performance characteristics",
+      "goals": [
+        "Validate rmatch 2-10x throughput claims vs java.util.regex",
+        "Establish engine characteristics across pattern counts and input sizes",
+        "Identify optimal use cases for each engine",
+        "Create statistical baseline for future comparisons"
+      ],
+      "methodology": {
+        "measurement_protocol": {
+          "warmup_runs": 5,
+          "measurement_runs": 10,
+          "discard_outliers": true,
+          "outlier_threshold": "1.5*IQR",
+          "confidence_level": 0.95
+        },
+        "fairness_rules": {
+          "engine_configurations": "best_reasonable",
+          "separate_compilation_scanning": true,
+          "common_subset_comparison": true,
+          "resource_limits": {
+            "max_memory_gb": 8,
+            "timeout_minutes": 10
+          }
+        }
+      },
+      "test_matrix": {
+        "pattern_counts": [
+          10,
+          100,
+          1000
+        ],
+        "input_sizes": [
+          "1MB",
+          "10MB",
+          "100MB"
+        ],
+        "pattern_suites": [
+          "log_mining"
+        ],
+        "corpora": [
+          "synthetic_controllable"
+        ],
+        "engines": [
+          "rmatch"
+        ],
+        "iterations_per_combination": 10,
+        "warmup_iterations": 5
+      },
+      "engine_configurations": {
+        "java-native": {
+          "jvm_flags": [
+            "-Xmx4g",
+            "-XX:+UseG1GC",
+            "-server"
+          ],
+          "compilation_strategy": "precompile_patterns",
+          "optimization_level": "production"
+        },
+        "re2j": {
+          "jvm_flags": [
+            "-Xmx4g",
+            "-XX:+UseG1GC",
+            "-server"
+          ],
+          "compilation_strategy": "precompile_patterns",
+          "optimization_level": "production"
+        },
+        "re2-cpp": {
+          "compile_flags": [
+            "-O3",
+            "-std=c++17",
+            "-march=native"
+          ],
+          "use_re2_set": true,
+          "optimization_level": "maximum"
+        },
+        "go-re2": {
+          "build_flags": [
+            "-ldflags",
+            "-s -w"
+          ],
+          "use_builtin_regexp": true,
+          "optimization_level": "production"
+        },
+        "hyperscan": {
+          "mode": "HS_MODE_BLOCK",
+          "flags": [
+            "HS_FLAG_CASELESS",
+            "HS_FLAG_DOTALL"
+          ],
+          "optimization_level": "maximum",
+          "platform_notes": "Requires x86_64 architecture"
+        },
+        "rmatch": {
+          "optimization_flags": "default",
+          "mode": "batch_processing",
+          "notes": "Target engine for comparison"
+        }
+      },
+      "data_configuration": {
+        "pattern_generation": {
+          "suite": "log_mining",
+          "seed": 12345,
+          "distribution": {
+            "timestamps": 0.25,
+            "ips": 0.2,
+            "urls": 0.25,
+            "error_codes": 0.15,
+            "key_values": 0.15
+          },
+          "complexity_target": "realistic"
+        },
+        "corpus_generation": {
+          "type": "synthetic_controllable",
+          "match_density": "medium",
+          "line_count_target": {
+            "1MB": 20000,
+            "10MB": 200000,
+            "100MB": 2000000
+          },
+          "character_distribution": "log_like",
+          "unicode_support": false
+        }
+      },
+      "success_criteria": {
+        "correctness": {
+          "match_count_agreement": "exact",
+          "reference_engines": [
+            "java-native",
+            "re2j"
+          ],
+          "tolerance": 0,
+          "validation_required": true
+        },
+        "performance": {
+          "primary_claims": {
+            "rmatch_vs_java": {
+              "metric": "scanning_throughput",
+              "target": ">2x",
+              "required_significance": 0.01
+            },
+            "linear_scaling": {
+              "metric": "throughput_vs_pattern_count",
+              "target": "sublinear_degradation",
+              "max_degradation": 0.5
+            }
+          },
+          "secondary_claims": {
+            "memory_efficiency": {
+              "metric": "peak_memory_usage",
+              "target": "comparable_or_better",
+              "baseline": "java-native"
+            },
+            "compilation_speed": {
+              "metric": "compilation_time",
+              "target": "acceptable",
+              "max_overhead": "10x"
+            }
+          }
+        },
+        "statistical_validity": {
+          "min_sample_size": 10,
+          "required_confidence": 0.95,
+          "max_coefficient_variation": 0.15,
+          "outlier_detection": "required"
+        }
+      },
+      "deliverables": {
+        "primary_charts": [
+          "throughput_vs_pattern_count.png",
+          "throughput_vs_input_size.png",
+          "compilation_time_comparison.png",
+          "memory_usage_heatmap.png",
+          "speedup_matrix.png"
+        ],
+        "analysis_reports": [
+          "engine_characteristics_summary.md",
+          "statistical_analysis_report.md",
+          "performance_claims_validation.md"
+        ],
+        "data_outputs": [
+          "raw_benchmark_results.json",
+          "statistical_summary.json",
+          "engine_metadata.json"
+        ]
+      },
+      "execution_plan": {
+        "estimated_duration": "60-90 minutes",
+        "parallel_execution": {
+          "max_concurrent_engines": 2,
+          "resource_isolation": true
+        },
+        "checkpoints": [
+          "engine_availability_check",
+          "pattern_generation",
+          "corpus_setup",
+          "correctness_validation",
+          "performance_measurement",
+          "statistical_analysis"
+        ],
+        "failure_handling": {
+          "engine_unavailable": "skip_with_warning",
+          "correctness_mismatch": "abort_with_error",
+          "performance_timeout": "record_partial_results"
+        }
+      },
+      "output_configuration": {
+        "results_format": "structured_json",
+        "include_raw_data": true,
+        "include_debug_info": false,
+        "compression": "gzip",
+        "schema_version": "2.0"
+      }
+    },
+    "system_info": {
+      "platform": {
+        "system": "Darwin",
+        "release": "25.1.0",
+        "version": "Darwin Kernel Version 25.1.0: Mon Oct 20 19:33:00 PDT 2025; root:xnu-12377.41.6~2/RELEASE_ARM64_T6020",
+        "machine": "x86_64",
+        "processor": "i386",
+        "architecture": [
+          "64bit",
+          "Mach-O"
+        ],
+        "platform_string": "macOS-26.1-x86_64-i386-64bit-Mach-O",
+        "node": "rainstick.local"
+      },
+      "hardware": {
+        "cpu": {
+          "logical_cores": 12,
+          "physical_cores": 12,
+          "max_frequency": 2400,
+          "current_frequency": 2400,
+          "model": "Apple M2 Max"
+        },
+        "memory": {
+          "total_bytes": 103079215104,
+          "total_gb": 96.0,
+          "available_bytes": 6389751808,
+          "available_gb": 5.95
+        },
+        "disk": {
+          "total_bytes": 994662584320,
+          "total_gb": 926.35,
+          "free_bytes": 16123322368,
+          "free_gb": 15.02
+        }
+      },
+      "software": {
+        "python": {
+          "version": "3.13.5",
+          "implementation": "CPython",
+          "compiler": "Clang 16.0.0 (clang-1600.0.26.6)"
+        },
+        "tools": {
+          "java": "openjdk version \"25\" 2025-09-16 LTS",
+          "javac": "javac 25",
+          "gcc": "Apple clang version 17.0.0 (clang-1700.6.3.2)",
+          "g++": "Apple clang version 17.0.0 (clang-1700.6.3.2)",
+          "go": "go version go1.25.4 darwin/amd64",
+          "make": "GNU Make 3.81"
+        }
+      },
+      "resources": {
+        "cpu_percent": 100.0,
+        "memory_percent": 93.8,
+        "load_average": [
+          114.62744140625,
+          63.2822265625,
+          34.99853515625
+        ],
+        "boot_time": 1766142305.0
+      }
+    },
+    "git_metadata": {
+      "repository": {
+        "root": "/Volumes/SynologyScsi1/git/rmatch",
+        "git_dir": "/Volumes/SynologyScsi1/git/rmatch/.git",
+        "is_git_repo": true
+      },
+      "commit": {
+        "sha": "7238c2eaf23d5f3d842d269b2d401598c4a82acd",
+        "sha_short": "7238c2e",
+        "message": "Add stable git-stored 10K regex patterns for consistent benchmarking",
+        "author_name": "Bj\u00f8rn Remseth",
+        "author_email": "la3lma@gmail.com",
+        "date": "2025-12-19 23:09:09 +0100"
+      },
+      "branch": {
+        "current": "codex/add-benchmarking-framework-for-regex-matchers",
+        "all_branches": [
+          "codex/add-benchmarking-framework-for-regex-matchers",
+          "codex/analyze-codebase-for-runtime-efficiency-improvement",
+          "codex/explain-codebase-structure-and-key-points",
+          "codex/find-and-fix-bug-in-codebase",
+          "codex/find-and-implement-performance-optimization",
+          "codex/locate-optimization-toggles-and-create-test",
+          "codex/review-performance-matcher-tests-for-reliability",
+          "copilot/ensure-java-25-available",
+          "copilot/fix-116",
+          "copilot/fix-133",
+          "copilot/fix-135",
+          "copilot/fix-140",
+          "copilot/fix-142",
+          "copilot/fix-145",
+          "copilot/fix-178",
+          "copilot/fix-210",
+          "copilot/fix-215",
+          "copilot/optimize-dispatch-using-modern-features",
+          "copilot/optimize-fast-path-common-cases",
+          "copilot/optimize-gc-settings-java-25",
+          "copilot/optimize-state-storage-implementation",
+          "copilot/update-benchmark-ratchet-architecture",
+          "dependabot/maven/com.diffplug.spotless-spotless-maven-plugin-2.46.1",
+          "dependabot/maven/com.google.guava-guava-33.4.8-jre",
+          "dependabot/maven/junit-jupiter.version-6.0.1",
+          "dependabot/maven/junit-platform.version-6.0.1",
+          "dependabot/maven/org.apache.maven.plugins-maven-checkstyle-plugin-3.6.0",
+          "dependabot/maven/org.apache.maven.plugins-maven-compiler-plugin-3.14.0",
+          "dependabot/maven/org.apache.maven.plugins-maven-dependency-plugin-3.6.1",
+          "dependabot/maven/org.apache.maven.plugins-maven-dependency-plugin-3.8.1",
+          "dependabot/maven/org.apache.maven.plugins-maven-jar-plugin-3.5.0",
+          "dependabot/maven/org.apache.maven.plugins-maven-release-plugin-3.1.1",
+          "dependabot/maven/org.apache.maven.plugins-maven-source-plugin-3.3.1",
+          "dependabot/maven/org.apache.maven.plugins-maven-surefire-plugin-3.5.3",
+          "dependabot/maven/org.junit.jupiter-junit-jupiter-engine-5.13.4",
+          "dependabot/maven/org.mockito-mockito-core-5.8.0",
+          "dependabot/maven/org.mockito-mockito-junit-jupiter-5.19.0",
+          "master",
+          "u/bjonremseth/updating-guice",
+          "u/bjornremseth/enable-aho",
+          "u/bjornremseth/ideation-over-larger-scale-tests",
+          "u/bjornremseth/optimizing-check",
+          "u/bjornremseth/style-management",
+          "u/bjornremseth/style-updates",
+          "u/la3lma/adding-more-extensive-performance-testing",
+          "u/la3lma/and-now-also-memory",
+          "u/la3lma/better-plots",
+          "u/la3lma/bogus-optimization",
+          "u/la3lma/bugfix-laden-den-anomality",
+          "u/la3lma/bump-java-junit-and-mockito-versions",
+          "u/la3lma/bump-java-version",
+          "u/la3lma/check-out-an-attempted-optimization-that-makes-performance-much-worse-but-why",
+          "u/la3lma/code-style-fixes",
+          "u/la3lma/enable-jvm-25-in-github-tasks",
+          "u/la3lma/github-workflows",
+          "u/la3lma/ngram-start-cache",
+          "u/la3lma/optimize-away-concurrent-skip-list",
+          "u/la3lma/optimize-early-termination",
+          "u/la3lma/optimize-regexps-to-open-from-next-input-char",
+          "u/la3lma/refactoring-a-la-intellij",
+          "u/la3lma/setting-up-c5-workflow",
+          "remotes/origin/HEAD -> origin/master",
+          "remotes/origin/codex/add-benchmarking-framework-for-regex-matchers",
+          "remotes/origin/codex/analyze-codebase-for-runtime-efficiency-improvement",
+          "remotes/origin/codex/explain-codebase-structure-and-key-points",
+          "remotes/origin/codex/find-and-fix-bug-in-codebase",
+          "remotes/origin/codex/find-and-implement-performance-optimization",
+          "remotes/origin/codex/fix-typos-in-javadoc/comments",
+          "remotes/origin/codex/improve-performance-of-rmatch-regex",
+          "remotes/origin/codex/locate-optimization-toggles-and-create-test",
+          "remotes/origin/codex/review-performance-matcher-tests-for-reliability",
+          "remotes/origin/copilot/ensure-java-25-available",
+          "remotes/origin/copilot/fix-104",
+          "remotes/origin/copilot/fix-106",
+          "remotes/origin/copilot/fix-108",
+          "remotes/origin/copilot/fix-110",
+          "remotes/origin/copilot/fix-112",
+          "remotes/origin/copilot/fix-114",
+          "remotes/origin/copilot/fix-116",
+          "remotes/origin/copilot/fix-117",
+          "remotes/origin/copilot/fix-119",
+          "remotes/origin/copilot/fix-123",
+          "remotes/origin/copilot/fix-125",
+          "remotes/origin/copilot/fix-129",
+          "remotes/origin/copilot/fix-131",
+          "remotes/origin/copilot/fix-133",
+          "remotes/origin/copilot/fix-135",
+          "remotes/origin/copilot/fix-137",
+          "remotes/origin/copilot/fix-140",
+          "remotes/origin/copilot/fix-142",
+          "remotes/origin/copilot/fix-145",
+          "remotes/origin/copilot/fix-147",
+          "remotes/origin/copilot/fix-149",
+          "remotes/origin/copilot/fix-151",
+          "remotes/origin/copilot/fix-164",
+          "remotes/origin/copilot/fix-168",
+          "remotes/origin/copilot/fix-170",
+          "remotes/origin/copilot/fix-174",
+          "remotes/origin/copilot/fix-176",
+          "remotes/origin/copilot/fix-178",
+          "remotes/origin/copilot/fix-208",
+          "remotes/origin/copilot/fix-210",
+          "remotes/origin/copilot/fix-213",
+          "remotes/origin/copilot/fix-215",
+          "remotes/origin/copilot/fix-38a4ec4e-81b4-45f0-8cbd-bddd0194adc7",
+          "remotes/origin/copilot/fix-4685aa4e-a9ee-4565-b58f-d7ddb1e5dc9a",
+          "remotes/origin/copilot/optimize-dispatch-using-modern-features",
+          "remotes/origin/copilot/optimize-fast-path-common-cases",
+          "remotes/origin/copilot/optimize-gc-settings-java-25",
+          "remotes/origin/copilot/optimize-state-storage-implementation",
+          "remotes/origin/copilot/trim-allocations-hot-paths",
+          "remotes/origin/copilot/update-benchmark-ratchet-architecture",
+          "remotes/origin/dependabot/add-v2-config-file",
+          "remotes/origin/dependabot/maven/com.diffplug.spotless-spotless-maven-plugin-2.46.1",
+          "remotes/origin/dependabot/maven/com.diffplug.spotless-spotless-maven-plugin-3.1.0",
+          "remotes/origin/dependabot/maven/com.github.spotbugs-spotbugs-maven-plugin-4.9.4.2",
+          "remotes/origin/dependabot/maven/com.github.spotbugs-spotbugs-maven-plugin-4.9.8.1",
+          "remotes/origin/dependabot/maven/com.github.spotbugs-spotbugs-maven-plugin-4.9.8.2",
+          "remotes/origin/dependabot/maven/com.google.guava-guava-23.0",
+          "remotes/origin/dependabot/maven/com.google.guava-guava-32.0.0-jre",
+          "remotes/origin/dependabot/maven/com.google.guava-guava-33.0.0-jre",
+          "remotes/origin/dependabot/maven/com.google.guava-guava-33.4.8-jre",
+          "remotes/origin/dependabot/maven/junit-junit-4.13.1",
+          "remotes/origin/dependabot/maven/junit-jupiter.version-6.0.1",
+          "remotes/origin/dependabot/maven/junit-platform.version-6.0.1",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-checkstyle-plugin-3.1.2",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-checkstyle-plugin-3.3.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-checkstyle-plugin-3.3.1",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-checkstyle-plugin-3.6.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-compiler-plugin-3.12.1",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-compiler-plugin-3.14.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-compiler-plugin-3.8.1",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-dependency-plugin-3.6.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-dependency-plugin-3.6.1",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-dependency-plugin-3.8.1",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-jar-plugin-3.2.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-jar-plugin-3.4.2",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-jar-plugin-3.5.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-release-plugin-3.1.1",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-release-plugin-3.3.1",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-resources-plugin-3.4.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-shade-plugin-3.6.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-source-plugin-3.2.1",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-source-plugin-3.3.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-source-plugin-3.3.1",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-source-plugin-3.4.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-surefire-plugin-3.1.0",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-surefire-plugin-3.2.3",
+          "remotes/origin/dependabot/maven/org.apache.maven.plugins-maven-surefire-plugin-3.5.3",
+          "remotes/origin/dependabot/maven/org.codehaus.mojo-cobertura-maven-plugin-2.7",
+          "remotes/origin/dependabot/maven/org.codehaus.mojo-findbugs-maven-plugin-3.0.5",
+          "remotes/origin/dependabot/maven/org.jetbrains-annotations-24.0.1",
+          "remotes/origin/dependabot/maven/org.jetbrains-annotations-24.1.0",
+          "remotes/origin/dependabot/maven/org.jetbrains-annotations-26.0.2",
+          "remotes/origin/dependabot/maven/org.jetbrains-annotations-26.0.2-1",
+          "remotes/origin/dependabot/maven/org.junit.jupiter-junit-jupiter-engine-5.10.1",
+          "remotes/origin/dependabot/maven/org.junit.jupiter-junit-jupiter-engine-5.13.4",
+          "remotes/origin/dependabot/maven/org.junit.jupiter-junit-jupiter-engine-5.9.3",
+          "remotes/origin/dependabot/maven/org.mockito-mockito-all-1.10.19",
+          "remotes/origin/dependabot/maven/org.mockito-mockito-core-5.19.0",
+          "remotes/origin/dependabot/maven/org.mockito-mockito-core-5.21.0",
+          "remotes/origin/dependabot/maven/org.mockito-mockito-core-5.8.0",
+          "remotes/origin/dependabot/maven/org.mockito-mockito-junit-jupiter-5.18.0",
+          "remotes/origin/dependabot/maven/org.mockito-mockito-junit-jupiter-5.19.0",
+          "remotes/origin/dependabot/maven/org.mockito-mockito-junit-jupiter-5.21.0",
+          "remotes/origin/dependabot/maven/org.mockito-mockito-junit-jupiter-5.8.0",
+          "remotes/origin/gh-pages",
+          "remotes/origin/master",
+          "remotes/origin/thick-edges",
+          "remotes/origin/u/bjonremseth/updating-guice",
+          "remotes/origin/u/bjornremseth/enable-aho",
+          "remotes/origin/u/bjornremseth/ideation-over-larger-scale-tests",
+          "remotes/origin/u/bjornremseth/optimizing-check",
+          "remotes/origin/u/bjornremseth/style-management",
+          "remotes/origin/u/bjornremseth/style-updates",
+          "remotes/origin/u/la3lma/adding-more-extensive-performance-testing",
+          "remotes/origin/u/la3lma/and-now-also-memory",
+          "remotes/origin/u/la3lma/better-plots",
+          "remotes/origin/u/la3lma/bogus-optimization",
+          "remotes/origin/u/la3lma/bugfix-laden-den-anomality",
+          "remotes/origin/u/la3lma/bump-java-junit-and-mockito-versions",
+          "remotes/origin/u/la3lma/bump-java-version",
+          "remotes/origin/u/la3lma/check-out-an-attempted-optimization-that-makes-performance-much-worse-but-why",
+          "remotes/origin/u/la3lma/code-style-fixes",
+          "remotes/origin/u/la3lma/enable-jvm-25-in-github-tasks",
+          "remotes/origin/u/la3lma/github-workflows",
+          "remotes/origin/u/la3lma/ngram-start-cache",
+          "remotes/origin/u/la3lma/optimize-away-concurrent-skip-list",
+          "remotes/origin/u/la3lma/optimize-early-termination",
+          "remotes/origin/u/la3lma/optimize-using-chatgtp",
+          "remotes/origin/u/la3lma/refactoring-a-la-chatgpt2",
+          "remotes/origin/u/la3lma/refactoring-a-la-intellij",
+          "remotes/origin/u/la3lma/setting-up-c5-workflow",
+          "remotes/origin/u/la3lma/typos-grammar-etc"
+        ]
+      },
+      "status": {
+        "is_clean": false,
+        "modified_files": 24,
+        "untracked_files": 21,
+        "ahead_of_remote": true
+      },
+      "remotes": {
+        "remotes": {
+          "origin": "ssh://git@github.com/la3lma/rmatch"
+        },
+        "upstream": "origin/codex/add-benchmarking-framework-for-regex-matchers"
+      }
+    },
+    "framework_version": "2.0.0"
+  }
+}

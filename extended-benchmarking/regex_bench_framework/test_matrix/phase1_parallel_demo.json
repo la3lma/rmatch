@@ -1,0 +1,32 @@
+{
+  "phase": 1,
+  "description": "Parallel execution demo - small pattern counts to avoid generation bottleneck",
+  "test_matrix": {
+    "pattern_counts": [10, 100],
+    "input_sizes": ["1MB"],
+    "pattern_suites": ["log_mining"],
+    "corpora": ["synthetic_controllable"],
+    "engines": [
+      "java-native-optimized",
+      "java-native-unfair",
+      "re2j",
+      "rmatch"
+    ],
+    "iterations_per_combination": 3,
+    "warmup_iterations": 2
+  },
+  "methodology": {
+    "measurement_protocol": {
+      "warmup_runs": 2,
+      "measurement_runs": 3,
+      "discard_outliers": false,
+      "confidence_level": 0.95
+    }
+  },
+  "execution_plan": {
+    "parallel_execution": {
+      "max_concurrent_engines": 4,
+      "resource_isolation": true
+    }
+  }
+}

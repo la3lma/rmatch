@@ -1,0 +1,24 @@
+{
+  "phase": "stable_pattern_validation",
+  "description": "Validation of 10K stable patterns across all engines",
+  "test_matrix": {
+    "pattern_counts": [10000],
+    "input_sizes": ["1MB"],
+    "pattern_suites": ["stable_patterns"],
+    "corpora": ["synthetic_controllable"],
+    "engines": [
+      "java-native-optimized",
+      "re2j",
+      "rmatch"
+    ],
+    "iterations_per_combination": 1,
+    "warmup_iterations": 0
+  },
+  "execution_plan": {
+    "failure_handling": {
+      "engine_unavailable": "skip_with_warning",
+      "correctness_mismatch": "record_with_warning",
+      "performance_timeout": "record_partial_results"
+    }
+  }
+}

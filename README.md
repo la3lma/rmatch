@@ -1,16 +1,24 @@
 rmatch
 ======
 
+## Repository Navigation
+
+- Core library: `rmatch/`
+- Tester and harness: `rmatch-tester/`
+- Benchmark platform: `extended-benchmarking/regex_bench_framework/`
+- Documentation index: `docs/README.md`
+- Papers: `docs/papers/`
+
 ## Current Performance Comparison
 
 | Metric | rmatch | Java Regex | Ratio (rmatch/java) |
 |--------|--------|------------|---------------------|
-| **5000 patterns** | 2.4s | 4.1s | 1.7x faster |
+| **5000 patterns** | 2.3s | 4.3s | 1.9x faster |
 | **Peak Memory** | 39MB | 19MB | 2.1x more memory |
 | **Pattern Loading** | 20MB | 1MB | 20.0x more memory |
 | **Matching Phase** | 5MB | 4MB | 1.2x more memory |
 
-*Latest benchmark comparison between rmatch and native Java regex (java.util.regex.Pattern) on 5000 regex patterns against Wuthering Heights corpus. Updated: 2025-12-18 21:42 UTC*
+*Latest benchmark comparison between rmatch and native Java regex (java.util.regex.Pattern) on 5000 regex patterns against Wuthering Heights corpus. Updated: 2026-03-04 09:04 UTC*
 
 ---
 
@@ -201,4 +209,3 @@ See [DISPATCH_OPTIMIZATION_RESULTS.md](DISPATCH_OPTIMIZATION_RESULTS.md) for:
 - Examples of patterns to refactor
 
 These experiments follow the same methodology as GC experiments to provide data-driven guidance on whether modern language features improve performance.
-

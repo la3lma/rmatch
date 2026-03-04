@@ -1,0 +1,34 @@
+# Claude Instructions for Regex Benchmark Framework
+
+## CRITICAL RULE: Data Preservation
+**ALWAYS preserve existing benchmark results unless EXPLICITLY instructed to delete them.**
+
+- NEVER start fresh benchmark runs that would overwrite existing data
+- ALWAYS use job-continue commands to resume existing work
+- ALWAYS backup existing databases before any operations that might affect them
+- When in doubt about data preservation, ask the user first
+- Multiple competing background processes can cause fresh runs - avoid this
+
+## CRITICAL BUG PREVENTION: Run Fragmentation
+**The system tends to create multiple run_ids instead of truly resuming, causing data fragmentation.**
+
+### Root Cause Identified:
+- Multiple runs create separate run_ids (e.g., 20251221_115843_4eeeed1a, 20251225_005937_4eeeed1a)
+- Live progress report was filtering by current run_id, hiding completed jobs from older runs
+- Fixed in regex_bench/cli.py:892-911 - now shows ALL completed jobs regardless of run_id
+
+### Prevention:
+- Monitor run fragmentation: `sqlite3 jobs.db "SELECT run_id, COUNT(*) as total, COUNT(CASE WHEN status='COMPLETED' THEN 1 END) as completed FROM benchmark_jobs GROUP BY run_id;"`
+- NEVER filter live reports by run_id - always show ALL completed data
+- Check for multiple run_ids before assuming data is lost
+
+## Key Commands
+- Resume existing: `python3 -m regex_bench.cli job-continue --output results/[existing-dir]`
+- Check status: `sqlite3 results/[dir]/jobs.db "SELECT COUNT(*) FROM benchmark_jobs WHERE status = 'COMPLETED';"`
+- Check fragmentation: `sqlite3 results/[dir]/jobs.db "SELECT run_id, COUNT(*) as jobs FROM benchmark_jobs GROUP BY run_id;"`
+- Backup data: `cp results/[dir]/jobs.db backups/jobs_backup_$(date +%Y%m%d_%H%M%S).db`
+
+## Strategic Context
+This benchmarking framework is designed to demonstrate where rmatch (a Java-based regex engine) excels compared to competitors, particularly in high pattern count + large corpus scenarios (1000+ patterns with 1GB corpus) where other engines show scaling failures.
+
+The most valuable data includes scaling breakdowns where competitors take hours to complete tasks, as this shows rmatch's competitive advantages.

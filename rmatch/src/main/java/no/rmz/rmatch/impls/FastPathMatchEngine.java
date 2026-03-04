@@ -52,7 +52,10 @@ public final class FastPathMatchEngine implements MatchEngine {
   /** Whether prefiltering is enabled. */
   private final boolean prefilterEnabled;
 
-  /** Minimum pattern count threshold for prefilter activation. Default 5000 is optimal based on testing. */
+  /**
+   * Minimum pattern count threshold for prefilter activation. Default 5000 is optimal based on
+   * testing.
+   */
   private static final int PREFILTER_ACTIVATION_THRESHOLD =
       Integer.parseInt(System.getProperty("rmatch.prefilter.threshold", "5000"));
 
