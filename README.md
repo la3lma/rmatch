@@ -108,7 +108,7 @@ make bench-gc-experiments
 
 ### Documentation
 
-See [GC_EXPERIMENTS.md](GC_EXPERIMENTS.md) for:
+See [GC_EXPERIMENTS.md](docs/optimization/GC_EXPERIMENTS.md) for:
 - Detailed usage instructions
 - How to analyze results
 - Applying findings to improve performance
@@ -139,7 +139,7 @@ export JAVA_OPTS="-Drmatch.engine=fastpath -Drmatch.prefilter=aho -XX:+TieredCom
 | **Baseline** | 10,230ms | 21,656ms |
 | **Optimized** | **9,895ms** (+3.3%) | **19,297ms** (+10.9%) |
 
-*Performance characteristics may vary across different architectures. See [FASTPATH_PERFORMANCE_ANALYSIS.md](FASTPATH_PERFORMANCE_ANALYSIS.md) for detailed architecture specifications and cross-platform considerations.*
+*Performance characteristics may vary across different architectures. See [FASTPATH_PERFORMANCE_ANALYSIS.md](docs/optimization/FASTPATH_PERFORMANCE_ANALYSIS.md) for detailed architecture specifications and cross-platform considerations.*
 
 ### Key Benefits
 
@@ -162,7 +162,7 @@ export JAVA_OPTS="-Drmatch.engine=fastpath -Drmatch.prefilter.threshold=5000 -XX
 
 ### Documentation
 
-See [FASTPATH_PERFORMANCE_ANALYSIS.md](FASTPATH_PERFORMANCE_ANALYSIS.md) for:
+See [FASTPATH_PERFORMANCE_ANALYSIS.md](docs/optimization/FASTPATH_PERFORMANCE_ANALYSIS.md) for:
 - Complete performance analysis and validation methodology
 - JIT technique explanations and benchmark results
 - Component-by-component optimization breakdown
@@ -202,7 +202,7 @@ Based on empirical testing:
 
 ### Documentation
 
-See [DISPATCH_OPTIMIZATION_RESULTS.md](DISPATCH_OPTIMIZATION_RESULTS.md) for:
+See [DISPATCH_OPTIMIZATION_RESULTS.md](docs/optimization/DISPATCH_OPTIMIZATION_RESULTS.md) for:
 - Detailed benchmark results
 - Performance analysis
 - Specific recommendations for code changes
