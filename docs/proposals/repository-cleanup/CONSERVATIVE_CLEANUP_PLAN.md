@@ -35,7 +35,7 @@ Clean up repository structure for accessibility while preserving all essential f
 ## Proposed High-Level Faces
 1. Core Library: `rmatch/` as primary engineering focus.
 2. Benchmarking Platform: `benchmarking/framework/regex_bench_framework/` as performance lab.
-3. Optimization Backlog: new `plans/optimization-backlog/` for idea intake and evaluation queue.
+3. Optimization Backlog: new `docs/plans/optimization-backlog/` for idea intake and evaluation queue.
 4. Documentation and Papers: `docs/` with paper writeups in `docs/papers/`.
 5. Historical/Legacy: new `archive/` as a quarantine zone for scar tissue and legacy artifacts.
 
@@ -50,7 +50,7 @@ Clean up repository structure for accessibility while preserving all essential f
 2. Add:
    - `docs/` for curated active documentation
    - `docs/papers/` for writeups and publication-prep material
-   - `plans/optimization-backlog/` for optimization proposal lifecycle
+   - `docs/plans/optimization-backlog/` for optimization proposal lifecycle
    - `archive/` for old/obsolete/historical artifacts
 3. Reduce top-level clutter by moving:
    - old standalone markdowns, backup files, ad hoc assets, and historical artifacts into `docs/` or `archive/`
@@ -58,7 +58,7 @@ Clean up repository structure for accessibility while preserving all essential f
 ## Proposed Directory Policy
 1. `docs/`: currently relevant operational and design docs.
    - paper manuscripts and generated PDFs live under `docs/papers/`
-2. `plans/optimization-backlog/`:
+2. `docs/plans/optimization-backlog/`:
    - `README.md` (workflow/rules)
    - `inbox/` (new ideas)
    - `screened/` (ready for experiment design)
@@ -100,10 +100,10 @@ Clean up repository structure for accessibility while preserving all essential f
 ### Phase 2: Introduce New Containers (Minimal Risk)
 1. Create:
    - `docs/cleanup/`
-   - `plans/optimization-backlog/{inbox,screened,validated,rejected}`
+   - `docs/plans/optimization-backlog/{inbox,screened,validated,rejected}`
    - `archive/2026-03-repo-cleanup/`
 2. Add governance docs:
-   - `plans/optimization-backlog/README.md`
+   - `docs/plans/optimization-backlog/README.md`
    - optimization idea template file
    - `archive/README.md` describing non-deletion policy
 3. Validation:
@@ -143,14 +143,14 @@ Clean up repository structure for accessibility while preserving all essential f
 4. Commit: `cleanup: organize benchmark harness historical material`.
 
 ### Phase 6: Optimization Backlog Consolidation
-1. Move scattered optimization notes into `plans/optimization-backlog/inbox/`.
+1. Move scattered optimization notes into `docs/plans/optimization-backlog/inbox/`.
 2. Add metadata header to each note:
    - hypothesis
    - expected gain
    - required changes
    - measurement plan
    - status
-3. Add index table in `plans/optimization-backlog/README.md`.
+3. Add index table in `docs/plans/optimization-backlog/README.md`.
 4. Commit: `cleanup: consolidate optimization ideas backlog`.
 
 ### Phase 7: Post-Cleanup Validation and Hardening

@@ -22,7 +22,7 @@ This snapshot records the repository root state after executing the cleanup move
 - `benchmarking/framework/`
 - `mvnw`
 - `mvnw.cmd`
-- `plans/`
+- `docs/plans/`
 - `pom.xml`
 - `requirements.txt`
 - `rmatch/`
@@ -55,7 +55,7 @@ Destination:
 
 - `analysis/` -> `docs/analysis/`
 - `proposals/` -> `docs/proposals/`
-- `TODO.md` -> `plans/TODO.md`
+- `TODO.md` -> `docs/plans/TODO.md`
 - `.gitignore-performance` -> `docs/cleanup/legacy-root-files/.gitignore-performance`
 
 ## Deferred / Intentional Keep

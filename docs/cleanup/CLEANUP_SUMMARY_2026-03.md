@@ -15,7 +15,7 @@ Conservative, non-destructive repository cleanup with emphasis on:
 1. Cleanup baseline and inventory artifacts maintained under `docs/cleanup/`.
 2. Scaffolding created and retained:
    - `docs/`
-   - `plans/optimization-backlog/`
+   - `docs/plans/optimization-backlog/`
    - `archive/2026-03-repo-cleanup/`
 
 ### Phase 3: Active Doc Relocation
@@ -63,15 +63,15 @@ Manifest updates:
 
 Added structured inbox items:
 
-1. `plans/optimization-backlog/inbox/dispatch-strategy-modernization.md`
-2. `plans/optimization-backlog/inbox/fastpath-prefilter-threshold-tuning.md`
-3. `plans/optimization-backlog/inbox/gc-runtime-profile-selection.md`
-4. `plans/optimization-backlog/inbox/large-workload-timeout-heuristics.md`
-5. `plans/optimization-backlog/inbox/memory-observability-in-benchmarks.md`
+1. `docs/plans/optimization-backlog/inbox/dispatch-strategy-modernization.md`
+2. `docs/plans/optimization-backlog/inbox/fastpath-prefilter-threshold-tuning.md`
+3. `docs/plans/optimization-backlog/inbox/gc-runtime-profile-selection.md`
+4. `docs/plans/optimization-backlog/inbox/large-workload-timeout-heuristics.md`
+5. `docs/plans/optimization-backlog/inbox/memory-observability-in-benchmarks.md`
 
 Updated backlog index:
 
-1. `plans/optimization-backlog/README.md`
+1. `docs/plans/optimization-backlog/README.md`
 
 ### Phase 7: Top-Level Declutter Execution
 
@@ -82,7 +82,7 @@ Executed the top-level review move recommendations:
 2. Root `KEEP (RELOCATE)` entries moved into curated locations:
    - `analysis/` -> `docs/analysis/`
    - `proposals/` -> `docs/proposals/`
-   - `TODO.md` -> `plans/TODO.md`
+   - `TODO.md` -> `docs/plans/TODO.md`
    - `.gitignore-performance` -> `docs/cleanup/legacy-root-files/.gitignore-performance`
 3. Root chart PNG and SQLite artifacts archived per owner directive.
 4. Tracked IDE/notebook remnants moved to archive:
@@ -126,5 +126,5 @@ These are pre-existing workflow issues and remain recorded in:
 2. Testing harness: `rmatch-tester/`
 3. Benchmark platform: `benchmarking/framework/regex_bench_framework/`
 4. Documentation and papers: `docs/`
-5. Optimization planning: `plans/optimization-backlog/`
+5. Optimization planning: `docs/plans/optimization-backlog/`
 6. Historical quarantine: `archive/`

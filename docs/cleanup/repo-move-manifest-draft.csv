@@ -37,5 +37,5 @@ prd-repo/PRD_PERFORMANCE_GITHUB_ACTION.md,archive/2026-03-repo-cleanup/root/lega
 .idea/dictionaries/rmz.xml,archive/2026-03-repo-cleanup/root/legacy-top-level-2026-03-04/.idea/dictionaries/rmz.xml,legacy-artifact,Tracked IDE dictionary moved while pruning local IDE state,Low no runtime dependency,moved
 analysis/,docs/analysis/,curated-relocation,Top-level KEEP(RELOCATE) execution from cleanup review,Low docs path updates only,moved
 proposals/,docs/proposals/,curated-relocation,Top-level KEEP(RELOCATE) execution from cleanup review,Low docs path updates only,moved
-TODO.md,plans/TODO.md,curated-relocation,Top-level KEEP(RELOCATE) execution from cleanup review,Low path updates only,moved
+TODO.md,docs/plans/TODO.md,curated-relocation,Top-level KEEP(RELOCATE) execution from cleanup review,Low path updates only,moved
 .gitignore-performance,docs/cleanup/legacy-root-files/.gitignore-performance,curated-relocation,Top-level KEEP(RELOCATE) execution from cleanup review,Low historical ignore file,moved

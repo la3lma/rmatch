@@ -10,6 +10,7 @@ This directory is the landing zone for curated project documentation.
 - `cleanup/` - repository cleanup planning, inventories, and validation logs
 - `optimization/` - optimization analyses, experiments, and results
 - `papers/` - LaTeX writeups and generated PDFs
+- `plans/` - optimization backlog and active planning artifacts
 - `proposals/` - historical and exploratory proposals
 
 ## Key Operational Docs

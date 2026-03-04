@@ -22,7 +22,7 @@ Recommendation labels:
 | `LICENSE` | License terms | KEEP | Standard root OSS metadata. |
 | `Makefile` | Root build/test/bench entrypoints | KEEP | Active project entrypoint. |
 | `README.md` | Main project landing page | KEEP | Active root documentation. |
-| `TODO.md` | Active backlog and notes | KEEP (RELOCATE) | Active content; better under `plans/` or `docs/cleanup/`. |
+| `TODO.md` | Active backlog and notes | KEEP (RELOCATE) | Active content; better under `docs/plans/` or `docs/cleanup/`. |
 | `benchmarks.ipynb` | Historical notebook analysis | MOVE TO ATTIC | Old exploratory flow; not in current controlled harness. |
 | `checkstyle-unused-imports.xml` | Checkstyle config used by Maven modules | KEEP | Referenced from multiple `pom.xml` files. |
 | `foo.sh` | Ad hoc benchmark shell wrapper | MOVE TO ATTIC | Not part of current controlled run pipeline. |
@@ -57,7 +57,7 @@ Recommendation labels:
 | `charts/` | Generated chart outputs (+legacy chart set) | KEEP (RELOCATE) | Keep for now due workflow references; later move to `docs/benchmarking/charts/` with workflow path update. |
 | `docs/` | Curated documentation and papers | KEEP | Active docs home. |
 | `benchmarking/framework/` | New large-scale benchmark platform and control plane | KEEP | Core of current benchmarking strategy. |
-| `plans/` | Optimization backlog and planning artifacts | KEEP | Active planning home; aligns with cleanup goals. |
+| `docs/plans/` | Optimization backlog and planning artifacts | KEEP | Active planning home; aligns with cleanup goals. |
 | `prd-repo/` | Legacy PRD docs (single file) | MOVE TO ATTIC | Historical design artifact; no longer primary execution plan. |
 | `proposals/` | Historical proposals and drafts | KEEP (RELOCATE) | Keep for now, but better moved under `docs/proposals/` (or archive stale ones) after curation. |
 | `rmatch/` | Core regex matcher library module | KEEP | Primary product code. |

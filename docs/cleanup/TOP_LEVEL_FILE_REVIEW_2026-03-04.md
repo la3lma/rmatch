@@ -19,7 +19,7 @@ Legend:
 | `LICENSE` | Project license terms | Keep (root) | Standard OSS metadata expected at root | High |
 | `Makefile` | Root build/test/benchmark command entrypoints | Keep (root) | Active developer entrypoint for build/test/charts | High |
 | `README.md` | Primary project landing page and usage docs | Keep (root) | Standard root entrypoint; referenced by users and automation | High |
-| `TODO.md` | Active cross-cutting backlog notes (includes current benchmark correctness notes) | Keep (move) | Content is active, but root clutter is high; move to `plans/` or `docs/cleanup/` later | Medium |
+| `TODO.md` | Active cross-cutting backlog notes (includes current benchmark correctness notes) | Keep (move) | Content is active, but root clutter is high; move to `docs/plans/` or `docs/cleanup/` later | Medium |
 | `benchmarks.ipynb` | Historical exploratory benchmark analysis notebook | Archive candidate | Not in active build/test path; likely scar tissue from older benchmark flow | Medium |
 | `checkstyle-unused-imports.xml` | Checkstyle configuration for Maven modules | Keep (root) | Referenced by `pom.xml`, `rmatch-tester/pom.xml`, and `benchmarking/jmh/pom.xml` | High |
 | `foo.sh` | Ad hoc script to run `GitHubActionPerformanceTestRunner` | Archive candidate | Not referenced by build/CI and duplicates managed entrypoints | High |
@@ -45,5 +45,5 @@ Legend:
 ## Suggested next conservative batch
 
 1. Move archive candidates from root into `archive/2026-03-repo-cleanup/root/legacy-benchmark-scripts-and-notebooks/` with manifest update.
-2. Move `TODO.md` into `plans/` (or `docs/cleanup/`) and leave a short pointer in `README.md`.
+2. Move `TODO.md` into `docs/plans/` (or `docs/cleanup/`) and leave a short pointer in `README.md`.
 3. Move top-level chart PNGs to attic and then retarget chart scripts/workflows to `charts/` paths if needed.

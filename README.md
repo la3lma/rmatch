@@ -7,6 +7,7 @@ rmatch
 - Tester and harness: `rmatch-tester/`
 - Benchmark platform: `benchmarking/framework/regex_bench_framework/`
 - Documentation index: `docs/README.md`
+- Planning backlog: `docs/plans/`
 - Papers: `docs/papers/`
 
 ## GCP Comparable Snapshot (10K Patterns)
