@@ -70,6 +70,9 @@ setup_debug.log
 gcp_runs/*.pid
 gcp_runs/*.nohup.pid
 
+# Local archival batches for historical benchmark artifacts
+attic/2026-03-historical-benchmark-*/
+
 # Coverage
 .coverage
 htmlcov/
