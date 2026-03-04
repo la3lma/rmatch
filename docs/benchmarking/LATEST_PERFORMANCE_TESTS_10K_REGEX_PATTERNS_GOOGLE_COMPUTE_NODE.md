@@ -1,8 +1,8 @@
-# Comparable GCP Snapshot
+# Latest Performance Tests Running 10K Regular Expression Patterns on Google Compute Node
 
 - Cohort: `e2-standard-8|x86_64`
 - Pattern count: `10000`
-- Source matrix: `benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv`
+- Source matrix: [benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv](../../benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv)
 
 | Corpus | Winner | rmatch (ms) | re2j (ms) | java-native-naive (ms) | re2j vs winner | java-native-naive vs winner |
 |---|---:|---:|---:|---:|---:|---:|
@@ -18,3 +18,4 @@ Missing entries indicate no successful completed run for that engine/workload ye
 
 ![Throughput trend](../../charts/gcp_e2_10k_throughput_mib_s.png)
 
+*MiB = mebibyte (2^20 bytes = 1,048,576 bytes).*

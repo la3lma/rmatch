@@ -72,7 +72,7 @@ readme-gcp-snapshot: setup-visualization-env
 		--cohort 'e2-standard-8|x86_64' \
 		--patterns 10000 \
 		--output-dir charts \
-		--md-output docs/benchmarking/GCP_COMPARABLE_SNAPSHOT.md
+		--md-output docs/benchmarking/LATEST_PERFORMANCE_TESTS_10K_REGEX_PATTERNS_GOOGLE_COMPUTE_NODE.md
 
 profile:
 	DUR=30; scripts/profile_async_profiler.sh $$DUR

@@ -214,7 +214,7 @@ def _throughput_plot(rows: list[Row], engines: list[str], out_path: Path) -> Non
     plt.yscale("log")
     plt.xticks(x_vals, x_labels)
     plt.xlabel("Corpus size")
-    plt.ylabel("Throughput (MiB/s, higher is better)")
+    plt.ylabel("Throughput (MiB/s, higher is better; 1 MiB = 1,048,576 bytes)")
     plt.title("Throughput trend by engine (same cohort, 10K patterns)")
     plt.grid(True, which="both", linestyle="--", alpha=0.35)
     plt.legend()
@@ -246,16 +246,17 @@ def _write_snapshot_md(
     ratio_plot: Path,
     throughput_plot: Path,
 ) -> None:
+    rel_matrix = os.path.relpath(matrix_csv, md_out.parent).replace("\\", "/")
     rel_runtime = os.path.relpath(runtime_plot, md_out.parent).replace("\\", "/")
     rel_ratio = os.path.relpath(ratio_plot, md_out.parent).replace("\\", "/")
     rel_tp = os.path.relpath(throughput_plot, md_out.parent).replace("\\", "/")
 
     lines: list[str] = []
-    lines.append("# Comparable GCP Snapshot")
+    lines.append("# Latest Performance Tests Running 10K Regular Expression Patterns on Google Compute Node")
     lines.append("")
     lines.append(f"- Cohort: `{cohort}`")
     lines.append(f"- Pattern count: `{patterns}`")
-    lines.append(f"- Source matrix: `{matrix_csv.as_posix()}`")
+    lines.append(f"- Source matrix: [{matrix_csv.as_posix()}]({rel_matrix})")
     lines.append("")
     lines.append(
         "| Corpus | Winner | rmatch (ms) | re2j (ms) | java-native-naive (ms) | re2j vs winner | java-native-naive vs winner |"
@@ -281,6 +282,8 @@ def _write_snapshot_md(
     lines.append("")
     lines.append(f"![Throughput trend]({rel_tp})")
     lines.append("")
+    lines.append("*MiB = mebibyte (2^20 bytes = 1,048,576 bytes).*")
+    lines.append("")
 
     md_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -299,7 +302,7 @@ def main() -> None:
     parser.add_argument("--output-dir", default="charts")
     parser.add_argument(
         "--md-output",
-        default="docs/benchmarking/GCP_COMPARABLE_SNAPSHOT.md",
+        default="docs/benchmarking/LATEST_PERFORMANCE_TESTS_10K_REGEX_PATTERNS_GOOGLE_COMPUTE_NODE.md",
     )
     args = parser.parse_args()
 

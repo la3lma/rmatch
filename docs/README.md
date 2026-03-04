@@ -16,7 +16,8 @@ This directory is the landing zone for curated project documentation.
 ## Key Operational Docs
 
 - `benchmarking/MAIN_MERGE_GATE.md` - required compile/smoke merge gate setup for `main`
-- `benchmarking/GCP_COMPARABLE_SNAPSHOT.md` - curated same-hardware GCP engine comparison snapshot
+- `benchmarking/LATEST_PERFORMANCE_TESTS_10K_REGEX_PATTERNS_GOOGLE_COMPUTE_NODE.md` - latest same-hardware GCP engine comparison snapshot (10K patterns)
+- `optimization/README.md` - entry point for GC, fast-path/JIT, and dispatch optimization material
 
 ## Current Papers
 
