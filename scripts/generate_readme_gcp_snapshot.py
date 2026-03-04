@@ -42,8 +42,9 @@ def _load_rows(matrix_csv: Path, cohort: str, patterns: int) -> tuple[list[Row],
         raise RuntimeError(f"No rows found in {matrix_csv}")
 
     total_cols = [c for c in all_rows[0].keys() if c.endswith("_total_ms")]
+    engine_total_cols = [c for c in total_cols if c != "winner_total_ms"]
     ratio_cols = [c for c in all_rows[0].keys() if c.endswith("_x_vs_winner")]
-    engines = [c.replace("_total_ms", "") for c in total_cols]
+    engines = [c.replace("_total_ms", "") for c in engine_total_cols]
 
     rows: list[Row] = []
     for raw in all_rows:
@@ -53,7 +54,7 @@ def _load_rows(matrix_csv: Path, cohort: str, patterns: int) -> tuple[list[Row],
             continue
 
         totals: dict[str, float] = {}
-        for col in total_cols:
+        for col in engine_total_cols:
             value = _parse_float(raw.get(col, ""))
             if value is not None:
                 totals[col.replace("_total_ms", "")] = value
