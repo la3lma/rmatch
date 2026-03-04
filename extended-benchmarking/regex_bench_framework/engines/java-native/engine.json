@@ -1,0 +1,25 @@
+{
+  "name": "java-native",
+  "version": "system-jdk",
+  "description": "Java standard library java.util.regex baseline",
+  "type": "external",
+  "command": ["bash", "runner.sh", "{patterns}", "{corpus}"],
+  "requires": ["java", "javac"],
+  "build_command": ["bash", "build.sh"],
+  "output_format": {
+    "match_pattern": "MATCHES=(\\d+)",
+    "time_pattern": "ELAPSED_NS=(\\d+)",
+    "compilation_pattern": "COMPILATION_NS=(\\d+)",
+    "memory_pattern": "MEMORY_BYTES=(\\d+)"
+  },
+  "characteristics": {
+    "backtracking": true,
+    "supports_backrefs": true,
+    "supports_lookaround": true,
+    "multi_pattern_optimized": false,
+    "memory_profile": "moderate"
+  },
+  "platform_requirements": {
+    "java_version": "8+"
+  }
+}

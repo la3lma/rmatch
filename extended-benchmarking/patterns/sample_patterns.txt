@@ -1,0 +1,5 @@
+[a-zA-Z]+\s+dog
+https?://[^\s]+
+[\w.-]+@[\w.-]+\.[A-Za-z]{2,}
+\d{3,}
+\bregex\b

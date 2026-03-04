@@ -1,0 +1,9 @@
+{
+  "image_uri": "europe-north2-docker.pkg.dev/run-cl/rmatch-bench/regex-bench:20260302-082009",
+  "project": "run-cl",
+  "region": "europe-north2",
+  "repo": "rmatch-bench",
+  "image_name": "regex-bench",
+  "tag": "20260302-082009",
+  "published_at": "2026-03-02T08:29:09.966739Z"
+}
