@@ -1,6 +1,14 @@
 rmatch
 ======
 
+## Repository Navigation
+
+- Core library: `rmatch/`
+- Tester and harness: `rmatch-tester/`
+- Benchmark platform: `extended-benchmarking/regex_bench_framework/`
+- Documentation index: `docs/README.md`
+- Papers: `docs/papers/`
+
 ## Current Performance Comparison
 
 | Metric | rmatch | Java Regex | Ratio (rmatch/java) |
@@ -201,4 +209,3 @@ See [DISPATCH_OPTIMIZATION_RESULTS.md](DISPATCH_OPTIMIZATION_RESULTS.md) for:
 - Examples of patterns to refactor
 
 These experiments follow the same methodology as GC experiments to provide data-driven guidance on whether modern language features improve performance.
-

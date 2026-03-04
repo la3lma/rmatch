@@ -8,7 +8,8 @@ Clean up repository structure for accessibility while preserving all essential f
 2. Keep benchmark harness and performance workflows fully operational.
 3. Preserve all historical material, but move non-essential and obsolete artifacts away from top-level view.
 4. Introduce a dedicated location for optimization ideas/backlog, including half-baked proposals.
-5. Execute in small, reversible steps with frequent commits and validation gates.
+5. Keep paper writeups under `docs/papers/` (not top-level).
+6. Execute in small, reversible steps with frequent commits and validation gates.
 
 ## Constraints and Guardrails
 1. No destructive cleanup in this phase (no permanent deletion of historical content).
@@ -35,7 +36,8 @@ Clean up repository structure for accessibility while preserving all essential f
 1. Core Library: `rmatch/` as primary engineering focus.
 2. Benchmarking Platform: `extended-benchmarking/regex_bench_framework/` as performance lab.
 3. Optimization Backlog: new `plans/optimization-backlog/` for idea intake and evaluation queue.
-4. Historical/Legacy: new `archive/` as a quarantine zone for scar tissue and legacy artifacts.
+4. Documentation and Papers: `docs/` with paper writeups in `docs/papers/`.
+5. Historical/Legacy: new `archive/` as a quarantine zone for scar tissue and legacy artifacts.
 
 ## Target Top-Level Shape (After Cleanup)
 1. Keep:
@@ -47,6 +49,7 @@ Clean up repository structure for accessibility while preserving all essential f
    - `pom.xml`, `Makefile`, `README.md`, `LICENSE`, Maven wrappers
 2. Add:
    - `docs/` for curated active documentation
+   - `docs/papers/` for writeups and publication-prep material
    - `plans/optimization-backlog/` for optimization proposal lifecycle
    - `archive/` for old/obsolete/historical artifacts
 3. Reduce top-level clutter by moving:
@@ -54,6 +57,7 @@ Clean up repository structure for accessibility while preserving all essential f
 
 ## Proposed Directory Policy
 1. `docs/`: currently relevant operational and design docs.
+   - paper manuscripts and generated PDFs live under `docs/papers/`
 2. `plans/optimization-backlog/`:
    - `README.md` (workflow/rules)
    - `inbox/` (new ideas)

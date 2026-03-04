@@ -6,8 +6,8 @@ This directory contains writeups related to the current benchmarking and archite
 
 ### 1) `status-report-2026-03-03`
 
-- Source: `papers/status-report-2026-03-03/status-report-2026-03-03.tex`
-- PDF: `papers/status-report-2026-03-03/status-report-2026-03-03.pdf`
+- Source: `docs/papers/status-report-2026-03-03/status-report-2026-03-03.tex`
+- PDF: `docs/papers/status-report-2026-03-03/status-report-2026-03-03.pdf`
 - Scope:
   - Current system architecture and optimization layers
   - Benchmarking methodology and fairness controls
@@ -17,8 +17,8 @@ This directory contains writeups related to the current benchmarking and archite
 
 ### 2) `but-what-about-rust`
 
-- Source: `papers/but-what-about-rust/but-what-about-rust.tex`
-- PDF: `papers/but-what-about-rust/but-what-about-rust.pdf`
+- Source: `docs/papers/but-what-about-rust/but-what-about-rust.tex`
+- PDF: `docs/papers/but-what-about-rust/but-what-about-rust.pdf`
 - Scope:
   - Research plan for a Rust-compatible implementation using current Java code as scaffolding
   - Required scaffolding artifacts for Codex-assisted generation
@@ -32,7 +32,6 @@ Each paper directory has its own `Makefile`.
 Examples:
 
 ```bash
-make -C papers/status-report-2026-03-03 pdf
-make -C papers/but-what-about-rust pdf
+make -C docs/papers/status-report-2026-03-03 pdf
+make -C docs/papers/but-what-about-rust pdf
 ```
-
