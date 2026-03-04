@@ -18,7 +18,7 @@ rmatch
 | **Pattern Loading** | 20MB | 1MB | 20.0x more memory |
 | **Matching Phase** | 5MB | 4MB | 1.2x more memory |
 
-*Latest benchmark comparison between rmatch and native Java regex (java.util.regex.Pattern) on 5000 regex patterns against Wuthering Heights corpus. Updated: 2026-03-04 09:04 UTC*
+*Latest benchmark comparison between rmatch and native Java regex (java.util.regex.Pattern) on 5000 regex patterns against Wuthering Heights corpus. Updated: 2026-03-04 16:32 UTC*
 
 ---
 
