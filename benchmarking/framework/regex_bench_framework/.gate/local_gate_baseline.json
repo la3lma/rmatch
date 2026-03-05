@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "created_at_utc": "2026-03-05T00:44:17.980126+00:00",
+  "git_sha": "dc620d0d88f0133b0c1be7eaed413d337a05c012",
+  "git_branch": "main",
+  "run_dir": "/Volumes/SynologyScsi1/git/rmatch/benchmarking/framework/regex_bench_framework/results/local_gate_baseline_20260305_004307",
+  "run_id": "20260305_014307_fc56c333",
+  "engine": "rmatch",
+  "pattern_count": 10000,
+  "input_sizes": [
+    "1MB"
+  ],
+  "metric": "scanning_ns",
+  "medians_ns": {
+    "1MB": 522897750.0
+  },
+  "config_path": "/Volumes/SynologyScsi1/git/rmatch/benchmarking/framework/regex_bench_framework/test_matrix/stable_10k_moderate_rmatch.json"
+}
