@@ -1,10 +1,19 @@
- SHELL := /bin/bash
+SHELL := /bin/bash
 
 # Optimal GC settings based on experimentation (see GC_OPTIMIZATION_RESULTS.md)
 # G1 with Compact Object Headers provides 5-12% performance improvement
 JAVA_GC_OPTS := -XX:+UseCompactObjectHeaders
+REGEX_BENCH_FRAMEWORK_DIR ?= benchmarking/framework/regex_bench_framework
+GATE_CONFIG ?= test_matrix/stable_10k_moderate_rmatch.json
+GATE_ENGINE ?= rmatch
+GATE_METRIC ?= scanning_ns
+GATE_MAX_SLOWDOWN ?= 1.10
+GATE_BASELINE_BRANCH ?= main
+GATE_BASELINE_DIR ?=
+GATE_SKIP_SMOKE ?= 0
+GATE_SKIP_REBUILD ?= 0
 
-.PHONY: build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts readme-gcp-snapshot profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch bench-enhanced bench-enhanced-quick bench-enhanced-full bench-enhanced-arch
+.PHONY: build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts readme-gcp-snapshot profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch bench-enhanced bench-enhanced-quick bench-enhanced-full bench-enhanced-arch gate-baseline gate-candidate
 
 build:
 	mvn -q -B spotless:apply
@@ -161,3 +170,23 @@ bench-enhanced-full:
 bench-enhanced-arch:
 	@echo "Running architecture-aware benchmarks for cross-platform comparison..."
 	MAVEN_OPTS="$(JAVA_GC_OPTS)" scripts/run_enhanced_benchmarks.sh architecture
+
+gate-baseline:
+	$(MAKE) -C $(REGEX_BENCH_FRAMEWORK_DIR) gate-local-baseline \
+		GATE_CONFIG="$(GATE_CONFIG)" \
+		GATE_ENGINE="$(GATE_ENGINE)" \
+		GATE_METRIC="$(GATE_METRIC)" \
+		GATE_BASELINE_BRANCH="$(GATE_BASELINE_BRANCH)" \
+		GATE_SKIP_SMOKE="$(GATE_SKIP_SMOKE)" \
+		GATE_SKIP_REBUILD="$(GATE_SKIP_REBUILD)"
+
+gate-candidate:
+	$(MAKE) -C $(REGEX_BENCH_FRAMEWORK_DIR) gate-local-candidate \
+		GATE_CONFIG="$(GATE_CONFIG)" \
+		GATE_ENGINE="$(GATE_ENGINE)" \
+		GATE_METRIC="$(GATE_METRIC)" \
+		GATE_MAX_SLOWDOWN="$(GATE_MAX_SLOWDOWN)" \
+		GATE_BASELINE_BRANCH="$(GATE_BASELINE_BRANCH)" \
+		GATE_BASELINE_DIR="$(GATE_BASELINE_DIR)" \
+		GATE_SKIP_SMOKE="$(GATE_SKIP_SMOKE)" \
+		GATE_SKIP_REBUILD="$(GATE_SKIP_REBUILD)"

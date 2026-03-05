@@ -48,6 +48,16 @@ GCP_WARMUP ?= 1
 GCP_MAX_LANES ?= 3
 GCP_DETACH ?= 1
 
+# Local change gate defaults (override with make VAR=value)
+GATE_CONFIG ?= test_matrix/stable_10k_moderate_rmatch.json
+GATE_ENGINE ?= rmatch
+GATE_METRIC ?= scanning_ns
+GATE_MAX_SLOWDOWN ?= 1.10
+GATE_BASELINE_BRANCH ?= main
+GATE_BASELINE_DIR ?=
+GATE_SKIP_SMOKE ?= 0
+GATE_SKIP_REBUILD ?= 0
+
 # Colors for output
 RED := \033[0;31m
 GREEN := \033[0;32m
@@ -193,6 +203,35 @@ test-correctness: venv build-engines ## Run correctness validation across engine
 test-unit: venv ## Run Python unit tests
 	@echo "$(BLUE)Running Python unit tests...$(NC)"
 	$(VENV_DIR)/bin/pytest tests/ -v
+
+.PHONY: gate-local-baseline
+gate-local-baseline: install-deps ## Create local gate baseline (smoke + 10K moderate probe)
+	@echo "$(BLUE)Running local change gate baseline...$(NC)"
+	@cmd="$(PYTHON) scripts/local_change_gate.py baseline --config $(GATE_CONFIG) --engine $(GATE_ENGINE) --metric $(GATE_METRIC) --baseline-branch $(GATE_BASELINE_BRANCH)"; \
+	if [ "$(GATE_SKIP_SMOKE)" = "1" ]; then \
+		cmd="$$cmd --skip-smoke"; \
+	fi; \
+	if [ "$(GATE_SKIP_REBUILD)" = "1" ]; then \
+		cmd="$$cmd --skip-rebuild"; \
+	fi; \
+	echo "$$cmd"; \
+	eval "$$cmd"
+
+.PHONY: gate-local-candidate
+gate-local-candidate: install-deps ## Run local candidate gate and fail on performance regression
+	@echo "$(BLUE)Running local change gate candidate check...$(NC)"
+	@cmd="$(PYTHON) scripts/local_change_gate.py candidate --config $(GATE_CONFIG) --engine $(GATE_ENGINE) --metric $(GATE_METRIC) --max-slowdown $(GATE_MAX_SLOWDOWN) --baseline-branch $(GATE_BASELINE_BRANCH)"; \
+	if [ -n "$(GATE_BASELINE_DIR)" ]; then \
+		cmd="$$cmd --baseline-dir $(GATE_BASELINE_DIR)"; \
+	fi; \
+	if [ "$(GATE_SKIP_SMOKE)" = "1" ]; then \
+		cmd="$$cmd --skip-smoke"; \
+	fi; \
+	if [ "$(GATE_SKIP_REBUILD)" = "1" ]; then \
+		cmd="$$cmd --skip-rebuild"; \
+	fi; \
+	echo "$$cmd"; \
+	eval "$$cmd"
 
 ##@ Benchmarking
 
