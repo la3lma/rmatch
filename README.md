@@ -3,11 +3,10 @@ rmatch
 
 ## What This Library Does
 
-`rmatch` is a Java library for matching many regular expressions against large input buffers in one pass-oriented matching pipeline.  
-It is built for high-volume multi-pattern workloads where you want to register many patterns once, then scan large text data efficiently and trigger callbacks on matches.
-
-The implementation intentionally uses a reduced regex surface syntax compared to modern Java/PCRE-style regex engines.  
-That was a deliberate trade-off: spend implementation effort on core matching efficiency first, then extend syntax breadth after the core engine is strong enough.
+- `rmatch` is a Java library for matching many regular expressions against large input buffers in one pass-oriented matching pipeline.
+- It is built for high-volume multi-pattern workloads where you register many patterns once, then scan large text data efficiently and trigger callbacks on matches.
+- The implementation intentionally uses a reduced regex surface syntax compared to modern Java/PCRE-style regex engines.
+- This was a deliberate trade-off: prioritize core matching efficiency first, then extend syntax breadth as the engine matures.
 
 ## Example Usage
 
