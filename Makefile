@@ -13,17 +13,34 @@ GATE_BASELINE_DIR ?=
 GATE_SKIP_SMOKE ?= 0
 GATE_SKIP_REBUILD ?= 0
 
-.PHONY: build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts readme-gcp-snapshot profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch bench-enhanced bench-enhanced-quick bench-enhanced-full bench-enhanced-arch gate-baseline gate-candidate
+.DEFAULT_GOAL := help
 
-build:
+.PHONY: help build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts readme-gcp-snapshot profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch bench-enhanced bench-enhanced-quick bench-enhanced-full bench-enhanced-arch gate-baseline gate-candidate pre-test-run test-run-full test-run-mini
+
+help: ## [core] Show available top-level targets
+	@echo "Top-level rmatch Make targets"
+	@echo "Usage: make <target>"
+	@echo ""
+	@echo "Core:"
+	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_.-]+:.*## / {if ($$2 ~ /^\[core\]/) printf "  %-28s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ""
+	@echo "Performance:"
+	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_.-]+:.*## / {if ($$2 ~ /^\[perf\]/) printf "  %-28s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ""
+	@echo "Legacy (kept for compatibility, planned for cleanup):"
+	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_.-]+:.*## / {if ($$2 ~ /^\[legacy\]/) printf "  %-28s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+build: ## [core] Build project artifacts (skip tests)
 	mvn -q -B spotless:apply
 	mvn -U -q -B -DskipTests -Dspotbugs.skip=true package
 
-test:
+test: ## [core] Run full verify build
 	mvn -q -B spotless:apply
 	mvn -q -B verify
 
-bench-micro:
+ci: test ## [core] Local CI equivalent
+
+bench-micro: ## [perf] Run focused micro benchmark (CompileAndMatchBench.buildMatcher)
 	MAVEN_OPTS="$(JAVA_GC_OPTS)" \
     JMH_FORKS=1 \
     JMH_WARMUP_IT=1 \
@@ -35,13 +52,13 @@ bench-micro:
     scripts/run_jmh.sh -p patternCount=10
     # scripts/run_jmh.sh
 
-bench-macro:
+bench-macro: ## [perf] Run macro benchmark for rmatch (10K regexps)
 	MAVEN_OPTS="$(JAVA_GC_OPTS)" MAX_REGEXPS=10000 scripts/run_macro_with_memory.sh
 
-bench-java:
+bench-java: ## [perf] Run macro benchmark for java.util.regex baseline (10K regexps)
 	MAVEN_OPTS="$(JAVA_GC_OPTS)" MAX_REGEXPS=10000 scripts/run_java_benchmark_with_memory.sh
 
-bench-suite:
+bench-suite: ## [perf] Run comprehensive JMH suite + visualization
 	@echo "Cleaning up any stale JMH lock files..."
 	@scripts/cleanup_jmh_locks.sh
 	@echo "Running comprehensive JMH benchmark suite..."
@@ -55,7 +72,7 @@ bench-suite:
 	@echo "Generating visualizations for the test suite..."
 	$(MAKE) visualize-benchmarks
 
-test-run-once: pre-test-run
+test-run-once: pre-test-run ## [legacy] One-pass quick JMH run with visualization
 	@echo "Cleaning up any stale JMH lock files..."
 	@scripts/cleanup_jmh_locks.sh
 	@echo "Running quick JMH benchmark suite (single iteration per test)..."
@@ -69,13 +86,13 @@ test-run-once: pre-test-run
 	@echo "Generating visualizations for the quick test suite..."
 	$(MAKE) visualize-benchmarks
 
-charts:
+charts: ## [legacy] Generate legacy macro/java chart artifacts and README perf table
 	python3 scripts/generate_macro_performance_plot.py
 	python3 scripts/generate_java_performance_plot.py
 	python3 scripts/generate_performance_comparison_plot.py
 	python3 scripts/update_readme_performance_table.py
 
-readme-gcp-snapshot: setup-visualization-env
+readme-gcp-snapshot: setup-visualization-env ## [core] Generate README snapshot from latest GCP comparable matrix
 	@scripts/.venv/bin/python scripts/generate_readme_gcp_snapshot.py \
 		--matrix-csv benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv \
 		--cohort 'e2-standard-8|x86_64' \
@@ -83,30 +100,30 @@ readme-gcp-snapshot: setup-visualization-env
 		--output-dir charts \
 		--md-output docs/benchmarking/LATEST_PERFORMANCE_TESTS_10K_REGEX_PATTERNS_GOOGLE_COMPUTE_NODE.md
 
-profile:
+profile: ## [perf] Run async-profiler capture (default 30s)
 	DUR=30; scripts/profile_async_profiler.sh $$DUR
 
-fmt:
+fmt: ## [core] Apply code formatting (spotless)
 	mvn -q -B spotless:apply
 
-spotless:
+spotless: ## [core] Apply spotless formatting
 	mvn -q -B spotless:apply
 
-spotbugs:
+spotbugs: ## [core] Run spotbugs checks
 	mvn -q -B spotbugs:check
 
-pre-test-run:
+pre-test-run: ## [legacy] Reset local rmatch Maven cache and reinstall
 	rm -rf ~/.m2/repository/no/rmz/rmatch
 	mvn -q -B spotless:apply
 	./mvnw clean install
 
-test-run-full: pre-test-run
+test-run-full: pre-test-run ## [legacy] Run full JMH script with bash tracing
 	time bash -x   ./scripts/run_jmh.sh
 
-test-run-mini: pre-test-run
+test-run-mini: pre-test-run ## [legacy] Run mini JMH suite with bash tracing
 	time bash -x   ./scripts/run_jmh_mini_suite.sh
 
-setup-visualization-env:
+setup-visualization-env: ## [core] Ensure scripts/.venv exists and is architecture-compatible
 	@echo "Setting up Python virtual environment for benchmark visualization..."
 	@if [ ! -d "scripts/.venv" ]; then \
 		echo "Creating virtual environment..."; \
@@ -129,49 +146,49 @@ setup-visualization-env:
 		fi; \
 	fi
 
-visualize-benchmarks: setup-visualization-env
+visualize-benchmarks: setup-visualization-env ## [legacy] Generate JMH visualization bundle to performance-graphs
 	@echo "Generating JMH benchmark visualizations..."
 	@mkdir -p performance-graphs
 	@scripts/run_visualization.sh
 	@echo "Visualizations saved to performance-graphs/"
 
-bench-gc-experiments:
+bench-gc-experiments: ## [perf] Run full GC experiment matrix
 	@echo "Running GC experiments with different configurations..."
 	@echo "This will test: G1 (default), ZGC Generational, Shenandoah, and Compact Object Headers variants"
 	scripts/run_gc_experiments.sh both all
 
-bench-gc-experiments-fast:
+bench-gc-experiments-fast: ## [perf] Run reduced/fast GC experiment matrix
 	@echo "Running FAST GC experiments with minimal parameters for quick testing..."
 	@echo "This tests the most important configs: G1 vs G1+CompactHeaders vs ZGC+Generational"
 	scripts/run_gc_experiments_fast.sh both important
 
-validate-gc:
+validate-gc: ## [perf] Validate JVM GC flags on current JDK
 	@echo "Validating GC configurations for Java 25..."
 	scripts/validate_gc_configs.sh
 
-bench-dispatch:
+bench-dispatch: ## [perf] Run dispatch optimization JMH benchmarks
 	@echo "Running dispatch optimization benchmarks..."
 	@echo "This tests modern Java language features: pattern matching, switch expressions, etc."
 	JMH_FORKS=3 JMH_WARMUP_IT=5 JMH_IT=10 scripts/run_dispatch_benchmarks.sh
 
 # Enhanced JMH-based benchmarks with modern performance analysis
-bench-enhanced:
+bench-enhanced: ## [perf] Run standard enhanced JMH benchmark set
 	@echo "Running standard enhanced benchmarks with JMH Extended Testing Framework..."
 	MAVEN_OPTS="$(JAVA_GC_OPTS)" scripts/run_enhanced_benchmarks.sh standard
 
-bench-enhanced-quick:
+bench-enhanced-quick: ## [perf] Run quick enhanced benchmark validation
 	@echo "Running quick enhanced benchmarks for validation..."
 	MAVEN_OPTS="$(JAVA_GC_OPTS)" scripts/run_enhanced_benchmarks.sh quick
 
-bench-enhanced-full:
+bench-enhanced-full: ## [perf] Run full enhanced benchmark suite
 	@echo "Running full enhanced benchmark suite with all matcher types..."
 	MAVEN_OPTS="$(JAVA_GC_OPTS)" scripts/run_enhanced_benchmarks.sh full
 
-bench-enhanced-arch:
+bench-enhanced-arch: ## [perf] Run architecture-aware enhanced benchmark suite
 	@echo "Running architecture-aware benchmarks for cross-platform comparison..."
 	MAVEN_OPTS="$(JAVA_GC_OPTS)" scripts/run_enhanced_benchmarks.sh architecture
 
-gate-baseline:
+gate-baseline: ## [core] Capture local performance baseline from main branch
 	$(MAKE) -C $(REGEX_BENCH_FRAMEWORK_DIR) gate-local-baseline \
 		GATE_CONFIG="$(GATE_CONFIG)" \
 		GATE_ENGINE="$(GATE_ENGINE)" \
@@ -180,7 +197,7 @@ gate-baseline:
 		GATE_SKIP_SMOKE="$(GATE_SKIP_SMOKE)" \
 		GATE_SKIP_REBUILD="$(GATE_SKIP_REBUILD)"
 
-gate-candidate:
+gate-candidate: ## [core] Compare current branch against saved baseline and fail on regression
 	$(MAKE) -C $(REGEX_BENCH_FRAMEWORK_DIR) gate-local-candidate \
 		GATE_CONFIG="$(GATE_CONFIG)" \
 		GATE_ENGINE="$(GATE_ENGINE)" \
