@@ -282,19 +282,22 @@ public final class MatchSetImpl implements MatchSet {
       matchSnapshot.addAll(matches);
     }
 
+    final Set<Regexp> activeRegexpsAtNode = currentNode.getRegexps();
+    final Set<Regexp> terminalRegexpsAtNode = terminalRegexpsFor(currentNode);
+
     for (final Match m : matchSnapshot) {
 
       // Get the regexp associated with the
       // match we're currently processing.
       final Regexp regexp = m.getRegexp();
-      final boolean isActive = currentNode.isActiveFor(regexp);
+      final boolean isActive = activeRegexpsAtNode.contains(regexp);
 
       m.setActive(isActive);
 
       // If this node is active for the current regexp,
       // that means that we don't have to abandon
       if (isActive) {
-        processActiveMatch(currentPos, m, regexp);
+        processActiveMatch(currentPos, m, regexp, terminalRegexpsAtNode);
       } else {
         // Process inactive match but don't remove yet
         if (m.isFinal()) {
@@ -322,10 +325,20 @@ public final class MatchSetImpl implements MatchSet {
    * @param regexp The regexp associated with the match
    */
   private void processActiveMatch(final int currentPos, final Match m, final Regexp regexp) {
+    processActiveMatch(currentPos, m, regexp, null);
+  }
 
+  private void processActiveMatch(
+      final int currentPos,
+      final Match m,
+      final Regexp regexp,
+      final Set<Regexp> terminalRegexpsAtNode) {
     m.setEnd(currentPos);
 
-    final boolean isFinal = currentNode.isTerminalFor(regexp);
+    final boolean isFinal =
+        terminalRegexpsAtNode != null
+            ? terminalRegexpsAtNode.contains(regexp)
+            : currentNode.isTerminalFor(regexp);
     // If we're also in a final position for this match, note that
     // fact so that we can trigger actions for this match.
     m.setFinal(isFinal);
@@ -416,5 +429,12 @@ public final class MatchSetImpl implements MatchSet {
   @Override
   public long getId() {
     return id;
+  }
+
+  private static Set<Regexp> terminalRegexpsFor(final DFANode dfaNode) {
+    if (dfaNode instanceof DFANodeImpl impl) {
+      return impl.getTerminalRegexpsCached();
+    }
+    return null;
   }
 }
