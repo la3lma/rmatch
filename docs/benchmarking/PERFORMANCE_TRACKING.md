@@ -10,6 +10,14 @@ The performance tracking system is completely redesigned to be:
 - **Automated**: Charts auto-generated via GitHub Actions
 - **Modern**: Clean, professional visualization style
 
+## Repository Layout Note
+
+Legacy non-GCP chart image artifacts are archived at:
+
+- `archive/2026-03-attic-consolidation/charts/legacy-non-gcp/`
+
+The top-level `charts/` directory is reserved for current GCP-comparable snapshot charts.
+
 ## Data Sources
 
 All performance data comes from `benchmarking/results/`:

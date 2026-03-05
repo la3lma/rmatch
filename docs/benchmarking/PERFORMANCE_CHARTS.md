@@ -32,6 +32,14 @@ The performance charting system supports multiple data sources and generates dif
 ### Combined Charts
 - **`performance_summary.png`** - Two-panel view combining historical CSV data (top) with recent JSON data (bottom)
 
+## Repository Layout Note
+
+Legacy non-GCP chart image artifacts have been moved out of `charts/` and into archive storage:
+
+- `archive/2026-03-attic-consolidation/charts/legacy-non-gcp/`
+
+The top-level `charts/` directory is now reserved for the current GCP-comparable snapshot charts used in the root README.
+
 ## Usage
 
 ### Generating Charts Manually
