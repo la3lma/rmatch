@@ -16,6 +16,11 @@ benchmarking/results/performance-check-*.json
 benchmarking/results/pr-performance-summary.md
 benchmarking/results/gc-experiments/*/
 
+# Never track archived debug corpora from structure-prune cleanup
+archive/2026-03-repo-cleanup/structure-prune-2026-03-05/benchmarking/framework/regex_bench_framework/debug_pattern_reuse_20251219_234537/data/corpus_1MB.txt
+archive/2026-03-repo-cleanup/structure-prune-2026-03-05/benchmarking/framework/regex_bench_framework/debug_pattern_reuse_20251219_234537/data/corpus_10MB.txt
+archive/2026-03-repo-cleanup/structure-prune-2026-03-05/benchmarking/framework/regex_bench_framework/debug_pattern_reuse_20251219_234537/data/corpus_100MB.txt
+
 # Large benchmark result files (exclude to avoid GitHub file size limits)
 benchmarking/results/*.txt
 benchmarking/results/*.log
