@@ -1,6 +1,64 @@
 rmatch
 ======
 
+## What This Library Does
+
+`rmatch` is a Java library for matching many regular expressions against large input buffers in one pass-oriented matching pipeline.  
+It is built for high-volume multi-pattern workloads where you want to register many patterns once, then scan large text data efficiently and trigger callbacks on matches.
+
+The implementation intentionally uses a reduced regex surface syntax compared to modern Java/PCRE-style regex engines.  
+That was a deliberate trade-off: spend implementation effort on core matching efficiency first, then extend syntax breadth after the core engine is strong enough.
+
+## Example Usage
+
+```java
+import no.rmz.rmatch.impls.MatcherImpl;
+import no.rmz.rmatch.utils.StringBuffer;
+
+public class Example {
+  public static void main(String[] args) throws Exception {
+    MatcherImpl matcher = new MatcherImpl();
+
+    matcher.add("ERROR|WARN", (buffer, start, end) -> {
+      String match = buffer.getString(start, end);
+      System.out.println("log-level match: " + match);
+    });
+
+    matcher.add("user:[a-z]+", (buffer, start, end) -> {
+      System.out.println("user token match: " + buffer.getString(start, end));
+    });
+
+    matcher.match(new StringBuffer("INFO user:alice WARN disk nearly full"));
+    matcher.shutdown();
+  }
+}
+```
+
+## Regex Syntax (Current)
+
+The current parser supports a deliberately small core language:
+
+- Literal text: `abc`
+- Concatenation: `ab` (implicit)
+- Alternation: `a|b`
+- Quantifiers on previous atom: `?`, `*`, `+`
+- Any single character: `.`
+- Line anchors: `^`, `$`
+- Character classes: `[abc]`, ranges `[a-z]`, negated classes `[^abc]`
+
+### Important Limitations
+
+This is **not** full Java/PCRE regex syntax today. In particular, treat the following as unsupported/not guaranteed:
+
+- Grouping and precedence control with parentheses: `( ... )`
+- Counted quantifiers: `{m}`, `{m,n}`
+- Lookaround: `(?=...)`, `(?!...)`, `(?<=...)`, `(?<!...)`
+- Backreferences and capture-group features
+- Shorthand classes and many escapes such as `\\d`, `\\w`, `\\s`, `\\b`
+- Inline flags such as `(?i)`
+
+This reduced syntax was a conscious engineering choice to prioritize matching-engine performance work first. As the core algorithms stabilize, extending syntax coverage is a natural next step.
+
 ## Repository Navigation
 
 - Core library: [rmatch/](rmatch/)
