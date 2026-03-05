@@ -85,14 +85,15 @@ public final class FastPathMatchEngine implements MatchEngine {
       final Map<Integer, String> patterns,
       final Map<Integer, Integer> flags,
       final Map<String, Regexp> regexpMappings) {
-    if (!prefilterEnabled || patterns.isEmpty()) {
+    if (!prefilterEnabled
+        || patterns.isEmpty()
+        || patterns.size() < PREFILTER_ACTIVATION_THRESHOLD) {
       prefilter = null;
       patternIdToRegexp = null;
       return;
     }
 
-    // Always enable prefilter - provides consistent benefits across all scales
-    // Dynamic threshold not needed based on comprehensive testing
+    // Only enable prefilter when the pattern count is large enough.
 
     final List<LiteralHint> hints = new ArrayList<>(patterns.size());
     patternIdToRegexp = new HashMap<>(patterns.size());
