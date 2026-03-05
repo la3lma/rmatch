@@ -39,6 +39,9 @@ public final class DFANodeImpl implements DFANode {
   /** The set of regular expression this node represents. */
   private final Set<Regexp> regexps = new HashSet<>();
 
+  /** Read-only cached view of regexps associated with this DFA node. */
+  private volatile Set<Regexp> regexpsView;
+
   /**
    * Maximum number of cached edges per DFA node to prevent memory leaks. This prevents the nextMap
    * from growing unbounded and causing OutOfMemoryError.
@@ -64,6 +67,9 @@ public final class DFANodeImpl implements DFANode {
 
   /** Cache for first-character filtering to optimize O(l*m) bottleneck. */
   private final Map<Character, Set<Regexp>> firstCharRegexpCache = new HashMap<>();
+
+  /** Cache of regexps for which this node is terminal. */
+  private volatile Set<Regexp> terminalRegexpsCache;
 
   /** Compressed representation of the basis set for memory efficiency and faster operations. */
   private final CompressedDFAState compressedBasis;
@@ -141,7 +147,7 @@ public final class DFANodeImpl implements DFANode {
 
   @Override
   public boolean isTerminalFor(final Regexp r) {
-    return r.hasTerminalNdfaNode(this);
+    return getTerminalRegexpsCached().contains(r);
   }
 
   @Override
@@ -152,11 +158,23 @@ public final class DFANodeImpl implements DFANode {
   @Override
   public void addRegexp(final Regexp r) {
     regexps.add(r);
+    regexpsView = null;
+    terminalRegexpsCache = null;
   }
 
   @Override
   public Set<Regexp> getRegexps() {
-    return Collections.unmodifiableSet(regexps);
+    Set<Regexp> view = regexpsView;
+    if (view == null) {
+      synchronized (this) {
+        view = regexpsView;
+        if (view == null) {
+          view = Collections.unmodifiableSet(regexps);
+          regexpsView = view;
+        }
+      }
+    }
+    return view;
   }
 
   @Override
@@ -262,6 +280,26 @@ public final class DFANodeImpl implements DFANode {
   @Override
   public boolean isFailingFor(final Regexp regexp) {
     return isFailingSet.contains(regexp);
+  }
+
+  Set<Regexp> getTerminalRegexpsCached() {
+    Set<Regexp> cached = terminalRegexpsCache;
+    if (cached == null) {
+      synchronized (this) {
+        cached = terminalRegexpsCache;
+        if (cached == null) {
+          final Set<Regexp> computed = new HashSet<>();
+          for (final Regexp regexp : regexps) {
+            if (regexp.hasTerminalNdfaNode(this)) {
+              computed.add(regexp);
+            }
+          }
+          cached = Collections.unmodifiableSet(computed);
+          terminalRegexpsCache = cached;
+        }
+      }
+    }
+    return cached;
   }
 
   /**
