@@ -1,0 +1,25 @@
+{
+  "phase": "stable_10k_moderate_rmatch",
+  "description": "Local regression gate: moderate-load 10K-pattern benchmark for rmatch",
+  "test_matrix": {
+    "pattern_counts": [10000],
+    "input_sizes": ["1MB", "10MB"],
+    "pattern_suites": ["stable_patterns"],
+    "corpora": ["synthetic_controllable"],
+    "engines": ["rmatch"],
+    "iterations_per_combination": 2,
+    "warmup_iterations": 0
+  },
+  "execution_plan": {
+    "failure_handling": {
+      "engine_unavailable": "fail_fast",
+      "correctness_mismatch": "record_with_warning",
+      "performance_timeout": "record_partial_results"
+    },
+    "timeout_per_job": 1200,
+    "resource_limits": {
+      "max_memory_mb": 8192,
+      "max_concurrent_jobs": 1
+    }
+  }
+}
