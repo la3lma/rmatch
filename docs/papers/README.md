@@ -25,6 +25,16 @@ This directory contains writeups related to the current benchmarking and archite
   - Validation protocol, experiment design, and threats to validity
   - Literature-anchored references for translation validation, Rust safety, and benchmarking rigor
 
+### 3) `refactoring-engine-paper`
+
+- Source: `docs/papers/refactoring-engine-paper/refactoring-engine-paper.tex`
+- PDF: `docs/papers/refactoring-engine-paper/refactoring-engine-paper.pdf`
+- Scope:
+  - Current optimization loop used in this repository
+  - Explicit correctness and performance gate sequence
+  - A/B decision rule on fixed 10K/1MB workload
+  - Future generalization into an automatable refactoring engine
+
 ## Build
 
 Each paper directory has its own `Makefile`.
@@ -34,4 +44,5 @@ Examples:
 ```bash
 make -C docs/papers/status-report-2026-03-03 pdf
 make -C docs/papers/but-what-about-rust pdf
+make -C docs/papers/refactoring-engine-paper pdf
 ```
