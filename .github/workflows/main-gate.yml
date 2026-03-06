@@ -53,7 +53,8 @@ jobs:
         run: ./mvnw -q -B -pl rmatch -Dtest=no.rmz.rmatch.ordinaryuse.OrdinaryUsageSmokeTest test
 
       - name: End-to-end tiny corpus smoke (25 patterns)
-        run: >
-          ./mvnw -q -B -pl rmatch-tester exec:java
-          -Dexec.mainClass=no.rmz.rmatch.performancetests.BenchmarkTheWutheringHeightsCorpusWithMemory
-          -Dexec.args="25"
+        run: |
+          ./mvnw -q -B -pl rmatch-tester -am -DskipTests compile
+          ./mvnw -q -B -pl rmatch-tester exec:java \
+            -Dexec.mainClass=no.rmz.rmatch.performancetests.BenchmarkTheWutheringHeightsCorpusWithMemory \
+            -Dexec.args="25"
