@@ -99,3 +99,5 @@ More detail:
 - Interactive all-runs report: [benchmarking/framework/regex_bench_framework/reports/workload_all_live/workload_engine_comparison_all.html](benchmarking/framework/regex_bench_framework/reports/workload_all_live/workload_engine_comparison_all.html)
 - Legacy front-page notes moved to:
   - [docs/benchmarking/LEGACY_FRONT_PAGE_NOTES.md](docs/benchmarking/LEGACY_FRONT_PAGE_NOTES.md)
+
+[![MvnRepository](https://badges.mvnrepository.com/badge/no.rmz/rmatch/badge.svg?label=MvnRepository&color=green)](https://mvnrepository.com/artifact/no.rmz/rmatch)
