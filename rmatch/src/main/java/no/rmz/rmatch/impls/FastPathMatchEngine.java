@@ -38,6 +38,7 @@ import no.rmz.rmatch.interfaces.*;
  * <p>Enable via system property: {@code -Drmatch.engine=fastpath}
  */
 public final class FastPathMatchEngine implements MatchEngine {
+  private static final int[] EMPTY_INT_ARRAY = new int[0];
 
   /** The NodeStorage instance. */
   private final NodeStorage ns;
@@ -58,11 +59,16 @@ public final class FastPathMatchEngine implements MatchEngine {
   private static final int PREFILTER_ACTIVATION_THRESHOLD =
       Integer.parseInt(System.getProperty("rmatch.prefilter.threshold", "5000"));
 
-  /** Set of positions where matches should be started (when using prefilter). */
-  private Set<Integer> candidatePositions;
+  /** Sorted positions where matches should be started (when using prefilter). */
+  private int[] candidatePositions = EMPTY_INT_ARRAY;
 
-  /** Map from positions to specific regexps that should be tested. */
-  private Map<Integer, Set<Regexp>> positionToRegexps;
+  private int candidatePositionCursor;
+
+  /** Sorted positions that have mapped regexps and the aligned regexp sets. */
+  private int[] mappedRegexPositions = EMPTY_INT_ARRAY;
+
+  private List<Set<Regexp>> mappedRegexps = Collections.emptyList();
+  private int mappedRegexCursor;
 
   /**
    * Create a new FastPathMatchEngine.
@@ -192,8 +198,12 @@ public final class FastPathMatchEngine implements MatchEngine {
     // Check if we should start new matches at this position
     boolean shouldStartMatch = true;
 
-    if (prefilterActive && candidatePositions != null) {
-      shouldStartMatch = candidatePositions.contains(currentPos);
+    if (prefilterActive) {
+      candidatePositionCursor =
+          advanceCursor(candidatePositions, candidatePositionCursor, currentPos);
+      shouldStartMatch =
+          candidatePositionCursor < candidatePositions.length
+              && candidatePositions[candidatePositionCursor] == currentPos;
     }
 
     if (shouldStartMatch) {
@@ -201,10 +211,14 @@ public final class FastPathMatchEngine implements MatchEngine {
       if (startNode != null) {
         Set<Regexp> candidateRegexps;
 
-        if (prefilterActive
-            && positionToRegexps != null
-            && positionToRegexps.containsKey(currentPos)) {
-          candidateRegexps = positionToRegexps.get(currentPos);
+        if (prefilterActive) {
+          mappedRegexCursor = advanceCursor(mappedRegexPositions, mappedRegexCursor, currentPos);
+          if (mappedRegexCursor < mappedRegexPositions.length
+              && mappedRegexPositions[mappedRegexCursor] == currentPos) {
+            candidateRegexps = mappedRegexps.get(mappedRegexCursor);
+          } else {
+            candidateRegexps = startNode.getRegexpsThatCanStartWith(currentChar);
+          }
         } else {
           candidateRegexps = startNode.getRegexpsThatCanStartWith(currentChar);
         }
@@ -258,19 +272,19 @@ public final class FastPathMatchEngine implements MatchEngine {
    */
   private boolean preparePrefilterForMatch(final Buffer b) {
     if (!prefilterEnabled || prefilter == null) {
-      candidatePositions = null;
-      positionToRegexps = null;
+      resetPrefilterCandidates();
       return false;
     }
 
     final String fullText = collectBufferText(b);
     if (fullText == null) {
-      candidatePositions = null;
-      positionToRegexps = null;
+      resetPrefilterCandidates();
       return false;
     }
 
     runPrefilterScan(fullText);
+    candidatePositionCursor = 0;
+    mappedRegexCursor = 0;
     return true;
   }
 
@@ -286,28 +300,46 @@ public final class FastPathMatchEngine implements MatchEngine {
   /** Run prefilter scan to identify candidate positions. */
   private void runPrefilterScan(final String text) {
     if (text == null || prefilter == null) {
-      candidatePositions = null;
-      positionToRegexps = null;
+      resetPrefilterCandidates();
       return;
     }
 
     final List<AhoCorasickPrefilter.Candidate> candidates = prefilter.scan(text);
-    candidatePositions = new HashSet<>();
-    positionToRegexps = new HashMap<>();
+    final Set<Integer> candidatePositionSet = new HashSet<>();
+    final Map<Integer, Set<Regexp>> mappedRegexpsByPosition = new HashMap<>();
 
     for (final AhoCorasickPrefilter.Candidate candidate : candidates) {
       final int startPos = candidate.startIndexForMatch();
       if (startPos >= 0) {
-        candidatePositions.add(startPos);
+        candidatePositionSet.add(startPos);
 
         if (patternIdToRegexp != null) {
           final Regexp regexp = patternIdToRegexp.get(candidate.patternId());
           if (regexp != null) {
-            positionToRegexps.computeIfAbsent(startPos, k -> new HashSet<>()).add(regexp);
+            mappedRegexpsByPosition.computeIfAbsent(startPos, k -> new HashSet<>()).add(regexp);
           }
         }
       }
     }
+
+    candidatePositions = candidatePositionSet.stream().mapToInt(Integer::intValue).toArray();
+    Arrays.sort(candidatePositions);
+
+    if (mappedRegexpsByPosition.isEmpty()) {
+      mappedRegexPositions = EMPTY_INT_ARRAY;
+      mappedRegexps = Collections.emptyList();
+      return;
+    }
+
+    mappedRegexPositions =
+        mappedRegexpsByPosition.keySet().stream().mapToInt(Integer::intValue).toArray();
+    Arrays.sort(mappedRegexPositions);
+
+    final List<Set<Regexp>> orderedRegexps = new ArrayList<>(mappedRegexPositions.length);
+    for (final int position : mappedRegexPositions) {
+      orderedRegexps.add(mappedRegexpsByPosition.get(position));
+    }
+    mappedRegexps = orderedRegexps;
   }
 
   /** Perform match actions. */
@@ -336,5 +368,20 @@ public final class FastPathMatchEngine implements MatchEngine {
       final Regexp regexp = m.getRegexp();
       regexp.performActions(b, start, end);
     }
+  }
+
+  private void resetPrefilterCandidates() {
+    candidatePositions = EMPTY_INT_ARRAY;
+    mappedRegexPositions = EMPTY_INT_ARRAY;
+    mappedRegexps = Collections.emptyList();
+    candidatePositionCursor = 0;
+    mappedRegexCursor = 0;
+  }
+
+  private static int advanceCursor(final int[] positions, int cursor, final int currentPos) {
+    while (cursor < positions.length && positions[cursor] < currentPos) {
+      cursor++;
+    }
+    return cursor;
   }
 }
