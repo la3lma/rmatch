@@ -61,10 +61,12 @@ public final class FastPathMatchEngine implements MatchEngine {
 
   /** Sorted positions where matches should be started (when using prefilter). */
   private int[] candidatePositions = EMPTY_INT_ARRAY;
+
   private int candidatePositionCursor;
 
   /** Sorted positions that have mapped regexps and the aligned regexp sets. */
   private int[] mappedRegexPositions = EMPTY_INT_ARRAY;
+
   private List<Set<Regexp>> mappedRegexps = Collections.emptyList();
   private int mappedRegexCursor;
 
@@ -329,7 +331,8 @@ public final class FastPathMatchEngine implements MatchEngine {
       return;
     }
 
-    mappedRegexPositions = mappedRegexpsByPosition.keySet().stream().mapToInt(Integer::intValue).toArray();
+    mappedRegexPositions =
+        mappedRegexpsByPosition.keySet().stream().mapToInt(Integer::intValue).toArray();
     Arrays.sort(mappedRegexPositions);
 
     final List<Set<Regexp>> orderedRegexps = new ArrayList<>(mappedRegexPositions.length);
