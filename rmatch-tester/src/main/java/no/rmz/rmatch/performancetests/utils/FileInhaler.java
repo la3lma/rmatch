@@ -30,15 +30,16 @@ public final class FileInhaler {
    */
   public StringSourceBuffer inhaleAsStringBuffer() {
     synchronized (file) {
-      if (!file.exists()) {
+      final File effectiveFile = resolveExistingFile();
+      if (!effectiveFile.exists()) {
         String currentWorkingDirectory = System.getProperty("user.dir");
         throw new IllegalStateException(
             "Couldn't find file "
-                + file
+                + effectiveFile
                 + " while current working directory is "
                 + currentWorkingDirectory);
       }
-      final FileInputStream fstream = getFileInputStream();
+      final FileInputStream fstream = getFileInputStream(effectiveFile);
       // Get the object of DataInputStream
       final DataInputStream in = new DataInputStream(fstream);
       final BufferedReader br =
@@ -73,11 +74,15 @@ public final class FileInhaler {
    * @return the input stream instance
    */
   private FileInputStream getFileInputStream() {
+    return getFileInputStream(resolveExistingFile());
+  }
+
+  private FileInputStream getFileInputStream(final File effectiveFile) {
     final FileInputStream fstream;
     try {
-      fstream = new FileInputStream(this.file);
+      fstream = new FileInputStream(effectiveFile);
     } catch (FileNotFoundException ex) {
-      throw new IllegalStateException("Couldn't find file " + this.file);
+      throw new IllegalStateException("Couldn't find file " + effectiveFile);
     }
     return fstream;
   }
@@ -103,13 +108,15 @@ public final class FileInhaler {
    */
   public void inhaleIntoCollector(final Collector collector) {
     synchronized (file) {
-      if (!file.exists()) {
+      final File effectiveFile = resolveExistingFile();
+      if (!effectiveFile.exists()) {
         String currentDir = System.getProperty("user.dir");
         System.out.println("Current dir using System:" + currentDir);
 
-        throw new IllegalStateException("Couldn't find file " + file + " while cwd=" + currentDir);
+        throw new IllegalStateException(
+            "Couldn't find file " + effectiveFile + " while cwd=" + currentDir);
       }
-      final FileInputStream fstream = getFileInputStream();
+      final FileInputStream fstream = getFileInputStream(effectiveFile);
       // Get the object of DataInputStream
       final DataInputStream in = new DataInputStream(fstream);
       final BufferedReader br =
@@ -133,5 +140,27 @@ public final class FileInhaler {
         }
       }
     }
+  }
+
+  private File resolveExistingFile() {
+    if (file.exists()) {
+      return file;
+    }
+
+    final String path = file.getPath();
+    final String modulePrefix = "rmatch-tester" + File.separator;
+    if (path.startsWith(modulePrefix)) {
+      final File withoutModulePrefix = new File(path.substring(modulePrefix.length()));
+      if (withoutModulePrefix.exists()) {
+        return withoutModulePrefix;
+      }
+    } else {
+      final File withModulePrefix = new File(modulePrefix + path);
+      if (withModulePrefix.exists()) {
+        return withModulePrefix;
+      }
+    }
+
+    return file;
   }
 }
