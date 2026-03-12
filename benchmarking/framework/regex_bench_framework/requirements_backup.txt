@@ -141,7 +141,7 @@ sphinxcontrib-serializinghtml==2.0.0
 stack-data==0.6.3
 terminado==0.18.1
 tinycss2==1.4.0
-tornado==6.5.4
+tornado==6.5.5
 traitlets==5.14.3
 types-requests==2.32.4.20250913
 types-setuptools==80.9.0.20250822
