@@ -13,7 +13,7 @@ GATE_SKIP_REBUILD ?= 0
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build test ci clean fmt spotless spotbugs gate-baseline gate-candidate release-central-preflight release-central-profile-check release-central-publish
+.PHONY: help build test clean fmt spotless spotbugs gate-baseline gate-candidate release-central-preflight release-central-profile-check release-central-publish
 
 help: ## [core] Show available top-level targets
 	@echo "Top-level rmatch Make targets"
@@ -29,8 +29,6 @@ build: ## [core] Build project artifacts (skip tests)
 test: ## [core] Run full verify build
 	mvn -q -B spotless:apply
 	mvn -q -B verify
-
-ci: test ## [core] Local CI equivalent
 
 clean: ## [core] Remove all Maven build artifacts from the repository
 	./mvnw -q -B clean
