@@ -57,6 +57,8 @@
                 <version>${mavenSurefire.version}</version>
                 <configuration>
                     <argLine>
+                        -javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${byteBuddy.version}/byte-buddy-agent-${byteBuddy.version}.jar
+                        -Xshare:off
                         --add-opens java.base/java.lang=ALL-UNNAMED
                         --add-opens java.base/java.util=ALL-UNNAMED
                     </argLine>
