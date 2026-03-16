@@ -1,6 +1,6 @@
 # Benchmarking Workspace
 
-This directory contains all benchmarking-related code, configs, and generated result artifacts for `rmatch`.
+This directory contains the in-repo benchmarking entry points that remain in active use for `rmatch`.
 
 ## Purpose
 
@@ -11,20 +11,15 @@ This directory contains all benchmarking-related code, configs, and generated re
 ## Which Benchmark Stack To Use
 
 - **Primary (active):** [`framework/regex_bench_framework/`](framework/regex_bench_framework/)
-  - This is the current benchmark orchestration system used for reports, campaigns, and run-control tooling.
-- **Secondary (legacy/simple):** [`framework/`](framework/)
-  - Older generic harness kept for reference and lightweight experiments.
-- **Microbenchmarks / JMH-focused:** [`jmh/`](jmh/)
-  - JMH module and related benchmark artifacts.
-
-If you are unsure, start with `framework/regex_bench_framework`.
+  - This is the current benchmark orchestration system retained in this repository.
+  - For full campaign work, use the dedicated `rmatch-perftest` repository.
 
 ## Directory Map
 
-- [`baseline/`](baseline/): saved baseline snapshots used for regression comparison context.
-- [`framework/`](framework/): benchmarking harnesses and the active `regex_bench_framework`.
-- [`jmh/`](jmh/): JMH benchmark module and generated artifacts.
-- [`results/`](results/): historical result outputs (mostly legacy/JMH-era artifacts).
+- [`framework/`](framework/): contains the active `regex_bench_framework`.
+- [`results/`](results/): retained placeholder for local outputs where needed.
+- Historical benchmarking subtrees previously under `benchmarking/` were soft-deleted to:
+  - [`../archive/2026-03-perftest-extraction/soft-delete-2026-03-10/`](../archive/2026-03-perftest-extraction/soft-delete-2026-03-10/)
 
 ## Recommended Workflows
 
@@ -45,7 +40,7 @@ Notes:
 - These targets are defined in the top-level `Makefile` and delegate into `framework/regex_bench_framework`.
 - Default gate metric is `scanning_ns` for `rmatch` on the stable 10K local probe config.
 
-### 2. Framework-Local Operations
+### 2. Framework-Local Operations (in this repo)
 
 From [`framework/regex_bench_framework/`](framework/regex_bench_framework/):
 
@@ -67,8 +62,7 @@ Useful references:
 - Active campaign outputs live under:
   - `framework/regex_bench_framework/results/`
   - `framework/regex_bench_framework/reports/`
-- Legacy/historical outputs are kept under:
-  - `results/`
+- Legacy/historical outputs are preserved in:
   - `archive/` (outside this directory tree)
 
 When making claims, prefer comparable cohorts and documented matrix configurations from the active framework docs.
