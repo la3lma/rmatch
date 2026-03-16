@@ -13,7 +13,7 @@ GATE_SKIP_REBUILD ?= 0
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build test ci fmt spotless spotbugs gate-baseline gate-candidate release-central-preflight release-central-profile-check release-central-publish
+.PHONY: help build test ci clean fmt spotless spotbugs gate-baseline gate-candidate release-central-preflight release-central-profile-check release-central-publish
 
 help: ## [core] Show available top-level targets
 	@echo "Top-level rmatch Make targets"
@@ -31,6 +31,10 @@ test: ## [core] Run full verify build
 	mvn -q -B verify
 
 ci: test ## [core] Local CI equivalent
+
+clean: ## [core] Remove all Maven build artifacts from the repository
+	./mvnw -q -B clean
+	find . -type d -name target -prune -exec rm -rf {} +
 
 profile: ## [perf] Run async-profiler capture (default 30s)
 	DUR=30; scripts/profile_async_profiler.sh $$DUR
