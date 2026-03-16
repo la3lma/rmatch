@@ -15,7 +15,7 @@ GATE_SKIP_REBUILD ?= 0
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts readme-gcp-snapshot profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch bench-enhanced bench-enhanced-quick bench-enhanced-full bench-enhanced-arch gate-baseline gate-candidate pre-test-run test-run-full test-run-mini
+.PHONY: help build test ci bench-micro bench-macro bench-java bench-suite test-run-once charts readme-gcp-snapshot profile fmt spotless spotbugs visualize-benchmarks setup-visualization-env bench-gc-experiments bench-gc-experiments-fast validate-gc bench-dispatch bench-enhanced bench-enhanced-quick bench-enhanced-full bench-enhanced-arch gate-baseline gate-candidate pre-test-run test-run-full test-run-mini release-central-preflight release-central-profile-check release-central-publish
 
 help: ## [core] Show available top-level targets
 	@echo "Top-level rmatch Make targets"
@@ -207,3 +207,12 @@ gate-candidate: ## [core] Compare current branch against saved baseline and fail
 		GATE_BASELINE_DIR="$(GATE_BASELINE_DIR)" \
 		GATE_SKIP_SMOKE="$(GATE_SKIP_SMOKE)" \
 		GATE_SKIP_REBUILD="$(GATE_SKIP_REBUILD)"
+
+release-central-preflight: ## [core] Full non-performance regression check before Maven Central release
+	./mvnw -q -B verify
+
+release-central-profile-check: ## [core] Verify Central release profile wiring without GPG signing
+	./mvnw -q -B -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true -Dgpg.skip=true verify
+
+release-central-publish: ## [core] Publish parent+rmatch to Maven Central (requires token+GPG setup and non-SNAPSHOT version)
+	./mvnw -B -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true -Dgpg.skip=false deploy
