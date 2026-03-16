@@ -20,11 +20,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
+import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.mockedcompiler.CharPlusNode;
 import no.rmz.rmatch.testutils.GraphDumper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +67,7 @@ public final class APlusTest {
     final String finalaPlus = "a+";
     aplusString = finalaPlus;
     regexp = new RegexpImpl(aplusString);
-    final NDFANode aPlusNode = new CharPlusNode('a', regexp, true);
+    final NDFANode aPlusNode = new TestCharPlusNode('a', regexp, true);
 
     when(compiler.compile(any(), any())).thenReturn(aPlusNode);
 
@@ -167,5 +168,29 @@ public final class APlusTest {
     verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
     verify(action).performMatch(any(Buffer.class), eq(2), eq(2));
     verify(action).performMatch(any(Buffer.class), eq(4), eq(5));
+  }
+
+  /** Local test helper: node that matches one-or-more occurrences of one character. */
+  private static final class TestCharPlusNode extends AbstractNDFANode {
+    private final Character myChar;
+
+    private TestCharPlusNode(final Character ch, final Regexp r, final boolean isTerminal) {
+      super(r, isTerminal);
+      this.myChar = ch;
+    }
+
+    @Override
+    public NDFANode getNextNDFA(final Character ch) {
+      return ch.equals(myChar) ? this : null;
+    }
+
+    @Override
+    public Collection<PrintableEdge> getEdgesToPrint() {
+      synchronized (monitor) {
+        final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
+        result.add(new PrintableEdge(String.valueOf(myChar), this));
+        return result;
+      }
+    }
   }
 }

@@ -17,11 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+import no.rmz.rmatch.compiler.CharNode;
 import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.compiler.TerminalNode;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.mockedcompiler.CharSequenceCompiler;
 import no.rmz.rmatch.testutils.GraphDumper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,9 +89,9 @@ public class SequenceNodeTest {
     abRegexp = new RegexpImpl(AB_STRING);
     acRegexp = new RegexpImpl(AC_STRING);
 
-    final NDFANode abNode = CharSequenceCompiler.compile(abRegexp, AB_STRING);
+    final NDFANode abNode = compileCharSequence(abRegexp, AB_STRING);
 
-    final NDFANode acNode = CharSequenceCompiler.compile(acRegexp, AC_STRING);
+    final NDFANode acNode = compileCharSequence(acRegexp, AC_STRING);
 
     when(compiler.compile(eq(abRegexp), any())).thenReturn(abNode);
 
@@ -170,5 +171,13 @@ public class SequenceNodeTest {
 
     verify(action).performMatch(any(Buffer.class), eq(AB_START), eq(AB_END));
     verify(action).performMatch(any(Buffer.class), eq(AC_START), eq(AC_END));
+  }
+
+  private static NDFANode compileCharSequence(final Regexp regexp, final String str) {
+    NDFANode result = new TerminalNode(regexp);
+    for (int i = str.length() - 1; i >= 0; i--) {
+      result = new CharNode(result, str.charAt(i), regexp);
+    }
+    return result;
   }
 }
