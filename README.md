@@ -64,6 +64,7 @@ This reduced syntax was a conscious engineering choice to prioritize matching-en
 - Tester and harness: [rmatch-tester/](rmatch-tester/)
 - Benchmark platform repository: [rmatch-perftest](https://github.com/la3lma/rmatch-perftest)
 - Documentation, plans, and papers repository: [rmatch-meta](https://github.com/la3lma/rmatch-meta)
+- Historical archive repository: [rmatch-archive](https://github.com/la3lma/rmatch-archive)
 
 ## Developer A/B Performance Protocol (Using `rmatch-perftest`)
 
