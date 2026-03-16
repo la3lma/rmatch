@@ -3,7 +3,11 @@ SHELL := /bin/bash
 # Optimal GC settings based on experimentation (see GC_OPTIMIZATION_RESULTS.md)
 # G1 with Compact Object Headers provides 5-12% performance improvement
 JAVA_GC_OPTS := -XX:+UseCompactObjectHeaders
-REGEX_BENCH_FRAMEWORK_DIR ?= benchmarking/framework/regex_bench_framework
+PERFTEST_REPO_DIR ?= ../rmatch-perftest
+REGEX_BENCH_FRAMEWORK_DIR ?= $(PERFTEST_REPO_DIR)/benchmarking/framework/regex_bench_framework
+PERFTEST_REPORT_DIR ?= $(REGEX_BENCH_FRAMEWORK_DIR)/reports/workload_all_live
+SNAPSHOT_OUTPUT_DIR ?= /tmp/rmatch-gcp-snapshot
+SNAPSHOT_MD_OUTPUT ?= $(SNAPSHOT_OUTPUT_DIR)/LATEST_PERFORMANCE_TESTS_10K_REGEX_PATTERNS_GOOGLE_COMPUTE_NODE.md
 GATE_CONFIG ?= test_matrix/stable_10k_moderate_rmatch.json
 GATE_ENGINE ?= rmatch
 GATE_METRIC ?= scanning_ns
@@ -93,12 +97,14 @@ charts: ## [legacy] Generate legacy macro/java chart artifacts and README perf t
 	python3 scripts/update_readme_performance_table.py
 
 readme-gcp-snapshot: setup-visualization-env ## [core] Generate README snapshot from latest GCP comparable matrix
+	@mkdir -p "$(SNAPSHOT_OUTPUT_DIR)"
 	@scripts/.venv/bin/python scripts/generate_readme_gcp_snapshot.py \
-		--matrix-csv benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv \
+		--matrix-csv $(PERFTEST_REPORT_DIR)/cohort_workload_engine_matrix.csv \
 		--cohort 'e2-standard-8|x86_64' \
 		--patterns 10000 \
-		--output-dir charts \
-		--md-output docs/benchmarking/LATEST_PERFORMANCE_TESTS_10K_REGEX_PATTERNS_GOOGLE_COMPUTE_NODE.md
+		--output-dir "$(SNAPSHOT_OUTPUT_DIR)" \
+		--md-output "$(SNAPSHOT_MD_OUTPUT)"
+	@echo "Snapshot artifacts written to $(SNAPSHOT_OUTPUT_DIR)"
 
 profile: ## [perf] Run async-profiler capture (default 30s)
 	DUR=30; scripts/profile_async_profiler.sh $$DUR
