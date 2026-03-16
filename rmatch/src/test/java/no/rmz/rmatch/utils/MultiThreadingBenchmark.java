@@ -54,10 +54,11 @@ public class MultiThreadingBenchmark {
           () -> {
             try {
               for (int j = 0; j < OPERATIONS_PER_THREAD; j++) {
-                String counterName = "bench_counter_" + threadId + "_" + j;
-                Counter counter = Counters.newCounter(counterName);
+                CounterType counterType =
+                    CounterType.values()[(threadId + j) % CounterType.values().length];
+                FastCounter counter = FastCounters.newCounter(counterType);
                 counter.inc();
-                counter.toString(); // Exercise the toString method
+                counter.toString(); // Exercise reporting path
                 totalOperations.incrementAndGet();
               }
             } finally {

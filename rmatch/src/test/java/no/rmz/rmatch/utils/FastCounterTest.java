@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -130,9 +131,9 @@ public class FastCounterTest {
     assertTrue(result.endsWith(String.valueOf(expectedValue)));
   }
 
-  /** Test compatibility with legacy Counter system via getCounters(). */
+  /** Test snapshot reporting API. */
   @Test
-  public void testLegacyCompatibility() {
+  public void testSnapshotReporting() {
     final FastCounter fastCounter = FastCounters.newCounter(CounterType.KNOWN_DFA_EDGES);
     final long initialValue = fastCounter.get();
     fastCounter.inc();
@@ -142,27 +143,16 @@ public class FastCounterTest {
     fastCounter.inc();
     final long expectedValue = initialValue + 5;
 
-    final Collection<Counter> legacyCounters = FastCounters.getCounters();
-    assertFalse(legacyCounters.isEmpty());
-
-    // Find our counter in the collection
-    boolean found = false;
-    for (final Counter c : legacyCounters) {
-      if (c.toString().contains("Known DFA Edges")) {
-        found = true;
-        assertTrue(c.toString().contains(String.valueOf(expectedValue)));
-        break;
-      }
-    }
-    assertTrue(found, "Should find the Known DFA Edges counter in the collection");
+    final Map<CounterType, Long> snapshot = FastCounters.snapshot();
+    assertFalse(snapshot.isEmpty());
+    assertEquals(expectedValue, snapshot.get(CounterType.KNOWN_DFA_EDGES));
   }
 
-  /** Test that getCounters returns all counter types. */
+  /** Test that snapshot returns all counter types. */
   @Test
-  public void testGetCountersCompleteness() {
-    final Collection<Counter> counters = FastCounters.getCounters();
-    assertEquals(
-        CounterType.values().length, counters.size(), "Should have all counter types represented");
+  public void testSnapshotCompleteness() {
+    final Map<CounterType, Long> counters = FastCounters.snapshot();
+    assertEquals(CounterType.values().length, counters.size(), "Should include all counter types");
   }
 
   /** Verify counter names match expected legacy names. */

@@ -44,14 +44,15 @@ public class CounterTest {
   @AfterEach
   public void tearDown() {}
 
-  /** Test of inc method, of class Counter. */
+  /** Test of concurrent increments using FastCounter. */
   @Test
   public void testMultiThreadedCounterAccess() {
-    final Counter counter = new Counter("Sample counter");
+    final FastCounter counter = FastCounters.newCounter(CounterType.MATCH_IMPL);
     final int noOfThreadsInPool = 10;
     final int noOfIterationsInRunnable = 10000;
     final int noOfRunnables = noOfThreadsInPool;
     final int noOfIncrements = noOfRunnables * noOfIterationsInRunnable;
+    final long initialValue = counter.get();
     final ExecutorService executors = Executors.newFixedThreadPool(noOfThreadsInPool);
     try {
       final Collection<Callable<Object>> runnables = new ArrayList<>();
@@ -74,6 +75,6 @@ public class CounterTest {
       executors.shutdown();
     }
 
-    assertEquals(noOfIncrements, counter.inc() - 1);
+    assertEquals(initialValue + noOfIncrements, counter.get());
   }
 }

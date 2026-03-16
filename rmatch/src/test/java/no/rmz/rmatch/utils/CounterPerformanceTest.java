@@ -15,54 +15,24 @@ package no.rmz.rmatch.utils;
 
 import org.junit.jupiter.api.Test;
 
-/**
- * Performance comparison test between the old string-based counters and the new FastCounter system.
- */
+/** Basic throughput probe for the FastCounter system. */
 public class CounterPerformanceTest {
 
   private static final int ITERATIONS = 10_000;
   private static final int WARMUP_ITERATIONS = 1_000;
 
   @Test
-  public void compareCounterPerformance() {
-    System.out.println("Counter Performance Comparison Test");
+  public void runFastCounterThroughputProbe() {
+    System.out.println("FastCounter Throughput Probe");
     System.out.println("====================================");
 
-    // Warmup both systems
-    warmupOldCounters();
+    // Warmup
     warmupFastCounters();
 
-    // Test old string-based counters
-    long oldTime = testOldCounters();
-    System.out.printf("Old string-based counters: %,d ns (%d iterations)%n", oldTime, ITERATIONS);
-    System.out.printf("Average per operation: %.2f ns%n", (double) oldTime / ITERATIONS);
-
-    // Test new FastCounters
+    // Test FastCounters
     long fastTime = testFastCounters();
-    System.out.printf("New FastCounters: %,d ns (%d iterations)%n", fastTime, ITERATIONS);
+    System.out.printf("FastCounters: %,d ns (%d iterations)%n", fastTime, ITERATIONS);
     System.out.printf("Average per operation: %.2f ns%n", (double) fastTime / ITERATIONS);
-
-    // Calculate improvement
-    double improvement = ((double) (oldTime - fastTime) / oldTime) * 100;
-    double speedup = (double) oldTime / fastTime;
-
-    System.out.println();
-    System.out.printf("Performance improvement: %.2f%%%n", improvement);
-    System.out.printf("Speedup: %.2fx%n", speedup);
-
-    if (improvement > 1.0) {
-      System.out.println("✓ Performance improvement achieved (>1%)");
-    } else {
-      System.out.println("⚠ Performance improvement less than 1%");
-    }
-  }
-
-  private void warmupOldCounters() {
-    for (int i = 0; i < WARMUP_ITERATIONS; i++) {
-      // Create unique names for each counter
-      Counter counter = Counters.newCounter("warmup-old-" + i, false);
-      counter.inc();
-    }
   }
 
   private void warmupFastCounters() {
@@ -71,19 +41,6 @@ public class CounterPerformanceTest {
           FastCounters.newCounter(CounterType.values()[i % CounterType.values().length]);
       counter.inc();
     }
-  }
-
-  private long testOldCounters() {
-    long startTime = System.nanoTime();
-
-    for (int i = 0; i < ITERATIONS; i++) {
-      // Create unique counter names since old system doesn't allow duplicates
-      String counterName = "test-old-" + i;
-      Counter counter = Counters.newCounter(counterName, false);
-      counter.inc();
-    }
-
-    return System.nanoTime() - startTime;
   }
 
   private long testFastCounters() {

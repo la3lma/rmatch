@@ -41,11 +41,12 @@ public class ConcurrencyTest {
           () -> {
             try {
               for (int j = 0; j < operationsPerThread; j++) {
-                String counterName = "counter_" + threadId + "_" + j;
-                Counter counter = Counters.newCounter(counterName);
+                CounterType counterType =
+                    CounterType.values()[(threadId + j) % CounterType.values().length];
+                FastCounter counter = FastCounters.newCounter(counterType);
                 assertNotNull(counter);
                 counter.inc();
-                assertTrue(counter.toString().contains(counterName));
+                assertTrue(counter.get() >= 1);
               }
             } catch (Exception e) {
               errorCount.incrementAndGet();

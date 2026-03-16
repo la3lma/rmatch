@@ -18,7 +18,7 @@ import no.rmz.rmatch.performancetests.utils.FileInhaler;
 import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 import no.rmz.rmatch.utils.CounterAction;
-import no.rmz.rmatch.utils.Counters;
+import no.rmz.rmatch.utils.FastCounters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -148,7 +148,7 @@ public class SequenceLoaderTest {
     LOG.info("Total no of 'horse' matches in Wuthering Heights is " + horseCounter.getCounter());
     assertTrue(finalCount > ARBITRARY_REASONABLE_LOWER_LIMIT_FOR_NO_OF_FINAL_COUNT);
 
-    Counters.dumpCounters();
+    FastCounters.dumpCounters();
   }
 
   /** The number of milliseonds in a seond. */
@@ -189,7 +189,7 @@ public class SequenceLoaderTest {
             result.getDuration(),
             result.getMaxNoOfMbsUsed(),
             System.currentTimeMillis() / MILLIS_IN_SECOND));
-    Counters.dumpCounters();
+    FastCounters.dumpCounters();
   }
 
   /**

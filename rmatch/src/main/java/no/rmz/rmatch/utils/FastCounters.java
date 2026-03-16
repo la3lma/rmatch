@@ -13,8 +13,8 @@
  */
 package no.rmz.rmatch.utils;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
@@ -48,14 +48,9 @@ public final class FastCounters {
     return INSTANCE.privateNewCounter(type);
   }
 
-  /**
-   * Get all counters as a collection for compatibility with legacy code. Creates new Counter
-   * instances for debugging/reporting purposes.
-   *
-   * @return collection of counter representations
-   */
-  public static Collection<Counter> getCounters() {
-    return INSTANCE.privateGetCounters();
+  /** Get a point-in-time snapshot of all counters. */
+  public static Map<CounterType, Long> snapshot() {
+    return INSTANCE.privateSnapshot();
   }
 
   /** Dump all counters to stdout for debugging. */
@@ -67,37 +62,19 @@ public final class FastCounters {
     return new FastCounter(type, counters);
   }
 
-  private Collection<Counter> privateGetCounters() {
-    final Collection<Counter> result = new ArrayList<>();
+  private Map<CounterType, Long> privateSnapshot() {
+    final Map<CounterType, Long> result = new EnumMap<>(CounterType.class);
     for (final CounterType type : CounterType.values()) {
-      final long value = counters.get(type.ordinal());
-      // Create a new Counter for compatibility - it won't be used for actual counting
-      Counter reportingCounter = new Counter(type.getLegacyName(), false);
-      // Use reflection to set the internal AtomicInteger value to match our fast counter
-      setCounterValue(reportingCounter, value);
-      result.add(reportingCounter);
+      result.put(type, counters.get(type.ordinal()));
     }
     return result;
   }
 
   private void privateDumpCounters() {
-    for (final CounterType type : CounterType.values()) {
-      final long value = counters.get(type.ordinal());
+    for (final Map.Entry<CounterType, Long> entry : privateSnapshot().entrySet()) {
+      final CounterType type = entry.getKey();
+      final long value = entry.getValue();
       System.out.println("#'" + type.getLegacyName() + "'=" + value);
-    }
-  }
-
-  private void setCounterValue(final Counter counter, final long value) {
-    try {
-      // Use reflection to access the private atomicInt field and set its value
-      java.lang.reflect.Field atomicField = Counter.class.getDeclaredField("atomicInt");
-      atomicField.setAccessible(true);
-      java.util.concurrent.atomic.AtomicInteger atomic =
-          (java.util.concurrent.atomic.AtomicInteger) atomicField.get(counter);
-      atomic.set((int) Math.min(value, Integer.MAX_VALUE));
-    } catch (Exception e) {
-      // If reflection fails, ignore - the counter will just show 0
-      // This is only used for debugging output anyway
     }
   }
 }

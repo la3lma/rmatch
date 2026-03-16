@@ -56,8 +56,14 @@ public final class CounterAction implements Action {
         if (now - globalLastTick >= REPORT_INTERVAL_MILLIS) {
           // Collecting a report from the known counters
           final StringBuilder sb = new StringBuilder();
-          for (final Counter c : FastCounters.getCounters()) {
-            sb.append("  ").append(c.toString()).append(", ");
+          for (final java.util.Map.Entry<CounterType, Long> entry :
+              FastCounters.snapshot().entrySet()) {
+            sb.append("  ")
+                .append("#'")
+                .append(entry.getKey().getLegacyName())
+                .append("'=")
+                .append(entry.getValue())
+                .append(", ");
           }
 
           final long duration = now - globalLastTick;

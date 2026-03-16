@@ -19,7 +19,7 @@ import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.performancetests.PerformanceCriteriaEvaluator;
 import no.rmz.rmatch.utils.CounterAction;
-import no.rmz.rmatch.utils.Counters;
+import no.rmz.rmatch.utils.FastCounters;
 
 /**
  * A harness for running benchmarks for matcher implementations based on the Wuthering Heights
@@ -136,7 +136,7 @@ public final class MatcherBenchmarker {
             finalCount,
             System.currentTimeMillis() / MILLISECONDS_IN_A_SECOND));
     LOG.log(Level.INFO, "Counter = " + finalCount);
-    Counters.dumpCounters();
+    FastCounters.dumpCounters();
   }
 
   public record LoggedMatch(String matcherTypeName, String regex, int start, int end) {}

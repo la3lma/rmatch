@@ -7,7 +7,7 @@ import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.CounterAction;
-import no.rmz.rmatch.utils.Counters;
+import no.rmz.rmatch.utils.FastCounters;
 
 /**
  * Enhanced version of MatcherBenchmarker that provides detailed memory consumption information
@@ -146,7 +146,7 @@ public final class MatcherBenchmarkerWithMemory {
             System.currentTimeMillis() / 1000));
 
     LOG.log(Level.INFO, "Counter = " + finalCount);
-    Counters.dumpCounters();
+    FastCounters.dumpCounters();
   }
 
   public static void testMatcher(final Buffer b, final Matcher matcher, final String[] argv)
