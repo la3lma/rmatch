@@ -5,11 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>no.rmz</groupId>
     <artifactId>rmatch-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
     <name>Umbrella project for the regex matcher subprojects.</name>
+    <url>https://github.com/la3lma/rmatch</url>
 
     <description>Regular expression matcher</description>
     <organization>
@@ -59,6 +60,9 @@
         <spotbugs.version>4.9.8.2</spotbugs.version>
 
         <mavenSourcePlugin.version>3.4.0</mavenSourcePlugin.version>
+        <mavenJavadocPlugin.version>3.12.0</mavenJavadocPlugin.version>
+        <mavenGpgPlugin.version>3.2.8</mavenGpgPlugin.version>
+        <centralPublishingMavenPlugin.version>0.9.0</centralPublishingMavenPlugin.version>
         <mavenSurefire.version>3.5.4</mavenSurefire.version>
         <mockitoCore.version>5.21.0</mockitoCore.version>
         <mockitoJunitJupiter.version>5.21.0</mockitoJunitJupiter.version>
@@ -195,7 +199,6 @@
     <modules>
         <module>rmatch</module>
         <module>rmatch-tester</module>
-        <module>benchmarking/jmh</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:la3lma/rmatch.git</connection>
@@ -280,6 +283,16 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${mavenJavadocPlugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>${mavenGpgPlugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${mavenDependencyPlugin.version}</version>
                 </plugin>
@@ -317,6 +330,63 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>central-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${centralPublishingMavenPlugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                            <waitUntil>published</waitUntil>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <doclint>none</doclint>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 
 </project>

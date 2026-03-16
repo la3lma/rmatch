@@ -62,42 +62,34 @@ This reduced syntax was a conscious engineering choice to prioritize matching-en
 
 - Core library: [rmatch/](rmatch/)
 - Tester and harness: [rmatch-tester/](rmatch-tester/)
-- Benchmark platform: [benchmarking/framework/regex_bench_framework/](benchmarking/framework/regex_bench_framework/)
-- Documentation index: [docs/README.md](docs/README.md)
-- Planning backlog: [docs/plans/](docs/plans/)
-- Papers: [docs/papers/](docs/papers/)
+- Benchmark platform repository: [rmatch-perftest](https://github.com/la3lma/rmatch-perftest)
+- Documentation, plans, and papers repository: [rmatch-meta](https://github.com/la3lma/rmatch-meta)
 
-## Latest Performance Tests Running 10K Regular Expression Patterns on Google Compute Node
+## Developer A/B Performance Protocol (Using `rmatch-perftest`)
 
-Comparable setup used for the snapshot below:
+Use this workflow for branch-vs-`main` performance checks without keeping full perf orchestration inside this repo:
 
-- Same hardware cohort: `e2-standard-8|x86_64` (GCP)
-- Same pattern suite: `stable_patterns` (`10,000` patterns)
-- Same corpus sizes: `1MB`, `10MB`, `100MB`
-- Source: [benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv](benchmarking/framework/regex_bench_framework/reports/workload_all_live/cohort_workload_engine_matrix.csv)
+1. In `rmatch` on `main`, run correctness checks and publish locally:
+   - `./mvnw -q test`
+   - `./mvnw -q -DskipTests install`
+2. In `rmatch-perftest`, run the baseline benchmark config (for example stable 10K/1MB+10MB gate config).
+3. Switch to candidate branch in `rmatch`, run the same correctness checks, and install again:
+   - `./mvnw -q test`
+   - `./mvnw -q -DskipTests install`
+4. In `rmatch-perftest`, rerun the exact same benchmark config.
+5. Compare baseline vs candidate from `rmatch-perftest` reports/databases.
 
-| Corpus | Winner | rmatch (ms) | re2j (ms) | java-native-naive (ms) | re2j vs winner | java-native-naive vs winner |
-|---|---:|---:|---:|---:|---:|---:|
-| 1MB | rmatch | 17,340.1 | 255,653.6 | 137,385.1 | 14.74x | 7.92x |
-| 10MB | rmatch | 19,762.0 | - | 1,205,972.5 | - | 61.02x |
-| 100MB | rmatch | 63,219.3 | 25,716,382.9 | - | 406.78x | - |
+Why this works:
 
-`-` means no successful completed run yet for that engine/workload combination.
+- `rmatch-perftest` contains benchmark orchestration (Docker/GCP/local), including multi-engine comparisons.
+- `rmatch` contributes only the Maven artifact under test (resolved from local `~/.m2` during A/B).
+- This keeps concerns separated and avoids carrying heavy campaign infrastructure in the core library repo.
 
-### Comparable Plot 1: Runtime Scaling
-![Comparable runtime scaling](charts/gcp_e2_10k_runtime_seconds.png)
+## Benchmarking and Reports
 
-### Comparable Plot 2: Relative Slowdown vs Winner
-![Relative slowdown vs winner](charts/gcp_e2_10k_relative_x_vs_winner.png)
+Performance benchmarking, workload comparisons, and campaign reports now live outside this repository:
 
-### Comparable Plot 3: Throughput Trend (MiB/s; 1 MiB = 1,048,576 bytes)
-![Throughput trend](charts/gcp_e2_10k_throughput_mib_s.png)
-
-More detail:
-
-- Snapshot doc: [docs/benchmarking/LATEST_PERFORMANCE_TESTS_10K_REGEX_PATTERNS_GOOGLE_COMPUTE_NODE.md](docs/benchmarking/LATEST_PERFORMANCE_TESTS_10K_REGEX_PATTERNS_GOOGLE_COMPUTE_NODE.md)
-- Interactive all-runs report: [benchmarking/framework/regex_bench_framework/reports/workload_all_live/workload_engine_comparison_all.html](benchmarking/framework/regex_bench_framework/reports/workload_all_live/workload_engine_comparison_all.html)
-- Legacy front-page notes moved to:
-  - [docs/benchmarking/LEGACY_FRONT_PAGE_NOTES.md](docs/benchmarking/LEGACY_FRONT_PAGE_NOTES.md)
+- Benchmark execution framework and run control: [rmatch-perftest](https://github.com/la3lma/rmatch-perftest)
+- Benchmark writeups, snapshots, and analysis papers: [rmatch-meta](https://github.com/la3lma/rmatch-meta)
 
 [![MvnRepository](https://badges.mvnrepository.com/badge/no.rmz/rmatch/badge.svg?label=MvnRepository&color=green)](https://mvnrepository.com/artifact/no.rmz/rmatch)
