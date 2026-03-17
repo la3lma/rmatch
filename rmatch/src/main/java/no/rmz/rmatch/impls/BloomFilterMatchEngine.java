@@ -19,6 +19,7 @@ import java.util.*;
 import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
 import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
+import no.rmz.rmatch.engine.prefilter.PrefilterSafety;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.SimpleBloomFilter;
 
@@ -149,11 +150,14 @@ public final class BloomFilterMatchEngine implements MatchEngine {
 
       // Extract literal hints from the pattern
       final var hint = LiteralPrefilter.extract(patternId++, pattern, 0);
-      hint.ifPresent(hints::add);
+      hint.filter(extracted -> PrefilterSafety.isSafeHint(pattern, extracted))
+          .ifPresent(hints::add);
     }
 
-    if (!hints.isEmpty()) {
+    if (!hints.isEmpty() && hints.size() == regexps.size()) {
       literalPrefilter = new AhoCorasickPrefilter(hints);
+    } else {
+      literalPrefilter = null;
     }
   }
 

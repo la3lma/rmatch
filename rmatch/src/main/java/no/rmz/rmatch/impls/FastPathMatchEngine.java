@@ -22,6 +22,7 @@ import no.rmz.rmatch.engine.fastpath.StateSetBuffers;
 import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
 import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
+import no.rmz.rmatch.engine.prefilter.PrefilterSafety;
 import no.rmz.rmatch.interfaces.*;
 
 /**
@@ -115,10 +116,10 @@ public final class FastPathMatchEngine implements MatchEngine {
       }
 
       final Optional<LiteralHint> hint = LiteralPrefilter.extract(patternId, regex, regexFlags);
-      hint.ifPresent(hints::add);
+      hint.filter(extracted -> PrefilterSafety.isSafeHint(regex, extracted)).ifPresent(hints::add);
     }
 
-    if (!hints.isEmpty()) {
+    if (!hints.isEmpty() && hints.size() == patterns.size()) {
       prefilter = new AhoCorasickPrefilter(hints);
     } else {
       prefilter = null;

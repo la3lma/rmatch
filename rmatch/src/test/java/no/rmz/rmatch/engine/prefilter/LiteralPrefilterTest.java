@@ -130,4 +130,54 @@ public class LiteralPrefilterTest {
     assertEquals("verylongpattern", hint.get().literal());
     assertEquals(12, hint.get().patternId());
   }
+
+  @Test
+  public void testMinLiteralLengthKillSwitch() {
+    final String oldMinLength = System.getProperty("rmatch.prefilter.literal.minLength");
+    try {
+      System.setProperty("rmatch.prefilter.literal.minLength", "4");
+      final Optional<LiteralHint> hint = LiteralPrefilter.extract(13, "abc|de", 0);
+      assertFalse(hint.isPresent(), "minLength=4 should suppress 3-char literals");
+    } finally {
+      restoreSystemProperty("rmatch.prefilter.literal.minLength", oldMinLength);
+    }
+  }
+
+  @Test
+  public void testCommonWordPenaltyKillSwitch() {
+    final String oldPenaltyEnabled =
+        System.getProperty("rmatch.prefilter.literal.commonWordPenalty.enabled");
+    final String oldPenaltyFactor =
+        System.getProperty("rmatch.prefilter.literal.commonWordPenalty.factor");
+    try {
+      System.setProperty("rmatch.prefilter.literal.commonWordPenalty.enabled", "true");
+      System.setProperty("rmatch.prefilter.literal.commonWordPenalty.factor", "0.5");
+      final Optional<LiteralHint> penalized = LiteralPrefilter.extract(14, "there|zxq", 0);
+      assertTrue(penalized.isPresent());
+      assertEquals(
+          "zxq",
+          penalized.get().literal(),
+          "Common-word penalty should demote 'there' below 'zxq'");
+
+      System.setProperty("rmatch.prefilter.literal.commonWordPenalty.enabled", "false");
+      final Optional<LiteralHint> unpenalized = LiteralPrefilter.extract(15, "there|zxq", 0);
+      assertTrue(unpenalized.isPresent());
+      assertEquals(
+          "there",
+          unpenalized.get().literal(),
+          "Disabling penalty should restore raw selectivity ordering");
+    } finally {
+      restoreSystemProperty(
+          "rmatch.prefilter.literal.commonWordPenalty.enabled", oldPenaltyEnabled);
+      restoreSystemProperty("rmatch.prefilter.literal.commonWordPenalty.factor", oldPenaltyFactor);
+    }
+  }
+
+  private static void restoreSystemProperty(final String key, final String value) {
+    if (value == null) {
+      System.clearProperty(key);
+    } else {
+      System.setProperty(key, value);
+    }
+  }
 }

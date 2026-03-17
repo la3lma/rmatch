@@ -32,6 +32,18 @@ import java.util.Optional;
  * }</pre>
  */
 public final class LiteralPrefilter {
+  private static final String PROP_MIN_LITERAL_LENGTH = "rmatch.prefilter.literal.minLength";
+  private static final String PROP_ANCHORED_MULTIPLIER =
+      "rmatch.prefilter.literal.anchoredMultiplier";
+  private static final String PROP_COMMON_WORD_PENALTY_ENABLED =
+      "rmatch.prefilter.literal.commonWordPenalty.enabled";
+  private static final String PROP_COMMON_WORD_PENALTY_FACTOR =
+      "rmatch.prefilter.literal.commonWordPenalty.factor";
+
+  private static final int DEFAULT_MIN_LITERAL_LENGTH = 2;
+  private static final double DEFAULT_ANCHORED_MULTIPLIER = 3.0;
+  private static final boolean DEFAULT_COMMON_WORD_PENALTY_ENABLED = true;
+  private static final double DEFAULT_COMMON_WORD_PENALTY_FACTOR = 0.5;
 
   /**
    * Result wrapper for literal extraction.
@@ -77,7 +89,7 @@ public final class LiteralPrefilter {
     int bestStart = -1;
 
     for (final String literal : literals) {
-      if (literal.length() < 2) {
+      if (literal.length() < minLiteralLength()) {
         continue; // Skip too-short literals
       }
 
@@ -95,7 +107,7 @@ public final class LiteralPrefilter {
     }
 
     // Require at least length >= 2 to be useful
-    if (bestLiteral.length() < 2) {
+    if (bestLiteral.length() < minLiteralLength()) {
       return Optional.empty();
     }
 
@@ -121,7 +133,7 @@ public final class LiteralPrefilter {
 
     // Bonus for anchored literals (much more selective)
     if (anchored) {
-      score *= 3.0;
+      score *= anchoredMultiplier();
     }
 
     // Bonus for rare characters (case-sensitive scoring)
@@ -144,9 +156,10 @@ public final class LiteralPrefilter {
 
     // Penalty for very common short words in English text
     final String lowerLiteral = literal.toLowerCase();
-    if ("the and for are but not you all can had has was were said from they have with this that what there when where who will more time very first well way may down day much use than more come some could out many write would like into over think also back after their just where those only new know take year good work three never before end through last right old see too any same another much while should still such make need life little world public hand big group system small number part way even place case work week government company right way good first time life work way back right over take state without much work need may think know never still much"
-        .contains(lowerLiteral)) {
-      score *= 0.5; // penalty for very common English words
+    if (commonWordPenaltyEnabled()
+        && "the and for are but not you all can had has was were said from they have with this that what there when where who will more time very first well way may down day much use than more come some could out many write would like into over think also back after their just where those only new know take year good work three never before end through last right old see too any same another much while should still such make need life little world public hand big group system small number part way even place case work week government company right way good first time life work way back right over take state without much work need may think know never still much"
+            .contains(lowerLiteral)) {
+      score *= commonWordPenaltyFactor(); // penalty for very common English words
     }
 
     return score;
@@ -309,6 +322,51 @@ public final class LiteralPrefilter {
         || c == '[' || c == ']' || c == '{' || c == '}' || c == '|' || c == ';' || c == '\''
         || c == ':' || c == ',' || c == '.' || c == '<' || c == '>' || c == '?' || c == '/'
         || c == '~' || c == '`';
+  }
+
+  private static int minLiteralLength() {
+    try {
+      return Math.max(
+          1,
+          Integer.parseInt(
+              System.getProperty(
+                  PROP_MIN_LITERAL_LENGTH, String.valueOf(DEFAULT_MIN_LITERAL_LENGTH))));
+    } catch (NumberFormatException ignored) {
+      return DEFAULT_MIN_LITERAL_LENGTH;
+    }
+  }
+
+  private static double anchoredMultiplier() {
+    try {
+      return Math.max(
+          1.0,
+          Double.parseDouble(
+              System.getProperty(
+                  PROP_ANCHORED_MULTIPLIER, String.valueOf(DEFAULT_ANCHORED_MULTIPLIER))));
+    } catch (NumberFormatException ignored) {
+      return DEFAULT_ANCHORED_MULTIPLIER;
+    }
+  }
+
+  private static boolean commonWordPenaltyEnabled() {
+    return Boolean.parseBoolean(
+        System.getProperty(
+            PROP_COMMON_WORD_PENALTY_ENABLED, String.valueOf(DEFAULT_COMMON_WORD_PENALTY_ENABLED)));
+  }
+
+  private static double commonWordPenaltyFactor() {
+    try {
+      return Math.max(
+          0.0,
+          Math.min(
+              1.0,
+              Double.parseDouble(
+                  System.getProperty(
+                      PROP_COMMON_WORD_PENALTY_FACTOR,
+                      String.valueOf(DEFAULT_COMMON_WORD_PENALTY_FACTOR)))));
+    } catch (NumberFormatException ignored) {
+      return DEFAULT_COMMON_WORD_PENALTY_FACTOR;
+    }
   }
 
   /** Private constructor to prevent instantiation. */
