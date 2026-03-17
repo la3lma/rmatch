@@ -70,9 +70,6 @@ public final class BloomFilterMatchEngine implements MatchEngine {
       return;
     }
 
-    /** All regexps in the system. */
-    Set<Regexp> allRegexps = new HashSet<>(regexps);
-
     // Build Bloom filter from n-grams
     buildBloomFilter(regexps);
 

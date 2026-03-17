@@ -329,7 +329,7 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <configuration>
-                    <failOnError>false</failOnError>
+                    <failOnError>true</failOnError>
                     <!-- optional: only flag HIGH priority, ignore Medium/Low -->
                     <threshold>High</threshold>
                 </configuration>
