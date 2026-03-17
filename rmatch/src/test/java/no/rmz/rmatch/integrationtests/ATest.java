@@ -90,7 +90,7 @@ public final class ATest {
   @Test
   public void testBterminated() throws RegexpParserException {
     final String is = "ab";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aString, action);
 
     m.match(b);
@@ -103,7 +103,7 @@ public final class ATest {
   @Test
   public void testEOSterminated() throws RegexpParserException {
     final String is = "a";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aString, action);
 
     m.match(b);

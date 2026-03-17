@@ -16,7 +16,7 @@ package no.rmz.rmatch.impls;
 import static org.junit.jupiter.api.Assertions.*;
 
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.utils.StringBuffer;
+import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,7 +81,7 @@ public class RegexpImplTest {
         };
     actionFired = false;
     timesFired = 0;
-    b = new StringBuffer("Fnord");
+    b = new RegexStringBuffer("Fnord");
     a =
         (b, start, end) -> {
           timesFired += 1;

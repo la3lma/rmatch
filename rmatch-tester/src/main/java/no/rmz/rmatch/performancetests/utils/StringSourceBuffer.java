@@ -141,7 +141,7 @@ public final class StringSourceBuffer implements Buffer, Cloneable {
   @Override
   public String toString() {
     synchronized (monitor) {
-      return "[StringBuffer currentPos = " + currentPos + ". str = " + str + "]";
+      return "[RegexStringBuffer currentPos = " + currentPos + ". str = " + str + "]";
     }
   }
 

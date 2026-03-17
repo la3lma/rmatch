@@ -62,8 +62,8 @@ public class OrdinaryUsageSmokeTest {
   /** Test matching the two regexps concurrently. */
   @Test
   public final void testUseOfOrdinaryMatcherImpl() throws RegexpParserException {
-    final no.rmz.rmatch.utils.StringBuffer b =
-        new no.rmz.rmatch.utils.StringBuffer(("ab" + " " + "ac"));
+    final no.rmz.rmatch.utils.RegexStringBuffer b =
+        new no.rmz.rmatch.utils.RegexStringBuffer(("ab" + " " + "ac"));
 
     m.add("ac", action);
     m.add("ab", action);

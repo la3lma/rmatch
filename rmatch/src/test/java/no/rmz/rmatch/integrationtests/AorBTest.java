@@ -90,7 +90,7 @@ public final class AorBTest {
   @Test
   public void testFirstAlternative() throws RegexpParserException {
     final String is = "ab";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aOrBString, action);
 
     m.match(b);
@@ -103,7 +103,7 @@ public final class AorBTest {
   @Test
   public void testSecondAlternative() throws RegexpParserException {
     final String is = "cb";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aOrBString, action);
 
     m.match(b);
@@ -116,7 +116,7 @@ public final class AorBTest {
   @Test
   public void testMatchForFirstInSandwichedPositon() throws RegexpParserException {
     final String is = "cac";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aOrBString, action);
 
     m.match(b);
@@ -129,7 +129,7 @@ public final class AorBTest {
   @Test
   public void testMatchForSecondInSandwichedPositon() throws RegexpParserException {
     final String is = "cbc";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aOrBString, action);
 
     m.match(b);

@@ -97,7 +97,7 @@ public final class APlusTest {
   @Test
   public void testMockedMatchLength1bTerminated() throws RegexpParserException {
     final String is = "ab";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aplusString, action);
 
     m.match(b);
@@ -111,7 +111,7 @@ public final class APlusTest {
   @Test
   public void testMockedMatchLength1bTerminatedbPrefixed() throws RegexpParserException {
     final String is = "bab";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aplusString, action);
 
     m.match(b);
@@ -124,7 +124,7 @@ public final class APlusTest {
   @Test
   public void testMockedMatchLength1() throws RegexpParserException {
     final String is = "a";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aplusString, action);
     m.match(b);
 
@@ -135,7 +135,7 @@ public final class APlusTest {
   @Test
   public void testMockedMatchLength2() throws RegexpParserException {
     final String is = "aa";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aplusString, action);
 
     m.match(b);
@@ -147,7 +147,7 @@ public final class APlusTest {
   @Test
   public void testMockedMatchLength3() throws RegexpParserException {
     final String is = "aaa";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aplusString, action);
 
     m.match(b);
@@ -159,7 +159,7 @@ public final class APlusTest {
   @Test
   public void testMockedTripleMatchLength7() throws RegexpParserException {
     final String is = "ababaab";
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(is);
+    final no.rmz.rmatch.utils.RegexStringBuffer b = new no.rmz.rmatch.utils.RegexStringBuffer(is);
     m.add(aplusString, action);
 
     m.match(b);

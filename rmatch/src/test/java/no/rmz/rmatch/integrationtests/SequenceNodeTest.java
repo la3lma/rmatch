@@ -122,7 +122,8 @@ public class SequenceNodeTest {
   /** Test performing a match on "ab". */
   @Test
   public void testMockedMatchLength1bTerminated() throws RegexpParserException {
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(AB_STRING);
+    final no.rmz.rmatch.utils.RegexStringBuffer b =
+        new no.rmz.rmatch.utils.RegexStringBuffer(AB_STRING);
     m.add(AB_STRING, action);
 
     m.match(b);
@@ -134,7 +135,8 @@ public class SequenceNodeTest {
   /** Test performing a match on "ab". */
   @Test
   public void testMockedMatchLength1bTerminatedWithAbdc() throws RegexpParserException {
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(AC_STRING);
+    final no.rmz.rmatch.utils.RegexStringBuffer b =
+        new no.rmz.rmatch.utils.RegexStringBuffer(AC_STRING);
     m.add(AC_STRING, action);
 
     m.match(b);
@@ -146,7 +148,8 @@ public class SequenceNodeTest {
   /** Test performing a match on "ac". */
   @Test
   public void testMockedMatchLength1bTerminatedWithAbdcInLongString() throws RegexpParserException {
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(ABAC_STRING);
+    final no.rmz.rmatch.utils.RegexStringBuffer b =
+        new no.rmz.rmatch.utils.RegexStringBuffer(ABAC_STRING);
     m.add(AC_STRING, action);
 
     m.match(b);
@@ -159,7 +162,8 @@ public class SequenceNodeTest {
   @Test
   public void testTwoPatternsStartWithTheSameLetterAndBothTriggeringMatches()
       throws RegexpParserException {
-    final no.rmz.rmatch.utils.StringBuffer b = new no.rmz.rmatch.utils.StringBuffer(ABAC_STRING);
+    final no.rmz.rmatch.utils.RegexStringBuffer b =
+        new no.rmz.rmatch.utils.RegexStringBuffer(ABAC_STRING);
 
     m.add(AC_STRING, action);
     m.add(AB_STRING, action);

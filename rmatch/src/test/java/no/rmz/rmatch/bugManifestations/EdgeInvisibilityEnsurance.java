@@ -59,7 +59,7 @@ public class EdgeInvisibilityEnsurance {
                 ll
                 laden""";
 
-    no.rmz.rmatch.interfaces.Buffer buffer = new no.rmz.rmatch.utils.StringBuffer(origString);
+    no.rmz.rmatch.interfaces.Buffer buffer = new no.rmz.rmatch.utils.RegexStringBuffer(origString);
 
     Matcher m = new MatcherImpl();
 

@@ -124,7 +124,7 @@ public class ARegexpCompilerTest {
     final Matcher m = new MatcherImpl(compiler, regexpFactory);
     m.add(regexpPattern, action);
 
-    final Buffer b = new no.rmz.rmatch.utils.StringBuffer(testString);
+    final Buffer b = new no.rmz.rmatch.utils.RegexStringBuffer(testString);
 
     m.match(b);
     return new MB(m, b);

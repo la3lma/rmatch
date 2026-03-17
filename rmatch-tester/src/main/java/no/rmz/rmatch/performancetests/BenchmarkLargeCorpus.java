@@ -33,7 +33,7 @@ import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.TestRunResult;
-import no.rmz.rmatch.utils.StringBuffer;
+import no.rmz.rmatch.utils.RegexStringBuffer;
 
 /**
  * A test scenario that will match a bunch (by default 10K) of regular expressions against the text
@@ -118,7 +118,7 @@ public final class BenchmarkLargeCorpus {
     // Then run the test
     final Matcher m = MatcherFactory.newMatcher();
 
-    Buffer buf = new StringBuffer(corpusString);
+    Buffer buf = new RegexStringBuffer(corpusString);
 
     System.out.println("========");
     System.out.println("Run the native matcher");

@@ -18,7 +18,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import no.rmz.rmatch.interfaces.Buffer;
 
 /** An implementation of the Buffer interface that holds all inputs as a String. */
-public final class StringBuffer implements Buffer, Cloneable {
+public final class RegexStringBuffer implements Buffer, Cloneable {
 
   /** A string containing the entire content of the buffer. */
   private final String str;
@@ -37,7 +37,7 @@ public final class StringBuffer implements Buffer, Cloneable {
    *
    * @param str The string we will return character by character.
    */
-  public StringBuffer(final String str) {
+  public RegexStringBuffer(final String str) {
     this.str = checkNotNull(str);
     currentPos = -1;
   }
@@ -47,7 +47,7 @@ public final class StringBuffer implements Buffer, Cloneable {
    *
    * @param aThis the buffer to clone.
    */
-  private StringBuffer(final StringBuffer aThis) {
+  private RegexStringBuffer(final RegexStringBuffer aThis) {
     this.str = aThis.str;
     this.currentPos = aThis.currentPos;
     this.currentChar = aThis.currentChar;
@@ -125,13 +125,13 @@ public final class StringBuffer implements Buffer, Cloneable {
   @Override
   public String toString() {
     synchronized (monitor) {
-      return "[StringBuffer currentPos = " + currentPos + ". str = " + str + "]";
+      return "[RegexStringBuffer currentPos = " + currentPos + ". str = " + str + "]";
     }
   }
 
   @SuppressWarnings("MethodDoesntCallSuperMethod")
   @Override
   public Buffer clone() {
-    return new StringBuffer(this);
+    return new RegexStringBuffer(this);
   }
 }

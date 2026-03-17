@@ -28,7 +28,7 @@ public final class WutheringHeightsBuffer implements Buffer, Cloneable {
   public static final String LOCATION_OF_WUTHERING_HEIGHTS = "corpus/wuthr10.txt";
 
   /**
-   * A StringBuffer instance that holds the entire text from Emily Bronte's novel "Wuthering
+   * A RegexStringBuffer instance that holds the entire text from Emily Bronte's novel "Wuthering
    * Heights".
    */
   private final StringSourceBuffer sb;

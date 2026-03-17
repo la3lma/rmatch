@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
  * Ensures prefilter-enabled engines keep matching semantics for generic Buffer implementations.
  *
  * <p>This protects against false negatives when the buffer is not {@code
- * no.rmz.rmatch.utils.StringBuffer}.
+ * no.rmz.rmatch.utils.RegexStringBuffer}.
  */
 public final class MatcherImplPrefilterFallbackTest {
 
@@ -57,7 +57,7 @@ public final class MatcherImplPrefilterFallbackTest {
     }
   }
 
-  /** Minimal Buffer implementation for regression testing non-StringBuffer input. */
+  /** Minimal Buffer implementation for regression testing non-RegexStringBuffer input. */
   private static final class GenericTestBuffer implements Buffer {
     private final String text;
     private int currentPos = -1;

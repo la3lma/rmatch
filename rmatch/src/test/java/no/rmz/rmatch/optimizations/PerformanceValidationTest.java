@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.CounterAction;
-import no.rmz.rmatch.utils.StringBuffer;
+import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;
 
 /** Performance validation test for the first-character optimization. */
@@ -71,7 +71,7 @@ public class PerformanceValidationTest {
     }
 
     // Run matching
-    final StringBuffer buffer = new StringBuffer(testInput);
+    final RegexStringBuffer buffer = new RegexStringBuffer(testInput);
     matcher.match(buffer);
 
     matcher.shutdown();

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.CounterAction;
-import no.rmz.rmatch.utils.StringBuffer;
+import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -71,7 +71,7 @@ public class ComplexityImprovementDemoTest {
       matcher.add(pattern, action);
     }
 
-    final StringBuffer buffer = new StringBuffer(input);
+    final RegexStringBuffer buffer = new RegexStringBuffer(input);
     matcher.match(buffer);
 
     // Should find matches (this validates that optimization doesn't break functionality)
@@ -167,7 +167,7 @@ public class ComplexityImprovementDemoTest {
     }
 
     // Run matching
-    final StringBuffer buffer = new StringBuffer(testInput);
+    final RegexStringBuffer buffer = new RegexStringBuffer(testInput);
     matcher.match(buffer);
 
     matcher.shutdown();

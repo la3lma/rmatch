@@ -16,13 +16,13 @@ package no.rmz.rmatch.impls;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.utils.StringBuffer;
+import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test that a StringBuffer has the length that it should and that it contains the things it should
- * contain.
+ * Test that a RegexStringBuffer has the length that it should and that it contains the things it
+ * should contain.
  */
 public final class StringBufferTest {
 
@@ -36,7 +36,7 @@ public final class StringBufferTest {
   @BeforeEach
   public void setUp() {
     staticString = "Fiskeboller";
-    sb = new StringBuffer(staticString);
+    sb = new RegexStringBuffer(staticString);
   }
 
   /** Test that the length we get is the real one. */

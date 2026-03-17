@@ -21,7 +21,7 @@ import no.rmz.rmatch.impls.MatchEngineImpl;
 import no.rmz.rmatch.impls.NodeStorageImpl;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.utils.StringBuffer;
+import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -56,7 +56,7 @@ public class AhoPrefilterIntegrationTest {
     // This is a basic test - we can't easily verify the full matching behavior
     // without integrating with the full matcher, but we can at least verify
     // that the prefilter configuration doesn't break anything
-    final Buffer buffer = new StringBuffer("hello world test this is a pattern");
+    final Buffer buffer = new RegexStringBuffer("hello world test this is a pattern");
 
     // This should run without throwing an exception
     // (The actual matching behavior would require full pattern compilation)

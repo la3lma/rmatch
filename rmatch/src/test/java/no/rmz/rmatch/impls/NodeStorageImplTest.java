@@ -21,7 +21,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.utils.StringBuffer;
+import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,13 +58,13 @@ class NodeStorageImplTest {
   }
 
   /**
-   * Set up a new NodeStorageImpl, a StringBuffer containing the string "a", and an empty tree set
-   * in the emptyTreeSet field.
+   * Set up a new NodeStorageImpl, a RegexStringBuffer containing the string "a", and an empty tree
+   * set in the emptyTreeSet field.
    */
   @BeforeEach
   public final void setUp() {
     nsi = new NodeStorageImpl();
-    buffer = new StringBuffer("a");
+    buffer = new RegexStringBuffer("a");
     emptyNdfaNodeSet = new TreeSet<>();
   }
 
