@@ -1,4 +1,5 @@
 SHELL := /bin/bash
+MVN ?= ./mvnw
 
 PERFTEST_REPO_DIR ?= ../rmatch-perftest
 REGEX_BENCH_FRAMEWORK_DIR ?= $(PERFTEST_REPO_DIR)/benchmarking/framework/regex_bench_framework
@@ -23,28 +24,28 @@ help: ## [core] Show available top-level targets
 	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_.-]+:.*## / {if ($$2 ~ /^\[core\]/) printf "  %-28s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 build: ## [core] Build project artifacts (skip tests)
-	mvn -q -B spotless:apply
-	mvn -U -q -B -DskipTests -Dspotbugs.skip=true package
+	$(MVN) -q -B spotless:apply
+	$(MVN) -U -q -B -DskipTests -Dspotbugs.skip=true package
 
 test: ## [core] Run full verify build
-	mvn -q -B spotless:apply
-	mvn -q -B verify
+	$(MVN) -q -B spotless:apply
+	$(MVN) -q -B verify
 
 clean: ## [core] Remove all Maven build artifacts from the repository
-	./mvnw -q -B clean
+	$(MVN) -q -B clean
 	find . -type d -name target -prune -exec rm -rf {} +
 
 profile: ## [perf] Run async-profiler capture (default 30s)
 	DUR=30; scripts/profile_async_profiler.sh $$DUR
 
 fmt: ## [core] Apply code formatting (spotless)
-	mvn -q -B spotless:apply
+	$(MVN) -q -B spotless:apply
 
 spotless: ## [core] Apply spotless formatting
-	mvn -q -B spotless:apply
+	$(MVN) -q -B spotless:apply
 
 spotbugs: ## [core] Run spotbugs checks
-	mvn -q -B spotbugs:check
+	$(MVN) -q -B spotbugs:check
 
 gate-baseline: ## [core] Capture local performance baseline from main branch
 	$(MAKE) -C $(REGEX_BENCH_FRAMEWORK_DIR) gate-local-baseline \
@@ -67,10 +68,10 @@ gate-candidate: ## [core] Compare current branch against saved baseline and fail
 		GATE_SKIP_REBUILD="$(GATE_SKIP_REBUILD)"
 
 release-central-preflight: ## [core] Full non-performance regression check before Maven Central release
-	./mvnw -q -B verify
+	$(MVN) -q -B verify
 
 release-central-profile-check: ## [core] Verify Central release profile wiring without GPG signing
-	./mvnw -q -B -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true -Dgpg.skip=true verify
+	$(MVN) -q -B -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true -Dgpg.skip=true verify
 
 release-central-publish: ## [core] Publish parent+rmatch to Maven Central (requires token+GPG setup and non-SNAPSHOT version)
-	./mvnw -B -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true -Dgpg.skip=false deploy
+	$(MVN) -B -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true -Dgpg.skip=false deploy
