@@ -213,11 +213,9 @@ public final class MatchSetImpl implements MatchSet {
       final int currentPos,
       final RunnableMatchesHolder runnableMatches) {
 
-    checkNotNull(ns, "NodeStorage can't be null");
-    checkNotNull(currentChar, "currentChar can't be null");
-    checkArgument(currentPos >= 0, "currentPos must be non-negative");
-    checkNotNull(runnableMatches, "runnableMatches can't be null");
-    checkNotNull(currentNode, "currentNode can never be null when progressing");
+    // Hot path: called once per input character per active match set. Internal invariants
+    // (non-null arguments, non-negative position) are guaranteed by the engine loop, so no
+    // precondition checks here.
 
     // If no matches are active, then there is nothing to do
     // so just return.

@@ -98,6 +98,10 @@ public final class NodeStorageImpl implements NodeStorage {
   public void addToStartnode(final NDFANode n) {
     checkNotNull(n, "Illegal to add null NDFANode");
     sn.add(n);
+    // A new regexp may start with characters that previously had no (or a different) start
+    // transition, so the cached start transitions must be recomputed.
+    Arrays.fill(asciiNextFromStart, null);
+    nextFromDFAMap.clear();
   }
 
   /**
@@ -118,11 +122,33 @@ public final class NodeStorageImpl implements NodeStorage {
 
   private final ConcurrentHashMap<Character, DFANode> nextFromDFAMap = new ConcurrentHashMap<>();
 
+  /** Number of characters covered by the ASCII fast-path array. */
+  private static final int ASCII_LIMIT = 128;
+
+  /**
+   * Marks an ASCII character known to start no regexp. Enables negative caching: the
+   * ConcurrentHashMap path cannot store nulls, so it re-scans all NDFA epsilon edges on every
+   * occurrence of such characters.
+   */
+  private static final DFANode NO_START = new DFANodeImpl(Collections.emptySet());
+
+  /** Direct-indexed start-node transitions for ASCII characters. */
+  private final DFANode[] asciiNextFromStart = new DFANode[ASCII_LIMIT];
+
   // XXX This is really startnode specific and shouldn't necessarily
   //     be tightly coupled with the NodeStorage implementation.
   @Override
   public DFANode getNextFromStartNode(final Character ch) {
-    checkNotNull(ch, "Illegal to use null char");
+    final char c = ch;
+    if (c < ASCII_LIMIT) {
+      final DFANode cached = asciiNextFromStart[c];
+      if (cached != null) {
+        return cached == NO_START ? null : cached;
+      }
+      final DFANode computed = sn.getNextDFA(ch, this);
+      asciiNextFromStart[c] = computed == null ? NO_START : computed;
+      return computed;
+    }
     return nextFromDFAMap.computeIfAbsent(ch, key -> sn.getNextDFA(ch, this));
   }
 
