@@ -70,6 +70,13 @@ public final class DFANodeImpl implements DFANode {
   private final Set<Regexp>[] asciiStartCache = new Set[ASCII_LIMIT];
 
   /**
+   * True once asciiStartCache holds at least one entry. Lets addRegexp skip the O(128) clear during
+   * DFA construction, where addRegexp is called once per basis NDFA node while the cache is still
+   * empty.
+   */
+  private boolean asciiStartCachePopulated = false;
+
+  /**
    * A map of computed edges going out of this node. There may be more edges going out of this node,
    * but these are the nodes that have been encountered so far during matching.
    *
@@ -189,7 +196,10 @@ public final class DFANodeImpl implements DFANode {
     regexps.add(r);
     regexpsView = null;
     terminalRegexpsCache = null;
-    Arrays.fill(asciiStartCache, null);
+    if (asciiStartCachePopulated) {
+      Arrays.fill(asciiStartCache, null);
+      asciiStartCachePopulated = false;
+    }
   }
 
   @Override
@@ -216,6 +226,7 @@ public final class DFANodeImpl implements DFANode {
       if (cached == null) {
         cached = computeRegexpsThatCanStartWith(ch);
         asciiStartCache[c] = cached;
+        asciiStartCachePopulated = true;
       }
       return cached;
     }
