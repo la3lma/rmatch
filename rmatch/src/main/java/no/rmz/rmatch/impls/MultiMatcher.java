@@ -20,6 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
@@ -124,12 +125,21 @@ public final class MultiMatcher implements Matcher {
     assert (matchers.length == noOfMatchers);
 
     final CountDownLatch counter = new CountDownLatch(matchers.length);
+    // If a partition fails we must still count down the latch, otherwise
+    // match() hangs forever instead of failing. The first failure is
+    // recorded and rethrown after all partitions have finished.
+    final AtomicReference<Throwable> firstFailure = new AtomicReference<>();
     for (final Matcher matcher : matchers) {
 
       final Runnable runnable =
           () -> {
-            matcher.match(b.clone());
-            counter.countDown();
+            try {
+              matcher.match(b.clone());
+            } catch (final Throwable t) {
+              firstFailure.compareAndSet(null, t);
+            } finally {
+              counter.countDown();
+            }
           };
 
       executorService.execute(runnable);
@@ -137,7 +147,19 @@ public final class MultiMatcher implements Matcher {
     try {
       counter.await();
     } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
       throw new RuntimeException(ex);
+    }
+
+    final Throwable failure = firstFailure.get();
+    if (failure != null) {
+      if (failure instanceof RuntimeException runtimeException) {
+        throw runtimeException;
+      }
+      if (failure instanceof Error error) {
+        throw error;
+      }
+      throw new RuntimeException("Matcher partition failed", failure);
     }
   }
 
