@@ -82,6 +82,9 @@ public final class SurfaceRegexpParser {
     /** Maximum total expansion count for counted quantifiers. */
     private static final int MAX_COUNTED_REPETITION = 1000;
 
+    /** True when a "(?i)" prefix requested case-insensitive matching. */
+    private boolean caseInsensitive = false;
+
     /**
      * Create a new helper class instance.
      *
@@ -89,10 +92,15 @@ public final class SurfaceRegexpParser {
      * @param arb the builder to use.
      */
     PAux(final String regexString, final AbstractRegexBuilder arb) {
+      this(regexString, arb, false);
+    }
+
+    PAux(final String regexString, final AbstractRegexBuilder arb, final boolean caseInsensitive) {
       this.arb = checkNotNull(arb);
       this.sb = new StringBuilder();
       this.regexString = regexString;
       this.src = new StringSource(regexString);
+      this.caseInsensitive = caseInsensitive;
     }
 
     /**
@@ -107,8 +115,38 @@ public final class SurfaceRegexpParser {
           return;
         }
       }
-      arb.addString(str);
+      emitString(str);
       sb = new StringBuilder();
+    }
+
+    /** Emit a literal string, applying case folding when requested. */
+    private void emitString(final String str) {
+      if (!caseInsensitive) {
+        arb.addString(str);
+        return;
+      }
+      // Case-insensitive: foldable characters become two-case character sets; unfoldable runs
+      // stay plain strings.
+      final StringBuilder plain = new StringBuilder();
+      for (int i = 0; i < str.length(); i++) {
+        final char c = str.charAt(i);
+        final char lo = Character.toLowerCase(c);
+        final char up = Character.toUpperCase(c);
+        if (lo != up) {
+          if (!plain.isEmpty()) {
+            arb.addString(plain.toString());
+            plain.setLength(0);
+          }
+          arb.startCharSet();
+          arb.addToCharSet(String.valueOf(lo) + up);
+          arb.endCharSet();
+        } else {
+          plain.append(c);
+        }
+      }
+      if (!plain.isEmpty()) {
+        arb.addString(plain.toString());
+      }
     }
 
     /**
@@ -131,9 +169,9 @@ public final class SurfaceRegexpParser {
         return;
       }
       if (len > 1) {
-        arb.addString(sb.substring(0, len - 1));
+        emitString(sb.substring(0, len - 1));
       }
-      arb.addString(sb.substring(len - 1));
+      emitString(sb.substring(len - 1));
       sb = new StringBuilder();
     }
 
@@ -150,6 +188,7 @@ public final class SurfaceRegexpParser {
      * @throws RegexpParserException when bad things happen during parsing.
      */
     void parse() throws RegexpParserException {
+      consumeFlagPrefix();
       while (src.hasNext()) {
         final char ch = src.next();
         parseNextChar(ch);
@@ -239,6 +278,27 @@ public final class SurfaceRegexpParser {
     }
 
     /**
+     * Consume a leading "(?i)", "(?s)", "(?is)" or "(?si)" flag prefix, if present. "i" enables
+     * case-insensitive compilation (case folding at the character/class level); "s" (DOTALL) is
+     * accepted as a documented no-op because '.' already matches every character including newline.
+     * Flags are prefix-only: pattern identity in RegexpStorage is the raw string, so the flag
+     * travels with the pattern. A "(?i)" later in the pattern is a parse error (via the
+     * unsupported-group-construct path).
+     */
+    private void consumeFlagPrefix() {
+      final java.util.regex.Matcher m =
+          java.util.regex.Pattern.compile("^\\(\\?([is]+)\\)").matcher(regexString);
+      if (m.find()) {
+        for (int i = 0; i < m.end(); i++) {
+          src.next();
+        }
+        if (m.group(1).indexOf('i') >= 0) {
+          caseInsensitive = true;
+        }
+      }
+    }
+
+    /**
      * Parse "{m}", "{m,n}" or "{m,}" and apply it to the last atom by replay: the atom's source
      * text is re-parsed (m-1) more times, then (n-m) optional copies (or one starred copy for
      * open-ended). Semantics: X{2,4} == XXX?X?.
@@ -314,7 +374,7 @@ public final class SurfaceRegexpParser {
 
     /** Re-parse the atom's source text so it is emitted again as the last fragment. */
     private void replayAtom(final String atomText) throws RegexpParserException {
-      final PAux sub = new PAux(atomText, arb);
+      final PAux sub = new PAux(atomText, arb, caseInsensitive);
       // Replay within the same builder scope: groups inside atomText are balanced by
       // construction, so this cannot unbalance the enclosing scopes.
       sub.parse();
@@ -450,7 +510,7 @@ public final class SurfaceRegexpParser {
               // Flush accumulated plain chars first, then add the class members.
               final String pending = sb.toString();
               if (!pending.isEmpty()) {
-                arb.addToCharSet(pending);
+                addCharsToSet(pending);
                 sb = new StringBuilder();
               }
               addShorthandMembers(esc);
@@ -465,9 +525,9 @@ public final class SurfaceRegexpParser {
           final String s = sb.toString();
           final int l = sb.length();
           if (l > 1) {
-            arb.addToCharSet(s.substring(0, l - 1));
+            addCharsToSet(s.substring(0, l - 1));
           }
-          arb.addRangeToCharSet(s.charAt(l - 1), ch);
+          addRangeToSet(s.charAt(l - 1), ch);
           sb = new StringBuilder();
           parsingRange = false;
         } else {
@@ -477,11 +537,48 @@ public final class SurfaceRegexpParser {
 
       final String cs = sb.toString();
       if (!cs.isEmpty()) {
-        arb.addToCharSet(cs);
+        addCharsToSet(cs);
         sb = new StringBuilder();
       }
 
       arb.endCharSet();
+    }
+
+    /** Add chars to the open charset, adding case-folded variants when folding. */
+    private void addCharsToSet(final String cs) {
+      if (!caseInsensitive) {
+        arb.addToCharSet(cs);
+        return;
+      }
+      final StringBuilder folded = new StringBuilder(cs);
+      for (int i = 0; i < cs.length(); i++) {
+        final char c = cs.charAt(i);
+        final char lo = Character.toLowerCase(c);
+        final char up = Character.toUpperCase(c);
+        if (lo != up) {
+          folded.append(lo).append(up);
+        }
+      }
+      arb.addToCharSet(folded.toString());
+    }
+
+    /** Add a range to the open charset; under folding also add the case-swapped range. */
+    private void addRangeToSet(final char from, final char to) {
+      arb.addRangeToCharSet(from, to);
+      if (caseInsensitive) {
+        final char fromLo = Character.toLowerCase(from);
+        final char toLo = Character.toLowerCase(to);
+        final char fromUp = Character.toUpperCase(from);
+        final char toUp = Character.toUpperCase(to);
+        if (fromLo != fromUp && toLo != toUp) {
+          if (from != fromLo || to != toLo) {
+            arb.addRangeToCharSet(fromLo, toLo);
+          }
+          if (from != fromUp || to != toUp) {
+            arb.addRangeToCharSet(fromUp, toUp);
+          }
+        }
+      }
     }
   }
 }
