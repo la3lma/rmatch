@@ -107,6 +107,41 @@ suspicious cell before believing it.
 
 Keep. Final arbiter before merge: the `rmatch-perftest` stable-10K gate.
 
+## Addendum 2026-07-05: agogo (32-thread x86) + stable-10K gate
+
+**agogo.local** (32-thread x86, Ubuntu, Temurin 25, ~48 MultiMatcher
+partitions): clean sweep, 9/9 cells, single 1.05–1.21×, factory 1.12–1.30×.
+One cell (factory 10k × 6.8MB) initially read 0.74× but did not survive a
+4-round alternating re-test: candidate 37.6–37.9s (±0.4%) vs baseline
+43.4–62.6s — the baseline is *bimodal* on that box (~43s/~60s environmental
+modes) and the candidate beat baseline's best leg in every round. GC ruled
+out (pause totals ~1–2s of 37–56s runs; candidate's lower). Data:
+[`data/2026-07-04-debox-ascii-hot-loop/agogo-results.csv`](data/2026-07-04-debox-ascii-hot-loop/agogo-results.csv).
+
+**stable-10K gate** (10k stable patterns, synthetic 1MB+10MB corpus,
+`scanning_ns` medians, threshold 1.10): candidate/baseline = **0.915 (1MB)**
+and **0.918 (10MB)** — PASS, candidate ~8.5% faster on both.
+
+**Merged to main** on the strength of: Mac cascade, agogo cascade,
+interleaved re-tests on both machines, gate pass, ~60 correctness-identical
+cells, full `verify`.
+
+Open issues spun out of this experiment (not blockers, pre-existing on main):
+
+1. **Nondeterministic match counts** on the stable_patterns/synthetic-corpus
+   workload: identical iterations differ ~4.3% in match count (both variants,
+   observed via the gate's correctness validator). Never occurs on the
+   word-list workloads. Suspect MultiMatcher partitioning or the perftest
+   RMatchBenchmark accounting. Deserves its own experiment.
+2. **Partition-count heuristic**: `MatcherFactory` hardcodes 1.5×cores.
+   Partition sweep on agogo in progress; early data suggest per-partition
+   regexp count matters more than core count (fewer partitions = superlinearly
+   more work each).
+3. Perftest framework skew found along the way: `pattern_suites` plumbing bug
+   (fixed, rmatch-perftest `758b23e`); gate script still expects a `jobs.db`
+   the current runner no longer writes (comparison computed manually from
+   `raw_results`).
+
 ## Data
 
 Raw CSVs, driver, and scripts: [`data/2026-07-04-debox-ascii-hot-loop/`](data/2026-07-04-debox-ascii-hot-loop/)
