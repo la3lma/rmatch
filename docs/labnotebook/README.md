@@ -16,6 +16,11 @@ survived many attempted optimizations.
 | 2026-07-05 | [MultiMatcher partition-count sweep](2026-07-05-partition-sweep.md) | Exploratory — U-curve; heuristic should factor regexp count, not just cores |
 | 2026-07-05 | [Match-count determinism](2026-07-05-match-count-determinism.md) | **Resolved** — engine deterministic; racy `int++` in perftest harness (fixed, `587e78a`) |
 
+## Known bugs
+
+Confirmed correctness bugs are tracked in [KNOWN-BUGS.md](KNOWN-BUGS.md) until
+fixed with a regression test. Current: KB-1 — `ab?` misses its length-1 match.
+
 ## Method notes
 
 - Benchmark driver lives with each entry's data (`data/<entry>/CascadeBench.java`),
