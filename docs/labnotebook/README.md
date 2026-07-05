@@ -12,7 +12,8 @@ survived many attempted optimizations.
 
 | Date | Experiment | Verdict |
 |------|-----------|---------|
-| 2026-07-04 | [De-box/de-hash the per-character hot path](2026-07-04-debox-ascii-hot-loop.md) | **Win** — single 1.02–1.26×, factory 1.02–1.09×, merged evidence |
+| 2026-07-04 | [De-box/de-hash the per-character hot path](2026-07-04-debox-ascii-hot-loop.md) | **Win, merged** — Mac + agogo cascades, stable-10K gate 0.915/0.918 |
+| 2026-07-05 | [MultiMatcher partition-count sweep](2026-07-05-partition-sweep.md) | Exploratory — U-curve; heuristic should factor regexp count, not just cores |
 
 ## Method notes
 
