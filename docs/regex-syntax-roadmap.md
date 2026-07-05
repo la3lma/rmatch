@@ -38,6 +38,8 @@ quantifiers `{m}`/`{m,n}`/`{m,}` (replay expansion, cap 1000), and `(?i)`
 prefix case-insensitivity (`(?s)` accepted as no-op — `.` is DOTALL-always).
 Deliberately descoped pending anchor machinery (KB-3: `^`/`$` throw today
 despite old README claims): `\b`/`\B`, MULTILINE, non-DOTALL toggle.
+Design pinned in [docs/design/anchor-machinery.md](design/anchor-machinery.md)
+— **ON HOLD** by decision (rmz, 2026-07-05) while other issues take priority.
 Along the way the new semantics suite exposed and fixed two ancient engine
 bugs: KB-4 (negated sets unsound) and KB-5 (matches forgetting final states).
 
