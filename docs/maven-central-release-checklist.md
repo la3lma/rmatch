@@ -25,6 +25,9 @@ the rest of the release work here as it becomes explicit.
 - [ ] Create or verify Central Portal user token credentials.
 - [ ] Confirm `~/.m2/settings.xml` has a `central` server entry matching
   `publishingServerId`.
+- [ ] Retry Central upload after Maven credentials are configured. Attempt on
+  2026-07-05 stopped before upload because `~/.m2/settings.xml` was not present
+  and no Central/Sonatype/Maven credential environment variables were set.
 
 ## POM and Artifact Hygiene
 
@@ -91,6 +94,8 @@ the rest of the release work here as it becomes explicit.
 
 - [ ] Confirm there are no uncommitted release-branch changes.
 - [ ] Confirm the release commit hash to upload.
+- [x] Configure Central upload for manual validation:
+  `autoPublish=false`, `waitUntil=VALIDATED`.
 - [ ] Run the Central deploy command with `autoPublish=false`.
 - [ ] Inspect the uploaded deployment in Central Portal.
 - [ ] Confirm Central Portal validation status.

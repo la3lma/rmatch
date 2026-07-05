@@ -306,7 +306,7 @@
                         <configuration>
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>false</autoPublish>
-                            <waitUntil>published</waitUntil>
+                            <waitUntil>VALIDATED</waitUntil>
                         </configuration>
                     </plugin>
 
