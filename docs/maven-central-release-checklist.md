@@ -71,7 +71,20 @@ the rest of the release work here as it becomes explicit.
 - [x] Inspect generated POM metadata.
 - [x] Confirm `rmatch-tester` still builds with tests skipped.
 - [ ] Run full reactor tests including `rmatch-tester` if practical.
-- [ ] Run an external consumer smoke test using a clean temporary Maven project.
+- [x] Run an external consumer smoke test using a clean temporary Maven
+  project.
+- [x] Install the release candidate locally before the consumer smoke test:
+  `mvn -pl rmatch -am clean install`. Result on 2026-07-05: build success;
+  312 tests, 0 failures, 0 errors, 3 skipped; `no.rmz:rmatch:1.9.0`
+  installed in the local Maven repository.
+- [x] Compile and run a temporary downstream project outside this repository:
+  `/tmp/rmatch-consumer-smoke.8sEIzq`, command
+  `mvn -q clean verify exec:java`. Result on 2026-07-05: build success;
+  output included `user token match: user:alice` and
+  `log-level match: WARN`.
+- [ ] Repeat the external consumer smoke test after Central publication, using
+  the artifact resolved from Maven Central rather than the local Maven
+  repository.
 - [ ] Run the chosen release benchmark smoke/gate and record exact result paths.
 
 ## Central Portal Upload
