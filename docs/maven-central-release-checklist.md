@@ -37,6 +37,9 @@ the rest of the release work here as it becomes explicit.
 - [x] Remove inherited test dependencies from the public compile/runtime graph.
 - [x] Confirm `no.rmz:rmatch` compile/runtime dependencies are only Guava,
   JetBrains annotations, and Aho-Corasick.
+- [ ] Run a dependency freshness pass and try to use current stable versions of
+  all direct dependencies where possible. Do not upgrade blindly: each upgrade
+  must pass the normal release validation gates.
 - [x] Remove application-style `Main-Class` and `Class-Path` manifest entries
   from the library JAR.
 - [x] Generate source JAR.
