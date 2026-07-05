@@ -47,6 +47,33 @@ it throws "Expected char after escape char" precisely when a next char EXISTS.
 Any pattern containing an escape fails at add() time (loud, not silent).
 Scheduled for the Tier-1 escapes work in the syntax program, test-first.
 
+## KB-4: negated character sets unsound by construction
+
+**Status:** FIXED 2026-07-05 (CharSetBuilder complement ranges). Found by the
+new differential suite within its first run. `[^a]` compiled as "match any
+char, also route 'a' to a FailNode and let the engine kill the match later" —
+but (a) the failing flag was never honored on the match's first node, so
+`[^a]` matched `'a'`; and (b) one failing NDFA path killed the whole match
+even when other legal paths survived, so `.+[^a]?` lost valid matches.
+Negated sets now compile to real character classes (complement intervals over
+the char domain). The FailNode mechanism is no longer used by charsets.
+
+## KB-5: matches extending past their last final state were discarded
+
+**Status:** FIXED 2026-07-05 (MatchImpl.lastFinalEnd). Found by the
+differential suite. A match that reached a final state and then kept
+extending while alive-but-non-final (e.g. `[^a]+[cb]` where the loop consumes
+past the ender) was silently dropped when it died non-final. Matches now
+remember their largest final end and commit with it. Ancient — affected the
+eager engine identically.
+
+## KB-3: anchors `^` and `$` throw UnsupportedOperationException
+
+**Status:** OPEN. The README claims anchor support; the compiler throws
+"Not supported yet" for both. Descoped from the current syntax program
+(needs real context-assertion machinery); the README must stop claiming it,
+and \b/MULTILINE wait on the same machinery.
+
 **Plan (campaign):** Run a dedicated correctness campaign after the current optimization
 campaign (rmz decision, 2026-07-05): differential fuzzing against
 `java.util.regex` over the supported syntax subset (literals, `?`, `*`, `+`,

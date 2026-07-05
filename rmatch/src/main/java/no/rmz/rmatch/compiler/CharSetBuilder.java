@@ -15,14 +15,12 @@ package no.rmz.rmatch.compiler;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
-import org.jetbrains.annotations.NotNull;
 
 /** A builder for a CharSet. */
 public final class CharSetBuilder {
@@ -61,59 +59,70 @@ public final class CharSetBuilder {
     final CompiledFragment result = new CompiledFragment(regexp);
     final NDFANode arrival = result.getArrivalNode();
     final NDFANode endNode = result.getEndingNode();
-    final String str = charSetStringBuilder.toString();
-    final NDFANode intermediateNode;
 
-    // If we're compiled an inverted set, then  create a graph that
-    // will let any character pass but if we get one of the
-    // characters of the character set, then we will fail the match
-    // by getting to  a failing node.
     if (isInverted) {
-      intermediateNode = createInvertedMatch(arrival, endNode);
-    } else {
-      intermediateNode = endNode;
+      // KB-4: a negated set must be a REAL character class matching exactly the complement.
+      // The previous construction ("match any char, but also route set members to a FailNode
+      // and let the engine's failing machinery kill the match afterwards") was unsound: one
+      // failing NDFA path killed the whole regexp's match even when other, legal paths
+      // survived (".+[^a]?" lost matches whose .+ path was alive), and the failing flag was
+      // never honored on the match's first node at all (so [^a] happily matched 'a').
+      for (final CharRange range : complementRanges()) {
+        arrival.addEpsilonEdge(new CharRangeNode(range, regexp, endNode));
+      }
+      return result;
     }
 
     // To match, make an NDFA node per character in the set
-    // and pass through to the intermediate node if matching
-    // one of the chars.
+    // and pass through to the end node if matching one of the chars.
+    final String str = charSetStringBuilder.toString();
     for (int i = str.length() - 1; i >= 0; i--) {
       final char myChar = str.charAt(i);
-      final NDFANode node = new CharNode(intermediateNode, myChar, regexp);
+      final NDFANode node = new CharNode(endNode, myChar, regexp);
       arrival.addEpsilonEdge(node);
     }
 
     // Add more opportunities to match by  NDFA node per range in the set
-    // and pass through to the intermediate node if matching
-    // one of the ranges.
+    // and pass through to the end node if matching one of the ranges.
     for (final CharRange range : charRanges) {
-      final NDFANode node = new CharRangeNode(range, regexp, intermediateNode);
-      arrival.addEpsilonEdge(node);
+      arrival.addEpsilonEdge(new CharRangeNode(range, regexp, endNode));
     }
 
     return result;
   }
 
-  @NotNull
-  private NDFANode createInvertedMatch(NDFANode arrival, NDFANode endNode) {
-    final NDFANode intermediateNode;
-    intermediateNode = new FailNode(regexp);
-    final NDFANode gettingThroughAnyhow =
-        new AbstractNDFANode(regexp, false) {
-          @Override
-          public NDFANode getNextNDFA(final Character ch) {
-            return endNode;
-          }
+  /**
+   * Compute the complement of this set's characters and ranges over the full char domain, as a
+   * minimal list of inclusive ranges.
+   *
+   * @return ranges covering exactly the characters NOT in this set.
+   */
+  private List<CharRange> complementRanges() {
+    // Collect all member intervals (inclusive char values).
+    final List<int[]> intervals = new ArrayList<>();
+    final String str = charSetStringBuilder.toString();
+    for (int i = 0; i < str.length(); i++) {
+      intervals.add(new int[] {str.charAt(i), str.charAt(i)});
+    }
+    for (final CharRange r : charRanges) {
+      intervals.add(new int[] {r.start(), r.end()});
+    }
+    intervals.sort((x, y) -> Integer.compare(x[0], y[0]));
 
-          @Override
-          public Collection<PrintableEdge> getEdgesToPrint() {
-            final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
-            result.add(new PrintableEdge(".", endNode));
-            return result;
-          }
-        };
-    arrival.addEpsilonEdge(gettingThroughAnyhow);
-    return intermediateNode;
+    // Sweep the sorted intervals, emitting the gaps between them.
+    final List<CharRange> complement = new ArrayList<>();
+    int next = 0; // smallest char value not yet accounted for
+    for (final int[] iv : intervals) {
+      if (iv[0] > next) {
+        complement.add(new CharRange((char) next, (char) (iv[0] - 1)));
+      }
+      next = Math.max(next, iv[1] + 1);
+      if (next > Character.MAX_VALUE) {
+        return complement;
+      }
+    }
+    complement.add(new CharRange((char) next, Character.MAX_VALUE));
+    return complement;
   }
 
   /**

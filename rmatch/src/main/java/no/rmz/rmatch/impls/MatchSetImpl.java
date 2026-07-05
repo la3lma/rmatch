@@ -199,6 +199,7 @@ public final class MatchSetImpl implements MatchSet {
           && candidates.contains(r)) {
         final Match m = new MatchImpl(this, r, true);
         m.setEnd(currentPos);
+        m.setIsFinal(); // record lastFinalEnd at the materialization position (KB-5)
         materialized.put(r, m);
       }
     }
