@@ -135,22 +135,31 @@ public class FirstCharacterOptimizationTest {
 
     final DFANode dfaNode = new DFANodeImpl(ndfaNodes);
 
-    // Create MatchSetImpl with character 'a' - should only create matches for regexpA
+    // With lazy materialization, no Match objects exist until a regexp reaches a terminal
+    // state. None of abc/bcd/cde are terminal after one character, so zero matches are
+    // materialized -- but the match set must stay alive to pursue them.
     final MatchSetImpl matchSetWithA = new MatchSetImpl(0, dfaNode, 'a');
     assertEquals(
-        1, matchSetWithA.getMatches().size(), "Should create only 1 match for character 'a'");
+        0,
+        matchSetWithA.getMatches().size(),
+        "No speculative matches should be materialized at creation");
+    assertTrue(matchSetWithA.hasMatches(), "Match set must stay alive for its candidates");
 
-    // Create MatchSetImpl with character 'b' - should only create matches for regexpB
     final MatchSetImpl matchSetWithB = new MatchSetImpl(0, dfaNode, 'b');
     assertEquals(
-        1, matchSetWithB.getMatches().size(), "Should create only 1 match for character 'b'");
+        0,
+        matchSetWithB.getMatches().size(),
+        "No speculative matches should be materialized at creation");
+    assertTrue(matchSetWithB.hasMatches(), "Match set must stay alive for its candidates");
 
-    // Create MatchSetImpl without character optimization - should create matches for all regexps
+    // Without character optimization the candidate set is larger, but still nothing is
+    // materialized until a terminal state is reached.
     final MatchSetImpl matchSetWithoutOptim = new MatchSetImpl(0, dfaNode);
     assertEquals(
-        3,
+        0,
         matchSetWithoutOptim.getMatches().size(),
-        "Should create 3 matches without optimization");
+        "No speculative matches should be materialized at creation");
+    assertTrue(matchSetWithoutOptim.hasMatches(), "Match set must stay alive for its candidates");
   }
 
   /** Helper method to compile a regexp using ARegexpCompiler directly. */

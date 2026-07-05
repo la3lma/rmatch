@@ -17,8 +17,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.CounterType;
@@ -26,11 +28,15 @@ import no.rmz.rmatch.utils.FastCounter;
 import no.rmz.rmatch.utils.FastCounters;
 
 /**
- * A an implementation of the MatchSet interface. A MatchSet keeps a set of matches which starts
- * from the same location in the input. The MatchSet will initially contain several matches. As the
- * matching process progresses fewer and fewer matches will remain, and eventually they will all be
- * removed either when firing an action, or just removed since it is discovered that the match can
- * not be brought to be final and then executed.
+ * A an implementation of the MatchSet interface. A MatchSet tracks all potential matches that start
+ * from the same location in the input.
+ *
+ * <p>Lazy materialization: the set of regexps still alive for this start position is exactly the
+ * regexp set of the current DFA node (DFA node regexp sets shrink monotonically along any
+ * transition path), so no per-regexp bookkeeping is needed while a potential match is merely
+ * "alive". A {@link Match} object is created only when a regexp first reaches a terminal state —
+ * the only point where observable state (a committable match) exists. Speculative candidates that
+ * die before ever reaching a terminal state never allocate anything.
  */
 public final class MatchSetImpl implements MatchSet {
   /** A counter for MatchSetImpls. */
@@ -81,14 +87,25 @@ public final class MatchSetImpl implements MatchSet {
     }
   }
 
-  /** The set of matches being pursued through this MatchSetImpl. */
-  private final Set<Match> matches;
+  /**
+   * Matches that have reached a terminal state at least once, keyed by regexp. Only these carry
+   * observable state; merely-alive candidates are represented implicitly by the current DFA node's
+   * regexp set.
+   */
+  private final Map<Regexp, Match> materialized = new HashMap<>(4);
 
-  /** Reusable list for creating match snapshots to avoid repeated allocations in hot paths. */
+  /** Reusable list for iteration snapshots to avoid repeated allocations in hot paths. */
   private final List<Match> matchSnapshot = new ArrayList<>();
 
   /** The current deterministic node that is used when pushing the matches further. */
   private DFANode currentNode;
+
+  /**
+   * The regexps that are candidates for matches starting at this position. Materialization is
+   * restricted to this set so that pre-filtered (e.g. prefilter-narrowed) candidate sets behave
+   * exactly as if only those regexps had been tracked from the start.
+   */
+  private final Set<Regexp> candidates;
 
   /** The start position of all the matches associated with this MatchSetImpl. */
   private final int start;
@@ -139,41 +156,38 @@ public final class MatchSetImpl implements MatchSet {
     start = startIndex;
     id = MY_COUNTER.inc();
 
-    // XXX This lines represents the most egregious
-    //     bug in the whole regexp package, since it
-    //     incurs a cost in both runtime and used memory
-    //     directly proportional to the number of
-    //     expressions (m) the matcher matches for.  For a
-    //     text that is l characters long, this  in turns
-    //     adds a factor O(l*m) to the resource use of the
-    //     algorithm.  Clearly not logarithmic in the number
-    //     of expressions, and thus a showstopper.
-
-    // OPTIMIZATION: Use pre-computed candidates if available, otherwise compute
-    final Set<Regexp> candidateRegexps;
     if (preComputedCandidates != null) {
-      candidateRegexps = preComputedCandidates;
+      candidates = preComputedCandidates;
     } else if (currentChar != null) {
-      candidateRegexps = this.currentNode.getRegexpsThatCanStartWith(currentChar);
+      candidates = this.currentNode.getRegexpsThatCanStartWith(currentChar);
     } else {
-      candidateRegexps = this.currentNode.getRegexps();
+      candidates = this.currentNode.getRegexps();
     }
 
-    // OPTIMIZATION: Early exit if no regexps can match
-    if (candidateRegexps.isEmpty()) {
-      this.matches = new HashSet<>(0);
+    // Materialize matches only for regexps that are final already at the first character
+    // (length-1 matches). Everything else stays implicit until it reaches a terminal state.
+    if (!candidates.isEmpty()) {
+      materializeNewlyTerminal(startIndex);
+    } else {
+      currentNode = null; // Nothing can ever match from here.
+    }
+  }
+
+  /**
+   * Create Match objects for candidate regexps that are terminal at the current node and not yet
+   * materialized. Such a match is created final and active, ending at the current position.
+   */
+  private void materializeNewlyTerminal(final int currentPos) {
+    final Set<Regexp> terminals = terminalRegexpsFor(currentNode);
+    if (terminals.isEmpty()) {
       return;
     }
-
-    // OPTIMIZATION: For very small regexp sets, use ArrayList for better performance
-    final int regexpCount = candidateRegexps.size();
-    final boolean useSmallOptimization = regexpCount <= 50;
-
-    // Use regular HashSet for better performance in single-threaded case
-    this.matches = new HashSet<>(candidateRegexps.size());
-
-    for (final Regexp r : candidateRegexps) {
-      matches.add(this.currentNode.newMatch(this, r));
+    for (final Regexp r : terminals) {
+      if (!materialized.containsKey(r) && candidates.contains(r)) {
+        final Match m = new MatchImpl(this, r, true);
+        m.setEnd(currentPos);
+        materialized.put(r, m);
+      }
     }
   }
 
@@ -184,16 +198,16 @@ public final class MatchSetImpl implements MatchSet {
 
   @Override
   public Set<Match> getMatches() {
-    synchronized (matches) {
-      return Set.copyOf(matches);
-    }
+    return Set.copyOf(materialized.values());
   }
 
   @Override
   public boolean hasMatches() {
-    synchronized (matches) {
-      return !matches.isEmpty();
-    }
+    // The match set is worth keeping while it has committable matches, or while the DFA path is
+    // still alive (some candidate may yet reach a terminal state). This slightly over-approximates
+    // the old behaviour for prefilter-narrowed candidate sets (the DFA path may outlive the
+    // narrowed candidates), which costs at most a few extra DFA steps and changes no output.
+    return !materialized.isEmpty() || currentNode != null;
   }
 
   /**
@@ -217,14 +231,9 @@ public final class MatchSetImpl implements MatchSet {
     // (non-null arguments, non-negative position) are guaranteed by the engine loop, so no
     // precondition checks here.
 
-    // If no matches are active, then there is nothing to do
-    // so just return.
-    if (!hasMatches()) {
+    if (currentNode == null) {
       return;
     }
-
-    // This nested if/for/if statement takes
-    // care of all the circumstances
 
     currentNode = currentNode.getNext(currentChar, ns);
 
@@ -233,24 +242,28 @@ public final class MatchSetImpl implements MatchSet {
       return;
     }
 
-    failMatchesThatCannotContinue(currentChar);
+    // Check if there are any regexps for which matches must fail at this node, and fail them.
+    if (!materialized.isEmpty() && currentNode.failsSomeRegexps()) {
+      failMatchesThatCannotContinue(currentChar);
+    }
 
-    progressMatches(currentChar, currentPos, runnableMatches);
+    // Progress matches that have observable state.
+    if (!materialized.isEmpty()) {
+      progressMaterializedMatches(currentPos, runnableMatches, currentChar);
+    }
+
+    // Materialize matches for regexps that just reached a terminal state.
+    materializeNewlyTerminal(currentPos);
   }
 
   private void terminateAssociatedMatches(
-      Character currentChar, RunnableMatchesHolder runnableMatches) {
-    // Found no nodes going out of the current node, so we have
-    // to stop pursuing the matches we've already got.
-    // This actually marks the MatchSetImpl instance for
-    // destruction, but we won't do anything more about that fact
-    // from within this loop.
-
-    // Reuse snapshot list to avoid allocation
-    matchSnapshot.clear();
-    synchronized (matches) {
-      matchSnapshot.addAll(matches);
+      final Character currentChar, final RunnableMatchesHolder runnableMatches) {
+    // Found no nodes going out of the current node: commit what is final, abandon the rest.
+    if (materialized.isEmpty()) {
+      return;
     }
+    matchSnapshot.clear();
+    matchSnapshot.addAll(materialized.values());
 
     for (final Match m : matchSnapshot) {
       m.setInactive();
@@ -260,128 +273,52 @@ public final class MatchSetImpl implements MatchSet {
           m.abandon(currentChar);
         }
       }
-      // Remove directly instead of building intermediate set
-      synchronized (matches) {
-        removeMatch(m);
-      }
+      removeMatch(m);
     }
   }
 
-  private void progressMatches(
-      final Character currentChar,
+  private void progressMaterializedMatches(
       final int currentPos,
-      final RunnableMatchesHolder runnableMatches) {
-    // got a current  node, so we'll se what we can do to progress
-    // the matches we've got.
-
-    // Reuse snapshot list to avoid allocation
-    matchSnapshot.clear();
-    synchronized (matches) {
-      matchSnapshot.addAll(matches);
-    }
+      final RunnableMatchesHolder runnableMatches,
+      final Character currentChar) {
 
     final Set<Regexp> activeRegexpsAtNode = currentNode.getRegexps();
     final Set<Regexp> terminalRegexpsAtNode = terminalRegexpsFor(currentNode);
 
-    for (final Match m : matchSnapshot) {
+    matchSnapshot.clear();
+    matchSnapshot.addAll(materialized.values());
 
-      // Get the regexp associated with the
-      // match we're currently processing.
+    for (final Match m : matchSnapshot) {
       final Regexp regexp = m.getRegexp();
       final boolean isActive = activeRegexpsAtNode.contains(regexp);
 
       m.setActive(isActive);
 
-      // If this node is active for the current regexp,
-      // that means that we don't have to abandon
       if (isActive) {
-        processActiveMatch(currentPos, m, regexp, terminalRegexpsAtNode);
+        // Advance the match: extend its end and update finality for this position.
+        m.setEnd(currentPos);
+        m.setFinal(terminalRegexpsAtNode.contains(regexp));
       } else {
-        // Process inactive match but don't remove yet
+        // The regexp fell out of the alive set: commit if it ended final, then abandon.
         if (m.isFinal()) {
           commitMatch(m, runnableMatches);
         }
-
         if (!m.isAbandoned()) {
           m.abandon(currentChar);
         }
-
-        // Remove directly instead of building intermediate set
-        synchronized (matches) {
-          removeMatch(m);
-        }
+        removeMatch(m);
       }
     }
   }
 
-  /**
-   * This is an active match, and we have somewhere to progress to, so we're advancing the end
-   * position of the match by one.
-   *
-   * @param currentPos The current position
-   * @param m The match we are progressing
-   * @param regexp The regexp associated with the match
-   */
-  private void processActiveMatch(final int currentPos, final Match m, final Regexp regexp) {
-    processActiveMatch(currentPos, m, regexp, null);
-  }
+  private void failMatchesThatCannotContinue(final Character currentChar) {
+    matchSnapshot.clear();
+    matchSnapshot.addAll(materialized.values());
 
-  private void processActiveMatch(
-      final int currentPos,
-      final Match m,
-      final Regexp regexp,
-      final Set<Regexp> terminalRegexpsAtNode) {
-    m.setEnd(currentPos);
-
-    final boolean isFinal =
-        terminalRegexpsAtNode != null
-            ? terminalRegexpsAtNode.contains(regexp)
-            : currentNode.isTerminalFor(regexp);
-    // If we're also in a final position for this match, note that
-    // fact so that we can trigger actions for this match.
-    m.setFinal(isFinal);
-  }
-
-  /**
-   * We can't continue this match, perhaps it's already final, and in that case we should commit
-   * what we've got before abandoning it.
-   *
-   * @param currentChar The character we are currently processing
-   * @param runnableMatches The matches we are currently running
-   * @param m The current match
-   */
-  private void progressInactiveMatch(
-      final Character currentChar, final RunnableMatchesHolder runnableMatches, final Match m) {
-
-    if (m.isFinal()) {
-      commitMatch(m, runnableMatches);
-    }
-
-    if (!m.isAbandoned()) {
-      m.abandon(currentChar);
-    }
-
-    removeMatch(m);
-  }
-
-  private void failMatchesThatCannotContinue(Character currentChar) {
-    // Check if there are any regexps for which matches must fail
-    // for this node, and then fail them.
-    if (currentNode.failsSomeRegexps()) {
-      // Reuse snapshot list to avoid allocation
-      matchSnapshot.clear();
-      synchronized (matches) {
-        matchSnapshot.addAll(matches);
-      }
-
-      for (final Match m : matchSnapshot) {
-        if (currentNode.isFailingFor(m.getRegexp())) {
-          m.abandon(currentChar);
-          // Remove directly instead of building intermediate set
-          synchronized (matches) {
-            removeMatch(m);
-          }
-        }
+    for (final Match m : matchSnapshot) {
+      if (currentNode.isFailingFor(m.getRegexp())) {
+        m.abandon(currentChar);
+        removeMatch(m);
       }
     }
   }
@@ -390,20 +327,19 @@ public final class MatchSetImpl implements MatchSet {
   public void removeMatch(final Match m) {
     checkNotNull(m);
     m.getRegexp().abandonMatchSet(this);
-    synchronized (matches) {
-      matches.remove(m);
-    }
+    materialized.remove(m.getRegexp(), m);
   }
 
   @Override
   public void finalCommit(final RunnableMatchesHolder runnableMatches) {
     checkNotNull(runnableMatches, "Target can't be null");
 
-    // Reuse snapshot list to avoid allocation
-    matchSnapshot.clear();
-    synchronized (matches) {
-      matchSnapshot.addAll(matches);
+    if (materialized.isEmpty()) {
+      return;
     }
+
+    matchSnapshot.clear();
+    matchSnapshot.addAll(materialized.values());
 
     // Pre-size with reasonable capacity based on expected regexp count
     final Set<Regexp> visitedRegexps = new HashSet<>(matchSnapshot.size());
@@ -417,10 +353,7 @@ public final class MatchSetImpl implements MatchSet {
         visitedRegexps.add(r);
         r.commitUndominated(runnableMatches);
       }
-      // Remove directly instead of building intermediate set
-      synchronized (matches) {
-        removeMatch(m);
-      }
+      removeMatch(m);
     }
   }
 
@@ -429,10 +362,21 @@ public final class MatchSetImpl implements MatchSet {
     return id;
   }
 
+  /**
+   * The set of regexps for which the given node is terminal. Uses the cached set on DFANodeImpl
+   * when available; falls back to per-regexp probing for other DFANode implementations (mocks in
+   * tests).
+   */
   private static Set<Regexp> terminalRegexpsFor(final DFANode dfaNode) {
     if (dfaNode instanceof DFANodeImpl impl) {
       return impl.getTerminalRegexpsCached();
     }
-    return null;
+    final Set<Regexp> result = new HashSet<>();
+    for (final Regexp r : dfaNode.getRegexps()) {
+      if (dfaNode.isTerminalFor(r)) {
+        result.add(r);
+      }
+    }
+    return result;
   }
 }
