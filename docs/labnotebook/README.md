@@ -15,6 +15,7 @@ survived many attempted optimizations.
 | 2026-07-04 | [De-box/de-hash the per-character hot path](2026-07-04-debox-ascii-hot-loop.md) | **Win, merged** — Mac + agogo cascades, stable-10K gate 0.915/0.918 |
 | 2026-07-05 | [MultiMatcher partition-count sweep](2026-07-05-partition-sweep.md) | Exploratory — U-curve; heuristic should factor regexp count, not just cores |
 | 2026-07-05 | [Two-char start filtering](2026-07-05-two-char-start-filter.md) | **Win, merged** — 2.2–8× vs main; ~7× vs java loop; RE2J loop still ~2× ahead on literal/cache-warm |
+| 2026-07-05 | [Lazy Match materialization](2026-07-05-lazy-match-materialization.md) | **Win, merged** — O(l·m) bug dead; 4–10×; beats RE2J loop beyond cache; 3 gremlins killed |
 | 2026-07-05 | [Match-count determinism](2026-07-05-match-count-determinism.md) | **Resolved** — engine deterministic; racy `int++` in perftest harness (fixed, `587e78a`) |
 
 ## Known bugs
@@ -29,6 +30,17 @@ fixed with a regression test. Current: KB-1 — `ab?` misses its length-1 match.
   identical driver bytecode.
 - Correctness gate: total match count must be identical between variants in every
   cell, or the experiment is void.
+- **Provoke the gremlins so they can be killed with fire** (rmz, 2026-07-05):
+  the standard word-list cascade is necessary but nowhere near sufficient. The
+  lazy-materialization experiment passed ~60 word-list cells with bit-identical
+  output while hiding three serious defects — a re-materialization storm, a
+  quadratic active-set blowup, and an actual output-correctness bug — all
+  exposed within minutes by ONE structurally different workload (zero-length-
+  capable patterns, wildcard chains, duplicates). The receipts battery must
+  keep growing more and more diverse adversarial workloads: zero-length
+  matchers, wildcard loops, deeply overlapping/nested patterns, pathological
+  duplicates, anchor-heavy sets, single-character floods. Every workload family
+  that CAN provoke a distinct failure mode should be in the battery.
 - **Beware sequential A/B on a workstation**: this machine showed ±20% swings on
   identical code at long runtimes (thermal drift). For any suspicious cell, re-test
   with interleaved runs (B,C,B,C — fresh JVM each) before believing a regression
