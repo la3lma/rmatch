@@ -8,8 +8,11 @@ rmatch lacks, assessed against the existing regexp → NDFA (Thompson-style)
 compilation pipeline.
 
 **Currently supported:** literals, concatenation, alternation `|`, quantifiers
-`?` `*` `+`, any-char `.`, line anchors `^` `$`, character classes `[abc]`,
-ranges `[a-z]`, negation `[^abc]`.
+`?` `*` `+`, counted quantifiers `{m}`/`{m,n}`/`{m,}`, grouping
+`( )`/`(?: )`, any-char `.`, character classes `[abc]`, ranges `[a-z]`,
+negation `[^abc]`, common escapes and shorthand classes, and prefix-level
+`(?i)`. Line anchors `^`/`$` are not supported in 1.9.0; they throw pending
+the anchor/boundary assertion machinery.
 
 ## Candidate features
 

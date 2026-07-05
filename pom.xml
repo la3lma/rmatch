@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>no.rmz</groupId>
     <artifactId>rmatch-parent</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>1.9.0</version>
 
     <packaging>pom</packaging>
 
-    <name>Umbrella project for the regex matcher subprojects.</name>
+    <name>rmatch parent</name>
     <url>https://github.com/la3lma/rmatch</url>
 
-    <description>Regular expression matcher</description>
+    <description>Parent POM for rmatch, a Java multi-pattern regular expression matcher.</description>
     <organization>
         <name>Rmz</name>
         <url>https://www.rmz.no/</url>
@@ -62,7 +62,7 @@
         <mavenSourcePlugin.version>3.4.0</mavenSourcePlugin.version>
         <mavenJavadocPlugin.version>3.12.0</mavenJavadocPlugin.version>
         <mavenGpgPlugin.version>3.2.8</mavenGpgPlugin.version>
-        <centralPublishingMavenPlugin.version>0.9.0</centralPublishingMavenPlugin.version>
+        <centralPublishingMavenPlugin.version>0.11.0</centralPublishingMavenPlugin.version>
         <mavenSurefire.version>3.5.4</mavenSurefire.version>
         <byteBuddy.version>1.17.7</byteBuddy.version>
         <mockitoCore.version>5.21.0</mockitoCore.version>
@@ -158,65 +158,15 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- Dependencies that ALL submodules inherit -->
-    <dependencies>
-        <!-- All submodules get these testing dependencies -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy-agent</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-commons</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- All submodules get Guava -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-    </dependencies>
-
-
     <modules>
         <module>rmatch</module>
         <module>rmatch-tester</module>
     </modules>
     <scm>
-        <connection>scm:git:git@github.com:la3lma/rmatch.git</connection>
-        <url>scm:git:git@github.com:la3lma/rmatch.git</url>
+        <connection>scm:git:https://github.com/la3lma/rmatch.git</connection>
+        <url>https://github.com/la3lma/rmatch</url>
         <developerConnection>scm:git:git@github.com:la3lma/rmatch.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>rmatch-1.9.0</tag>
     </scm>
 
     <build>

@@ -12,7 +12,7 @@ rmatch
 
 ```java
 import no.rmz.rmatch.impls.MatcherImpl;
-import no.rmz.rmatch.utils.StringBuffer;
+import no.rmz.rmatch.utils.RegexStringBuffer;
 
 public class Example {
   public static void main(String[] args) throws Exception {
@@ -27,7 +27,7 @@ public class Example {
       System.out.println("user token match: " + buffer.getString(start, end));
     });
 
-    matcher.match(new StringBuffer("INFO user:alice WARN disk nearly full"));
+    matcher.match(new RegexStringBuffer("INFO user:alice WARN disk nearly full"));
     matcher.shutdown();
   }
 }
