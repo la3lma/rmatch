@@ -107,6 +107,20 @@ public final class MatchSetImpl implements MatchSet {
    */
   private final Set<Regexp> candidates;
 
+  /**
+   * Maximum candidate-set size for which the exact per-step liveness test is performed. For
+   * candidate sets larger than this, the set provably contains the DFA node's alive set from the
+   * second character onward (start filters only remove regexps that cannot survive character two),
+   * so the match set dies exactly when the DFA path dies and no per-step test is needed. Small
+   * sets, however, are typically prefilter-narrowed and can die long before the DFA path does —
+   * without this test the match set would keep stepping a long-lived DFA path for nothing
+   * (observed: 30x slowdown on the prefiltered stable-10K gate workload).
+   */
+  private static final int SMALL_CANDIDATE_LIVENESS_LIMIT = 8;
+
+  /** Candidates to liveness-test each step, or null when the test is unnecessary (large sets). */
+  private final Set<Regexp> smallCandidates;
+
   /** The start position of all the matches associated with this MatchSetImpl. */
   private final int start;
 
@@ -163,6 +177,8 @@ public final class MatchSetImpl implements MatchSet {
     } else {
       candidates = this.currentNode.getRegexps();
     }
+
+    smallCandidates = candidates.size() <= SMALL_CANDIDATE_LIVENESS_LIMIT ? candidates : null;
 
     // Materialize matches only for regexps that are final already at the first character
     // (length-1 matches). Everything else stays implicit until it reaches a terminal state.
@@ -254,6 +270,23 @@ public final class MatchSetImpl implements MatchSet {
 
     // Materialize matches for regexps that just reached a terminal state.
     materializeNewlyTerminal(currentPos);
+
+    // Exact liveness test for narrow (typically prefilter-mapped) candidate sets: when no
+    // candidate is alive at the current node and nothing is materialized, this match set can
+    // never produce anything again — stop stepping the DFA path.
+    if (smallCandidates != null && materialized.isEmpty()) {
+      final Set<Regexp> alive = currentNode.getRegexps();
+      boolean anyAlive = false;
+      for (final Regexp r : smallCandidates) {
+        if (alive.contains(r)) {
+          anyAlive = true;
+          break;
+        }
+      }
+      if (!anyAlive) {
+        currentNode = null;
+      }
+    }
   }
 
   private void terminateAssociatedMatches(
