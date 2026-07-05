@@ -5,6 +5,12 @@
 gate (`make perf-local-baseline` / `make perf-local-candidate`) as final arbiter
 before merging.
 
+> **DECISION (rmz, 2026-07-05): The optimization wins.** Merged to main
+> (`4e60ac4`). Receipts kept in this entry and `data/`. The evidence bar was:
+> two architectures, both engine paths, interleaved re-tests of every
+> suspicious cell, stable-10K gate pass (0.915/0.918), ~60 cells with
+> bit-identical match counts.
+
 ## Hypothesis
 
 The inner match loop pays per-character costs for boxed-`Character` hash lookups
