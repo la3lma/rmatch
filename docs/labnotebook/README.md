@@ -29,6 +29,17 @@ fixed with a regression test. Current: KB-1 — `ab?` misses its length-1 match.
   identical driver bytecode.
 - Correctness gate: total match count must be identical between variants in every
   cell, or the experiment is void.
+- **Provoke the gremlins so they can be killed with fire** (rmz, 2026-07-05):
+  the standard word-list cascade is necessary but nowhere near sufficient. The
+  lazy-materialization experiment passed ~60 word-list cells with bit-identical
+  output while hiding three serious defects — a re-materialization storm, a
+  quadratic active-set blowup, and an actual output-correctness bug — all
+  exposed within minutes by ONE structurally different workload (zero-length-
+  capable patterns, wildcard chains, duplicates). The receipts battery must
+  keep growing more and more diverse adversarial workloads: zero-length
+  matchers, wildcard loops, deeply overlapping/nested patterns, pathological
+  duplicates, anchor-heavy sets, single-character floods. Every workload family
+  that CAN provoke a distinct failure mode should be in the battery.
 - **Beware sequential A/B on a workstation**: this machine showed ±20% swings on
   identical code at long runtimes (thermal drift). For any suspicious cell, re-test
   with interleaved runs (B,C,B,C — fresh JVM each) before believing a regression
