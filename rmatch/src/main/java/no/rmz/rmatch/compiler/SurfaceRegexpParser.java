@@ -64,6 +64,9 @@ public final class SurfaceRegexpParser {
     /** A source of characters based on the input string. */
     private final StringSource src;
 
+    /** Current group nesting depth; must be zero at end of input. */
+    private int groupDepth = 0;
+
     /**
      * Create a new helper class instance.
      *
@@ -135,6 +138,9 @@ public final class SurfaceRegexpParser {
         final char ch = src.next();
         parseNextChar(ch);
       }
+      if (groupDepth != 0) {
+        throw new RegexpParserException("Unbalanced group: missing ')'");
+      }
       commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
     }
 
@@ -178,10 +184,40 @@ public final class SurfaceRegexpParser {
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
           parseCharSet();
           break;
+        case '(':
+          commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+          parseGroupStart();
+          break;
+        case ')':
+          if (groupDepth == 0) {
+            throw new RegexpParserException("')' without matching '('");
+          }
+          commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+          arb.endGroup();
+          groupDepth--;
+          break;
         default:
           sb.append(ch);
           break;
       }
+    }
+
+    private void parseGroupStart() throws RegexpParserException {
+      // "(?" introduces special group constructs; only the non-capturing "(?:" is supported
+      // (capturing does not exist in rmatch, so "(...)" and "(?:...)" are equivalent).
+      final Character nxt = src.peek();
+      if (nxt != null && nxt == '?') {
+        src.next();
+        final Character nxt2 = src.peek();
+        if (nxt2 != null && nxt2 == ':') {
+          src.next();
+        } else {
+          throw new RegexpParserException(
+              "Unsupported group construct '(?" + (nxt2 == null ? "" : nxt2) + "'");
+        }
+      }
+      arb.startGroup();
+      groupDepth++;
     }
 
     private void parseQuotedChar() throws RegexpParserException {

@@ -52,7 +52,7 @@ public class JavaRegexDifferentialTest {
 
   /** Generate a random atom over the supported syntax subset. */
   private static String atom(final Random rng) {
-    return switch (rng.nextInt(5)) {
+    return switch (rng.nextInt(6)) {
       case 0 -> String.valueOf(ALPHABET[rng.nextInt(ALPHABET.length)]);
       case 1 -> ".";
       case 2 ->
@@ -61,6 +61,14 @@ public class JavaRegexDifferentialTest {
               + ALPHABET[rng.nextInt(ALPHABET.length)]
               + "]";
       case 3 -> "[^" + ALPHABET[rng.nextInt(ALPHABET.length)] + "]";
+      case 4 ->
+          // F1: a parenthesized group with a small alternation inside — a quantifiable atom.
+          "("
+              + ALPHABET[rng.nextInt(ALPHABET.length)]
+              + "|"
+              + ALPHABET[rng.nextInt(ALPHABET.length)]
+              + ALPHABET[rng.nextInt(ALPHABET.length)]
+              + ")";
       default -> String.valueOf(ALPHABET[rng.nextInt(ALPHABET.length)]);
     };
   }
