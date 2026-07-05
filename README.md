@@ -1,17 +1,37 @@
-rmatch
-======
+# rmatch
 
-## What This Library Does
+[![MvnRepository](https://badges.mvnrepository.com/badge/no.rmz/rmatch/badge.svg?label=MvnRepository&color=green)](https://mvnrepository.com/artifact/no.rmz/rmatch)
 
-- `rmatch` is a Java library for matching many regular expressions against large input buffers in one pass-oriented matching pipeline.
-- It is built for high-volume multi-pattern workloads where you register many patterns once, then scan large text data efficiently and trigger callbacks on matches.
-- The implementation intentionally uses a reduced regex surface syntax compared to modern Java/PCRE-style regex engines.
-- This was a deliberate trade-off: prioritize core matching efficiency first, then extend syntax breadth as the engine matures.
+`rmatch` is a Java library for matching many regular expressions against large
+text buffers with one pass-oriented matching pipeline. It is aimed at workloads
+where many patterns are registered once and then reused against large corpora,
+for example log scanning, rule matching, and other high-volume multi-pattern
+search tasks.
 
-## Example Usage
+`1.9.0` is a pre-2.0 Maven Central release-candidate line. The engine is useful
+and benchmark-positive, while the public syntax/API contract is still being
+polished toward a stable `2.0.0`.
+
+## Installation
+
+Maven, after the `1.9.0` Central publication:
+
+```xml
+<dependency>
+  <groupId>no.rmz</groupId>
+  <artifactId>rmatch</artifactId>
+  <version>1.9.0</version>
+</dependency>
+```
+
+`1.9.0` is compiled for Java 25. Release smoke tests have also been run with
+newer JDKs.
+
+## Quick Start
 
 ```java
 import no.rmz.rmatch.impls.MatcherImpl;
+import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 
 public class Example {
@@ -19,82 +39,92 @@ public class Example {
     MatcherImpl matcher = new MatcherImpl();
 
     matcher.add("ERROR|WARN", (buffer, start, end) -> {
-      String match = buffer.getString(start, end);
-      System.out.println("log-level match: " + match);
+      System.out.println("log-level match: " + matchedText(buffer, start, end));
     });
 
     matcher.add("user:[a-z]+", (buffer, start, end) -> {
-      System.out.println("user token match: " + buffer.getString(start, end));
+      System.out.println("user token match: " + matchedText(buffer, start, end));
     });
 
     matcher.match(new RegexStringBuffer("INFO user:alice WARN disk nearly full"));
     matcher.shutdown();
   }
+
+  private static String matchedText(Buffer buffer, int start, int end) {
+    // rmatch callbacks use inclusive start/end offsets.
+    return buffer.getString(start, end + 1);
+  }
 }
 ```
 
-## Regex Syntax (Current)
+`MatcherImpl` uses the fast-path engine by default. The callback receives the
+matched buffer and inclusive start/end offsets. rmatch reports the longest match
+for each start position; overlapping matches from different start positions may
+therefore be reported.
 
-The current parser supports a deliberately small core language:
+## Supported Syntax in 1.9.0
+
+The parser intentionally supports a reduced regular-expression language. This
+is not a drop-in replacement for `java.util.regex` or PCRE.
 
 - Literal text: `abc`
 - Concatenation: `ab` (implicit)
 - Alternation: `a|b`
-- Quantifiers on previous atom: `?`, `*`, `+`
+- Quantifiers on the previous atom: `?`, `*`, `+`
 - Counted quantifiers: `{m}`, `{m,n}`, `{m,}` (expansion capped at 1000)
-- Grouping: `( ... )` and `(?: ... )` (equivalent — there are no captures)
+- Grouping: `( ... )` and `(?: ... )` (equivalent; there are no captures)
 - Any single character: `.` (matches every character, including newline)
 - Character classes: `[abc]`, ranges `[a-z]`, negated classes `[^abc]`
-- Shorthand classes: `\d`, `\D`, `\w`, `\W`, `\s`, `\S` (also inside sets: `[\d ]`)
-- Escapes: `\\`, `\.`, `\*`, `\+`, `\?`, `\[`, `\(`, ... and `\n`, `\t`, `\r`, `\f`
-- Pattern-prefix flags: `(?i)` case-insensitive, `(?s)` accepted (dot is DOTALL already)
+- Shorthand classes: `\d`, `\D`, `\w`, `\W`, `\s`, `\S`
+- Escapes: `\\`, `\.`, `\*`, `\+`, `\?`, `\[`, `\(`, `\n`, `\t`, `\r`, `\f`
+- Pattern-prefix flags: `(?i)` for case-insensitive matching; `(?s)` is
+  accepted because `.` is already DOTALL
 
-### Important Limitations
+## Important Limitations
 
-This is **not** full Java/PCRE regex syntax today. In particular, treat the following as unsupported/not guaranteed:
+These constructs are not part of the supported `1.9.0` surface:
 
-- Line anchors `^` and `$` (currently throw; see KNOWN-BUGS KB-3)
-- Word boundaries `\\b`, `\\B` (wait on the same anchor machinery)
+- Line anchors `^` and `$`
+- Word boundaries `\b` and `\B`
 - Lookaround: `(?=...)`, `(?!...)`, `(?<=...)`, `(?<!...)`
-- Backreferences and capture-group features (backreferences: never — non-regular)
-- Scoped inline flags such as `a(?i)b` (prefix-only `(?i)` IS supported)
+- Backreferences and capture-group features
+- Scoped inline flags such as `a(?i)b`
 - `MULTILINE` mode and a non-DOTALL `.` toggle
 
-This reduced syntax was a conscious engineering choice to prioritize matching-engine performance work first. As the core algorithms stabilize, extending syntax coverage is a natural next step.
+Backreferences are intentionally out of scope because they are non-regular.
+Other limitations are candidates for the 2.0 work, especially the anchor and
+boundary-assertion machinery.
 
-## Repository Navigation
+## Release Notes and Roadmap
 
-- Core library: [rmatch/](rmatch/)
-- Tester and harness: [rmatch-tester/](rmatch-tester/)
-- Benchmark platform repository: [rmatch-perftest](https://github.com/la3lma/rmatch-perftest)
-- Documentation, plans, and papers repository: [rmatch-meta](https://github.com/la3lma/rmatch-meta)
-- Historical archive repository: [rmatch-archive](https://github.com/la3lma/rmatch-archive)
+- [CHANGELOG.md](CHANGELOG.md) describes the `1.9.0` pre-release line.
+- [docs/release.md](docs/release.md) documents the Maven Central release lane.
+- [docs/maven-central-release-checklist.md](docs/maven-central-release-checklist.md)
+  tracks the current release checklist.
+- [docs/regex-syntax-roadmap.md](docs/regex-syntax-roadmap.md) tracks syntax
+  coverage toward `2.0.0`.
 
-## Developer A/B Performance Protocol (Using `rmatch-perftest`)
+## Repository Layout
 
-Use this workflow for branch-vs-`main` performance checks without keeping full perf orchestration inside this repo:
+- [rmatch/](rmatch/) contains the public library artifact `no.rmz:rmatch`.
+- [rmatch-tester/](rmatch-tester/) contains local performance and experiment
+  tooling; it is not part of the Maven Central release lane.
+- [rmatch-perftest](https://github.com/la3lma/rmatch-perftest) contains the
+  benchmark platform and multi-engine comparison harness.
+- [rmatch-meta](https://github.com/la3lma/rmatch-meta) contains longer-form
+  benchmark writeups, plans, and analysis papers.
 
-1. In `rmatch` on `main`, run correctness checks and publish locally:
-   - `./mvnw -q test`
-   - `./mvnw -q -DskipTests install`
-2. In `rmatch-perftest`, run the baseline benchmark config (for example stable 10K/1MB+10MB gate config).
-3. Switch to candidate branch in `rmatch`, run the same correctness checks, and install again:
-   - `./mvnw -q test`
-   - `./mvnw -q -DskipTests install`
+## Developer Performance Workflow
+
+Use `rmatch-perftest` for branch-vs-`main` performance checks:
+
+1. In `rmatch` on `main`, run correctness checks and install locally:
+   `./mvnw -q test && ./mvnw -q -DskipTests install`
+2. In `rmatch-perftest`, run the baseline benchmark config.
+3. Switch to the candidate branch in `rmatch`, rerun the same checks, and
+   install locally again.
 4. In `rmatch-perftest`, rerun the exact same benchmark config.
-5. Compare baseline vs candidate from `rmatch-perftest` reports/databases.
+5. Compare baseline vs candidate from the generated reports/databases.
 
-Why this works:
-
-- `rmatch-perftest` contains benchmark orchestration (Docker/GCP/local), including multi-engine comparisons.
-- `rmatch` contributes only the Maven artifact under test (resolved from local `~/.m2` during A/B).
-- This keeps concerns separated and avoids carrying heavy campaign infrastructure in the core library repo.
-
-## Benchmarking and Reports
-
-Performance benchmarking, workload comparisons, and campaign reports now live outside this repository:
-
-- Benchmark execution framework and run control: [rmatch-perftest](https://github.com/la3lma/rmatch-perftest)
-- Benchmark writeups, snapshots, and analysis papers: [rmatch-meta](https://github.com/la3lma/rmatch-meta)
-
-[![MvnRepository](https://badges.mvnrepository.com/badge/no.rmz/rmatch/badge.svg?label=MvnRepository&color=green)](https://mvnrepository.com/artifact/no.rmz/rmatch)
+Keeping the benchmark campaign machinery in `rmatch-perftest` keeps the Maven
+library artifact small and focused.

@@ -1,6 +1,8 @@
 # rmatch release process
 
 This document describes the cautious release lane for the pre-2.0 series.
+The detailed living checklist is in
+[maven-central-release-checklist.md](maven-central-release-checklist.md).
 
 ## Version line
 
