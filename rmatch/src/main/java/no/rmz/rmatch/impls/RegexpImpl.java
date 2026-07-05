@@ -60,6 +60,12 @@ public final class RegexpImpl implements Regexp {
   /** Cache for first-character matching results to optimize O(l*m) bottleneck. */
   private final Map<Character, Boolean> firstCharacterCache = new HashMap<>();
 
+  /** Number of characters covered by the ASCII fast-path cache. */
+  private static final int ASCII_LIMIT = 128;
+
+  /** ASCII first-character cache: 0 = unknown, 1 = can start, 2 = cannot start. */
+  private final byte[] asciiFirstCharCache = new byte[ASCII_LIMIT];
+
   /**
    * Make a new instance of Regexp representing a regular expression.
    *
@@ -272,9 +278,22 @@ public final class RegexpImpl implements Regexp {
   }
 
   @Override
-  public synchronized boolean canStartWith(final Character ch) {
-    checkNotNull(ch, "Character cannot be null");
+  public boolean canStartWith(final Character ch) {
+    final char c = ch;
+    if (c < ASCII_LIMIT) {
+      // Lock-free fast path: recomputation on a racy miss is benign and idempotent.
+      final byte cached = asciiFirstCharCache[c];
+      if (cached != 0) {
+        return cached == 1;
+      }
+      final boolean result = computeCanStartWith(ch);
+      asciiFirstCharCache[c] = result ? (byte) 1 : (byte) 2;
+      return result;
+    }
+    return canStartWithNonAscii(ch);
+  }
 
+  private synchronized boolean canStartWithNonAscii(final Character ch) {
     // Return cached result if available
     Boolean cachedResult = firstCharacterCache.get(ch);
     if (cachedResult != null) {

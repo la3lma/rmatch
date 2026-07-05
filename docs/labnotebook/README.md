@@ -1,0 +1,27 @@
+# Lab Notebook
+
+Experiment log for rmatch performance work. One entry per experiment.
+
+Ground rule (hard-earned): **receipts before belief.** Every optimization is a
+hypothesis until it has measurably won on a cascade of increasingly larger
+regexp-count × corpus-size combinations, with identical match counts to `main`
+in every cell. Ideas that "obviously" help usually don't; the current code has
+survived many attempted optimizations.
+
+## Entries
+
+| Date | Experiment | Verdict |
+|------|-----------|---------|
+| 2026-07-04 | [De-box/de-hash the per-character hot path](2026-07-04-debox-ascii-hot-loop.md) | **Win** — single 1.02–1.26×, factory 1.02–1.09×, merged evidence |
+
+## Method notes
+
+- Benchmark driver lives with each entry's data (`data/<entry>/CascadeBench.java`),
+  compiled *outside* the repo against snapshot jars, so baseline and candidate run
+  identical driver bytecode.
+- Correctness gate: total match count must be identical between variants in every
+  cell, or the experiment is void.
+- **Beware sequential A/B on a workstation**: this machine showed ±20% swings on
+  identical code at long runtimes (thermal drift). For any suspicious cell, re-test
+  with interleaved runs (B,C,B,C — fresh JVM each) before believing a regression
+  or an improvement.

@@ -13,7 +13,6 @@
  */
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.*;
@@ -178,8 +177,9 @@ public final class FastPathMatchEngine implements MatchEngine {
       final RunnableMatchesHolder runnableMatches,
       final boolean prefilterActive) {
 
-    checkNotNull(currentChar);
-    checkArgument(currentPos >= 0);
+    // Hot path: called once per input character. Internal invariants (non-null char,
+    // non-negative position) are guaranteed by the match() loop, so no precondition
+    // checks here.
 
     // Clear runnable matches
     ((RunnableMatchesHolderImpl) runnableMatches).clear();

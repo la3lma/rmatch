@@ -13,7 +13,6 @@
  */
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.*;
@@ -180,8 +179,9 @@ public final class MatchEngineImpl implements MatchEngine {
       final Set<MatchSet> activeMatchSets,
       final boolean prefilterActive) {
 
-    checkNotNull(currentChar, "currentChar can't be null");
-    checkArgument(currentPos >= 0, "Pos in buf must be non-negative");
+    // Hot path: called once per input character. Internal invariants (non-null char,
+    // non-negative position) are guaranteed by the match() loop, so no precondition
+    // checks here.
 
     // Progress all the already active matches and collect
     // the runnables.  The runnables may or may not be

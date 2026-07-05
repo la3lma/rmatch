@@ -48,6 +48,34 @@ public final class DFANodeImpl implements DFANode {
    */
   private static final int MAX_CACHED_EDGES = 10000;
 
+  /** Number of characters covered by the ASCII fast-path arrays. */
+  private static final int ASCII_LIMIT = 128;
+
+  /**
+   * Sentinel marking an ASCII character that is known to have no outgoing transition. Lets us cache
+   * negative lookups (the ConcurrentHashMap path cannot store nulls, so it recomputes failing
+   * transitions on every visit).
+   */
+  private static final DFANode NO_TRANSITION = new DFANodeImpl(Collections.emptySet());
+
+  /**
+   * Direct-indexed transition table for ASCII characters. Entries are null (not yet computed), a
+   * real DFA node, or NO_TRANSITION. Plain array: each DFA node graph is owned by a single matcher,
+   * whose match loop is serialized; a lost racy write only causes a benign recomputation.
+   */
+  private final DFANode[] asciiNext = new DFANode[ASCII_LIMIT];
+
+  /** Direct-indexed cache of getRegexpsThatCanStartWith results for ASCII characters. */
+  @SuppressWarnings("unchecked")
+  private final Set<Regexp>[] asciiStartCache = new Set[ASCII_LIMIT];
+
+  /**
+   * True once asciiStartCache holds at least one entry. Lets addRegexp skip the O(128) clear during
+   * DFA construction, where addRegexp is called once per basis NDFA node while the cache is still
+   * empty.
+   */
+  private boolean asciiStartCachePopulated = false;
+
   /**
    * A map of computed edges going out of this node. There may be more edges going out of this node,
    * but these are the nodes that have been encountered so far during matching.
@@ -137,7 +165,15 @@ public final class DFANodeImpl implements DFANode {
    * @return the map of nodes going out of this DFA node.
    */
   public Map<Character, DFANode> getNextMap() {
-    return Collections.unmodifiableMap(nextMap);
+    // Merge the ASCII fast-path edges with the map-based (non-ASCII) edges.
+    final Map<Character, DFANode> merged = new HashMap<>(nextMap);
+    for (int i = 0; i < ASCII_LIMIT; i++) {
+      final DFANode n = asciiNext[i];
+      if (n != null && n != NO_TRANSITION) {
+        merged.put((char) i, n);
+      }
+    }
+    return Collections.unmodifiableMap(merged);
   }
 
   @Override
@@ -160,6 +196,10 @@ public final class DFANodeImpl implements DFANode {
     regexps.add(r);
     regexpsView = null;
     terminalRegexpsCache = null;
+    if (asciiStartCachePopulated) {
+      Arrays.fill(asciiStartCache, null);
+      asciiStartCachePopulated = false;
+    }
   }
 
   @Override
@@ -178,36 +218,60 @@ public final class DFANodeImpl implements DFANode {
   }
 
   @Override
-  public synchronized Set<Regexp> getRegexpsThatCanStartWith(final Character ch) {
-    checkNotNull(ch, "Character cannot be null");
+  public Set<Regexp> getRegexpsThatCanStartWith(final Character ch) {
+    final char c = ch;
+    if (c < ASCII_LIMIT) {
+      // Lock-free fast path: recomputation on a racy miss is benign and idempotent.
+      Set<Regexp> cached = asciiStartCache[c];
+      if (cached == null) {
+        cached = computeRegexpsThatCanStartWith(ch);
+        asciiStartCache[c] = cached;
+        asciiStartCachePopulated = true;
+      }
+      return cached;
+    }
+    return getRegexpsThatCanStartWithNonAscii(ch);
+  }
 
+  private synchronized Set<Regexp> getRegexpsThatCanStartWithNonAscii(final Character ch) {
     // Return cached result if available
     Set<Regexp> cachedResult = firstCharRegexpCache.get(ch);
     if (cachedResult != null) {
       return cachedResult;
     }
 
-    // Compute filtered regexps
-    Set<Regexp> filteredRegexps = new HashSet<>();
+    final Set<Regexp> unmodifiableResult = computeRegexpsThatCanStartWith(ch);
+    firstCharRegexpCache.put(ch, unmodifiableResult);
+    return unmodifiableResult;
+  }
+
+  private Set<Regexp> computeRegexpsThatCanStartWith(final Character ch) {
+    final Set<Regexp> filteredRegexps = new HashSet<>();
     for (final Regexp r : regexps) {
       if (r.canStartWith(ch)) {
         filteredRegexps.add(r);
       }
     }
-
-    // Cache and return the result
-    Set<Regexp> unmodifiableResult = Collections.unmodifiableSet(filteredRegexps);
-    firstCharRegexpCache.put(ch, unmodifiableResult);
-    return unmodifiableResult;
+    return Collections.unmodifiableSet(filteredRegexps);
   }
 
   @Override
   public void addLink(final Character c, final DFANode n) {
-    nextMap.put(c, n);
+    final char ch = c;
+    if (ch < ASCII_LIMIT) {
+      asciiNext[ch] = n;
+    } else {
+      nextMap.put(c, n);
+    }
   }
 
   @Override
   public boolean hasLinkFor(final Character c) {
+    final char ch = c;
+    if (ch < ASCII_LIMIT) {
+      final DFANode n = asciiNext[ch];
+      return n != null && n != NO_TRANSITION;
+    }
     return nextMap.containsKey(c);
   }
 
@@ -232,7 +296,19 @@ public final class DFANodeImpl implements DFANode {
 
   @Override
   public DFANode getNext(final Character ch, final NodeStorage ns) {
-    // Check if we already have this edge cached
+    final char c = ch;
+    if (c < ASCII_LIMIT) {
+      // Direct-indexed fast path, including negative caching via NO_TRANSITION.
+      final DFANode cached = asciiNext[c];
+      if (cached != null) {
+        return cached == NO_TRANSITION ? null : cached;
+      }
+      final DFANode computed = computeNext(ch, ns);
+      asciiNext[c] = computed == null ? NO_TRANSITION : computed;
+      return computed;
+    }
+
+    // Non-ASCII: check if we already have this edge cached
     DFANode cachedNode = nextMap.get(ch);
     if (cachedNode != null) {
       return cachedNode;
@@ -243,22 +319,27 @@ public final class DFANodeImpl implements DFANode {
       nextMap.clear();
     }
 
-    return nextMap.computeIfAbsent(
-        ch,
-        key -> {
-          KNOWN_DFA_EDGES_COUNTER.inc();
+    return nextMap.computeIfAbsent(ch, key -> computeNext(key, ns));
+  }
 
-          final SortedSet<NDFANode> nodes = getNextThroughBasis(ch);
-          if (!nodes.isEmpty()) {
-            return ns.getDFANode(nodes);
-          }
-          return null;
-        });
+  private DFANode computeNext(final Character ch, final NodeStorage ns) {
+    KNOWN_DFA_EDGES_COUNTER.inc();
+
+    final SortedSet<NDFANode> nodes = getNextThroughBasis(ch);
+    if (!nodes.isEmpty()) {
+      return ns.getDFANode(nodes);
+    }
+    return null;
   }
 
   @Override
   public void removeLink(final Character c) {
-    nextMap.remove(c);
+    final char ch = c;
+    if (ch < ASCII_LIMIT) {
+      asciiNext[ch] = null;
+    } else {
+      nextMap.remove(c);
+    }
   }
 
   /**
