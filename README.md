@@ -41,20 +41,24 @@ The current parser supports a deliberately small core language:
 - Concatenation: `ab` (implicit)
 - Alternation: `a|b`
 - Quantifiers on previous atom: `?`, `*`, `+`
-- Any single character: `.`
-- Line anchors: `^`, `$`
+- Counted quantifiers: `{m}`, `{m,n}`, `{m,}` (expansion capped at 1000)
+- Grouping: `( ... )` and `(?: ... )` (equivalent — there are no captures)
+- Any single character: `.` (matches every character, including newline)
 - Character classes: `[abc]`, ranges `[a-z]`, negated classes `[^abc]`
+- Shorthand classes: `\d`, `\D`, `\w`, `\W`, `\s`, `\S` (also inside sets: `[\d ]`)
+- Escapes: `\\`, `\.`, `\*`, `\+`, `\?`, `\[`, `\(`, ... and `\n`, `\t`, `\r`, `\f`
+- Pattern-prefix flags: `(?i)` case-insensitive, `(?s)` accepted (dot is DOTALL already)
 
 ### Important Limitations
 
 This is **not** full Java/PCRE regex syntax today. In particular, treat the following as unsupported/not guaranteed:
 
-- Grouping and precedence control with parentheses: `( ... )`
-- Counted quantifiers: `{m}`, `{m,n}`
+- Line anchors `^` and `$` (currently throw; see KNOWN-BUGS KB-3)
+- Word boundaries `\\b`, `\\B` (wait on the same anchor machinery)
 - Lookaround: `(?=...)`, `(?!...)`, `(?<=...)`, `(?<!...)`
-- Backreferences and capture-group features
-- Shorthand classes and many escapes such as `\\d`, `\\w`, `\\s`, `\\b`
-- Inline flags such as `(?i)`
+- Backreferences and capture-group features (backreferences: never — non-regular)
+- Scoped inline flags such as `a(?i)b` (prefix-only `(?i)` IS supported)
+- `MULTILINE` mode and a non-DOTALL `.` toggle
 
 This reduced syntax was a conscious engineering choice to prioritize matching-engine performance work first. As the core algorithms stabilize, extending syntax coverage is a natural next step.
 

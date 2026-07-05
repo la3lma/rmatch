@@ -45,6 +45,17 @@ public final class MatchImpl implements Match {
    */
   private int end;
 
+  /**
+   * The largest end position at which this match was in a final state, or -1 if it never was.
+   *
+   * <p>KB-5: a match can pass through a final state and then keep extending while alive but
+   * non-final (e.g. "[^a]+[cb]" where the [^a]+ loop consumes past the [cb] ender). When such a
+   * match eventually dies non-final, the correct result is the LONGEST end that was final — which
+   * must therefore be remembered, not just the instantaneous final flag. Without this, the match
+   * was silently discarded.
+   */
+  private int lastFinalEnd = -1;
+
   /** The Regexp for which this match is valued. */
   private final Regexp r;
 
@@ -66,6 +77,9 @@ public final class MatchImpl implements Match {
     this.r = checkNotNull(r, "Regexp can't be null");
     this.isFinal = isFinal; // why?
     end = ms.getStart(); // XXX Bogus
+    if (isFinal) {
+      lastFinalEnd = end;
+    }
     isActive = true;
     r.registerMatch(this);
     id = counter.inc();
@@ -127,6 +141,7 @@ public final class MatchImpl implements Match {
   @Override
   public void setIsFinal() {
     isFinal = true;
+    lastFinalEnd = end;
   }
 
   @Override
@@ -136,11 +151,18 @@ public final class MatchImpl implements Match {
 
   @Override
   public int getEnd() {
+    // If the match extended past its last final state without reaching another one, the
+    // reportable extent is the last FINAL end (KB-5).
+    if (!isFinal && lastFinalEnd >= 0) {
+      return lastFinalEnd;
+    }
     return end;
   }
 
   @Override
   public void setEnd(final int end) {
+    // NOTE: does NOT update lastFinalEnd — at the time setEnd runs, the final flag still
+    // reflects the PREVIOUS position. Only setFinal/setIsFinal carry a fresh judgment.
     this.end = end;
   }
 
@@ -156,7 +178,9 @@ public final class MatchImpl implements Match {
 
   @Override
   public boolean isFinal() {
-    return isFinal;
+    // A match that has EVER been final has a committable result (at lastFinalEnd), even if its
+    // current extent is not final (KB-5).
+    return isFinal || lastFinalEnd >= 0;
   }
 
   @Override
@@ -177,5 +201,8 @@ public final class MatchImpl implements Match {
   @Override
   public void setFinal(final boolean aFinal) {
     this.isFinal = aFinal;
+    if (aFinal) {
+      lastFinalEnd = end;
+    }
   }
 }

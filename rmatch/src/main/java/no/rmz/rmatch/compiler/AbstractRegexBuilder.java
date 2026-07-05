@@ -89,4 +89,17 @@ public interface AbstractRegexBuilder {
 
   /** Add a pattern matching an element that should be repeated once or many times, e.g. "a+". */
   void addOptionalOnceOrMulti();
+
+  /**
+   * Start a group ("(" or "(?:"). Subsequent input builds the group's subexpression until endGroup
+   * is called. Groups nest.
+   */
+  default void startGroup() {
+    throw new UnsupportedOperationException("groups not supported by this builder");
+  }
+
+  /** End the innermost open group; the group becomes a single quantifiable atom. */
+  default void endGroup() {
+    throw new UnsupportedOperationException("groups not supported by this builder");
+  }
 }

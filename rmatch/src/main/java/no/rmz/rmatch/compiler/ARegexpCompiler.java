@@ -14,7 +14,10 @@
 package no.rmz.rmatch.compiler;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 
@@ -26,10 +29,16 @@ import no.rmz.rmatch.interfaces.Regexp;
 public final class ARegexpCompiler implements AbstractRegexBuilder {
 
   /**
-   * A builder for alternatives. By default we will assume that we are building an alternative, so
-   * this builder ends up consuming most of the input and returning the final result.
+   * A stack of alternatives builders: the bottom element builds the whole expression, and each open
+   * group pushes a fresh builder for its subexpression. All parsed elements go to the innermost
+   * (top) builder.
    */
-  final AlternativesBuilder alternativesBuilder;
+  private final Deque<AlternativesBuilder> builders = new ArrayDeque<>();
+
+  /** The top of the builder stack: the builder for the innermost open scope. */
+  final AlternativesBuilder alternativesBuilder() {
+    return builders.peek();
+  }
 
   /** The last, and hence an epsilon-node going out of the last element of the resultFragments. */
   private final TerminalNode terminal;
@@ -51,7 +60,7 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
   public ARegexpCompiler(final Regexp regexp) {
     this.regexp = checkNotNull(regexp);
     this.terminal = new TerminalNode(regexp);
-    this.alternativesBuilder = new AlternativesBuilder(regexp);
+    builders.push(new AlternativesBuilder(regexp));
   }
 
   /**
@@ -61,7 +70,8 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
    * @return Returns an NDFANode that represent the compilation of the regexp.
    */
   public NDFANode getResult() {
-    final CompiledFragment result = alternativesBuilder.build();
+    checkState(builders.size() == 1, "Unbalanced group: missing ')' or ')' without '('");
+    final CompiledFragment result = alternativesBuilder().build();
     result.getEndingNode().addEpsilonEdge(terminal);
     return result.getArrivalNode();
   }
@@ -89,12 +99,12 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
     // otherwise we append the NDFA representing
     // the string to the end of the last node in the current set of
     // alternatives.
-    alternativesBuilder.addLast(result);
+    alternativesBuilder().addLast(result);
   }
 
   @Override
   public void separateAlternatives() {
-    alternativesBuilder.separateAlternatives();
+    alternativesBuilder().separateAlternatives();
   }
 
   @Override
@@ -105,7 +115,7 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
   @Override
   public void endCharSet() {
     final CompiledFragment result = charSetStringBuilder.build();
-    alternativesBuilder.addLast(result);
+    alternativesBuilder().addLast(result);
   }
 
   @Override
@@ -128,7 +138,7 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
     final CompiledFragment fragment = new CompiledFragment(regexp);
     final NDFANode resultNode = new AnyCharNode(fragment.getEndingNode(), regexp);
     fragment.getArrivalNode().addEpsilonEdge(resultNode);
-    alternativesBuilder.addLast(fragment);
+    alternativesBuilder().addLast(fragment);
   }
 
   @Override
@@ -143,20 +153,33 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
 
   @Override
   public void addOptionalSingular() {
-    final CompiledFragment last = alternativesBuilder.getLastFragment();
+    final CompiledFragment last = alternativesBuilder().getLastFragment();
     last.getArrivalNode().addEpsilonEdge(last.getEndingNode());
   }
 
   @Override
   public void addOptionalZeroOrMulti() {
-    final CompiledFragment last = alternativesBuilder.getLastFragment();
+    final CompiledFragment last = alternativesBuilder().getLastFragment();
     last.getArrivalNode().addEpsilonEdge(last.getEndingNode());
     last.getEndingNode().addEpsilonEdge(last.getArrivalNode());
   }
 
   @Override
   public void addOptionalOnceOrMulti() {
-    final CompiledFragment last = alternativesBuilder.getLastFragment();
+    final CompiledFragment last = alternativesBuilder().getLastFragment();
     last.getEndingNode().addEpsilonEdge(last.getArrivalNode());
+  }
+
+  @Override
+  public void startGroup() {
+    builders.push(new AlternativesBuilder(regexp));
+  }
+
+  @Override
+  public void endGroup() {
+    checkState(builders.size() > 1, "')' without matching '('");
+    final CompiledFragment group = builders.pop().build();
+    // The finished group becomes a single quantifiable atom in the enclosing scope.
+    alternativesBuilder().addLast(group);
   }
 }
