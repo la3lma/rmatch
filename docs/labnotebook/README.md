@@ -17,6 +17,7 @@ survived many attempted optimizations.
 | 2026-07-05 | [Two-char start filtering](2026-07-05-two-char-start-filter.md) | **Win, merged** — 2.2–8× vs main; ~7× vs java loop; RE2J loop still ~2× ahead on literal/cache-warm |
 | 2026-07-05 | [Lazy Match materialization](2026-07-05-lazy-match-materialization.md) | **Win, merged** — O(l·m) bug dead; 4–10×; beats RE2J loop beyond cache; 3 gremlins killed |
 | 2026-07-05 | [KB-1: quantifier binding](2026-07-05-kb1-quantifier-binding.md) | **Fixed** — ab? ≡ (ab)? parser bug; star didn't loop; now agrees with java.util.regex |
+| 2026-07-05 | [Semantics suite + syntax Tier-1](2026-07-05-semantics-suite-and-syntax-tier1.md) | **Complete, merged** — groups, escapes+classes, {m,n}, (?i); differential suite killed KB-2/4/5 |
 | 2026-07-05 | [Match-count determinism](2026-07-05-match-count-determinism.md) | **Resolved** — engine deterministic; racy `int++` in perftest harness (fixed, `587e78a`) |
 
 ## Known bugs

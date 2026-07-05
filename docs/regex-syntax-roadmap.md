@@ -30,6 +30,17 @@ ranges `[a-z]`, negation `[^abc]`.
 | **Backreferences `\1`** | Never | Non-regular — provably outside what any finite automaton can match, and thus incompatible with one-pass DFA matching by construction. RE2/RE2J draw exactly the same line, in good company. Document as a permanent exclusion. |
 | **Atomic groups `(?>…)`, possessive `*+` `++`** | Never | These exist to control backtracking; rmatch has no backtracking to control. Accept-and-ignore (parse and treat as their plain equivalents) could be offered for compatibility, but implementing their Java semantics is meaningless here. |
 
+## Status update 2026-07-05 (evening)
+
+Implemented, test-first, perf-gated (see labnotebook entry): grouping
+`( )`/`(?: )`, escapes + shorthand classes (KB-2 fixed en route), counted
+quantifiers `{m}`/`{m,n}`/`{m,}` (replay expansion, cap 1000), and `(?i)`
+prefix case-insensitivity (`(?s)` accepted as no-op — `.` is DOTALL-always).
+Deliberately descoped pending anchor machinery (KB-3: `^`/`$` throw today
+despite old README claims): `\b`/`\B`, MULTILINE, non-DOTALL toggle.
+Along the way the new semantics suite exposed and fixed two ancient engine
+bugs: KB-4 (negated sets unsound) and KB-5 (matches forgetting final states).
+
 ## Suggested order of attack
 
 1. Grouping `( … )` / `(?: … )` — unlocks composition, parser-only.
