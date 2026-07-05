@@ -59,6 +59,15 @@ public final class StringSource {
   }
 
   /**
+   * The index of the next character to be read.
+   *
+   * @return current position in the source string.
+   */
+  public int getIndex() {
+    return index;
+  }
+
+  /**
    * If more characters after thd current, then return then return the next character without
    * advancing the index pointer, otherwise return null.
    *

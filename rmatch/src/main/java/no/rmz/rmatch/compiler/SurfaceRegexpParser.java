@@ -64,8 +64,23 @@ public final class SurfaceRegexpParser {
     /** A source of characters based on the input string. */
     private final StringSource src;
 
+    /** The raw regexp source, kept for counted-quantifier atom replay. */
+    private final String regexString;
+
     /** Current group nesting depth; must be zero at end of input. */
     private int groupDepth = 0;
+
+    /** Source span [start, end) of the last completed atom, or -1 when no atom is available. */
+    private int lastAtomStart = -1;
+
+    /** See lastAtomStart. */
+    private int lastAtomEnd = -1;
+
+    /** Source start positions of currently open groups (for atom-span tracking). */
+    private final java.util.ArrayDeque<Integer> openGroupStarts = new java.util.ArrayDeque<>();
+
+    /** Maximum total expansion count for counted quantifiers. */
+    private static final int MAX_COUNTED_REPETITION = 1000;
 
     /**
      * Create a new helper class instance.
@@ -76,6 +91,7 @@ public final class SurfaceRegexpParser {
     PAux(final String regexString, final AbstractRegexBuilder arb) {
       this.arb = checkNotNull(arb);
       this.sb = new StringBuilder();
+      this.regexString = regexString;
       this.src = new StringSource(regexString);
     }
 
@@ -148,17 +164,23 @@ public final class SurfaceRegexpParser {
     //     but no more than n times modifier.
 
     private void parseNextChar(char ch) throws RegexpParserException {
+      final int atomStart = src.getIndex() - 1;
       switch (ch) {
         case '|':
           commitCurrentString(COMMIT_EMPTY_STRING_IF_NOTHING_IN_SB);
           arb.separateAlternatives();
+          lastAtomStart = -1;
           break;
         case '\\':
           parseQuotedChar();
+          lastAtomStart = atomStart;
+          lastAtomEnd = src.getIndex();
           break;
         case '.':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
           arb.addAnyChar();
+          lastAtomStart = atomStart;
+          lastAtomEnd = src.getIndex();
           break;
         case '^':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
@@ -171,22 +193,32 @@ public final class SurfaceRegexpParser {
         case '?':
           commitForQuantifier();
           arb.addOptionalSingular();
+          lastAtomStart = -1; // a quantified atom cannot take another counted quantifier
           break;
         case '*':
           commitForQuantifier();
           arb.addOptionalZeroOrMulti();
+          lastAtomStart = -1;
           break;
         case '+':
           commitForQuantifier();
           arb.addOptionalOnceOrMulti();
+          lastAtomStart = -1;
+          break;
+        case '{':
+          parseCountedQuantifier();
+          lastAtomStart = -1;
           break;
         case '[':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
           parseCharSet();
+          lastAtomStart = atomStart;
+          lastAtomEnd = src.getIndex();
           break;
         case '(':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
           parseGroupStart();
+          openGroupStarts.push(atomStart);
           break;
         case ')':
           if (groupDepth == 0) {
@@ -195,10 +227,115 @@ public final class SurfaceRegexpParser {
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
           arb.endGroup();
           groupDepth--;
+          lastAtomStart = openGroupStarts.pop();
+          lastAtomEnd = src.getIndex();
           break;
         default:
           sb.append(ch);
+          lastAtomStart = atomStart;
+          lastAtomEnd = src.getIndex();
           break;
+      }
+    }
+
+    /**
+     * Parse "{m}", "{m,n}" or "{m,}" and apply it to the last atom by replay: the atom's source
+     * text is re-parsed (m-1) more times, then (n-m) optional copies (or one starred copy for
+     * open-ended). Semantics: X{2,4} == XXX?X?.
+     */
+    private void parseCountedQuantifier() throws RegexpParserException {
+      if (lastAtomStart < 0) {
+        throw new RegexpParserException("Counted quantifier '{' with no preceding atom");
+      }
+      final String atomText = regexString.substring(lastAtomStart, lastAtomEnd);
+
+      final int m = parseCountNumber(true);
+      final int n; // -1 means open-ended
+      final Character sep = src.peek();
+      if (sep == null) {
+        throw new RegexpParserException("Unterminated counted quantifier");
+      }
+      if (sep == '}') {
+        src.next();
+        n = m;
+      } else if (sep == ',') {
+        src.next();
+        final Character after = src.peek();
+        if (after != null && after == '}') {
+          src.next();
+          n = -1;
+        } else {
+          n = parseCountNumber(false);
+          if (src.peek() == null || src.next() != '}') {
+            throw new RegexpParserException("Expected '}' terminating counted quantifier");
+          }
+        }
+      } else {
+        throw new RegexpParserException("Malformed counted quantifier");
+      }
+
+      if (n >= 0 && n < m) {
+        throw new RegexpParserException("Counted quantifier {" + m + "," + n + "} has max < min");
+      }
+      if (m == 0 && n == 0) {
+        throw new RegexpParserException("Counted quantifier {0} is not supported");
+      }
+      final int total = n >= 0 ? n : m;
+      if (total > MAX_COUNTED_REPETITION || m > MAX_COUNTED_REPETITION) {
+        throw new RegexpParserException(
+            "Counted quantifier exceeds maximum repetition " + MAX_COUNTED_REPETITION);
+      }
+
+      // The atom has already been emitted once. Make sure it stands alone as the last fragment
+      // (split it out of any accumulated literal), exactly as for ? * +.
+      commitForQuantifier();
+
+      if (m == 0) {
+        // First (already emitted) copy becomes optional.
+        arb.addOptionalSingular();
+      }
+      // Additional REQUIRED copies: copies 2..m.
+      for (int i = 1; i < m; i++) {
+        replayAtom(atomText);
+      }
+      if (n < 0) {
+        // Open-ended: one more copy, starred.
+        replayAtom(atomText);
+        arb.addOptionalZeroOrMulti();
+      } else {
+        // Bounded: (n - max(m,1)... ) optional copies. Copies beyond the required ones.
+        final int required = Math.max(m, 1); // copy 1 exists even when m == 0 (made optional)
+        for (int i = required; i < n; i++) {
+          replayAtom(atomText);
+          arb.addOptionalSingular();
+        }
+      }
+    }
+
+    /** Re-parse the atom's source text so it is emitted again as the last fragment. */
+    private void replayAtom(final String atomText) throws RegexpParserException {
+      final PAux sub = new PAux(atomText, arb);
+      // Replay within the same builder scope: groups inside atomText are balanced by
+      // construction, so this cannot unbalance the enclosing scopes.
+      sub.parse();
+    }
+
+    /** Parse a decimal number inside a counted quantifier. */
+    private int parseCountNumber(final boolean atStart) throws RegexpParserException {
+      final StringBuilder num = new StringBuilder();
+      while (src.peek() != null && Character.isDigit(src.peek())) {
+        num.append(src.next());
+      }
+      if (num.isEmpty()) {
+        throw new RegexpParserException(
+            atStart
+                ? "Counted quantifier '{' must be followed by a number"
+                : "Expected number after ',' in counted quantifier");
+      }
+      try {
+        return Integer.parseInt(num.toString());
+      } catch (NumberFormatException e) {
+        throw new RegexpParserException("Number too large in counted quantifier");
       }
     }
 

@@ -78,13 +78,24 @@ public class JavaRegexDifferentialTest {
     final int atoms = 1 + rng.nextInt(4);
     for (int i = 0; i < atoms; i++) {
       sb.append(atom(rng));
-      final int q = rng.nextInt(4);
+      final int q = rng.nextInt(6);
       if (q == 1) {
         sb.append('?');
       } else if (q == 2) {
         sb.append('*');
       } else if (q == 3) {
         sb.append('+');
+      } else if (q == 4) {
+        // F3: counted quantifiers.
+        final int min = rng.nextInt(3);
+        final int kind = rng.nextInt(3);
+        if (kind == 0 && min > 0) {
+          sb.append('{').append(min).append('}');
+        } else if (kind == 1) {
+          sb.append('{').append(min).append(',').append(min + 1 + rng.nextInt(2)).append('}');
+        } else {
+          sb.append('{').append(Math.max(min, 1)).append(",}");
+        }
       }
     }
     if (rng.nextInt(4) == 0) {
