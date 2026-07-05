@@ -105,11 +105,9 @@ public class TwoCharStartFilterTest {
   @Test
   public void quantifiedPatternsSurvive() throws Exception {
     final Set<String> found = matchesOf(new String[] {"ab?"}, "a ab");
-    // NOTE: ideally "ab?" would also match the lone "a" at position 0 (length-1 match via the
-    // optional suffix). The engine does NOT produce that match today — verified identical on
-    // unfiltered main (both engines) — so this test pins filter-neutrality, not ideal regex
-    // semantics. If the underlying length-1-optional gap is ever fixed, this expectation should
-    // gain "ab?@0-0".
-    assertEquals(Set.of("ab?@2-3"), found);
+    // Both the length-1 match (optional suffix absent) and the length-2 match must fire.
+    // The @0-0 match was missing until KB-1 (quantifier bound to the whole preceding literal
+    // instead of the last atom) was fixed in SurfaceRegexpParser.
+    assertEquals(Set.of("ab?@0-0", "ab?@2-3"), found);
   }
 }
