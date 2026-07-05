@@ -41,7 +41,8 @@ expectation must gain `ab?@0-0`.
 
 ## KB-2: escape parsing throws on every `\x` (inverted condition)
 
-**Status:** OPEN. Discovered 2026-07-05 during the KB-1 chase.
+**Status:** FIXED 2026-07-05 as part of syntax program F2 (escapes +
+shorthand classes), test-first in EscapeSyntaxTest. Originally: Discovered 2026-07-05 during the KB-1 chase.
 `SurfaceRegexpParser.parseQuotedChar` has `if (src.hasNext()) throw` — inverted:
 it throws "Expected char after escape char" precisely when a next char EXISTS.
 Any pattern containing an escape fails at add() time (loud, not silent).

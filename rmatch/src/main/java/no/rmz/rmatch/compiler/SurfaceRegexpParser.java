@@ -221,12 +221,62 @@ public final class SurfaceRegexpParser {
     }
 
     private void parseQuotedChar() throws RegexpParserException {
-      char ch;
-      if (src.hasNext()) {
+      // KB-2: this condition was inverted, making EVERY escape throw.
+      if (!src.hasNext()) {
         throw new RegexpParserException("Expected char after escape char: \\");
       }
-      ch = src.next();
-      sb.append(ch);
+      final char ch = src.next();
+      switch (ch) {
+        // Literal escapes: the metacharacter itself.
+        case '\\', '.', '*', '+', '?', '[', ']', '(', ')', '|', '^', '$', '-', '{', '}':
+          sb.append(ch);
+          break;
+        // Control escapes.
+        case 'n':
+          sb.append('\n');
+          break;
+        case 't':
+          sb.append('\t');
+          break;
+        case 'r':
+          sb.append('\r');
+          break;
+        case 'f':
+          sb.append('\f');
+          break;
+        // Shorthand character classes: sugar over the existing charset machinery.
+        case 'd', 'D', 'w', 'W', 's', 'S':
+          commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+          emitShorthandClass(ch);
+          break;
+        default:
+          throw new RegexpParserException("Unsupported escape '\\" + ch + "'");
+      }
+    }
+
+    /** Emit \d \D \w \W \s \S as a (possibly inverted) character set fragment. */
+    private void emitShorthandClass(final char c) {
+      arb.startCharSet();
+      if (Character.isUpperCase(c)) {
+        arb.invertCharSet();
+      }
+      addShorthandMembers(Character.toLowerCase(c));
+      arb.endCharSet();
+    }
+
+    /** Add the member characters of a lowercase shorthand class to the open charset. */
+    private void addShorthandMembers(final char c) {
+      switch (c) {
+        case 'd' -> arb.addRangeToCharSet('0', '9');
+        case 'w' -> {
+          arb.addRangeToCharSet('a', 'z');
+          arb.addRangeToCharSet('A', 'Z');
+          arb.addRangeToCharSet('0', '9');
+          arb.addToCharSet("_");
+        }
+        case 's' -> arb.addToCharSet(" \t\n\u000B\f\r");
+        default -> throw new IllegalStateException("not a shorthand class: " + c);
+      }
     }
 
     private void parseCharSet() throws RegexpParserException {
@@ -248,6 +298,30 @@ public final class SurfaceRegexpParser {
         ch = src.next();
         if (ch == ']') {
           break;
+        } else if (ch == '\\') {
+          if (!src.hasNext()) {
+            throw new RegexpParserException("Expected char after escape char in charset");
+          }
+          final char esc = src.next();
+          switch (esc) {
+            case '\\', ']', '[', '-', '^' -> sb.append(esc);
+            case 'n' -> sb.append('\n');
+            case 't' -> sb.append('\t');
+            case 'r' -> sb.append('\r');
+            case 'f' -> sb.append('\f');
+            case 'd', 'w', 's' -> {
+              // Flush accumulated plain chars first, then add the class members.
+              final String pending = sb.toString();
+              if (!pending.isEmpty()) {
+                arb.addToCharSet(pending);
+                sb = new StringBuilder();
+              }
+              addShorthandMembers(esc);
+            }
+            default ->
+                throw new RegexpParserException(
+                    "Unsupported escape '\\" + esc + "' inside character set");
+          }
         } else if (ch == '-') {
           parsingRange = true;
         } else if (parsingRange) {
