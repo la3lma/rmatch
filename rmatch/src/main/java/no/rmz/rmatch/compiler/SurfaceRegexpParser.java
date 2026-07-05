@@ -93,6 +93,32 @@ public final class SurfaceRegexpParser {
     }
 
     /**
+     * Commit the accumulated literal so that a quantifier that follows binds to the LAST ATOM only,
+     * per standard regex semantics. "ab?" must mean a(b?), not (ab)?.
+     *
+     * <p>The accumulated string (if any) is split: everything before the last character is
+     * committed as one fragment, then the last character is committed as its own single-atom
+     * fragment for the quantifier to attach to. When the string is empty the preceding construct
+     * (character set, any-char, ...) has already been committed as its own fragment and is the
+     * correct quantifier target as-is.
+     *
+     * <p>This was KB-1: quantifiers bound to the whole preceding literal, so "ab?" compiled as
+     * (ab)? — matching the empty string and "ab" but not "a", and making the FOLLOWING atom
+     * spuriously matchable on its own in patterns like "ab?c".
+     */
+    private void commitForQuantifier() {
+      final int len = sb.length();
+      if (len == 0) {
+        return;
+      }
+      if (len > 1) {
+        arb.addString(sb.substring(0, len - 1));
+      }
+      arb.addString(sb.substring(len - 1));
+      sb = new StringBuilder();
+    }
+
+    /**
      * The objective is to parse all legal regexps as described in
      * http://en.wikipedia.org/wiki/Regular_expression That's an interesting goal in itself, however
      * it may in fact be better to emulate java's regexp syntax.
@@ -137,15 +163,15 @@ public final class SurfaceRegexpParser {
           arb.addEndOfLine();
           break;
         case '?':
-          commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+          commitForQuantifier();
           arb.addOptionalSingular();
           break;
         case '*':
-          commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+          commitForQuantifier();
           arb.addOptionalZeroOrMulti();
           break;
         case '+':
-          commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+          commitForQuantifier();
           arb.addOptionalOnceOrMulti();
           break;
         case '[':
