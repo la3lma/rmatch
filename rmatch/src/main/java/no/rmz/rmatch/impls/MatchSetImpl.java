@@ -108,18 +108,15 @@ public final class MatchSetImpl implements MatchSet {
   private final Set<Regexp> candidates;
 
   /**
-   * Maximum candidate-set size for which the exact per-step liveness test is performed. For
-   * candidate sets larger than this, the set provably contains the DFA node's alive set from the
-   * second character onward (start filters only remove regexps that cannot survive character two),
-   * so the match set dies exactly when the DFA path dies and no per-step test is needed. Small
-   * sets, however, are typically prefilter-narrowed and can die long before the DFA path does —
-   * without this test the match set would keep stepping a long-lived DFA path for nothing
-   * (observed: 30x slowdown on the prefiltered stable-10K gate workload).
+   * Regexps whose match has been removed from this match set (committed, abandoned or failed). The
+   * eager implementation created at most ONE Match per (match set, regexp) — ever — because
+   * creation happened only in the constructor. Lazy materialization must preserve that invariant
+   * explicitly, or a regexp that remains alive and terminal after its match is removed (e.g.
+   * zero-length-capable patterns like [^0-9]*, or anchor-failed matches) is re-materialized on
+   * every character: an unbounded materialize/remove cycle (observed as a 100x+ blowup on the
+   * stable-10K gate workload). Lazily allocated; most match sets never materialize anything.
    */
-  private static final int SMALL_CANDIDATE_LIVENESS_LIMIT = 8;
-
-  /** Candidates to liveness-test each step, or null when the test is unnecessary (large sets). */
-  private final Set<Regexp> smallCandidates;
+  private Set<Regexp> spent;
 
   /** The start position of all the matches associated with this MatchSetImpl. */
   private final int start;
@@ -178,8 +175,6 @@ public final class MatchSetImpl implements MatchSet {
       candidates = this.currentNode.getRegexps();
     }
 
-    smallCandidates = candidates.size() <= SMALL_CANDIDATE_LIVENESS_LIMIT ? candidates : null;
-
     // Materialize matches only for regexps that are final already at the first character
     // (length-1 matches). Everything else stays implicit until it reaches a terminal state.
     if (!candidates.isEmpty()) {
@@ -199,7 +194,9 @@ public final class MatchSetImpl implements MatchSet {
       return;
     }
     for (final Regexp r : terminals) {
-      if (!materialized.containsKey(r) && candidates.contains(r)) {
+      if (!materialized.containsKey(r)
+          && (spent == null || !spent.contains(r))
+          && candidates.contains(r)) {
         final Match m = new MatchImpl(this, r, true);
         m.setEnd(currentPos);
         materialized.put(r, m);
@@ -259,7 +256,10 @@ public final class MatchSetImpl implements MatchSet {
     }
 
     // Check if there are any regexps for which matches must fail at this node, and fail them.
-    if (!materialized.isEmpty() && currentNode.failsSomeRegexps()) {
+    // This must consider ALL candidates, not just materialized ones: the eager implementation
+    // permanently failed the (eagerly created) match of a candidate that had not yet reached a
+    // terminal state, so a failed candidate must never materialize later either.
+    if (currentNode.failsSomeRegexps()) {
       failMatchesThatCannotContinue(currentChar);
     }
 
@@ -271,14 +271,19 @@ public final class MatchSetImpl implements MatchSet {
     // Materialize matches for regexps that just reached a terminal state.
     materializeNewlyTerminal(currentPos);
 
-    // Exact liveness test for narrow (typically prefilter-mapped) candidate sets: when no
-    // candidate is alive at the current node and nothing is materialized, this match set can
-    // never produce anything again — stop stepping the DFA path.
-    if (smallCandidates != null && materialized.isEmpty()) {
+    // Exact liveness test, mirroring the eager implementation's lifetime: a match set is dead
+    // as soon as nothing is materialized AND no unconsumed candidate is still alive at the
+    // current node (a dead or spent candidate can never materialize again, because the alive
+    // set shrinks monotonically along the DFA path and spent regexps are barred). Without this,
+    // match sets whose useful candidates are exhausted keep riding long-lived DFA paths — on
+    // workloads with zero-length-capable or wildcard-looping patterns the paths rarely die, the
+    // active set grows without bound, and matching goes quadratic (observed on the stable-10K
+    // gate workload). Early exit keeps the common case O(1): the first live candidate wins.
+    if (materialized.isEmpty()) {
       final Set<Regexp> alive = currentNode.getRegexps();
       boolean anyAlive = false;
-      for (final Regexp r : smallCandidates) {
-        if (alive.contains(r)) {
+      for (final Regexp r : candidates) {
+        if ((spent == null || !spent.contains(r)) && alive.contains(r)) {
           anyAlive = true;
           break;
         }
@@ -345,13 +350,27 @@ public final class MatchSetImpl implements MatchSet {
   }
 
   private void failMatchesThatCannotContinue(final Character currentChar) {
-    matchSnapshot.clear();
-    matchSnapshot.addAll(materialized.values());
+    // Fail materialized matches the way the eager implementation did.
+    if (!materialized.isEmpty()) {
+      matchSnapshot.clear();
+      matchSnapshot.addAll(materialized.values());
 
-    for (final Match m : matchSnapshot) {
-      if (currentNode.isFailingFor(m.getRegexp())) {
-        m.abandon(currentChar);
-        removeMatch(m);
+      for (final Match m : matchSnapshot) {
+        if (currentNode.isFailingFor(m.getRegexp())) {
+          m.abandon(currentChar);
+          removeMatch(m);
+        }
+      }
+    }
+
+    // Bar unmaterialized candidates that fail at this node from ever materializing: in the
+    // eager implementation their (already created) match was abandoned here, permanently.
+    for (final Regexp r : candidates) {
+      if ((spent == null || !spent.contains(r)) && currentNode.isFailingFor(r)) {
+        if (spent == null) {
+          spent = new HashSet<>(4);
+        }
+        spent.add(r);
       }
     }
   }
@@ -359,8 +378,15 @@ public final class MatchSetImpl implements MatchSet {
   @Override
   public void removeMatch(final Match m) {
     checkNotNull(m);
-    m.getRegexp().abandonMatchSet(this);
-    materialized.remove(m.getRegexp(), m);
+    final Regexp r = m.getRegexp();
+    r.abandonMatchSet(this);
+    materialized.remove(r, m);
+    // Preserve the eager implementation's create-once invariant: once a regexp's match has
+    // been removed from this match set, it must never be re-materialized here.
+    if (spent == null) {
+      spent = new HashSet<>(4);
+    }
+    spent.add(r);
   }
 
   @Override
