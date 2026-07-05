@@ -16,9 +16,10 @@ package no.rmz.rmatch.utils;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.interfaces.LookaheadBuffer;
 
 /** An implementation of the Buffer interface that holds all inputs as a String. */
-public final class RegexStringBuffer implements Buffer, Cloneable {
+public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
 
   /** A string containing the entire content of the buffer. */
   private final String str;
@@ -74,6 +75,17 @@ public final class RegexStringBuffer implements Buffer, Cloneable {
     synchronized (monitor) {
       progress();
       return currentChar;
+    }
+  }
+
+  @Override
+  public Character peek() {
+    synchronized (monitor) {
+      final int nextPos = currentPos + 1;
+      if (nextPos < str.length()) {
+        return str.charAt(nextPos);
+      }
+      return null;
     }
   }
 

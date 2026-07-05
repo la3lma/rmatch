@@ -40,6 +40,22 @@ import no.rmz.rmatch.interfaces.*;
 public final class FastPathMatchEngine implements MatchEngine {
   private static final int[] EMPTY_INT_ARRAY = new int[0];
 
+  /** Number of characters covered by the two-character start-filter cache. */
+  private static final int ASCII_LIMIT = 128;
+
+  /**
+   * Cache of start candidates keyed by the first two characters of a potential match. A regexp can
+   * produce a match starting with characters (c1, c2) only if it is still alive in the DFA after
+   * consuming both, or if it has a complete length-1 match on c1 alone (c1 reaches a terminal
+   * state). Both are exact DFA properties, so this filter never changes match semantics — it only
+   * avoids creating speculative matches that are guaranteed to die on the second character.
+   *
+   * <p>Rows are allocated lazily per first character; entries lazily per second character.
+   * Invalidated in configurePrefilter, which runs whenever the pattern set changes.
+   */
+  @SuppressWarnings("unchecked")
+  private final Set<Regexp>[][] twoCharStartCache = new Set[ASCII_LIMIT][];
+
   /** The NodeStorage instance. */
   private final NodeStorage ns;
 
@@ -91,6 +107,9 @@ public final class FastPathMatchEngine implements MatchEngine {
       final Map<Integer, String> patterns,
       final Map<Integer, Integer> flags,
       final Map<String, Regexp> regexpMappings) {
+    // The pattern set changed: cached two-character start candidates are stale.
+    Arrays.fill(twoCharStartCache, null);
+
     if (!prefilterEnabled
         || patterns.isEmpty()
         || patterns.size() < PREFILTER_ACTIVATION_THRESHOLD) {
@@ -218,10 +237,10 @@ public final class FastPathMatchEngine implements MatchEngine {
               && mappedRegexPositions[mappedRegexCursor] == currentPos) {
             candidateRegexps = mappedRegexps.get(mappedRegexCursor);
           } else {
-            candidateRegexps = startNode.getRegexpsThatCanStartWith(currentChar);
+            candidateRegexps = startCandidates(b, currentChar, startNode);
           }
         } else {
-          candidateRegexps = startNode.getRegexpsThatCanStartWith(currentChar);
+          candidateRegexps = startCandidates(b, currentChar, startNode);
         }
 
         if (!candidateRegexps.isEmpty()) {
@@ -384,5 +403,72 @@ public final class FastPathMatchEngine implements MatchEngine {
       cursor++;
     }
     return cursor;
+  }
+
+  /**
+   * Compute the set of regexps worth starting a match for at the current position, using up to two
+   * characters of context when the buffer supports lookahead.
+   *
+   * <p>Falls back to the one-character filter when the buffer cannot peek, at end of input, or for
+   * non-ASCII characters — so this is purely an optimization layer, never a semantic change.
+   */
+  private Set<Regexp> startCandidates(final Buffer b, final char c1, final DFANode startNode) {
+    final Set<Regexp> oneChar = startNode.getRegexpsThatCanStartWith(c1);
+    if (oneChar.isEmpty() || c1 >= ASCII_LIMIT || !(b instanceof LookaheadBuffer lookahead)) {
+      return oneChar;
+    }
+    final Character peeked = lookahead.peek();
+    if (peeked == null) {
+      // Last character of the buffer: only length-1 matches are possible, but the
+      // one-character set is a safe (and tiny-cost) over-approximation here.
+      return oneChar;
+    }
+    final char c2 = peeked;
+    if (c2 >= ASCII_LIMIT) {
+      return oneChar;
+    }
+
+    Set<Regexp>[] row = twoCharStartCache[c1];
+    if (row == null) {
+      @SuppressWarnings("unchecked")
+      final Set<Regexp>[] newRow = new Set[ASCII_LIMIT];
+      row = newRow;
+      twoCharStartCache[c1] = row;
+    }
+    Set<Regexp> cached = row[c2];
+    if (cached == null) {
+      cached = computeTwoCharCandidates(oneChar, startNode, c2);
+      row[c2] = cached;
+    }
+    return cached;
+  }
+
+  /**
+   * Exact two-character candidate set: regexps from the one-character set that either survive the
+   * DFA transition on the second character, or already have a complete length-1 match after the
+   * first character (terminal at the start node's successor).
+   */
+  private Set<Regexp> computeTwoCharCandidates(
+      final Set<Regexp> oneChar, final DFANode startNode, final char c2) {
+    if (!(startNode instanceof DFANodeImpl startNodeImpl)) {
+      // Unknown DFA node implementation: no safe way to read terminal sets cheaply.
+      return oneChar;
+    }
+    final Set<Regexp> terminalAfterOneChar = startNodeImpl.getTerminalRegexpsCached();
+    final DFANode afterTwoChars = startNode.getNext(c2, ns);
+    final Set<Regexp> aliveAfterTwoChars =
+        afterTwoChars == null ? Collections.emptySet() : afterTwoChars.getRegexps();
+
+    final Set<Regexp> result = new HashSet<>();
+    for (final Regexp r : oneChar) {
+      if (aliveAfterTwoChars.contains(r) || terminalAfterOneChar.contains(r)) {
+        result.add(r);
+      }
+    }
+    if (result.size() == oneChar.size()) {
+      // Nothing was filtered; share the existing set instead of a copy.
+      return oneChar;
+    }
+    return Collections.unmodifiableSet(result);
   }
 }
