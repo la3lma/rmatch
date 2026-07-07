@@ -263,18 +263,24 @@ the rest of the release work here as it becomes explicit.
 
 ## Central Portal Upload
 
-- [ ] Confirm there are no uncommitted release-branch changes.
-- [ ] Confirm the `1.9.1` release commit hash to upload.
+- [x] Confirm there are no uncommitted release-branch changes before upload.
+- [x] Confirm the `1.9.1` release commit hash uploaded:
+  `5ee41857`.
 - [x] Configure Central upload for manual validation:
   `autoPublish=false`, `waitUntil=VALIDATED`.
-- [ ] Run the Central deploy command with `autoPublish=false` for `1.9.1`.
-- [ ] Inspect the uploaded `1.9.1` deployment in Central Portal.
+- [x] Run the Central deploy command with `autoPublish=false` for `1.9.1`.
+  Result on 2026-07-07:
+  `mvn -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true
+  -Dgpg.keyname=55D9C01E75B1E582 deploy` succeeded.
+- [ ] Inspect the uploaded `1.9.1` deployment in Central Portal. Deployment id:
+  `88ce19c0-3326-4152-a540-97194f903326`.
 - [x] Historical note: previous deployment
   `27700f0f-46da-40a1-a9b1-ba192cdc02e3` validated successfully on
   2026-07-07, but it belongs to the earlier `1.9.0` release-prep state and
   should not be published as the `1.9.1` release.
-- [ ] Confirm Central Portal validation status for the fresh `1.9.1`
-  deployment.
+- [x] Confirm Central Portal validation status for the fresh `1.9.1`
+  deployment. Deployment `88ce19c0-3326-4152-a540-97194f903326` validated
+  successfully on 2026-07-07 and requires manual publishing.
 - [ ] Only after validation, publish/release the `1.9.1` deployment.
 
 ## Git Tagging and Post-Release
