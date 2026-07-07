@@ -197,6 +197,8 @@ is not a drop-in replacement for `java.util.regex` or PCRE.
 - Escapes: `\\`, `\.`, `\*`, `\+`, `\?`, `\[`, `\(`, `\n`, `\t`, `\r`, `\f`
 - Line anchors: `^` and `$` in line-oriented mode. `^` matches at buffer start
   and after `\n`; `$` matches at EOF and before `\n`.
+- Word boundaries: `\b` and `\B` using ASCII word semantics aligned with
+  `\w`: letters, digits, and underscore are word characters.
 - Pattern-prefix flags: `(?i)` for case-insensitive matching; `(?s)` is
   accepted because `.` is already DOTALL
 
@@ -206,15 +208,14 @@ These constructs are not part of the supported `1.9.x` surface:
 
 - Pure zero-width patterns such as `^$` are not yet part of the public support
   contract; match reporting currently assumes consumed spans.
-- Word boundaries `\b` and `\B`
 - Lookaround: `(?=...)`, `(?!...)`, `(?<=...)`, `(?<!...)`
 - Backreferences and capture-group features
 - Scoped inline flags such as `a(?i)b`
 - `MULTILINE` mode and a non-DOTALL `.` toggle
 
 Backreferences are intentionally out of scope because they are non-regular.
-Other limitations are candidates for the 2.0 work, especially the remaining
-boundary-assertion machinery.
+Other limitations are candidates for the 2.0 work, especially explicit mode
+semantics and pure zero-width match reporting.
 
 ## Release Notes and Roadmap
 

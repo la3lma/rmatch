@@ -17,8 +17,9 @@ package no.rmz.rmatch.compiler;
  * Callback interface used by the surface parser while reading a regular expression.
  *
  * <p>The parser recognizes syntax and reports semantic events here: literal characters, character
- * sets, alternation, quantifiers, groups, and anchors. Implementations decide how those events
- * become an executable representation. The production implementation builds NDFA fragments.
+ * sets, alternation, quantifiers, groups, anchors, and word boundaries. Implementations decide how
+ * those events become an executable representation. The production implementation builds NDFA
+ * fragments.
  */
 public interface AbstractRegexBuilder {
 
@@ -36,47 +37,55 @@ public interface AbstractRegexBuilder {
   void separateAlternatives();
 
   /**
-   * When parsing a char set (e.g. "[abc]", this method is invoked before the body of the char set.
+   * When parsing a character set such as {@code [abc]}, this method is invoked before the parser
+   * reads the body of the set.
    */
   void startCharSet();
 
   /**
-   * When parsing a char set, this method is invoked to indicate the end of the char set parsing.
+   * When parsing a character set, this method is invoked after the parser has read the full set.
    */
   void endCharSet();
 
   /**
-   * This method is invoked immediately after the invokation of the "startCharSet" method, if the
-   * char set is encoded as an "inverse" char set, i.e. one matching all other characters than the
-   * ones encoded by the content of the char set (e.g. "[^a]" would match anything except the letter
-   * "a"
+   * This method is invoked immediately after {@link #startCharSet()} when the set is negated.
+   *
+   * <p>For example, {@code [^a]} matches every character except {@code a}.
    */
   void invertCharSet();
 
   /**
-   * Add all the characters in the string are added to the char set.
+   * Add all characters in the supplied string to the current character set.
    *
-   * @param cs a string representing characters in a char seg.
+   * @param cs characters to add to the current set
    */
   void addToCharSet(final String cs);
 
   /**
-   * A range matching all characters greather than or equal to the startOfRange char, and less than
-   * or equal to the endOfRange.
+   * Add a closed character range to the current character set.
    *
-   * @param startOfRange Lirst character in range.
-   * @param endOfRange Last character in range.
+   * <p>The resulting range matches every character greater than or equal to {@code startOfRange}
+   * and less than or equal to {@code endOfRange}.
+   *
+   * @param startOfRange first character in the range
+   * @param endOfRange last character in the range
    */
   void addRangeToCharSet(final char startOfRange, final char endOfRange);
 
-  /** Add a pattern matching any char ("."). */
+  /** Add a pattern matching any character ({@code .}). */
   void addAnyChar();
 
-  /** Add a pattern matching the beginning of a line ("^"). */
+  /** Add a zero-width assertion matching the beginning of a line ({@code ^}). */
   void addBeginningOfLine();
 
-  /** Add a pattern matching the end of a line ("$"). */
+  /** Add a zero-width assertion matching the end of a line ({@code $}). */
   void addEndOfLine();
+
+  /** Add a zero-width assertion matching an ASCII word boundary ({@code \b}). */
+  void addWordBoundary();
+
+  /** Add a zero-width assertion matching the absence of an ASCII word boundary ({@code \B}). */
+  void addNonWordBoundary();
 
   /**
    * Add a pattern matching an optional, but singular element: E.g. "a?" denoting zero or one

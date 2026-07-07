@@ -7,19 +7,27 @@
 - Added the first zero-width assertion machinery for line anchors `^` and `$`.
   They now compile as assertion edges in the automaton rather than throwing at
   compile time.
+- Added word-boundary assertions `\b` and `\B`, aligned with rmatch's ASCII
+  `\w` shorthand semantics: letters, digits, and underscore are word
+  characters.
 - Added a dedicated line-anchor semantics suite covering buffer boundaries,
   newline boundaries, whole-line matching, alternation, grouping, and mixed
   anchored/unanchored pattern sets.
+- Added a dedicated word-boundary semantics suite covering whole-word,
+  prefix/suffix boundary, non-boundary, newline, underscore, and digit cases.
 - Kept assertion-aware matching on a separate path so ordinary pattern sets can
   continue using the existing no-context hot path.
 
-### Still required before merge/release
+### Validation
 
-- Run the full external `rmatch-perftest` branch-vs-main gate. Local smoke data
-  is recorded under `docs/benchmark-receipts/issue-269-line-anchors`, but is not
-  sufficient release evidence.
+- External `rmatch-perftest` branch-vs-main gate passed on agogo for
+  `\b`/`\B`: same generated data, correctness pass, identical match counts,
+  scanning ratios 0.911 on 1MB and 1.018 on 10MB.
+
+### Still required before release
+
 - Decide and document pure zero-width match semantics, for example `^$`.
-- Continue the broader #267 work for word boundaries and flag-mode behavior.
+- Continue the broader #267 work for input anchors and flag-mode behavior.
 
 ## 1.9.1 - pre-2.0 Maven Central release candidate
 

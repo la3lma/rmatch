@@ -29,83 +29,73 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
-/** Functional tests for the first anchor sub-issue: {@code ^} and {@code $}. */
-public class LineAnchorSemanticsTest {
+/** Functional tests for ASCII word-boundary assertions: {@code \b} and {@code \B}. */
+public class WordBoundarySemanticsTest {
 
-  private record Case(String description, String[] patterns, String input, String... expected) {}
+  private record Case(String description, String pattern, String input, String... expected) {}
 
   private static final List<Case> CASES =
       List.of(
-          new Case("start of buffer", p("^a"), "a ba", "^a@0-0"),
-          new Case("start after newline", p("^a"), "x\na ba\nabc", "^a@2-2", "^a@7-7"),
-          new Case("not after ordinary whitespace", p("^a"), "x a"),
-          new Case("end at eof", p("a$"), "ba", "a$@1-1"),
-          new Case("end before newline", p("a$"), "ba\nca ", "a$@1-1"),
-          new Case("line-start assertion does not match after a consumed char", p("a^"), "a\nab"),
-          new Case("line-end assertion does not match before a consumed char", p("$a"), "a\n"),
-          new Case("whole line", p("^ab$"), "ab\nxab\nabx\nab", "^ab$@0-1", "^ab$@11-12"),
           new Case(
-              "anchored and unanchored patterns mix",
-              p("^ab", "ab"),
-              "zab\nab",
-              "ab@1-2",
-              "^ab@4-5",
-              "ab@4-5"),
+              "whole word only",
+              "\\bcat\\b",
+              "cat category bobcat cat!",
+              "\\bcat\\b@0-2",
+              "\\bcat\\b@20-22"),
           new Case(
-              "line-end inside alternation is semantic",
-              p("foo$|foobar"),
-              "foobar foo\nfoo",
-              "foo$|foobar@0-5",
-              "foo$|foobar@7-9",
-              "foo$|foobar@11-13"),
+              "word boundary before prefix",
+              "\\bcat",
+              "cat category bobcat cat!",
+              "\\bcat@0-2",
+              "\\bcat@4-6",
+              "\\bcat@20-22"),
           new Case(
-              "line-start inside alternation is semantic",
-              p("^foo|bar"),
-              "xfoo\nbar foo",
-              "^foo|bar@5-7"),
+              "word boundary after suffix",
+              "cat\\b",
+              "cat category bobcat cat!",
+              "cat\\b@0-2",
+              "cat\\b@16-18",
+              "cat\\b@20-22"),
           new Case(
-              "anchors inside groups",
-              p("(^ab|cd$)"),
-              "ab\nxcd\ncd",
-              "(^ab|cd$)@0-1",
-              "(^ab|cd$)@4-5",
-              "(^ab|cd$)@7-8"));
+              "non-word-boundary on both sides",
+              "\\Bcat\\B",
+              "xcaty cat catz xcat",
+              "\\Bcat\\B@1-3"),
+          new Case(
+              "underscore and digits are word characters",
+              "\\bcat\\b",
+              "_cat cat_ cat2 cat",
+              "\\bcat\\b@15-17"),
+          new Case("boundary after newline", "\\bcat\\b", "dog\ncat\ncategory", "\\bcat\\b@4-6"));
 
-  private static String[] p(final String... patterns) {
-    return patterns;
+  private static Set<String> matchesOf(final String pattern, final String input) throws Exception {
+    return matchesOf(pattern, new RegexStringBuffer(input));
   }
 
-  private static Set<String> matchesOf(final String[] patterns, final String input)
-      throws Exception {
-    return matchesOf(patterns, new RegexStringBuffer(input));
-  }
-
-  private static Set<String> matchesOf(final String[] patterns, final Buffer input)
-      throws Exception {
+  private static Set<String> matchesOf(final String pattern, final Buffer input) throws Exception {
     final Matcher m = new MatcherImpl(new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
     final Set<String> found = new TreeSet<>();
-    for (final String pattern : patterns) {
-      final String pat = pattern;
-      m.add(
-          pat,
-          (b, start, end) -> {
-            synchronized (found) {
-              found.add(pat + "@" + start + "-" + end);
-            }
-          });
-    }
+    m.add(
+        pattern,
+        (b, start, end) -> {
+          synchronized (found) {
+            found.add(pattern + "@" + start + "-" + end);
+          }
+        });
     m.match(input);
     m.shutdown();
     return found;
   }
 
   @Test
-  void endAnchorWorksBeforeNewlineForCloneableNonLookaheadBuffer() throws Exception {
-    assertEquals(new TreeSet<>(List.of("a$@1-1")), matchesOf(p("a$"), new PlainBuffer("ba\nca ")));
+  void wordBoundaryWorksWithCloneableNonLookaheadBuffer() throws Exception {
+    assertEquals(
+        new TreeSet<>(List.of("\\bcat\\b@0-2", "\\bcat\\b@8-10")),
+        matchesOf("\\bcat\\b", new PlainBuffer("cat dog cat!")));
   }
 
   @TestFactory
-  List<DynamicTest> lineAnchors() {
+  List<DynamicTest> wordBoundaries() {
     final List<DynamicTest> tests = new ArrayList<>();
     for (final Case c : CASES) {
       tests.add(
@@ -113,7 +103,7 @@ public class LineAnchorSemanticsTest {
               c.description(),
               () ->
                   assertEquals(
-                      new TreeSet<>(List.of(c.expected())), matchesOf(c.patterns(), c.input()))));
+                      new TreeSet<>(List.of(c.expected())), matchesOf(c.pattern(), c.input()))));
     }
     return tests;
   }

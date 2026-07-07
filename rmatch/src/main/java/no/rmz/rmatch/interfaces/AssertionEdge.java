@@ -11,9 +11,11 @@ public record AssertionEdge(ZeroWidthAssertion assertion, NDFANode destination) 
    * Return whether this edge may be followed in the supplied input context.
    *
    * @param context current positional context
+   * @param afterCurrentChar whether the assertion is evaluated after consuming the current
+   *     character
    * @return {@code true} if the assertion is satisfied
    */
-  public boolean isSatisfiedBy(final MatchContext context) {
-    return assertion.matches(context);
+  public boolean isSatisfiedBy(final MatchContext context, final boolean afterCurrentChar) {
+    return assertion.matches(context, afterCurrentChar);
   }
 }
