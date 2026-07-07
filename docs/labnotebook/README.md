@@ -20,7 +20,7 @@ survived many attempted optimizations.
 | 2026-07-05 | [Semantics suite + syntax Tier-1](2026-07-05-semantics-suite-and-syntax-tier1.md) | **Complete, merged** — groups, escapes+classes, {m,n}, (?i); differential suite killed KB-2/4/5 |
 | 2026-07-05 | [Match-count determinism](2026-07-05-match-count-determinism.md) | **Resolved** — engine deterministic; racy `int++` in perftest harness (fixed, `587e78a`) |
 | 2026-07-07 | [Line anchors `^` and `$`](2026-07-07-line-anchors.md) | **Merged** — tests pass; agogo external perf gate green |
-| 2026-07-08 | [Word boundaries `\b` and `\B`](2026-07-08-word-boundaries.md) | **Functional branch** — focused tests pass; external perf gate still required |
+| 2026-07-08 | [Word boundaries `\b` and `\B`](2026-07-08-word-boundaries.md) | **Ready for review** — tests pass; agogo gate green at 0.911/1.018 |
 
 ## Known bugs
 

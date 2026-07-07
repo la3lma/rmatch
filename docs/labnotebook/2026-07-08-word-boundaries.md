@@ -48,5 +48,28 @@ The new suite covers:
 
 ## Performance gate
 
-Still required before merge: run the same external `rmatch-perftest` agogo gate
-used for issue #269 and compare against `main`.
+External `rmatch-perftest` agogo gate: PASS.
+
+Run id: `word-boundary-gate-20260708-002756`
+
+Baseline: `origin/main` at `a6afc125`.
+
+Candidate: `255e066f` on
+`u/la3lma/codex/issue-270-word-boundaries`.
+
+The candidate reused the exact baseline-generated patterns and corpora. SHA-256
+hashes matched for:
+
+- `patterns_10000.txt`
+- `corpus_1MB.txt`
+- `corpus_10MB.txt`
+
+Scanning ratios, candidate vs baseline:
+
+| Corpus | Baseline median | Candidate median | Ratio | Gate |
+|--------|-----------------|------------------|-------|------|
+| 1MB | 2689.924 ms | 2451.092 ms | 0.911 | PASS |
+| 10MB | 18231.954 ms | 18562.257 ms | 1.018 | PASS |
+
+Both runs reported `correctness_status=pass`, `failed_runs=0`,
+`patterns_failed=0`, and identical match counts.

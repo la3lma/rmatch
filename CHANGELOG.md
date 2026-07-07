@@ -18,11 +18,14 @@
 - Kept assertion-aware matching on a separate path so ordinary pattern sets can
   continue using the existing no-context hot path.
 
-### Still required before merge/release
+### Validation
 
-- Run the full external `rmatch-perftest` branch-vs-main gate. Local smoke data
-  is recorded under `docs/benchmark-receipts/issue-269-line-anchors`, but is not
-  sufficient release evidence.
+- External `rmatch-perftest` branch-vs-main gate passed on agogo for
+  `\b`/`\B`: same generated data, correctness pass, identical match counts,
+  scanning ratios 0.911 on 1MB and 1.018 on 10MB.
+
+### Still required before release
+
 - Decide and document pure zero-width match semantics, for example `^$`.
 - Continue the broader #267 work for input anchors and flag-mode behavior.
 
