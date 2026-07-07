@@ -1,7 +1,7 @@
 # 2026-07-07 — Line anchors `^` and `$`
 
-**Status:** Functional implementation on feature branch. Do not merge until the
-full external performance gate has been run.
+**Status:** Merged. Functional tests passed, and the external performance gate
+was run before merge.
 
 Branch: `u/la3lma/codex/issue-267-line-anchors`.
 
@@ -67,14 +67,15 @@ Temporary local sanity data is checked in under
 It shows identical match counts for a no-anchor workload, but also very high
 workstation variance. Treat it as a smoke receipt only.
 
-Before merge, run the real branch-vs-main performance gate with byte-identical
-inputs and explicit match-count equality.
+The real branch-vs-main performance gate was run before merge with
+byte-identical inputs and explicit match-count equality.
 
 ## Known descopes
 
 - Pure zero-width patterns such as `^$` are still not claimed as supported. The
   engine reports consumed spans today, so zero-width match reporting needs its
   own explicit design decision.
-- Word boundaries `\b`/`\B` remain in #267, not this sub-issue.
+- Word boundaries `\b`/`\B` were intentionally handled as the next sub-issue,
+  [#270](https://github.com/la3lma/rmatch/issues/270).
 - `MULTILINE`/DOTALL flag semantics are still future work. The current `^`/`$`
   behavior is line-oriented by default.

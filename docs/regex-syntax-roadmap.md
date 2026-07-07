@@ -11,8 +11,7 @@ compilation pipeline.
 `?` `*` `+`, counted quantifiers `{m}`/`{m,n}`/`{m,}`, grouping
 `( )`/`(?: )`, any-char `.`, character classes `[abc]`, ranges `[a-z]`,
 negation `[^abc]`, common escapes and shorthand classes, and prefix-level
-`(?i)`, and line anchors `^`/`$`. Word-boundary assertions `\b`/`\B` are in
-progress under [issue #270](https://github.com/la3lma/rmatch/issues/270).
+`(?i)`, line anchors `^`/`$`, and word-boundary assertions `\b`/`\B`.
 
 ## Candidate features
 
@@ -23,7 +22,7 @@ progress under [issue #270](https://github.com/la3lma/rmatch/issues/270).
 | **Counted quantifiers `{m}` `{m,n}` `{m,}`** | 1 | Compile by unrolling into existing operators: `X{2,4}` → `XX(X(X)?)?`, `X{2,}` → `XXX*`. NDFA size grows linearly with the bound, so impose an explicit expansion cap (java effectively caps too). Requires grouping to land first for sane parsing. Very common in real rules (`[0-9]{4}`, `\w{8,64}`), so this plus the two rows above probably covers the majority of wild patterns. |
 | **POSIX/Unicode classes `\p{Alpha}` etc.** | 1 (ASCII subset) | ASCII-range versions are plain char-class sugar — trivial. Full Unicode property classes are the same mechanism with much larger class sets; feasible but interacts with the ASCII-oriented fast paths (128-wide tables), so ship the ASCII subset first and benchmark the Unicode variant separately. |
 | **Case-insensitive matching (API flag, later `(?i)`)** | 2 | Compilable by case-folding every char/class node at compile time — a pattern-level transform, no engine change. An `add(pattern, flags, action)` API overload is trivial and covers the dominant use case; scoped inline `(?i)…(?-i)` is parser bookkeeping on top. Scan-path cost: slightly larger char classes, nothing structural. |
-| **Word boundary `\b` / `\B`** | 2 — active | Zero-width context assertion, same family as the existing `^`/`$` anchor machinery — which lives in the historically bug-prone ε/terminal zone (KB-1's neighborhood). Technically well-understood: condition transitions on the character-class of the previous/next input character. Active under [issue #270](https://github.com/la3lma/rmatch/issues/270), using ASCII word semantics aligned with rmatch `\w`. Very high value for word-list workloads: eliminates substring false positives ("cat" in "category") without any performance trick. |
+| **Word boundary `\b` / `\B`** | 2 — implemented | Zero-width context assertion, same family as the existing `^`/`$` anchor machinery. Implemented under [issue #270](https://github.com/la3lma/rmatch/issues/270), using ASCII word semantics aligned with rmatch `\w`. Very high value for word-list workloads: eliminates substring false positives ("cat" in "category") without any performance trick. |
 | **Input anchors `\A \z \Z`** | 2 | Straightforward variants of the existing anchor handling (buffer-start/buffer-end instead of line-start/line-end). Small, but same ε-zone caveat as `\b`: land with tests from the correctness campaign. |
 | **`DOTALL` / `MULTILINE` modes** | 2 | Mode switches that alter which char set `.` expands to and whether `^`/`$` bind to line or buffer boundaries — both are compile-time choices over existing node types. Needs the flags-capable `add()` API from the case-insensitivity row. |
 | **Lazy quantifiers `*?` `+?` `??`** | 2 | Curiously, for an automata engine this is not an NDFA change at all: laziness only changes WHICH match is reported (shortest-per-start instead of longest-per-start). Maps to "commit at first terminal hit instead of last" in the match-selection layer. The work is a semantics decision and its interaction with domination rules, not compilation. Prototype behind a per-pattern flag once the semantics spec from the correctness campaign exists. |
@@ -42,8 +41,9 @@ prefix case-insensitivity (`(?s)` accepted as no-op — `.` is DOTALL-always).
 The first anchor sub-issue,
 [`^`/`$` line anchors](https://github.com/la3lma/rmatch/issues/269), has merged.
 The second sub-issue, [`\b`/`\B` word boundaries](https://github.com/la3lma/rmatch/issues/270),
-is active. Remaining deliberately descoped anchor/mode machinery after 1.9.1:
-input anchors, MULTILINE, non-DOTALL toggle, and pure zero-width match reporting.
+is implemented and performance-gated. Remaining deliberately descoped
+anchor/mode machinery after 1.9.1: input anchors, MULTILINE, non-DOTALL
+toggle, and pure zero-width match reporting.
 Both sub-issues are split out from [issue #267](https://github.com/la3lma/rmatch/issues/267).
 Design is pinned in [docs/design/anchor-machinery.md](design/anchor-machinery.md).
 Along the way the new semantics suite exposed and fixed two ancient engine
@@ -55,7 +55,8 @@ bugs: negated sets were unsound, and matches could forget earlier final states.
 2. `\d \w \s` + escapes — biggest wild-pattern coverage per line of code.
 3. `{m,n}` with an explicit expansion bound.
 4. Case-insensitivity as an `add(pattern, flags, action)` API flag.
-5. `\b` / `\B` — active as issue #270.
+5. `\b` / `\B` — implemented under issue #270.
+6. Input anchors, mode flags, and pure zero-width reporting — future work.
 
 ## Measuring progress
 

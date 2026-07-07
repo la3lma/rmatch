@@ -1,7 +1,8 @@
 # Known Bugs
 
-Confirmed correctness bugs, kept here so they are not forgotten between
-campaigns. Each entry stays until a fix lands with a regression test.
+Confirmed correctness bugs and the fixes that closed them. Entries stay here
+after repair because they document failure modes the engine must not
+accidentally reintroduce.
 
 ## KB-1: quantifiers bound to the whole preceding literal (was: `ab?` does not match a lone `a`)
 
@@ -68,15 +69,16 @@ past the ender) was silently dropped when it died non-final. Matches now
 remember their largest final end and commit with it. Ancient — affected the
 eager engine identically.
 
-## Anchors `^` and `$` throw UnsupportedOperationException
+## Anchors `^` and `$` used to throw UnsupportedOperationException
 
-**Status:** FUNCTIONAL BRANCH. Tracked in
+**Status:** RESOLVED. Line anchors were fixed under
 [issue #269](https://github.com/la3lma/rmatch/issues/269), split out from
-[issue #267](https://github.com/la3lma/rmatch/issues/267). The compiler no
-longer throws for `^` and `$` on the feature branch, and the semantic test suite
-covers line-start/line-end behavior. Do not mark fully resolved until the
-external branch-vs-main performance gate passes and the branch is merged.
-Word boundaries and MULTILINE remain under the broader #267 machinery.
+[issue #267](https://github.com/la3lma/rmatch/issues/267). The compiler now
+accepts `^` and `$`, and the semantic test suite covers line-start/line-end
+behavior. Word boundaries `\b` and `\B` were implemented as the next assertion
+step under [issue #270](https://github.com/la3lma/rmatch/issues/270).
+MULTILINE, input anchors, and pure zero-width match reporting remain separate
+future work.
 
 **Plan (campaign):** Run a dedicated correctness campaign alongside the current
 implementation work: differential fuzzing against

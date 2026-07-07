@@ -346,7 +346,10 @@ the rest of the release work here as it becomes explicit.
 
 - [ ] Expand public API documentation for the callback coordinate convention.
 - [ ] Decide whether to introduce a friendlier public facade before `2.0.0`.
-- [ ] Decide final anchor/boundary assertion roadmap for `^`, `$`, `\b`, and
-  `\B`.
+- [x] Decide final anchor/boundary assertion roadmap for `^`, `$`, `\b`, and
+  `\B`. Result on 2026-07-08: line anchors and word-boundary assertions are
+  implemented, tested, documented, and performance-gated for the `1.9.2`
+  release lane. Remaining assertion/mode work is tracked separately: input
+  anchors, MULTILINE, non-DOTALL behavior, and pure zero-width match reporting.
 - [ ] Decide compatibility claims versus `java.util.regex` for `2.0.0`.
 - [ ] Decide how benchmark claims should be phrased and reproduced publicly.

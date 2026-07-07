@@ -2,6 +2,8 @@
 
 Date: 2026-07-08
 
+Status: implemented and ready for merge after PR review/CI.
+
 Branch: `u/la3lma/codex/issue-270-word-boundaries`
 
 Issue: [#270](https://github.com/la3lma/rmatch/issues/270)
@@ -25,6 +27,11 @@ Assertion evaluation is phase-aware:
 
 The word class deliberately matches rmatch's ASCII `\w` shorthand:
 `[A-Za-z0-9_]`.
+
+This completes the second small assertion-machinery sub-issue after line
+anchors. The remaining broader work is not "word boundaries are missing", but
+input anchors, mode flags, and the separate question of pure zero-width match
+reporting.
 
 ## Functional receipt
 
