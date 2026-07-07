@@ -48,6 +48,11 @@ the rest of the release work here as it becomes explicit.
   bumped JUnit, Mockito, Byte Buddy, Spotless, SpotBugs,
   compiler/dependency/resources/shade/assembly plugins, and added Maven
   Enforcer while leaving milestone/beta plugin lines alone.
+- [ ] Before every major release, run a dependency hygiene check: review direct
+  and transitive dependencies for known vulnerabilities, stale or unmaintained
+  packages, unnecessary public/transitive exposure, license compatibility and
+  reasonable upgrades to current stable versions; record the decisions and
+  validation evidence here.
 - [x] Remove obsolete Cobertura and FindBugs hooks; SpotBugs is the active
   static-analysis tool.
 - [x] Review Guava usage and decide whether it must remain a public transitive
