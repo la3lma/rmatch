@@ -19,6 +19,38 @@ the rest of the release work here as it becomes explicit.
   continue mainline development on `2.0-SNAPSHOT`; use the `1.9.x` release
   branch only for release-candidate stabilization.
 
+## 1.9.2 Release Run
+
+- [x] Sync release worktree from current `origin/main`. Result on 2026-07-08:
+  release branch `u/la3lma/codex/release-1.9.2` starts at `d9fe0eca`, the
+  merge of PR #277 with word-boundary assertions.
+- [x] Set release POM versions and README snippets to `1.9.2`.
+- [x] Convert `1.9.2` changelog notes from snapshot wording to release-candidate
+  wording, with pure zero-width reporting and flag-mode behavior documented as
+  future work rather than release blockers.
+- [x] Run full release preflight. Result on 2026-07-08:
+  `make release-central-preflight` succeeded.
+- [x] Run Central profile check without signing/uploading. Result on
+  2026-07-08: `make release-central-profile-check` succeeded.
+- [x] Run signed Central release-profile verify. Result on 2026-07-08:
+  `./mvnw -B -pl rmatch -am -Pcentral-release -DskipTests
+  -Dspotbugs.skip=true -Dgpg.keyname=55D9C01E75B1E582 verify` succeeded and
+  signed the parent POM plus rmatch POM, main JAR, source JAR, and Javadoc JAR.
+- [x] Verify `1.9.2` generated `.asc` signatures locally. Result on
+  2026-07-08: `gpg --verify` reported good signatures for all generated
+  release artifacts using key `9017955845408C9B4422B5DE55D9C01E75B1E582`.
+- [x] Inspect `1.9.2` JAR manifest, embedded POM properties, and Java baseline.
+  Result on 2026-07-08: manifest has `Java-Version: 21`, no application
+  `Main-Class`, embedded properties report `no.rmz:rmatch:1.9.2`, and
+  `javap` reports classfile major version 65.
+- [x] Verify `1.9.2` compile dependency tree. Result on 2026-07-08:
+  `no.rmz:rmatch` has only `org.ahocorasick:ahocorasick:0.6.3` in compile
+  scope.
+- [x] Run a downstream consumer smoke test after local install. Result on
+  2026-07-08: `/tmp/rmatch-192-consumer-smoke.XBPoXD`, command
+  `mvn -q clean verify exec:java -Dexec.mainClass=Example`, printed
+  `log-level match: WARN` and `user token match: user:alice`.
+
 ## Identity and Access
 
 - [x] Create a current GPG release-signing key.
@@ -179,10 +211,15 @@ the rest of the release work here as it becomes explicit.
   0 failures, 0 errors, 2 skipped; Spotless and SpotBugs passed in both
   modules. `javap` on `no.rmz.rmatch.impls.MatcherImpl` reported classfile
   major version 65.
-- [ ] Before release, audit source, tests, benchmark harnesses, and build/release
+- [x] Before release, audit source, tests, benchmark harnesses, and build/release
   scripts for deprecated method/API usage. Remove deprecated calls where
   practical; document and track any unavoidable remaining usage. Track this
-  under [issue #272](https://github.com/la3lma/rmatch/issues/272).
+  under [issue #272](https://github.com/la3lma/rmatch/issues/272). Result for
+  `1.9.2` on 2026-07-08: source/test/build grep found the public deprecated
+  `Buffer.getCurrentRestString()` method and its test implementation delegate.
+  This is deliberate compatibility surface and should not be removed during the
+  `1.9.2` release cut; keep the cleanup tracked under
+  [issue #272](https://github.com/la3lma/rmatch/issues/272).
 - [ ] Before 2.0, audit for unused methods, classes, and interfaces that are not
   part of the intended external API. Remove unused accidental/internal surface
   where safe; document any unused public surface that is intentionally retained.
