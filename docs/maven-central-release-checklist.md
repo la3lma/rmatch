@@ -129,11 +129,12 @@ the rest of the release work here as it becomes explicit.
   `make release-central-javadoc-check` verifies that the `central-release`
   profile creates the Javadoc jar that javadoc.io will consume after Central
   publication.
-- [ ] Post-release: after `1.9.1` is visible on javadoc.io, add a README badge
+- [x] Post-release: after `1.9.1` is visible on javadoc.io, add a README badge
   and API-doc link:
   `[![Javadocs](https://javadoc.io/badge2/no.rmz/rmatch/javadoc.svg)](https://javadoc.io/doc/no.rmz/rmatch)`.
-- [ ] Decide how prominently to describe `1.9.x` as pre-2.0 in README after
-  Central publication.
+- [x] Decide how prominently to describe `1.9.x` as pre-2.0 in README after
+  Central publication. Decision on 2026-07-07: keep the short paragraph near
+  the top of README, after the badges and before the performance rationale.
 
 ## Local Validation
 
@@ -272,8 +273,9 @@ the rest of the release work here as it becomes explicit.
   Result on 2026-07-07:
   `mvn -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true
   -Dgpg.keyname=55D9C01E75B1E582 deploy` succeeded.
-- [ ] Inspect the uploaded `1.9.1` deployment in Central Portal. Deployment id:
-  `88ce19c0-3326-4152-a540-97194f903326`.
+- [x] Inspect the uploaded `1.9.1` deployment in Central Portal. Deployment id:
+  `88ce19c0-3326-4152-a540-97194f903326`. User approved/published this
+  deployment on 2026-07-07.
 - [x] Historical note: previous deployment
   `27700f0f-46da-40a1-a9b1-ba192cdc02e3` validated successfully on
   2026-07-07, but it belongs to the earlier `1.9.0` release-prep state and
@@ -281,24 +283,44 @@ the rest of the release work here as it becomes explicit.
 - [x] Confirm Central Portal validation status for the fresh `1.9.1`
   deployment. Deployment `88ce19c0-3326-4152-a540-97194f903326` validated
   successfully on 2026-07-07 and requires manual publishing.
-- [ ] Only after validation, publish/release the `1.9.1` deployment.
+- [x] Only after validation, publish/release the `1.9.1` deployment. User
+  approved/published deployment `88ce19c0-3326-4152-a540-97194f903326` on
+  2026-07-07.
 
 ## Git Tagging and Post-Release
 
-- [ ] Create the `rmatch-1.9.1` tag only after Central validation is known.
-- [ ] Push the release tag.
-- [ ] Confirm artifact availability from Maven Central.
-- [ ] Confirm the MvnRepository page updates.
-- [ ] Update the MvnRepository banner at the bottom of any README or project
+- [x] Create the `rmatch-1.9.1` tag only after Central validation is known.
+  Result on 2026-07-07: annotated tag `rmatch-1.9.1` points at uploaded
+  release commit `5ee41857`.
+- [x] Push the release tag. Result on 2026-07-07:
+  `git push origin rmatch-1.9.1` succeeded.
+- [x] Confirm artifact availability from Maven Central. Result on 2026-07-07:
+  `https://repo.maven.apache.org/maven2/no/rmz/rmatch/1.9.1/rmatch-1.9.1.pom`
+  and the corresponding `-javadoc.jar` returned HTTP 200 after propagation.
+- [ ] Confirm the MvnRepository page updates. Status on 2026-07-07: still
+  pending external indexing; direct `mvnrepository.com` checks are also gated
+  by Cloudflare challenge from this environment.
+- [x] Update the MvnRepository banner at the bottom of any README or project
   page where it is still used, and make sure it points to the latest version on
-  Maven Central.
-- [ ] Update README if any "after publication" language should become present
-  tense.
-- [ ] After `1.9.1` is published and resolvable from Maven Central, rerun the
+  Maven Central. Result on 2026-07-07: no MvnRepository banner remains in
+  README; the active version badge points to Central directly.
+- [x] Update README if any "after publication" language should become present
+  tense. Result on 2026-07-07: README already describes `1.9.1` as the
+  current Maven Central line and now includes the javadoc.io badge.
+- [x] After `1.9.1` is published and resolvable from Maven Central, rerun the
   clean-repository scratch-project smoke test against Central using the README
-  `1.9.1` snippets.
-- [ ] Bump repository back to the agreed next development snapshot.
-- [ ] Add a post-release note summarizing exactly what was published.
+  `1.9.1` snippets. Result on 2026-07-07:
+  `/tmp/rmatch-191-central-consumer-smoke.DlvpZt` with empty Maven repository
+  `/tmp/rmatch-191-central-m2.KUwue0`, command
+  `mvn -Dmaven.repo.local=/tmp/rmatch-191-central-m2.KUwue0 -q clean verify
+  exec:java -Dexec.mainClass=Example`, printed
+  `user token match: user:alice` and `log-level match: WARN`.
+- [x] Bump repository back to the agreed next development snapshot. Result on
+  2026-07-07: no change needed in this dedicated `1.9.x` release branch; the
+  agreed next development line remains `2.0-SNAPSHOT` on mainline.
+- [x] Add a post-release note summarizing exactly what was published. Result on
+  2026-07-07: `CHANGELOG.md` records Maven Central publication date, coordinate
+  `no.rmz:rmatch:1.9.1`, tag `rmatch-1.9.1`, and release commit `5ee41857`.
 
 ## Known Follow-Up Release Work
 

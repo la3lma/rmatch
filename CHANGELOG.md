@@ -7,6 +7,9 @@ publication pass. It keeps the same pre-2.0 positioning, but improves the
 public dependency surface, Java baseline, documentation, and performance
 evidence.
 
+Published to Maven Central on 2026-07-07 as `no.rmz:rmatch:1.9.1`, with the
+Git tag `rmatch-1.9.1` pointing at release commit `5ee41857`.
+
 ### Highlights
 
 - Lowered the public Java baseline to Java 21 by compiling with

@@ -1,6 +1,7 @@
 # rmatch
 
 [![Maven Central](https://img.shields.io/maven-central/v/no.rmz/rmatch.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/no.rmz/rmatch)
+[![Javadocs](https://javadoc.io/badge2/no.rmz/rmatch/javadoc.svg)](https://javadoc.io/doc/no.rmz/rmatch)
 
 `rmatch` is a Java library for matching many regular expressions against large
 text buffers with one pass-oriented matching pipeline. It is aimed at workloads
