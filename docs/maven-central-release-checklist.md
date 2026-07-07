@@ -215,9 +215,14 @@ the rest of the release work here as it becomes explicit.
   `mvn -q clean verify exec:java`. Result on 2026-07-05: build success;
   output included `user token match: user:alice` and
   `log-level match: WARN`.
-- [ ] Repeat the external consumer smoke test after Central publication, using
+- [x] Repeat the external consumer smoke test after Central publication, using
   the artifact resolved from Maven Central rather than the local Maven
-  repository.
+  repository. Result on 2026-07-07:
+  `/tmp/rmatch-191-central-consumer-smoke.DlvpZt` with empty Maven repository
+  `/tmp/rmatch-191-central-m2.KUwue0`, command
+  `mvn -Dmaven.repo.local=/tmp/rmatch-191-central-m2.KUwue0 -q clean verify
+  exec:java -Dexec.mainClass=Example`, printed
+  `user token match: user:alice` and `log-level match: WARN`.
 - [x] Run an external consumer smoke test for `1.9.1-SNAPSHOT` using a clean
   temporary Maven project outside the repository. Result on 2026-07-07:
   `/tmp/rmatch-191-consumer-smoke.xqqeOm`, command
