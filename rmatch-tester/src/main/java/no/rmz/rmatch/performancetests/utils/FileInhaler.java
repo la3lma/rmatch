@@ -13,8 +13,8 @@
  */
 package no.rmz.rmatch.performancetests.utils;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.exit;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

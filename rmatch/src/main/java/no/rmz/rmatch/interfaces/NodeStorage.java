@@ -17,14 +17,13 @@ import java.util.Collection;
 import java.util.SortedSet;
 
 /**
- * Implements a "subset construction mechanism". When matching a regular expression, the expression
- * is first compiled into a nondeterministic finite automaton. That automaton is then
- * opportunistically (incrementally, whatever) compiled into a deterministic finite automaton. Now,
- * the number of determinstic nodes is O(2^N) where N is the number of nondeterminstic nodes, so
- * making them all is, for large regular expressions, usually not an option. That is why we are
- * opportunistic and cacheing etc.
+ * Engine-internal storage for incremental subset construction.
  *
- * <p>The NodeStorage is the interface used to abstract this mechanism away.
+ * <p>When a pattern is compiled, rmatch first builds nondeterministic automaton nodes and then
+ * creates deterministic nodes lazily as input is scanned. This keeps large pattern sets from
+ * requiring all theoretical deterministic states up front. The public {@link
+ * Matcher#getNodeStorage} hook exists for diagnostics and graph/debug tooling; application code
+ * does not need to use this interface for normal matching.
  */
 public interface NodeStorage {
 

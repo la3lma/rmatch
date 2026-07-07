@@ -15,47 +15,78 @@ package no.rmz.rmatch.interfaces;
 
 import no.rmz.rmatch.compiler.RegexpParserException;
 
-/** A facade for the components of the matcher engine. */
+/**
+ * Main public API for registering regular expressions and matching them against buffers.
+ *
+ * <p>A matcher is normally used in three steps:
+ *
+ * <ol>
+ *   <li>Register one or more patterns with {@link #add(String, Action)}.
+ *   <li>Call {@link #match(Buffer)} for each input buffer that should be scanned.
+ *   <li>Call {@link #shutdown()} when the matcher is no longer needed.
+ * </ol>
+ *
+ * <p>rmatch is designed for workloads where many patterns are reused against large inputs. For a
+ * single small pattern and a single small string, {@code java.util.regex} is usually simpler.
+ *
+ * <p>The regular-expression syntax is intentionally a supported subset of Java regular expressions;
+ * see the project README for the current list. Match callbacks receive inclusive start/end offsets,
+ * while {@link Buffer#getString(int, int)} uses Java substring-style exclusive end offsets.
+ */
 public interface Matcher {
 
   /**
-   * Add a regular expression to the matcher, and associate it with an action to be run when the
-   * expression matches some input.
+   * Register a regular expression and the action to invoke whenever that expression matches.
    *
-   * @param r A regular expression.
-   * @param a An action to run.
-   * @throws no.rmz.rmatch.compiler.RegexpParserException
+   * <p>The same action may be registered for more than one expression. Implementations may invoke
+   * actions concurrently, so action implementations must be thread-safe unless the caller knows the
+   * concrete matcher is single-threaded.
+   *
+   * @param r regular-expression text in the rmatch supported syntax subset
+   * @param a action to run for each match
+   * @throws RegexpParserException if {@code r} cannot be parsed by the supported rmatch syntax
    */
   void add(final String r, final Action a) throws RegexpParserException;
 
   /**
-   * Remove an association between a regular expression and an action from the matcher.
+   * Remove one association between a regular expression and an action.
    *
-   * @param r A regular expression.
-   * @param a An action.
+   * <p>If the same expression has several actions, only the supplied expression/action pair is
+   * removed. Removing a pair that is not present is a no-op.
+   *
+   * @param r regular-expression text previously registered with {@link #add(String, Action)}
+   * @param a action previously associated with {@code r}
    */
   void remove(final String r, final Action a);
 
   /**
-   * Match all the regexps that are presently managed by the matcher and run all the corresponding
-   * actions when matches are found.
+   * Scan the supplied buffer with all currently registered expressions.
    *
-   * @param b a buffer that will provide the input to be matched against.
+   * <p>Actions are invoked during the scan. Match callbacks receive the same buffer instance (or a
+   * clone of it for partitioned implementations) plus inclusive start/end offsets for the matched
+   * text.
+   *
+   * @param b input buffer to scan; callers normally use {@code new RegexStringBuffer(text)}
    */
   void match(final Buffer b);
 
   /**
-   * Get the NodeStorage instance used by this matcher.
+   * Return the internal node storage used by this matcher.
    *
-   * @return a NodeStorage instance.
+   * <p>This method is mainly useful for diagnostics and graph/debug tooling. It is not needed for
+   * normal matching.
+   *
+   * @return internal node storage for this matcher
    */
   NodeStorage getNodeStorage();
 
   /**
-   * Shut the matcher down nicely. If the matcher has internal threads, or threadpools or anything
-   * else that needs an orderly shutdown, then this method will handle that shutdown.
+   * Release resources owned by the matcher.
    *
-   * @throws InterruptedException when bad things happen.
+   * <p>Single-threaded implementations may have nothing to do. Partitioned implementations use
+   * worker threads and should be shut down when the matcher is no longer needed.
+   *
+   * @throws InterruptedException if shutdown waits for worker threads and is interrupted
    */
   void shutdown() throws InterruptedException;
 }

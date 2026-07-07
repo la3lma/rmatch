@@ -16,8 +16,12 @@ package no.rmz.rmatch.interfaces;
 import no.rmz.rmatch.impls.DominationHeap;
 
 /**
- * A representation of a regular expression. Regexps are comparable to each other, but essentially
- * that is just comparison of the regexp strings.
+ * Engine-internal compiled regular-expression state.
+ *
+ * <p>This type is public because the matcher implementation and older diagnostic tools expose it.
+ * Application code should normally treat patterns as strings passed to {@link Matcher#add(String,
+ * Action)}. Implementing or mutating {@code Regexp} directly is not required for ordinary rmatch
+ * use.
  */
 public interface Regexp extends Comparable<Regexp> {
 

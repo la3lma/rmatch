@@ -17,20 +17,23 @@ import java.util.Comparator;
 import java.util.Set;
 
 /**
- * A set of matches that is being processed by a matcher. The set of matches all start at the same
- * position in the input but may end at different positions.
+ * Engine-internal group of match candidates that share the same input start position.
+ *
+ * <p>This interface is public for historical and diagnostic reasons. It is not part of the normal
+ * application API; applications should register {@link Action} callbacks with {@link Matcher}
+ * instead of interacting with {@code MatchSet} directly.
  */
 public interface MatchSet {
 
   /**
-   * XXX Not really sure what this method does. Review and report back.
+   * Commit any final, undominated matches from this set to the supplied target.
    *
    * @param target the recipient of matches that are committed.
    */
   void finalCommit(final RunnableMatchesHolder target);
 
   /**
-   * Get all of the matches that are currently associated with the MatchSet.
+   * Return the matches currently associated with this set.
    *
    * @return a set of Match instances.
    */
@@ -58,11 +61,11 @@ public interface MatchSet {
   long getId();
 
   /**
-   * Will progress the match-set one character ahead. All the matches that can be continued will be
-   * continued, and those that can't will be aborted. The matches that can be correctly terminated
-   * will be added to the set of runnable matches through the runnableMatches instance, but only
-   * those matches that is the "dominant" one will eventually run, the others will be discarded
-   * silently.
+   * Progress this match set one character ahead.
+   *
+   * <p>Matches that can continue are advanced, matches that cannot continue are abandoned, and
+   * matches that can validly terminate are staged in {@code runnableMatches}. If several matches
+   * overlap for the same expression, domination rules decide which callbacks are eventually run.
    *
    * @param ns A node storage instance used to get new DFA nodes.
    * @param currentChar The current char.

@@ -13,27 +13,31 @@
  */
 package no.rmz.rmatch.interfaces;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import no.rmz.rmatch.impls.RegexpImpl;
 
 /**
- * A producer of regexp instances. This is an useful interface to have when testing various things.
- * In production the default DEFAULT_REGEXP_FACTORY will be used all the time.
+ * Factory for engine-internal {@link Regexp} instances.
+ *
+ * <p>Most applications never need this interface. It exists so tests, diagnostics, and custom
+ * matcher construction can supply alternative regular-expression implementations. Ordinary code
+ * should create matchers through {@code MatcherFactory.newMatcher()} or {@code new MatcherImpl()}.
  */
 public interface RegexpFactory {
 
   /**
-   * Generate a new regular expression instance.
+   * Create a new regular-expression state object for the supplied pattern text.
    *
-   * @param regexpString A string that will be interpreted as a regular expression.
-   * @return A Regexp instance.
+   * @param regexpString pattern text
+   * @return regular-expression state object
    */
   Regexp newRegexp(final String regexpString);
 
   /**
-   * The default regexp factory that is used in production. It works by making a RegexpImpl
-   * instance.
+   * Default factory used by production matchers.
+   *
+   * <p>The factory creates {@link RegexpImpl} instances.
    */
   RegexpFactory DEFAULT_REGEXP_FACTORY =
       (final String regexpString) -> {

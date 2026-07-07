@@ -17,7 +17,7 @@ Two new suites now pin the engine's ground truth:
 
 The differential found two ancient engine bugs on its FIRST run:
 
-- **KB-4 — negated sets unsound by construction.** `[^a]` compiled as
+- **Negated sets were unsound by construction.** `[^a]` compiled as
   "match anything, also route 'a' to a FailNode and let the engine kill the
   match later". The failing flag was never honored on the first node (so
   `[^a]` matched `'a'`), and one failing path killed matches whose other NDFA
@@ -31,20 +31,22 @@ The differential found two ancient engine bugs on its FIRST run:
   the memory from a stale flag (off-by-one ends) — the differential caught
   that too, within seconds.
 
-Also registered **KB-3**: `^`/`$` throw `UnsupportedOperationException`
-despite years of README claims. README corrected.
+Also registered [issue #267](https://github.com/la3lma/rmatch/issues/267):
+`^`/`$` throw `UnsupportedOperationException` despite years of README claims.
+README corrected.
 
 ## The features (each: red tests → green → verify → checksums)
 
 | feature | notes |
 |---|---|
 | `( )` and `(?: )` | Stack of AlternativesBuilders; groups are quantifiable atoms; nesting; loud errors for unbalanced/unsupported constructs. 12 tests. |
-| Escapes + `\d \D \w \W \s \S` | KB-2 (inverted condition made every escape throw) fixed en route; classes are charset sugar (uppercase = KB-4 complement machinery); escapes work inside sets. 17 tests. |
+| Escapes + `\d \D \w \W \s \S` | The inverted escape-condition bug was fixed en route; classes are charset sugar, and uppercase forms use the same complement machinery as negated sets; escapes work inside sets. 17 tests. |
 | `{m}` `{m,n}` `{m,}` | Replay expansion: parser tracks each atom's source span and re-parses it; `X{2,4}` ≡ `XXX?X?`; cap 1000. Works on chars, sets, classes, groups. 13 tests. |
 | `(?i)` prefix (+ `(?s)` no-op) | Compile-time case folding of literals/sets/ranges; replay inherits the flag; prefix-only because pattern identity is the raw string. 11 tests. |
 
 Descoped, documented in the roadmap: `\b`/`\B`, MULTILINE, non-DOTALL toggle —
-all wait on the anchor machinery KB-3 shows doesn't exist yet.
+all wait on the anchor machinery tracked in
+[issue #267](https://github.com/la3lma/rmatch/issues/267).
 
 ## Receipts
 
@@ -63,8 +65,9 @@ all wait on the anchor machinery KB-3 shows doesn't exist yet.
 
 ## Fallout / next
 
-- KNOWN-BUGS: KB-2, KB-4, KB-5 closed; KB-3 (anchors) open with a design
-  note — it gates `\b`, MULTILINE, and honest README anchors.
+- KNOWN-BUGS: escape handling, negated sets, and final-state retention closed;
+  the anchor issue remains open with a design note — it gates `\b`, MULTILINE,
+  and honest README anchors.
 - The adversarial battery grew again (gremlin doctrine): the differential
   generator IS an adversarial workload factory now.
 - Syntax coverage yardstick (gitleaks/grok %) still to be wired up.

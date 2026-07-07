@@ -15,13 +15,54 @@
     <packaging>jar</packaging>
 
     <name>rmatch-tester</name>
-    <url>https://maven.apache.org</url>
+    <description>Local performance and experiment harnesses for rmatch. This module is not part of the Maven Central release lane.</description>
+    <url>https://github.com/la3lma/rmatch</url>
 
     <dependencies>
         <dependency>
             <groupId>no.rmz</groupId>
             <artifactId>rmatch</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-commons</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -30,6 +71,7 @@
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>${mavenAssemblyPlugin.version}</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -100,7 +142,7 @@
                         <manifest>
                             <classpathPrefix>lib/</classpathPrefix>
                             <addClasspath>true</addClasspath>
-                            <mainClass>no.rmz.App</mainClass>
+                            <mainClass>no.rmz.rmatch.performancetests.BenchmarkLargeCorpus</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -127,56 +169,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.5.1</version>
-                <configuration>
-                    <instrumentation>
-                        <ignores>
-                            <ignore>com.example.boringcode.*</ignore>
-                        </ignores>
-                        <excludes>
-                            <exclude>no/rmz/rmatch/**/*Test.class</exclude>
-                        </excludes>
-                    </instrumentation>
-                    <check/>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
-
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>${mavenFindbugsPlugin.version}</version>
-                <configuration>
-                    <xmlOutput>true</xmlOutput>
-                    <!-- Optional directory to put findbugs xdoc xml report -->
-                    <xmlOutputDirectory>target/site</xmlOutputDirectory>
-                </configuration>
-            </plugin>
-
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${mavenCheckstylePlugin.version}</version>
-                <configuration>
-                    <configLocation>sun_checks.xml</configLocation>
-                </configuration>
-            </plugin>
-        </plugins>
-
-    </reporting>
 </project>

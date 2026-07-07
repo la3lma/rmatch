@@ -20,7 +20,15 @@ import java.util.logging.Logger;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 
-/** Simple utility action used to count the number of something. */
+/**
+ * Thread-safe {@link Action} implementation that counts matches.
+ *
+ * <p>This is mainly a convenience action for examples, smoke tests, diagnostics, and simple
+ * throughput probes. It is safe to use with the partitioned matcher returned by {@code
+ * MatcherFactory.newMatcher()} because the counter is atomic. For application code that needs the
+ * matched text, implement {@link Action} directly and use {@link Buffer#getString(int, int)} with
+ * the callback offsets.
+ */
 public final class CounterAction implements Action {
 
   /** Our dear old Log. */
@@ -107,9 +115,9 @@ public final class CounterAction implements Action {
   }
 
   /**
-   * Return the number of matches that has been performed on this action.
+   * Return the number of matches observed by this action instance.
    *
-   * @return an integer.
+   * @return match count
    */
   public int getCounter() {
     return counter.get();

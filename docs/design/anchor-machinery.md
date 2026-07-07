@@ -3,9 +3,10 @@
 **Status: ON HOLD** (rmz, 2026-07-05). Design pinned so the campaign can start
 cold when its turn comes. Do not implement while other issues take priority.
 
-Covers: `^`, `$` (KB-3), MULTILINE, `\b`, `\B`, and the groundwork a
-non-DOTALL `.` toggle would share. See also `docs/regex-syntax-roadmap.md`
-and `docs/labnotebook/KNOWN-BUGS.md` (KB-3).
+Covers: `^`, `$`, MULTILINE, `\b`, `\B`, and the groundwork a non-DOTALL `.`
+toggle would share. See also
+[issue #267](https://github.com/la3lma/rmatch/issues/267),
+`docs/regex-syntax-roadmap.md`, and `docs/labnotebook/KNOWN-BUGS.md`.
 
 ## Problem statement
 
@@ -17,7 +18,7 @@ question is where that context lives without harming the caches that carry
 the engine's performance (per-node `DFANode[128]` transition tables, cached
 terminal sets, subset-construction cache, two-char start filter).
 
-## Hard constraint learned from KB-4
+## Hard constraint learned from the negated-set bug
 
 Assertions MUST be part of the transition/acceptance function itself —
 never a post-hoc "kill the match afterwards" mechanism. The old
@@ -54,8 +55,8 @@ machinery already exists:
 
 - `LookaheadBuffer.peek()` (built for the two-char start filter) supplies
   text[i+1] at step i; peek() == null is the EOT context.
-- `MatchImpl.lastFinalEnd` (built for KB-5) already commits matches at a
-  remembered earlier end.
+- `MatchImpl.lastFinalEnd` already commits matches at a remembered earlier
+  end.
 
 Terminal sets per DFA node become a small array indexed by next-char class
 (newline-or-EOF / word / other) instead of a single set — same caching
@@ -89,7 +90,7 @@ per lab protocol, not assumed.
   `^ $ \b` — extend the generator with assertions at each campaign step.
 - Adversarial battery additions: anchors inside alternations, groups and
   counted quantifiers; `foo\b|foobar`-style patterns aimed specifically at
-  the KB-4 ghost; assertion-dense pattern sets mixed with plain literals to
+  the old failing-path bug; assertion-dense pattern sets mixed with plain literals to
   verify pay-for-use isolation.
 
 ## Known hard corners (named before implementation)
@@ -109,7 +110,8 @@ per lab protocol, not assumed.
 
 ## Campaign shape (when taken off hold)
 
-1. `^` / `$` — fixes KB-3; K=2 warm-up; README anchors become true again.
+1. `^` / `$` — fixes [issue #267](https://github.com/la3lma/rmatch/issues/267);
+   K=2 warm-up; README anchors become true again.
 2. MULTILINE — a flag on the anchors, trivial after step 1.
 3. `\b` / `\B` — K=4 + end-classes; the general case.
 4. (Shared groundwork then enables a non-DOTALL `.` toggle as a flag.)

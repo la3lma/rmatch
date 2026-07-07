@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.performancetests;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 import static no.rmz.rmatch.performancetests.utils.MatcherBenchmarker.matchComparator;
 
 import java.io.PrintStream;

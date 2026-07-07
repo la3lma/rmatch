@@ -19,8 +19,8 @@ import no.rmz.rmatch.interfaces.NDFANode;
 
 /**
  * Utility class for mapping between NDFANode objects and their compressed integer representations.
- * This enables efficient conversion between legacy SortedSet<NDFANode> and new compressed int[]
- * representations.
+ * This enables efficient conversion between legacy {@code SortedSet<NDFANode>} and new compressed
+ * {@code int[]} representations.
  */
 public final class NDFANodeIdMapper {
 

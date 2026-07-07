@@ -9,10 +9,10 @@
 
     <packaging>pom</packaging>
 
-    <name>Umbrella project for the regex matcher subprojects.</name>
+    <name>rmatch parent</name>
     <url>https://github.com/la3lma/rmatch</url>
 
-    <description>Regular expression matcher</description>
+    <description>Parent POM for rmatch, a Java multi-pattern regular expression matcher.</description>
     <organization>
         <name>Rmz</name>
         <url>https://www.rmz.no/</url>
@@ -36,37 +36,33 @@
 
     <properties>
         <maven.plugin.validation>DEFAULT</maven.plugin.validation>
-        <java.version>25</java.version>
-        <errorprone.version>2.37.0</errorprone.version>
-        <guava.version>33.5.0-jre</guava.version>
-        <jetbrains-annotations.version>26.0.2-1</jetbrains-annotations.version>
+        <java.version>21</java.version>
         <ahocorasick.version>0.6.3</ahocorasick.version>
         <jmh.version>1.37</jmh.version>
-        <junit-jupiter.version>5.11.4</junit-jupiter.version>
-        <junit-platform.version>6.0.1</junit-platform.version>
+        <junit-jupiter.version>6.1.1</junit-jupiter.version>
+        <junit-platform.version>6.1.1</junit-platform.version>
         <mavenCheckstylePlugin.version>3.6.0</mavenCheckstylePlugin.version>
-        <mavenCoberturaPlugin.version>2.5.1</mavenCoberturaPlugin.version>
-        <mavenCompilerPlugin.version>3.14.1</mavenCompilerPlugin.version>
-        <mavenDependencyPlugin.version>3.9.0</mavenDependencyPlugin.version>
-
-        <mavenFindbugsPlugin.version>3.0.5</mavenFindbugsPlugin.version>
-        <mavenResourcesPlugin.version>3.4.0</mavenResourcesPlugin.version>
-        <mavenShadePlugin.version>3.6.1</mavenShadePlugin.version>
+        <mavenAssemblyPlugin.version>3.8.0</mavenAssemblyPlugin.version>
+        <mavenCompilerPlugin.version>3.15.0</mavenCompilerPlugin.version>
+        <mavenDependencyPlugin.version>3.11.0</mavenDependencyPlugin.version>
+        <mavenEnforcerPlugin.version>3.6.3</mavenEnforcerPlugin.version>
+        <mavenResourcesPlugin.version>3.5.0</mavenResourcesPlugin.version>
+        <mavenShadePlugin.version>3.6.2</mavenShadePlugin.version>
         <mavenJarPlugin.version>3.5.0</mavenJarPlugin.version>
         <mavenReleasePlugin.version>3.3.1</mavenReleasePlugin.version>
 
         <!-- Code quality plugins -->
-        <spotless.version>3.1.0</spotless.version>
-        <spotbugs.version>4.9.8.2</spotbugs.version>
+        <spotless.version>3.8.0</spotless.version>
+        <spotbugs.version>4.10.2.0</spotbugs.version>
 
         <mavenSourcePlugin.version>3.4.0</mavenSourcePlugin.version>
         <mavenJavadocPlugin.version>3.12.0</mavenJavadocPlugin.version>
         <mavenGpgPlugin.version>3.2.8</mavenGpgPlugin.version>
-        <centralPublishingMavenPlugin.version>0.9.0</centralPublishingMavenPlugin.version>
+        <centralPublishingMavenPlugin.version>0.11.0</centralPublishingMavenPlugin.version>
         <mavenSurefire.version>3.5.4</mavenSurefire.version>
-        <byteBuddy.version>1.17.7</byteBuddy.version>
-        <mockitoCore.version>5.21.0</mockitoCore.version>
-        <mockitoJunitJupiter.version>5.21.0</mockitoJunitJupiter.version>
+        <byteBuddy.version>1.18.11</byteBuddy.version>
+        <mockitoCore.version>5.23.0</mockitoCore.version>
+        <mockitoJunitJupiter.version>5.23.0</mockitoJunitJupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -127,17 +123,6 @@
 
             <!-- Third-party Libraries -->
             <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains</groupId>
-                <artifactId>annotations</artifactId>
-                <version>${jetbrains-annotations.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.ahocorasick</groupId>
                 <artifactId>ahocorasick</artifactId>
                 <version>${ahocorasick.version}</version>
@@ -158,63 +143,13 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- Dependencies that ALL submodules inherit -->
-    <dependencies>
-        <!-- All submodules get these testing dependencies -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy-agent</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-commons</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- All submodules get Guava -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-    </dependencies>
-
-
     <modules>
         <module>rmatch</module>
         <module>rmatch-tester</module>
     </modules>
     <scm>
-        <connection>scm:git:git@github.com:la3lma/rmatch.git</connection>
-        <url>scm:git:git@github.com:la3lma/rmatch.git</url>
+        <connection>scm:git:https://github.com/la3lma/rmatch.git</connection>
+        <url>https://github.com/la3lma/rmatch</url>
         <developerConnection>scm:git:git@github.com:la3lma/rmatch.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
@@ -237,8 +172,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${mavenCompilerPlugin.version}</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <release>${java.version}</release>
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
                             <arg>-verbose</arg>
@@ -268,6 +202,11 @@
                 </plugin>
 
                 <!-- Standard Maven plugins -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${mavenAssemblyPlugin.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
@@ -308,9 +247,34 @@
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${mavenDependencyPlugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${mavenEnforcerPlugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-build-toolchain</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.9.0,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
@@ -356,7 +320,7 @@
                         <configuration>
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>false</autoPublish>
-                            <waitUntil>published</waitUntil>
+                            <waitUntil>VALIDATED</waitUntil>
                         </configuration>
                     </plugin>
 

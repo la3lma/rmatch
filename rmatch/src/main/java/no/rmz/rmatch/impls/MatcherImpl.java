@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +23,17 @@ import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 
 /**
- * An implementation of the Matcher interface that hooks together various component that together
- * makes up a real matcher.
+ * Single-engine {@link Matcher} implementation used by the README examples and by partitioned
+ * matchers internally.
+ *
+ * <p>{@code MatcherImpl} is a good direct choice when the caller wants a simple matcher instance
+ * without worker-thread partitioning. Register expressions with {@link #add(String, Action)}, scan
+ * input with {@link #match(Buffer)}, and call {@link #shutdown()} when finished. The default
+ * constructor uses the fast-path engine unless the {@code rmatch.engine} system property selects
+ * another engine variant.
+ *
+ * <p>Callbacks receive inclusive start/end offsets. Use {@code buffer.getString(start, end + 1)} to
+ * recover the matched text.
  */
 public final class MatcherImpl implements Matcher {
 
@@ -51,20 +60,19 @@ public final class MatcherImpl implements Matcher {
   /** Indicates that the engine-specific prefilter needs to be rebuilt. */
   private volatile boolean prefilterDirty = false;
 
-  /**
-   * Create a new matcher using the default compiler and regexp factory. This is usually a good
-   * choice for production use.
-   */
+  /** Create a new matcher using the default compiler, regexp factory, and engine selection. */
   public MatcherImpl() {
     this(new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
   }
 
   /**
-   * This is useful for testing when we sometimes want to inject mocked compilers and regexp
-   * factories.
+   * Create a matcher with explicitly supplied compiler and regexp factory.
    *
-   * @param compiler A compiler to use.
-   * @param regexpFactory A regexp factory to use.
+   * <p>This constructor is primarily useful for tests and experiments. Normal users should prefer
+   * {@link #MatcherImpl()} or {@link MatcherFactory#newMatcher()}.
+   *
+   * @param compiler compiler used to turn registered expressions into automata
+   * @param regexpFactory factory used to create internal regexp objects
    */
   public MatcherImpl(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
     /** The compiler we will use. */
@@ -83,6 +91,13 @@ public final class MatcherImpl implements Matcher {
     prefilterDirty = needsPrefilterConfiguration();
   }
 
+  /**
+   * Register an expression/action pair.
+   *
+   * @param r regular-expression text in the supported rmatch syntax subset
+   * @param a action to run for each match
+   * @throws RegexpParserException if {@code r} cannot be parsed
+   */
   @Override
   public void add(final String r, final Action a) throws RegexpParserException {
     synchronized (rs) {
@@ -94,6 +109,12 @@ public final class MatcherImpl implements Matcher {
     }
   }
 
+  /**
+   * Remove an expression/action pair from this matcher.
+   *
+   * @param r regular-expression text previously registered with this matcher
+   * @param a action previously associated with {@code r}
+   */
   @Override
   public void remove(final String r, final Action a) {
     synchronized (rs) {
@@ -160,6 +181,15 @@ public final class MatcherImpl implements Matcher {
     legacyEngine.configurePrefilter(patterns, flags, regexpMappings);
   }
 
+  /**
+   * Scan the supplied buffer and invoke actions for matching expressions.
+   *
+   * <p>This implementation synchronizes access to the underlying engine while matching. Do not
+   * mutate the registered expression set from another thread while relying on deterministic match
+   * timing.
+   *
+   * @param b input buffer to scan
+   */
   @Override
   public void match(final Buffer b) {
     ensurePrefilterConfigured();
@@ -169,11 +199,17 @@ public final class MatcherImpl implements Matcher {
     }
   }
 
+  /**
+   * Return the internal node storage used by this matcher.
+   *
+   * @return diagnostic node storage; normal callers do not need this
+   */
   @Override
   public NodeStorage getNodeStorage() {
     return ns;
   }
 
+  /** Release matcher resources. This single-engine implementation currently owns no worker pool. */
   @Override
   public void shutdown() {}
 

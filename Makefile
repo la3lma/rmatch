@@ -15,7 +15,7 @@ GATE_SKIP_REBUILD ?= 0
 
 .DEFAULT_GOAL := help
 
-.PHONY: help main main-local main-docker build test clean profile fmt spotless spotbugs
+.PHONY: help main main-local main-docker build test clean profile fmt spotless spotbugs javadocs release-central-javadoc-check
 .PHONY: perf-local-setup perf-local-smoke perf-local-baseline perf-local-candidate perf-docker-smoke
 .PHONY: gate-baseline gate-candidate
 .PHONY: release-central-preflight release-central-profile-check release-central-publish
@@ -67,6 +67,13 @@ spotless: ## [core] Apply spotless formatting
 
 spotbugs: ## [core] Run spotbugs checks
 	$(MVN) -q -B spotbugs:check
+
+javadocs: ## [core] Generate browsable local API docs under rmatch/target/reports/apidocs
+	rm -rf rmatch/target/reports/apidocs
+	$(MVN) -q -B -pl rmatch -am -DskipTests -Dspotbugs.skip=true javadoc:javadoc
+
+release-central-javadoc-check: ## [core] Verify Central profile builds the javadoc jar without signing/uploading
+	$(MVN) -q -B -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true -Dgpg.skip=true verify
 
 perf-local-setup: ## [perf-local] Prepare the local benchmark framework venv and engines
 	$(MAKE) -C $(REGEX_BENCH_FRAMEWORK_DIR) setup

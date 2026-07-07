@@ -13,8 +13,8 @@
  */
 package no.rmz.rmatch.utils;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkArgument;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentSkipListMap;
