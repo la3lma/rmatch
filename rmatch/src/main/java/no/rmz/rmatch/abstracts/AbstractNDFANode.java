@@ -260,7 +260,7 @@ public abstract class AbstractNDFANode implements NDFANode {
     }
     if (context != MatchContext.NONE) {
       for (final AssertionEdge edge : current.getAssertionEdges()) {
-        if (edge.isSatisfiedBy(context)) {
+        if (edge.isSatisfiedBy(context, false)) {
           newNodes.add(edge.destination());
         }
       }
@@ -298,7 +298,7 @@ public abstract class AbstractNDFANode implements NDFANode {
   private static void addSatisfiedAssertionDestinations(
       final NDFANode node, final MatchContext context, final Set<NDFANode> destinations) {
     for (final AssertionEdge edge : node.getAssertionEdges()) {
-      if (edge.isSatisfiedBy(context)) {
+      if (edge.isSatisfiedBy(context, true)) {
         destinations.add(edge.destination());
       }
     }

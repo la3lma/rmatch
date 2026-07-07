@@ -78,6 +78,12 @@ public interface AbstractRegexBuilder {
   /** Add a pattern matching the end of a line ("$"). */
   void addEndOfLine();
 
+  /** Add a pattern matching a word boundary ("\\b"). */
+  void addWordBoundary();
+
+  /** Add a pattern matching a non-word-boundary ("\\B"). */
+  void addNonWordBoundary();
+
   /**
    * Add a pattern matching an optional, but singular element: E.g. "a?" denoting zero or one
    * instances of the character "a".

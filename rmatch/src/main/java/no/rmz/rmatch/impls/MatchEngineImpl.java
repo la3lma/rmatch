@@ -301,7 +301,7 @@ public final class MatchEngineImpl implements MatchEngine {
       while (b.hasNext()) {
         final Character nextChar = b.getNext();
         final int currentPos = b.getCurrentPos();
-        final MatchContext context = contextForPosition(b, currentPos, previousChar);
+        final MatchContext context = contextForPosition(b, currentPos, previousChar, nextChar);
         matcherProgress(b, nextChar, currentPos, activeMatchSets, prefilterActive, context);
         previousChar = nextChar;
       }
@@ -391,18 +391,24 @@ public final class MatchEngineImpl implements MatchEngine {
   }
 
   private static MatchContext contextForPosition(
-      final Buffer b, final int currentPos, final Character previousChar) {
+      final Buffer b,
+      final int currentPos,
+      final Character previousChar,
+      final Character currentChar) {
     if (b instanceof LookaheadBuffer lookahead) {
-      return MatchContext.forPosition(currentPos, previousChar, lookahead.peek());
+      return MatchContext.forPosition(currentPos, previousChar, currentChar, lookahead.peek());
     }
     try {
       final Buffer clone = b.clone();
       final Character nextChar = clone.hasNext() ? clone.getNext() : null;
-      return MatchContext.forPosition(currentPos, previousChar, nextChar);
+      return MatchContext.forPosition(currentPos, previousChar, currentChar, nextChar);
     } catch (RuntimeException ex) {
       // Custom buffers are expected to clone, but EOF-only context is safer than guessing.
     }
     return new MatchContext(
-        currentPos == 0 || previousChar != null && previousChar == '\n', !b.hasNext());
+        currentPos == 0 || previousChar != null && previousChar == '\n',
+        !b.hasNext(),
+        false,
+        false);
   }
 }

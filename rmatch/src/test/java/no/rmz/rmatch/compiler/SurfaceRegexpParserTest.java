@@ -165,6 +165,20 @@ public class SurfaceRegexpParserTest {
     verify(arb).addEndOfLine();
   }
 
+  @Test
+  public final void testWordBoundary() throws Exception {
+    instance.parse("\\ba");
+    verify(arb).addWordBoundary();
+    verify(arb).addString("a");
+  }
+
+  @Test
+  public final void testNonWordBoundary() throws Exception {
+    instance.parse("a\\B");
+    verify(arb).addString("a");
+    verify(arb).addNonWordBoundary();
+  }
+
   /**
    * Thest that the "any char" (dot) syntax is parsed correctly.
    *

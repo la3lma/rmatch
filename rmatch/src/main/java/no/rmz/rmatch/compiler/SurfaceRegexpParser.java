@@ -441,6 +441,15 @@ public final class SurfaceRegexpParser {
         case 'f':
           sb.append('\f');
           break;
+        // Zero-width assertions.
+        case 'b':
+          commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+          arb.addWordBoundary();
+          break;
+        case 'B':
+          commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
+          arb.addNonWordBoundary();
+          break;
         // Shorthand character classes: sugar over the existing charset machinery.
         case 'd', 'D', 'w', 'W', 's', 'S':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);

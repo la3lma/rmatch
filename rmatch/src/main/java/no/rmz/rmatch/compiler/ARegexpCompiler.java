@@ -152,6 +152,16 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
     addAssertion(ZeroWidthAssertion.LINE_END);
   }
 
+  @Override
+  public void addWordBoundary() {
+    addAssertion(ZeroWidthAssertion.WORD_BOUNDARY);
+  }
+
+  @Override
+  public void addNonWordBoundary() {
+    addAssertion(ZeroWidthAssertion.NON_WORD_BOUNDARY);
+  }
+
   private void addAssertion(final ZeroWidthAssertion assertion) {
     regexp.markUsesContextAssertions();
     final CompiledFragment fragment = new CompiledFragment(regexp);

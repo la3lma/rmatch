@@ -1,9 +1,11 @@
 # Design note: anchor and boundary-assertion machinery
 
-**Status: ACTIVE for step 1** (2026-07-07). The `^` / `$` line-anchor sub-issue
-is being implemented on branch `u/la3lma/codex/issue-267-line-anchors`; see
-[issue #269](https://github.com/la3lma/rmatch/issues/269). Word boundaries,
-input anchors, and flag-mode work remain future steps under
+**Status: ACTIVE for step 2** (2026-07-08). The `^` / `$` line-anchor sub-issue
+has merged via [issue #269](https://github.com/la3lma/rmatch/issues/269). Word
+boundaries `\b` / `\B` are being implemented on branch
+`u/la3lma/codex/issue-270-word-boundaries`; see
+[issue #270](https://github.com/la3lma/rmatch/issues/270). Input anchors and
+flag-mode work remain future steps under
 [issue #267](https://github.com/la3lma/rmatch/issues/267).
 
 Covers: `^`, `$`, MULTILINE, `\b`, `\B`, and the groundwork a non-DOTALL `.`
@@ -113,10 +115,11 @@ per lab protocol, not assumed.
 
 ## Campaign shape (when taken off hold)
 
-1. `^` / `$` — active in [issue #269](https://github.com/la3lma/rmatch/issues/269);
+1. `^` / `$` — merged via [issue #269](https://github.com/la3lma/rmatch/issues/269);
    K=2 warm-up; README anchors become true again after merge and perf gate.
-2. MULTILINE — a flag on the anchors, trivial after step 1.
-3. `\b` / `\B` — K=4 + end-classes; the general case.
+2. `\b` / `\B` — active in [issue #270](https://github.com/la3lma/rmatch/issues/270);
+   start- and end-side word-boundary context over the existing assertion edges.
+3. MULTILINE — a flag on the anchors.
 4. (Shared groundwork then enables a non-DOTALL `.` toggle as a flag.)
 
 Estimated effort: step 1 comparable to the lazy-materialization experiment;
