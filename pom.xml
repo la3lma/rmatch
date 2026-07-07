@@ -36,7 +36,7 @@
 
     <properties>
         <maven.plugin.validation>DEFAULT</maven.plugin.validation>
-        <java.version>25</java.version>
+        <java.version>21</java.version>
         <ahocorasick.version>0.6.3</ahocorasick.version>
         <jmh.version>1.37</jmh.version>
         <junit-jupiter.version>6.1.1</junit-jupiter.version>
@@ -172,8 +172,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${mavenCompilerPlugin.version}</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <release>${java.version}</release>
                         <showWarnings>true</showWarnings>
                         <compilerArgs>
                             <arg>-verbose</arg>

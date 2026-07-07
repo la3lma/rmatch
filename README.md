@@ -24,8 +24,8 @@ Maven, after the `1.9.0` Central publication:
 </dependency>
 ```
 
-`1.9.0` is compiled for Java 25. Release smoke tests have also been run with
-newer JDKs.
+`1.9.x` is compiled with `--release 21`, so consumers should use Java 21 or
+newer. Release smoke tests have also been run with newer JDKs.
 
 ## Quick Start
 

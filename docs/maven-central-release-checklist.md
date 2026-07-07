@@ -70,7 +70,10 @@ the rest of the release work here as it becomes explicit.
 - [x] Generate javadoc JAR.
 - [x] Generate GPG signatures for POM, main JAR, source JAR, and javadoc JAR.
 - [x] Verify generated `.asc` signatures locally.
-- [ ] Review whether Java 25 is the intended public baseline for `1.9.0`.
+- [x] Review whether Java 25 is the intended public baseline for `1.9.x`.
+  Decision on 2026-07-07: no, use Java 21 as the public baseline and compile
+  with `--release 21` so Maven Central consumers on current LTS Java can use the
+  library while newer JDKs remain valid build/test runtimes.
 - [x] Review whether Guava should remain a public transitive dependency before
   `2.0.0`. Decision: no, remove before `1.9.1`.
 - [x] Review whether JetBrains annotations should remain compile-scoped or move
@@ -112,6 +115,13 @@ the rest of the release work here as it becomes explicit.
   tests, 0 failures, 0 errors, 3 skipped; `rmatch-tester` tests reported 16
   tests, 0 failures, 0 errors, 2 skipped; Spotless and SpotBugs passed in both
   modules.
+- [x] Verify Java 21 public baseline. Result on 2026-07-07:
+  `mvn -pl rmatch-tester -am clean verify` succeeded after changing the
+  compiler configuration to `--release 21`; `rmatch` tests reported 312 tests,
+  0 failures, 0 errors, 3 skipped; `rmatch-tester` tests reported 16 tests,
+  0 failures, 0 errors, 2 skipped; Spotless and SpotBugs passed in both
+  modules. `javap` on `no.rmz.rmatch.impls.MatcherImpl` reported classfile
+  major version 65.
 - [x] Verify post-cleanup compile dependency tree. Result on 2026-07-07:
   `no.rmz:rmatch` has only `org.ahocorasick:ahocorasick:0.6.3` in compile
   scope; `rmatch-tester` has `rmatch` and Aho-Corasick in compile scope when
@@ -124,6 +134,11 @@ the rest of the release work here as it becomes explicit.
 - [x] Re-run bumped `1.9.1-SNAPSHOT` Central release-profile verify without
   deployment after removing Guava and JetBrains annotations. Result on
   2026-07-07: the same command succeeded and generated signed artifacts.
+- [x] Re-run bumped `1.9.1-SNAPSHOT` Central release-profile verify without
+  deployment after lowering the public Java baseline to 21. Result on
+  2026-07-07: `mvn -pl rmatch -am -Pcentral-release -DskipTests
+  -Dspotbugs.skip=true -Dgpg.keyname=55D9C01E75B1E582 verify` succeeded and
+  generated signed artifacts plus javadocs.
 - [x] Run OSV vulnerability check for the bumped dependency/plugin set. Result
   on 2026-07-07: no vulnerabilities returned for 39 queried Maven coordinates.
 - [x] Run an external consumer smoke test using a clean temporary Maven
@@ -160,6 +175,14 @@ the rest of the release work here as it becomes explicit.
   `corpus_10MB.txt`) and match counts were identical. Median `scanning_ns`
   ratios were 0.980x for 1MB and 1.005x for 10MB, both within the 1.10 slowdown
   gate; no performance regression detected.
+- [x] Run a speed regression test for the Java 21 baseline change. Result on
+  2026-07-07: compared previous clean dependency-surface candidate
+  `results/local_gate_dep_candidate_clean_20260707_125341` against Java 21
+  candidate `results/local_gate_java21_candidate_same_inputs_20260707_111243`
+  using byte-identical inputs (`patterns_10000.txt`, `corpus_1MB.txt`,
+  `corpus_10MB.txt`) and identical match counts. Median `scanning_ns` ratios
+  were 0.986x for 1MB and 0.968x for 10MB, both within the 1.10 slowdown gate;
+  no performance regression detected.
 
 ## Central Portal Upload
 
