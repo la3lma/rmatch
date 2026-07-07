@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>no.rmz</groupId>
     <artifactId>rmatch-parent</artifactId>
-    <version>1.9.0</version>
+    <version>1.9.1-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -37,36 +37,34 @@
     <properties>
         <maven.plugin.validation>DEFAULT</maven.plugin.validation>
         <java.version>25</java.version>
-        <errorprone.version>2.37.0</errorprone.version>
-        <guava.version>33.5.0-jre</guava.version>
-        <jetbrains-annotations.version>26.0.2-1</jetbrains-annotations.version>
+        <guava.version>33.6.0-jre</guava.version>
+        <jetbrains-annotations.version>26.1.0</jetbrains-annotations.version>
         <ahocorasick.version>0.6.3</ahocorasick.version>
         <jmh.version>1.37</jmh.version>
-        <junit-jupiter.version>5.11.4</junit-jupiter.version>
-        <junit-platform.version>6.0.1</junit-platform.version>
+        <junit-jupiter.version>6.1.1</junit-jupiter.version>
+        <junit-platform.version>6.1.1</junit-platform.version>
         <mavenCheckstylePlugin.version>3.6.0</mavenCheckstylePlugin.version>
-        <mavenCoberturaPlugin.version>2.5.1</mavenCoberturaPlugin.version>
-        <mavenCompilerPlugin.version>3.14.1</mavenCompilerPlugin.version>
-        <mavenDependencyPlugin.version>3.9.0</mavenDependencyPlugin.version>
-
-        <mavenFindbugsPlugin.version>3.0.5</mavenFindbugsPlugin.version>
-        <mavenResourcesPlugin.version>3.4.0</mavenResourcesPlugin.version>
-        <mavenShadePlugin.version>3.6.1</mavenShadePlugin.version>
+        <mavenAssemblyPlugin.version>3.8.0</mavenAssemblyPlugin.version>
+        <mavenCompilerPlugin.version>3.15.0</mavenCompilerPlugin.version>
+        <mavenDependencyPlugin.version>3.11.0</mavenDependencyPlugin.version>
+        <mavenEnforcerPlugin.version>3.6.3</mavenEnforcerPlugin.version>
+        <mavenResourcesPlugin.version>3.5.0</mavenResourcesPlugin.version>
+        <mavenShadePlugin.version>3.6.2</mavenShadePlugin.version>
         <mavenJarPlugin.version>3.5.0</mavenJarPlugin.version>
         <mavenReleasePlugin.version>3.3.1</mavenReleasePlugin.version>
 
         <!-- Code quality plugins -->
-        <spotless.version>3.1.0</spotless.version>
-        <spotbugs.version>4.9.8.2</spotbugs.version>
+        <spotless.version>3.8.0</spotless.version>
+        <spotbugs.version>4.10.2.0</spotbugs.version>
 
         <mavenSourcePlugin.version>3.4.0</mavenSourcePlugin.version>
         <mavenJavadocPlugin.version>3.12.0</mavenJavadocPlugin.version>
         <mavenGpgPlugin.version>3.2.8</mavenGpgPlugin.version>
         <centralPublishingMavenPlugin.version>0.11.0</centralPublishingMavenPlugin.version>
         <mavenSurefire.version>3.5.4</mavenSurefire.version>
-        <byteBuddy.version>1.17.7</byteBuddy.version>
-        <mockitoCore.version>5.21.0</mockitoCore.version>
-        <mockitoJunitJupiter.version>5.21.0</mockitoJunitJupiter.version>
+        <byteBuddy.version>1.18.11</byteBuddy.version>
+        <mockitoCore.version>5.23.0</mockitoCore.version>
+        <mockitoJunitJupiter.version>5.23.0</mockitoJunitJupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -166,7 +164,7 @@
         <connection>scm:git:https://github.com/la3lma/rmatch.git</connection>
         <url>https://github.com/la3lma/rmatch</url>
         <developerConnection>scm:git:git@github.com:la3lma/rmatch.git</developerConnection>
-        <tag>rmatch-1.9.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <build>
@@ -220,6 +218,11 @@
                 <!-- Standard Maven plugins -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${mavenAssemblyPlugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>${mavenResourcesPlugin.version}</version>
                 </plugin>
@@ -258,9 +261,34 @@
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${mavenDependencyPlugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${mavenEnforcerPlugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-build-toolchain</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.9.0,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>

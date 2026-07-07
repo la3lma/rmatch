@@ -39,9 +39,19 @@ the rest of the release work here as it becomes explicit.
 - [x] Remove inherited test dependencies from the public compile/runtime graph.
 - [x] Confirm `no.rmz:rmatch` compile/runtime dependencies are only Guava,
   JetBrains annotations, and Aho-Corasick.
-- [ ] Run a dependency freshness pass and try to use current stable versions of
+- [x] Run a dependency freshness pass and try to use current stable versions of
   all direct dependencies where possible. Do not upgrade blindly: each upgrade
-  must pass the normal release validation gates.
+  must pass the normal release validation gates. First `1.9.1-SNAPSHOT` pass on
+  2026-07-07 bumped Guava, JetBrains annotations, JUnit, Mockito, Byte Buddy,
+  Spotless, SpotBugs, compiler/dependency/resources/shade/assembly plugins, and
+  added Maven Enforcer while leaving milestone/beta plugin lines alone.
+- [x] Remove obsolete Cobertura and FindBugs hooks; SpotBugs is the active
+  static-analysis tool.
+- [ ] Review Guava usage and decide whether it must remain a public transitive
+  dependency, can be reduced, or should stay for pragmatic `1.9.x` stability.
+- [ ] Review JetBrains annotation usage and decide whether annotations should
+  remain compile-scoped, become optional/provided, or be removed from public
+  dependency surface.
 - [x] Remove application-style `Main-Class` and `Class-Path` manifest entries
   from the library JAR.
 - [x] Generate source JAR.
@@ -79,6 +89,18 @@ the rest of the release work here as it becomes explicit.
 - [x] Inspect generated POM metadata.
 - [x] Confirm `rmatch-tester` still builds with tests skipped.
 - [ ] Run full reactor tests including `rmatch-tester` if practical.
+- [x] Run full bumped `1.9.1-SNAPSHOT` reactor test including `rmatch-tester`.
+  Result on 2026-07-07: `mvn -pl rmatch-tester -am verify` succeeded;
+  `rmatch` tests reported 312 tests, 0 failures, 0 errors, 3 skipped;
+  `rmatch-tester` tests reported 16 tests, 0 failures, 0 errors, 2 skipped;
+  SpotBugs reported 0 findings.
+- [x] Run bumped `1.9.1-SNAPSHOT` Central release-profile verify without
+  deployment. Result on 2026-07-07:
+  `mvn -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true
+  -Dgpg.keyname=55D9C01E75B1E582 verify` succeeded and generated signed
+  artifacts.
+- [x] Run OSV vulnerability check for the bumped dependency/plugin set. Result
+  on 2026-07-07: no vulnerabilities returned for 39 queried Maven coordinates.
 - [x] Run an external consumer smoke test using a clean temporary Maven
   project.
 - [x] Install the release candidate locally before the consumer smoke test:
@@ -93,7 +115,16 @@ the rest of the release work here as it becomes explicit.
 - [ ] Repeat the external consumer smoke test after Central publication, using
   the artifact resolved from Maven Central rather than the local Maven
   repository.
+- [x] Run an external consumer smoke test for `1.9.1-SNAPSHOT` using a clean
+  temporary Maven project outside the repository. Result on 2026-07-07:
+  `/tmp/rmatch-191-consumer-smoke.xqqeOm`, command
+  `mvn -q clean verify exec:java`, output included
+  `user token match: user:alice` and `log-level match: WARN`.
 - [ ] Run the chosen release benchmark smoke/gate and record exact result paths.
+- [ ] After the Guava/annotation decision is implemented, run a speed regression
+  test against the previous release baseline. If performance changes
+  materially, record whether it is a regression or improvement and investigate
+  the cause before release.
 
 ## Central Portal Upload
 
