@@ -13,7 +13,6 @@
  */
 package no.rmz.rmatch.interfaces;
 
-import java.util.Collection;
 import java.util.SortedSet;
 
 /**
@@ -21,9 +20,8 @@ import java.util.SortedSet;
  *
  * <p>When a pattern is compiled, rmatch first builds nondeterministic automaton nodes and then
  * creates deterministic nodes lazily as input is scanned. This keeps large pattern sets from
- * requiring all theoretical deterministic states up front. The public {@link
- * Matcher#getNodeStorage} hook exists for diagnostics and graph/debug tooling; application code
- * does not need to use this interface for normal matching.
+ * requiring all theoretical deterministic states up front. Application code does not need to use
+ * this interface for normal matching.
  */
 public interface NodeStorage {
 
@@ -66,18 +64,4 @@ public interface NodeStorage {
    * @return deterministic node for {@code ndfaset}
    */
   DFANode getDFANode(final SortedSet<NDFANode> ndfaset);
-
-  /**
-   * Return a snapshot of currently stored NDFA nodes.
-   *
-   * @return known NDFA nodes
-   */
-  Collection<NDFANode> getNDFANodes();
-
-  /**
-   * Return a snapshot of currently stored DFA nodes.
-   *
-   * @return known DFA nodes
-   */
-  Collection<DFANode> getDFANodes();
 }

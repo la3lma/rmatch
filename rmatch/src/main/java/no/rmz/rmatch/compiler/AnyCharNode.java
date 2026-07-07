@@ -15,10 +15,8 @@ package no.rmz.rmatch.compiler;
 
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
 
 /** NDFA node that consumes one arbitrary character. */
@@ -41,12 +39,5 @@ public final class AnyCharNode extends AbstractNDFANode {
   @Override
   public NDFANode getNextNDFA(final Character ch) {
     return nextNode;
-  }
-
-  @Override
-  public Collection<PrintableEdge> getEdgesToPrint() {
-    final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
-    result.add(new PrintableEdge(".", nextNode));
-    return result;
   }
 }

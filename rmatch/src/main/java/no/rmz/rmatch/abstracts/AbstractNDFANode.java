@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import no.rmz.rmatch.interfaces.AssertionEdge;
 import no.rmz.rmatch.interfaces.MatchContext;
 import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.interfaces.ZeroWidthAssertion;
 import no.rmz.rmatch.utils.CounterType;
@@ -31,10 +30,9 @@ import no.rmz.rmatch.utils.LifoSet;
 /**
  * Base implementation for nodes in rmatch's nondeterministic finite automata.
  *
- * <p>Subclasses provide the character-specific transition ({@link #getNextNDFA(Character)}) and,
- * when useful, diagnostic graph edges ({@link #getEdgesToPrint()}). This base class handles epsilon
- * closure, assertion closure, node identity, terminal/failing flags, and transition-cache
- * bookkeeping.
+ * <p>Subclasses provide the character-specific transition ({@link #getNextNDFA(Character)}). This
+ * base class handles epsilon closure, assertion closure, node identity, terminal/failing flags, and
+ * transition-cache bookkeeping.
  */
 public abstract class AbstractNDFANode implements NDFANode {
   /**
@@ -363,26 +361,6 @@ public abstract class AbstractNDFANode implements NDFANode {
         addEpsilonEdge(n);
       }
     }
-  }
-
-  /**
-   * This method is intended to be overridden. The subclass should first call its superclass's
-   * getEdgesToPring method, to get all the epsilon edges, and anything else the superclass chooses
-   * to include, and then add whatever edges that the getNextNDFA method can link to.
-   *
-   * @return A collection of PrintableEdge instances.
-   */
-  public final Collection<PrintableEdge> getEpsilonEdgesToPrint() {
-    final Collection<PrintableEdge> result = new ArrayList<>();
-    synchronized (monitor) {
-      for (final NDFANode n : epsilonSet) {
-        result.add(new PrintableEdge(null, n));
-      }
-      for (final AssertionEdge edge : assertionEdges) {
-        result.add(new PrintableEdge(edge.assertion().name(), edge.destination()));
-      }
-    }
-    return result;
   }
 
   private record ContextTransitionKey(Character ch, MatchContext context) {}

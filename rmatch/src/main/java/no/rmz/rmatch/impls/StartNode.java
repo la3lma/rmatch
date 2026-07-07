@@ -120,11 +120,6 @@ public final class StartNode extends AbstractNDFANode {
     return ndfaOutMap.get(ch);
   }
 
-  @Override
-  public Collection<PrintableEdge> getEdgesToPrint() {
-    return getEpsilonEdgesToPrint();
-  }
-
   public DFANodeImpl asDfaNode() {
     return this.topDFA;
   }

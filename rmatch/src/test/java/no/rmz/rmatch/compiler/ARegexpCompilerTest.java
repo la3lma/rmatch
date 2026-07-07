@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.testutils.GraphDumper;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -134,11 +133,9 @@ public class ARegexpCompilerTest {
    * Verify match
    *
    * @param mb The MB instance
-   * @param nameOfTest name of test
    * @param stop end of match
    */
-  private void verifyPerformMatch(final MB mb, final String nameOfTest, final int stop) {
-    GraphDumper.dump(nameOfTest, mb.m().getNodeStorage());
+  private void verifyPerformMatch(final MB mb, final int stop) {
     verify(action).performMatch(any(Buffer.class), eq(0), eq(stop));
   }
 
@@ -151,7 +148,7 @@ public class ARegexpCompilerTest {
     final MB mb =
         runMatcherFromCompiler(regexpPattern, testString, arb -> arb.addString(regexpPattern));
 
-    verifyPerformMatch(mb, "ARegexpCompilerTestAddString", 0);
+    verifyPerformMatch(mb, 0);
   }
 
   /** Test of addString method, of class ARegexpCompiler. */
@@ -169,7 +166,7 @@ public class ARegexpCompilerTest {
               arb.addString("b");
             });
 
-    verifyPerformMatch(mb, "testAddStringLength2", 1);
+    verifyPerformMatch(mb, 1);
   }
 
   /** Test of separateAlternatives method, of class ARegexpCompiler. */
@@ -187,7 +184,7 @@ public class ARegexpCompilerTest {
               arb.addString("b");
             });
 
-    verifyPerformMatch(mb, "ARegexpCompilerTestSeparateAlternatives", 0);
+    verifyPerformMatch(mb, 0);
   }
 
   /** Test recognition of a char set. */
@@ -206,7 +203,7 @@ public class ARegexpCompilerTest {
               arb.endCharSet();
             });
 
-    verifyPerformMatch(mb, "testCharSet", 0);
+    verifyPerformMatch(mb, 0);
   }
 
   /** Test recognition of a char set. */
@@ -226,7 +223,7 @@ public class ARegexpCompilerTest {
               arb.endCharSet();
             });
 
-    verifyPerformMatch(mb, "testInverseCharSet", 0);
+    verifyPerformMatch(mb, 0);
   }
 
   /** Test of addRangeToCharSet method, of class ARegexpCompiler. */
@@ -244,7 +241,7 @@ public class ARegexpCompilerTest {
               arb.endCharSet();
             });
 
-    verifyPerformMatch(mb, "testAddRangeToCharSet", 0);
+    verifyPerformMatch(mb, 0);
   }
 
   /** Test of addAnyChar method, of class ARegexpCompiler. */
@@ -255,7 +252,7 @@ public class ARegexpCompilerTest {
     final MB mb =
         runMatcherFromCompiler(regexpPattern, testString, AbstractRegexBuilder::addAnyChar);
 
-    verifyPerformMatch(mb, "testAddAnyChar", 0);
+    verifyPerformMatch(mb, 0);
   }
 
   /** Test of addBeginningOfLine method, of class ARegexpCompiler. */
@@ -274,7 +271,7 @@ public class ARegexpCompilerTest {
               arb.addAnyChar();
             });
 
-    verifyPerformMatch(mb, "testAddBeginningOfLine", 0);
+    verifyPerformMatch(mb, 0);
   }
 
   /** Test of addEndOfLine method, of class ARegexpCompiler. */
@@ -292,7 +289,7 @@ public class ARegexpCompilerTest {
               arb.addString("z");
               arb.addAnyChar();
             });
-    verifyPerformMatch(mb, "testAddendOfLine", 0);
+    verifyPerformMatch(mb, 0);
   }
 
   /** Test of addOptionalSingular method, of class ARegexpCompiler. */
@@ -309,7 +306,7 @@ public class ARegexpCompilerTest {
               arb.addOptionalSingular();
               arb.addString("b");
             });
-    verifyPerformMatch(mb, "testAddOptionalSingular", 0);
+    verifyPerformMatch(mb, 0);
   }
 
   /** Test of addOptionalZeroOrMulti method, of class ARegexpCompiler. */
@@ -328,7 +325,7 @@ public class ARegexpCompilerTest {
               arb.addString("n");
             });
 
-    verifyPerformMatch(mb, "testAddOptionalZeroOrMulti", 5);
+    verifyPerformMatch(mb, 5);
   }
 
   /** Test of addOptionalOnceOrMulti method, of class ARegexpCompiler. */
@@ -348,6 +345,6 @@ public class ARegexpCompilerTest {
               arb.addString("n");
             });
 
-    verifyPerformMatch(mb, "testAddOptionalOnceOrMulti", 5);
+    verifyPerformMatch(mb, 5);
   }
 }

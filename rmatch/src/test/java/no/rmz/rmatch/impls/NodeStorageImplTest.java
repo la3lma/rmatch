@@ -16,7 +16,6 @@ package no.rmz.rmatch.impls;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
@@ -153,11 +152,6 @@ class NodeStorageImplTest {
     @Override
     public NDFANode getNextNDFA(final Character ch) {
       return this;
-    }
-
-    @Override
-    public Collection<PrintableEdge> getEdgesToPrint() {
-      return getEpsilonEdgesToPrint();
     }
   }
 

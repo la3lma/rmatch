@@ -47,11 +47,6 @@ public final class BenchmarkTheWutheringHeightsCorpus {
     final Matcher m = MatcherFactory.newMatcher();
     MatcherBenchmarker.testMatcher(m, argx, "rmatch-tester/" + LOCATION_OF_WUTHERING_HEIGHTS);
 
-    // This should normally not be done, since it's slow.  Haven't bothered
-    // to add a switch for it yet.
-    // GraphDumper.dump(
-    //          "benchmarkTheWutheringHeightsCorpus",
-    //         m.getNodeStorage());
     System.exit(0); // XXX In case of dangling threads
   }
 
