@@ -1,0 +1,4 @@
+engine,iterations,median_scanning_s,median_total_s,match_counts,patterns_compiled,corpus_size_bytes,status
+java-native-naive,3,7.145469,7.180892,134945060,1000,1048625,ok
+re2j,3,26.260591,26.518777,134945060,1000,1048625,ok
+rmatch,3,2.045461,17.323278,15132652,1000,1048625,ok

@@ -1,0 +1,20 @@
+{
+  "run_id": "20260707_144710_9b07c78b",
+  "phase": "frontpage_current_agogo_1k_1mb",
+  "status": "completed",
+  "engines_tested": [
+    "rmatch",
+    "java-native-naive",
+    "re2j"
+  ],
+  "total_combinations": 9,
+  "successful_runs": 9,
+  "failed_runs": 0,
+  "duration_seconds": 158.00640606880188,
+  "output_directory": "results/frontpage_current_agogo_1k_1mb_20260707_144708",
+  "correctness_status": "pass",
+  "correctness_issue_count": 0,
+  "correctness_major_issue_count": 0,
+  "correctness_minor_issue_count": 0,
+  "correctness_issues": []
+}
