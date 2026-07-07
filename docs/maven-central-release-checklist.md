@@ -90,6 +90,12 @@ the rest of the release work here as it becomes explicit.
 - [x] Document deliberate syntax limitations in README.
 - [x] Fix README quick-start example to use the real buffer class.
 - [x] Compile and run the README quick-start example against the built artifact.
+- [x] Compile and run the README scratch-project example against the previous
+  Maven Central artifact using a clean temporary Maven repository. Result on
+  2026-07-07: the README example as written used the currently published
+  `no.rmz:rmatch:1.9.0`; running `mvn -q compile exec:java
+  -Dexec.mainClass=Example` printed `user token match: user:alice` and
+  `log-level match: WARN` in about five seconds on the local machine.
 - [x] Add a short public performance note with exact benchmark provenance.
   README now explains the comparison model against naive `java.util.regex` and
   RE2J loops, the rmatch one-pass setup, the measured fields, and the
@@ -209,6 +215,9 @@ the rest of the release work here as it becomes explicit.
 - [ ] Confirm the MvnRepository page updates.
 - [ ] Update README if any "after publication" language should become present
   tense.
+- [ ] After `1.9.1` is published and resolvable from Maven Central, update the
+  README dependency and scratch-project examples from `1.9.0` to `1.9.1`, then
+  rerun the clean-repository scratch-project smoke test against Central.
 - [ ] Bump repository back to the agreed next development snapshot.
 - [ ] Add a post-release note summarizing exactly what was published.
 

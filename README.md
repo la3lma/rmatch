@@ -14,13 +14,13 @@ polished toward a stable `2.0.0`.
 
 ## Installation
 
-Maven, after the `1.9.x` Central publication:
+For an existing Maven project, add the current Maven Central release:
 
 ```xml
 <dependency>
   <groupId>no.rmz</groupId>
   <artifactId>rmatch</artifactId>
-  <version>1.9.1</version>
+  <version>1.9.0</version>
 </dependency>
 ```
 
@@ -29,8 +29,42 @@ newer. Release smoke tests have also been run with newer JDKs.
 
 ## Copy-Paste Example
 
-Put this dependency in your Maven project, then copy the class below and run it.
-It registers two patterns once, scans one buffer, and prints both matches.
+For a scratch project, create this structure:
+
+```text
+rmatch-demo/
+  pom.xml
+  src/main/java/Example.java
+```
+
+For a complete scratch project, use this full `pom.xml`:
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>demo</groupId>
+  <artifactId>rmatch-demo</artifactId>
+  <version>1.0.0</version>
+
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>no.rmz</groupId>
+      <artifactId>rmatch</artifactId>
+      <version>1.9.0</version>
+    </dependency>
+  </dependencies>
+</project>
+```
+
+Put this in `src/main/java/Example.java`. It registers two patterns once, scans
+one buffer, and prints both matches.
 
 ```java
 import no.rmz.rmatch.impls.MatcherImpl;
@@ -58,6 +92,19 @@ public class Example {
     return buffer.getString(start, end + 1);
   }
 }
+```
+
+Run it:
+
+```bash
+mvn -q compile exec:java -Dexec.mainClass=Example
+```
+
+Expected output:
+
+```text
+user token match: user:alice
+log-level match: WARN
 ```
 
 `MatcherImpl` uses the fast-path engine by default. The callback receives the
