@@ -27,64 +27,65 @@ import java.util.Comparator;
 public interface Match {
 
   /**
-   * Get the unique identifier for the match.
+   * Return the matcher-local identifier for this match candidate.
    *
-   * @return an (long) integer uniquely identifying the match.
+   * @return unique match identifier
    */
   long getId();
 
   /**
-   * Abandon this match. Remove all references to it from everything the match knows points to it
-   * (the match set and the regexp).
+   * Abandon this candidate and remove it from the match structures that currently reference it.
+   *
+   * @param currentChar character being processed when the candidate is abandoned
    */
   void abandon(Character currentChar);
 
   /**
-   * True iff the match has been abandoned.
+   * Return whether this candidate has been abandoned.
    *
-   * @return abandonment status.
+   * @return {@code true} if the candidate is no longer eligible to match
    */
   boolean isAbandoned();
 
   /**
-   * The MatchSet instance that contains this match.
+   * Return the match set that owns this candidate.
    *
-   * @return A MatchSet instance
+   * @return owning match set
    */
   MatchSet getMatchSet();
 
   /**
-   * Return the Regexp instance that triggered this match.
+   * Return the compiled expression being matched by this candidate.
    *
-   * @return a Regexp instance.
+   * @return compiled regular-expression state
    */
   Regexp getRegexp();
 
   /**
-   * Get the index of the last element of the match.
+   * Return the inclusive end offset of this candidate.
    *
-   * @return the index of the last element of the match.
+   * @return zero-based inclusive end offset
    */
   int getEnd();
 
   /**
-   * Get the index of the first index of the match.
+   * Return the inclusive start offset of this candidate.
    *
-   * @return the index of the last character in the match.
+   * @return zero-based inclusive start offset
    */
   int getStart();
 
   /**
-   * True iff the match is actively being developed.
+   * Return whether this candidate is still being extended by the engine.
    *
-   * @return a current activity state.
+   * @return {@code true} if the candidate is active
    */
   boolean isActive();
 
   /**
-   * True iff the match represents a valid termination of the regular expression is being matched.
+   * Return whether this candidate currently represents a complete match.
    *
-   * @return iff the current state represents a valid termination state.
+   * @return {@code true} if the candidate is at a valid terminal state
    */
   boolean isFinal();
 
@@ -95,26 +96,26 @@ public interface Match {
    */
   void setEnd(int end);
 
-  /** Set the state if the match to be final. */
+  /** Mark this candidate as complete. */
   void setIsFinal();
 
-  /** Set the state oft he match to be not final. */
+  /** Mark this candidate as incomplete. */
   void setNotFinal();
 
-  /** Set the state of the match to be inactive. */
+  /** Mark this candidate as no longer active. */
   void setInactive();
 
   /**
-   * Set the activity state of the match to be whatever.
+   * Set whether this candidate is active.
    *
-   * @param activityState the new activity state.
+   * @param activityState new activity state
    */
   void setActive(boolean activityState);
 
   /**
-   * Set the finality state to be whatever.
+   * Set whether this candidate is complete.
    *
-   * @param finalityState the new finality state.
+   * @param finalityState new finality state
    */
   void setFinal(boolean finalityState);
 
@@ -145,10 +146,12 @@ public interface Match {
         }
       };
 
+  /** Return whether this candidate consumes no input characters. */
   default boolean isZeroLength() {
     return (this.getEnd() - this.getStart()) == 0;
   }
 
+  /** Return whether this candidate must keep running before it can be committed. */
   default boolean notReadyForCommit() {
     return !isFinal() || isActive();
   }

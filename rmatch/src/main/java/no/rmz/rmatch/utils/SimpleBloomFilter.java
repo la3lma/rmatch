@@ -16,8 +16,11 @@ package no.rmz.rmatch.utils;
 import java.util.BitSet;
 
 /**
- * A simple Bloom filter implementation for fast set membership testing. Provides fast negative
- * lookups with no false negatives, but may have false positives.
+ * Simple Bloom filter for fast string membership pre-screening.
+ *
+ * <p>Bloom filters never produce false negatives: if {@link #mightContain(String)} returns {@code
+ * false}, the item was not added. They may produce false positives, so {@code true} means "possibly
+ * present," not "definitely present."
  */
 public final class SimpleBloomFilter {
   private final BitSet bitSet;
@@ -25,10 +28,10 @@ public final class SimpleBloomFilter {
   private final int bitSetSize;
 
   /**
-   * Create a new Bloom filter.
+   * Create a Bloom filter sized for the expected workload.
    *
-   * @param expectedElements Expected number of elements to be added
-   * @param falsePositiveRate Desired false positive rate (e.g., 0.01 for 1%)
+   * @param expectedElements expected number of inserted elements
+   * @param falsePositiveRate desired false-positive rate, for example {@code 0.01} for one percent
    */
   public SimpleBloomFilter(final int expectedElements, final double falsePositiveRate) {
     this.bitSetSize = optimalBitSetSize(expectedElements, falsePositiveRate);
@@ -37,7 +40,7 @@ public final class SimpleBloomFilter {
   }
 
   /**
-   * Add a string to the Bloom filter.
+   * Add a string to the filter.
    *
    * @param item the string to add
    */
@@ -59,10 +62,10 @@ public final class SimpleBloomFilter {
   }
 
   /**
-   * Test if a string might be in the set.
+   * Return whether a string might have been added.
    *
    * @param item the string to test
-   * @return false if definitely not in set, true if might be in set
+   * @return {@code false} if definitely absent; {@code true} if possibly present
    */
   public boolean mightContain(final String item) {
     if (item == null) {

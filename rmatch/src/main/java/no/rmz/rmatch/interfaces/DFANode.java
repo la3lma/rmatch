@@ -16,32 +16,34 @@ package no.rmz.rmatch.interfaces;
 import java.util.Set;
 
 /**
- * Implement the Node interface for deterministic finite automatas (DFA)s. Implement the Node
- * interface for deterministic finite automatas (DFA)s.
+ * A node in rmatch's lazily constructed deterministic finite automaton.
+ *
+ * <p>This is engine machinery. The matcher builds DFA nodes from sets of {@link NDFANode}s as input
+ * is scanned, instead of eagerly constructing every theoretical DFA state up front.
  */
 public interface DFANode extends Node {
 
   /**
-   * Add a link going out through a character to a specific DFANOde.
+   * Add a deterministic transition for one input character.
    *
-   * @param c the linking character
-   * @param n the target node
+   * @param c input character that triggers the transition
+   * @param n destination DFA node
    */
   void addLink(final Character c, final DFANode n);
 
   /**
-   * Add a reference to a regep that is relevant for the present node.
+   * Associate a compiled regular expression with this DFA node.
    *
-   * @param r a regexp.
+   * @param r regular-expression state relevant to this node
    */
   void addRegexp(final Regexp r);
 
   /**
-   * Get the DFAnode we can reach from here through a character.
+   * Return the deterministic node reached by consuming the supplied character.
    *
-   * @param ch A character.
-   * @param ns NodeStorage A node storage instance used to get new DFA nodes.
-   * @return Return a determinstic node.
+   * @param ch input character to consume
+   * @param ns node storage used to create or reuse lazily constructed DFA nodes
+   * @return reachable deterministic node, or {@code null} if no transition exists
    */
   DFANode getNext(final Character ch, final NodeStorage ns);
 
@@ -51,23 +53,25 @@ public interface DFANode extends Node {
    * @param ch input character
    * @param ns node storage for subset construction
    * @param context positional context for assertions adjacent to this transition
-   * @return reachable deterministic node, or null
+   * @return reachable deterministic node, or {@code null} if no transition exists
    */
   DFANode getNext(final Character ch, final NodeStorage ns, final MatchContext context);
 
   /**
-   * Get the set of regexps that are associated with the present node.
+   * Return the regular expressions associated with this DFA node.
    *
-   * @return a set of regexps.
+   * @return associated regular-expression states
    */
   Set<Regexp> getRegexps();
 
   /**
-   * Get the set of regexps that can start with the given character. This optimizes the O(l*m)
-   * bottleneck by filtering regexps that cannot possibly match starting with the given character.
+   * Return the expressions that can begin by consuming the supplied character.
+   *
+   * <p>This first-character filter keeps the engine from starting candidates for expressions that
+   * cannot possibly match at the current input position.
    *
    * @param ch the character to filter by
-   * @return a set of regexps that can start with the given character
+   * @return regular-expression states that can start with {@code ch}
    */
   Set<Regexp> getRegexpsThatCanStartWith(final Character ch);
 
@@ -76,15 +80,15 @@ public interface DFANode extends Node {
    *
    * @param ch the character to filter by
    * @param context positional context for assertions adjacent to this transition
-   * @return a set of regexps that can start with the character in this context
+   * @return regular-expression states that can start with the character in this context
    */
   Set<Regexp> getRegexpsThatCanStartWith(final Character ch, final MatchContext context);
 
   /**
-   * True iff there is an outgoing link for the character.
+   * Return whether this node has an outgoing transition for the supplied character.
    *
-   * @param c the character
-   * @return true iff there exists an outgoing link
+   * @param c input character
+   * @return {@code true} if a transition for {@code c} exists
    */
   boolean hasLinkFor(final Character c);
 
@@ -95,39 +99,40 @@ public interface DFANode extends Node {
   boolean isTerminalFor(final Regexp r);
 
   /**
-   * Create a new match instance and add it to a MatchSet.
+   * Create a match candidate for a regular expression starting from a match set.
    *
-   * @param ms A MatchSet.
-   * @param r A regular expression.
-   * @return A newly created Match.
+   * @param ms match set that will own the candidate
+   * @param r regular-expression state being matched
+   * @return newly created match candidate
    */
   Match newMatch(final MatchSet ms, final Regexp r);
 
   /**
-   * Remove a link mapping the character c to somewhere.
+   * Remove the transition for a character.
    *
-   * @param c a character
+   * @param c input character whose transition should be removed
    */
   void removeLink(final Character c);
 
   /**
-   * True if this DFA node will fail some regexp.
+   * Return whether this node fails at least one regular expression.
    *
-   * @return true iff capable of failing a regexp.
+   * @return {@code true} if this node can abandon candidates
    */
   boolean failsSomeRegexps();
 
   /**
-   * True if this node fails for a particular regesp.
+   * Return whether this node fails candidates for a particular expression.
    *
-   * @param regexp the regex we may be failing for.
-   * @return true iff failing for regexp.
+   * @param regexp regular-expression state to check
+   * @return {@code true} if this node fails candidates for {@code regexp}
    */
   boolean isFailingFor(final Regexp regexp);
 
   /**
-   * Return an unique long that identifies this DFA in this matcher engine. Mostly intended to be
-   * used during debugging, to visualize the graph of the DFA.
+   * Return an identifier that is unique within the owning matcher.
+   *
+   * @return matcher-local DFA node identifier
    */
   long getId();
 }

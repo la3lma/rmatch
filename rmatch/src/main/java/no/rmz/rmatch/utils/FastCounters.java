@@ -18,12 +18,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
- * High-performance counter system using primitive arrays indexed by operation type.
+ * Registry of diagnostic counters indexed by {@link CounterType}.
  *
- * <p>Replaces the original string-based counter system to eliminate string hashing overhead, reduce
- * synchronization complexity, and provide O(1) counter access.
- *
- * <p>Thread-safe implementation using {@link AtomicLongArray} for lock-free operations.
+ * <p>The implementation uses an {@link AtomicLongArray}, so hot-path code can update counters by
+ * ordinal instead of looking up string keys in a map.
  */
 public final class FastCounters {
 
@@ -39,7 +37,7 @@ public final class FastCounters {
   }
 
   /**
-   * Get a fast counter for the specified counter type.
+   * Return a counter for the specified counter type.
    *
    * @param type the type of counter to get
    * @return a FastCounter instance
@@ -48,12 +46,16 @@ public final class FastCounters {
     return INSTANCE.privateNewCounter(type);
   }
 
-  /** Get a point-in-time snapshot of all counters. */
+  /**
+   * Return a point-in-time snapshot of all counters.
+   *
+   * @return counter values keyed by counter type
+   */
   public static Map<CounterType, Long> snapshot() {
     return INSTANCE.privateSnapshot();
   }
 
-  /** Dump all counters to stdout for debugging. */
+  /** Print all counter values to standard output for debugging. */
   public static void dumpCounters() {
     INSTANCE.privateDumpCounters();
   }

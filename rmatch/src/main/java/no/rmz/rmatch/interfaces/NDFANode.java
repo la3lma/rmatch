@@ -17,21 +17,30 @@ import java.util.Collection;
 import java.util.SortedSet;
 
 /**
- * An interface that must be implemented by representations of nondeterminstic finite
- * automaton-nodes. (NDFAs).
+ * A node in rmatch's nondeterministic finite automaton.
+ *
+ * <p>This is engine machinery, not the normal application API. It is public because the compiler,
+ * matcher, and historical diagnostic tools share it. Most users should register patterns through
+ * {@link Matcher#add(String, Action)} and never need to construct or traverse {@code NDFANode}
+ * instances directly.
  */
 public interface NDFANode extends Node, Comparable<NDFANode> {
 
   /**
-   * Epsilon edges are edges that connect nodes without the need to follow any input. This method
-   * adds an epsilon edge from the present node to some other node.
+   * Add an epsilon edge from this node to another node.
    *
-   * @param n The node that will be the gtarget of the epsilon edge.
+   * <p>An epsilon edge consumes no input. During closure calculation the engine may move across
+   * such an edge without reading a character.
+   *
+   * @param n destination node
    */
   void addEpsilonEdge(final NDFANode n);
 
   /**
-   * Add an epsilon-like edge guarded by a zero-width assertion.
+   * Add an assertion edge from this node to another node.
+   *
+   * <p>Like an epsilon edge, an assertion edge consumes no input. Unlike an epsilon edge, it may be
+   * followed only when its zero-width condition is satisfied at the current input position.
    *
    * @param assertion assertion that must hold for the edge to be followed
    * @param n destination node
@@ -39,65 +48,63 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
   void addAssertionEdge(final ZeroWidthAssertion assertion, final NDFANode n);
 
   /**
-   * Remove a node that is reachable from this node through an epsilon (no-input) edge.
+   * Remove an epsilon edge from this node to the supplied destination.
    *
-   * @param n the node to remove.
+   * @param n destination node to remove from the epsilon-reachable set
    */
   void removeEpsilonReachableNode(final NDFANode n);
 
   /**
-   * Get all the nodes that are reachable by epsilon edges.
+   * Return the direct epsilon destinations of this node.
    *
-   * @return All the nodes reachable by epsilon edges.
+   * @return nodes reachable from this node without consuming input
    */
   SortedSet<NDFANode> getEpsilons();
 
   /**
-   * Get all zero-width assertion edges leaving this node.
+   * Return the direct assertion edges leaving this node.
    *
-   * @return assertion edges reachable from this node
+   * @return zero-width assertion edges from this node
    */
   Collection<AssertionEdge> getAssertionEdges();
 
   /**
-   * Give n that the nxt character is ch, what is the next NDFA node that can be reached. In the
-   * particular brand of nondeterminsm implemented by this interface, there will for each
-   * outgoingcharacter at most one node that is dreictly reachable through that character. This is
-   * very much the common case for regular expressions, but in the not so uncommon special case
-   * where one wants multiple nodes to be reached by the same character, this must be implemente by
-   * having an intermeiate noe that is directly reached, and that node then has to have epsilon
-   * nodes that reaches the other nodes that are to be reached through the character.
+   * Return the node reached by consuming the supplied character directly from this node.
    *
-   * @param ch Get the node reachable through character ch.
-   * @return the character to reach through (or something like that).
+   * <p>rmatch's compiled NDFAs keep at most one direct outgoing edge per character from a single
+   * node. When a pattern needs to branch after consuming the same character, the compiler creates
+   * one direct character edge and places the branch behind that node using epsilon edges.
+   *
+   * @param ch input character to consume
+   * @return directly reachable node, or {@code null} when no such edge exists
    */
   NDFANode getNextNDFA(final Character ch);
 
   /**
-   * While getNextNDFA will give the single node that is reachable through a character, in general
-   * there will be more noes that are reached due to the possib e presence of epsilon nodes going
-   * out of the target node found by getNestNDFA. The getNextSet method will find the transitive,
-   * reflexive closure of the epsilon-reachable nodes going out of the node found by getNextNDFA the
-   * character ch.
+   * Return every node reachable after consuming the supplied character.
    *
-   * @param ch The character we're lokking through
-   * @return The set of nodes reachable thrugh the character ch.
+   * <p>The result includes the direct character destination and the epsilon closure reachable from
+   * that destination. In other words, this is the set of NDFA states the engine may occupy after it
+   * reads {@code ch} from this node.
+   *
+   * @param ch input character to consume
+   * @return reachable node set, including epsilon closure
    */
   SortedSet<NDFANode> getNextSet(final Character ch);
 
   /**
    * Context-aware variant of {@link #getNextSet(Character)} for zero-width assertions.
    *
-   * @param ch The character we're looking through
+   * @param ch input character to consume
    * @param context positional context for assertions adjacent to this transition
-   * @return The set of nodes reachable through the character in this context.
+   * @return reachable node set, including context-sensitive assertion closure
    */
   SortedSet<NDFANode> getNextSet(final Character ch, final MatchContext context);
 
   /**
-   * The regular expression this node is representing.
+   * Return the compiled regular expression that owns this node.
    *
-   * @return The Regexp this node is part of the representatio of.
+   * @return owning regular-expression state
    */
   Regexp getRegexp();
 
@@ -105,28 +112,29 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
   boolean isActiveFor(final Regexp rexp);
 
   /**
-   * A collection of edges that can be used when printing a graph. Is not necessarily when actually
-   * traversing the graph. Also, an implementation may choose to return null for this method, for
-   * efficiency reasons or other reasons.
+   * Return edges intended for diagnostic graph rendering.
    *
-   * @return A collection of printable edges or null.
+   * <p>This method is not part of matching semantics. It exists for historical graph/debug tools
+   * and may omit information that is irrelevant to those tools.
+   *
+   * @return printable diagnostic edges, or {@code null} if unavailable
    */
   Collection<PrintableEdge> getEdgesToPrint();
 
   /**
-   * Return a unique identifier for this NDFA node.
+   * Return an identifier that is unique within the owning matcher.
    *
-   * @return a Long identifying the node uniquely within the matcher
+   * @return matcher-local node identifier
    */
   Long getId();
 
   /**
-   * If true, then the present node represents a valid termination of a match. This means that a
-   * match that is in progress can be returned and executed, because it is a legal match, but not
-   * necessarily that it will since there may be other overlapping matches that should be run
-   * instead (determined through the "domination protocol").
+   * Return whether this node is a valid termination point for its owning expression.
    *
-   * @return iff the node is terminal.
+   * <p>A terminal node means a match candidate is legally complete. The engine may still suppress a
+   * completed candidate if another overlapping match dominates it.
+   *
+   * @return {@code true} when this node is terminal
    */
   boolean isTerminal();
 
@@ -138,12 +146,12 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
   boolean isTerminalFor(final Regexp rexp);
 
   /**
-   * If the NDFA exececution ever reaches a node for which isFailing is true, the matcher must
-   * abandon any matches for the Regexp that which the failing node represents.
+   * Return whether reaching this node abandons candidates for its owning expression.
    *
-   * <p>A typical usecase for this type of node is for inverted matches: "[^abc]".
+   * <p>A failing node is used to model constructs such as negated character classes. If execution
+   * reaches such a node, the current candidate has learned enough to know it cannot succeed.
    *
-   * @return True iff this node dictates failing for matches associated with this NDFANode's Regexp.
+   * @return {@code true} when this node fails candidates for its owning expression
    */
   boolean isFailing();
 }

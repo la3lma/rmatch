@@ -14,11 +14,11 @@
 package no.rmz.rmatch.compiler;
 
 /**
- * This interface is used for builders of abstract syntax trees for regular expressions. Its
- * intended use is to be injected into a parser for the surface syntax of regular expressions, which
- * then parses that surface syntax, and delegates to an AbstractRegexBuilder to build a proper
- * abstract regular expression tree. That tree is in turn sent over to a compiler that will produce
- * a more or less runnable representation of it, e.g. an NDFA.
+ * Callback interface used by the surface parser while reading a regular expression.
+ *
+ * <p>The parser recognizes syntax and reports semantic events here: literal characters, character
+ * sets, alternation, quantifiers, groups, and anchors. Implementations decide how those events
+ * become an executable representation. The production implementation builds NDFA fragments.
  */
 public interface AbstractRegexBuilder {
 

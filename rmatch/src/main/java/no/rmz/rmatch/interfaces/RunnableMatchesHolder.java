@@ -16,22 +16,24 @@ package no.rmz.rmatch.interfaces;
 import java.util.Set;
 
 /**
- * A set used to hold matches that are legal to run since they represent a legal match, but may or
- * may not actually be run pending determination of domination ordering.
+ * Collector for completed match candidates whose actions may be invoked.
+ *
+ * <p>A match enters this holder only after it reaches a legal terminal state. It may still be
+ * suppressed later if another overlapping candidate dominates it.
  */
 public interface RunnableMatchesHolder {
 
   /**
-   * Add a match to the set. Fail if the match isn't final.
+   * Add a completed candidate to the holder.
    *
-   * @param m the match to add.
+   * @param m completed match candidate
    */
   void add(final Match m);
 
   /**
-   * Get the set of matches.
+   * Return the candidates currently held for possible execution.
    *
-   * @return the set of matches.
+   * @return runnable match candidates
    */
   Set<Match> getMatches();
 }

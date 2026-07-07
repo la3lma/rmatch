@@ -13,14 +13,13 @@
  */
 package no.rmz.rmatch.interfaces;
 
-/** The match engine used to make matches. */
+/** Engine component that scans an input buffer and commits matching callbacks. */
 public interface MatchEngine {
 
   /**
-   * Detect all matches for the input in buffer b, and run all actions associated with the matching
-   * regexps.
+   * Scan a buffer and invoke actions associated with any expressions that match.
    *
-   * @param b the buffer to search in.
+   * @param b input buffer to scan
    */
   void match(final Buffer b);
 }

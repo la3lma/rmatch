@@ -16,22 +16,22 @@ package no.rmz.rmatch.interfaces;
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 /**
- * An edge used for printing. The label is a descriptive label describing what type of input is
- * necessary to traverse the edge. Typically it will be the regular expression that triggers
- * traversal, e.g. "[abc]", or "b" or something. It will only be an expression representing a single
- * character though.
+ * Diagnostic edge description used by graph-rendering tools.
  *
- * @param label A printable label, to be used by programs such as graphwiz to produce nice readable
- *     representations of the NDFAs used by the program.
- * @param destination The target of the edge.
+ * <p>A {@code PrintableEdge} is not consulted by the matcher. It is a lightweight description of a
+ * node-to-node connection for tools that draw the compiled automata. The label is intended for
+ * humans, for example {@code "a"}, {@code "[abc]"}, or {@code null} for an epsilon edge.
+ *
+ * @param label human-readable edge label, or {@code null} for an epsilon edge
+ * @param destination destination node
  */
 public record PrintableEdge(String label, NDFANode destination) {
 
   /**
-   * A new printable edge, not used for matching but only for pretty printing of the DNFA Graph.
+   * Create a diagnostic edge description.
    *
-   * @param label A printable label, or null for epsilon edges.
-   * @param destination The target for the edge.
+   * @param label human-readable edge label, or {@code null} for an epsilon edge
+   * @param destination destination node
    */
   public PrintableEdge(final String label, final NDFANode destination) {
     this.label = label;
@@ -39,9 +39,9 @@ public record PrintableEdge(String label, NDFANode destination) {
   }
 
   /**
-   * Get the target (destination) of the edge.
+   * Return the destination node.
    *
-   * @return The target.
+   * @return destination node
    */
   @Override
   public NDFANode destination() {
@@ -49,10 +49,9 @@ public record PrintableEdge(String label, NDFANode destination) {
   }
 
   /**
-   * Get a descriptive label for the edge, typically a string like "a" or "[foo]" or some other
-   * regular expression representing a single character.
+   * Return the human-readable label for this edge.
    *
-   * @return a nice descriptive string.
+   * @return edge label, or {@code null} for an epsilon edge
    */
   @Override
   public String label() {

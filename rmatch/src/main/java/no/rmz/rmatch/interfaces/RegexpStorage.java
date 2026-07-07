@@ -17,57 +17,51 @@ import java.util.Set;
 import no.rmz.rmatch.compiler.RegexpParserException;
 
 /**
- * Storage for regular expressions. It provides an interface for storing regular expressions, as
- * strings, and retrieving their corresponding representations as Regexpr instances.
+ * Engine-internal registry from pattern text to compiled regular-expression state.
  *
- * <p>The lookup is syntactic, not semantic, so that equivalent regular expression strings, such as
- * "aa*" and "a+" will not be recognized as representing the same regular language, even if they in
- * fact do that.
+ * <p>The lookup is syntactic, not semantic. Two strings that describe the same language, such as
+ * {@code aa*} and {@code a+}, are stored as distinct entries unless the caller supplied exactly the
+ * same pattern text.
  */
 public interface RegexpStorage {
 
   /**
-   * True iff we have stored a representation corresponding to the regular expression string given
-   * as parameter.
+   * Return whether this storage already contains the supplied pattern text.
    *
-   * @param regexp a regular expression string.
-   * @return true iff a representation is stored for regexp.
+   * @param regexp regular-expression text
+   * @return {@code true} if a compiled representation is present
    */
   boolean hasRegexp(final String regexp);
 
   /**
-   * Get the representation representing a regexp string.
+   * Return the compiled representation for a pattern, creating it if necessary.
    *
-   * @param regexp a regular expression string. If no representation is stored prior to the
-   *     invocation of getRegexp, a representation will be added through the invocation of
-   *     getRegexp.
-   * @return A Regexp instance representing the regexp string.
+   * @param regexp regular-expression text
+   * @return compiled regular-expression state for {@code regexp}
    */
   Regexp getRegexp(final String regexp);
 
   /**
-   * Add an action associated with a regular expression. If the regular expression isn't represented
-   * by a Regexp representation prior to the invocation of the add method, a representation will be
-   * created by this invocation.
+   * Associate an action with a regular expression, creating the compiled representation if needed.
    *
-   * @param regexp A regular expression string.
-   * @param a An action to be invoked when the regular expression matches.
-   * @throws RegexpParserException when the regexp has a syntax error.
+   * @param regexp regular-expression text
+   * @param a action to invoke when the expression matches
+   * @throws RegexpParserException if {@code regexp} is not valid rmatch syntax
    */
   void add(final String regexp, final Action a) throws RegexpParserException;
 
   /**
-   * Remove the associaten between a regular expression and an action.
+   * Remove one association between a regular expression and an action.
    *
-   * @param regexp a regular expression
-   * @param a An action
+   * @param regexp regular-expression text
+   * @param a action to remove from the expression
    */
   void remove(final String regexp, final Action a);
 
   /**
-   * Get the set of regular expression associated with this storage instance.
+   * Return the pattern strings known to this storage.
    *
-   * @return A set of regular expression representations.
+   * @return stored regular-expression strings
    */
   Set<String> getRegexpSet();
 }
