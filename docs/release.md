@@ -63,8 +63,8 @@ Check that `rmatch` does not leak test dependencies:
 mvn -q -pl rmatch dependency:tree -Dscope=compile
 ```
 
-Expected compile/runtime dependencies for `no.rmz:rmatch` are Guava,
-JetBrains annotations, and Aho-Corasick.
+Expected compile/runtime dependencies for `no.rmz:rmatch` are limited to
+Aho-Corasick.
 
 ## Maven Central upload
 

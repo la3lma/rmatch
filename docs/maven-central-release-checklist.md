@@ -90,9 +90,12 @@ the rest of the release work here as it becomes explicit.
 - [x] Document deliberate syntax limitations in README.
 - [x] Fix README quick-start example to use the real buffer class.
 - [x] Compile and run the README quick-start example against the built artifact.
-- [ ] Add a short public performance note with exact benchmark provenance.
+- [x] Add a short public performance note with exact benchmark provenance.
+  README now explains the comparison model against naive `java.util.regex` and
+  RE2J loops, the rmatch one-pass setup, the measured fields, and the
+  byte-identical-input/match-count discipline used for release gates.
 - [ ] Add or link API docs once published javadocs are available.
-- [ ] Decide how prominently to describe `1.9.0` as pre-2.0 in README after
+- [ ] Decide how prominently to describe `1.9.x` as pre-2.0 in README after
   Central publication.
 
 ## Local Validation

@@ -8,26 +8,29 @@ where many patterns are registered once and then reused against large corpora,
 for example log scanning, rule matching, and other high-volume multi-pattern
 search tasks.
 
-`1.9.0` is a pre-2.0 Maven Central release-candidate line. The engine is useful
+`1.9.x` is a pre-2.0 Maven Central release-candidate line. The engine is useful
 and benchmark-positive, while the public syntax/API contract is still being
 polished toward a stable `2.0.0`.
 
 ## Installation
 
-Maven, after the `1.9.0` Central publication:
+Maven, after the `1.9.x` Central publication:
 
 ```xml
 <dependency>
   <groupId>no.rmz</groupId>
   <artifactId>rmatch</artifactId>
-  <version>1.9.0</version>
+  <version>1.9.1</version>
 </dependency>
 ```
 
 `1.9.x` is compiled with `--release 21`, so consumers should use Java 21 or
 newer. Release smoke tests have also been run with newer JDKs.
 
-## Quick Start
+## Copy-Paste Example
+
+Put this dependency in your Maven project, then copy the class below and run it.
+It registers two patterns once, scans one buffer, and prints both matches.
 
 ```java
 import no.rmz.rmatch.impls.MatcherImpl;
@@ -62,7 +65,12 @@ matched buffer and inclusive start/end offsets. rmatch reports the longest match
 for each start position; overlapping matches from different start positions may
 therefore be reported.
 
-## Supported Syntax in 1.9.0
+Use rmatch when you have many patterns and you want to scan the same large text
+stream or corpus without running a separate regex search for every pattern.
+For one small pattern against one small string, `java.util.regex` is usually the
+simpler tool.
+
+## Supported Syntax in 1.9.x
 
 The parser intentionally supports a reduced regular-expression language. This
 is not a drop-in replacement for `java.util.regex` or PCRE.
@@ -82,7 +90,7 @@ is not a drop-in replacement for `java.util.regex` or PCRE.
 
 ## Important Limitations
 
-These constructs are not part of the supported `1.9.0` surface:
+These constructs are not part of the supported `1.9.x` surface:
 
 - Line anchors `^` and `$`
 - Word boundaries `\b` and `\B`
@@ -95,9 +103,49 @@ Backreferences are intentionally out of scope because they are non-regular.
 Other limitations are candidates for the 2.0 work, especially the anchor and
 boundary-assertion machinery.
 
+## Performance Comparisons
+
+The benchmark question we care about is not "can rmatch beat one regex on one
+short string?" It is: when many patterns must be applied to the same corpus, how
+does a one-pass multi-pattern engine compare with engines that normally run one
+compiled pattern at a time?
+
+We therefore compare rmatch against:
+
+- `java.util.regex` naive loop: compile the same pattern set, then run each
+  compiled Java regex over the corpus.
+- RE2J loop: compile the same pattern set with RE2J, then run each compiled RE2J
+  regex over the corpus.
+- rmatch: register the same pattern set in one matcher and scan the corpus once.
+
+The comparisons use the supported rmatch syntax subset only. Patterns and corpus
+files are kept byte-identical across engines, and benchmark runs check that
+match counts remain consistent before performance numbers are treated as useful.
+This matters: a faster run with different inputs or different match semantics is
+not evidence.
+
+The numbers and tables we use come from the separate
+[rmatch-perftest](https://github.com/la3lma/rmatch-perftest) harness. That
+harness records raw per-job measurements such as:
+
+- `compilation_ns`: time to compile/register the pattern set.
+- `scanning_ns`: time spent scanning the corpus after compilation.
+- `total_ns`: end-to-end time for the benchmark job.
+- `match_count`: number of matches reported for correctness/provenance checks.
+
+For release gating, we use median `scanning_ns` over repeated runs, compare
+candidate and baseline runs on the same machine, and require byte-identical
+input files. The current `1.9.1` release-prep gate used the stable 10K-pattern
+moderate workload in `rmatch-perftest`, with 1 MB and 10 MB corpora, and passed
+without performance regression after the Java 21 baseline change.
+
+Longer benchmark campaigns, charts, and reports belong in `rmatch-perftest` and
+`rmatch-meta`; this repository keeps the Maven library and the short public
+explanation close to the code.
+
 ## Release Notes and Roadmap
 
-- [CHANGELOG.md](CHANGELOG.md) describes the `1.9.0` pre-release line.
+- [CHANGELOG.md](CHANGELOG.md) describes the `1.9.x` pre-release line.
 - [docs/release.md](docs/release.md) documents the Maven Central release lane.
 - [docs/maven-central-release-checklist.md](docs/maven-central-release-checklist.md)
   tracks the current release checklist.
@@ -120,11 +168,15 @@ Use `rmatch-perftest` for branch-vs-`main` performance checks:
 
 1. In `rmatch` on `main`, run correctness checks and install locally:
    `./mvnw -q test && ./mvnw -q -DskipTests install`
-2. In `rmatch-perftest`, run the baseline benchmark config.
+2. In `rmatch-perftest`, run the baseline benchmark config and keep the result
+   directory.
 3. Switch to the candidate branch in `rmatch`, rerun the same checks, and
    install locally again.
-4. In `rmatch-perftest`, rerun the exact same benchmark config.
-5. Compare baseline vs candidate from the generated reports/databases.
+4. In `rmatch-perftest`, rerun the exact same benchmark config, reusing the
+   same pattern and corpus files.
+5. Compare baseline vs candidate from the generated reports, raw JSON, or
+   database artifacts. Treat the comparison as valid only when inputs and match
+   counts agree.
 
 Keeping the benchmark campaign machinery in `rmatch-perftest` keeps the Maven
 library artifact small and focused.
