@@ -176,6 +176,10 @@ the rest of the release work here as it becomes explicit.
   0 failures, 0 errors, 2 skipped; Spotless and SpotBugs passed in both
   modules. `javap` on `no.rmz.rmatch.impls.MatcherImpl` reported classfile
   major version 65.
+- [ ] Before release, audit source, tests, benchmark harnesses, and build/release
+  scripts for deprecated method/API usage. Remove deprecated calls where
+  practical; document and track any unavoidable remaining usage. Track this
+  under [issue #272](https://github.com/la3lma/rmatch/issues/272).
 - [x] Verify post-cleanup compile dependency tree. Result on 2026-07-07:
   `no.rmz:rmatch` has only `org.ahocorasick:ahocorasick:0.6.3` in compile
   scope; `rmatch-tester` has `rmatch` and Aho-Corasick in compile scope when
