@@ -50,6 +50,26 @@ the rest of the release work here as it becomes explicit.
   2026-07-08: `/tmp/rmatch-192-consumer-smoke.XBPoXD`, command
   `mvn -q clean verify exec:java -Dexec.mainClass=Example`, printed
   `log-level match: WARN` and `user token match: user:alice`.
+- [x] Upload the `1.9.2` release commit to Central Portal. Result on
+  2026-07-08: release commit `48151212` deployed as Central deployment
+  `ea3d5702-e26e-4376-974c-6e094298aac8`; validation succeeded.
+- [x] Publish the validated `1.9.2` Central deployment. Result on 2026-07-08:
+  the deployment moved from `VALIDATED` to `PUBLISHING` via the Central
+  Publisher API and then reached `PUBLISHED`.
+- [x] Confirm `1.9.2` artifact availability from Maven Central. Result on
+  2026-07-08: direct checks for
+  `https://repo.maven.apache.org/maven2/no/rmz/rmatch/1.9.2/rmatch-1.9.2.pom`
+  and the corresponding `-javadoc.jar` returned HTTP 200.
+- [x] Run a clean-repository consumer smoke test against Maven Central
+  `1.9.2`. Result on 2026-07-08:
+  `/tmp/rmatch-192-central-consumer-smoke.Hq0dTH` with empty Maven repository
+  `/tmp/rmatch-192-central-m2.XCCLKb`, command
+  `mvn -Dmaven.repo.local=/tmp/rmatch-192-central-m2.XCCLKb -q clean verify
+  exec:java -Dexec.mainClass=Example`, printed `log-level match: WARN` and
+  `user token match: user:alice`.
+- [x] Create and push the `rmatch-1.9.2` tag. Result on 2026-07-08:
+  annotated tag `rmatch-1.9.2` points at uploaded release commit `48151212`
+  and was pushed to `origin`.
 
 ## Identity and Access
 

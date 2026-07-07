@@ -6,6 +6,9 @@
 published `1.9.x` line. It keeps the same pre-2.0 positioning as `1.9.1`, but
 now supports line anchors and ASCII word boundaries.
 
+Published to Maven Central on 2026-07-08 as `no.rmz:rmatch:1.9.2`, with the
+Git tag `rmatch-1.9.2` pointing at release commit `48151212`.
+
 ### Highlights
 
 - Added the first zero-width assertion machinery for line anchors `^` and `$`.
