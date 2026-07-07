@@ -1,6 +1,6 @@
 # rmatch
 
-[![MvnRepository](https://badges.mvnrepository.com/badge/no.rmz/rmatch/badge.svg?label=MvnRepository&color=green)](https://mvnrepository.com/artifact/no.rmz/rmatch)
+[![Maven Central](https://img.shields.io/maven-central/v/no.rmz/rmatch.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/no.rmz/rmatch)
 
 `rmatch` is a Java library for matching many regular expressions against large
 text buffers with one pass-oriented matching pipeline. It is aimed at workloads
@@ -12,20 +12,83 @@ search tasks.
 and benchmark-positive, while the public syntax/API contract is still being
 polished toward a stable `2.0.0`.
 
-## Installation
+## Why Use rmatch?
 
-For an existing Maven project, add the current Maven Central release:
+The benchmark question for rmatch is not "can it beat one regex on one short
+string?" It is: when many patterns must be applied to the same corpus, how does
+a one-pass multi-pattern engine compare with engines that normally run one
+compiled pattern at a time?
+
+The public comparison model is:
+
+- `java.util.regex` naive loop: compile the same pattern set, then run each
+  compiled Java regex over the corpus.
+- RE2J loop: compile the same pattern set with RE2J, then run each compiled
+  RE2J regex over the corpus.
+- rmatch: register the same pattern set in one matcher and scan the corpus once.
+
+Current release gates use byte-identical inputs and require match counts to
+agree before timing numbers are treated as public evidence. A fresh Docker run
+on a 32-logical-CPU AMD Ryzen 9 9950X3D machine on 2026-07-07 used deterministic
+literal-token patterns over an 8 MiB corpus. The 1k-pattern case still favors
+RE2J, which is expected for smaller literal workloads. At 5k and 10k patterns,
+the one-pass rmatch scan pulls ahead while the per-pattern loops continue to
+scale with the number of patterns.
+
+![rmatch README efficiency comparison](docs/benchmark-receipts/agogo-2026-07-07/readme-efficiency-large/readme-efficiency-scanning.svg)
+
+| Patterns | Match count | rmatch (s) | RE2J (s) | Java regex loop (s) |
+|---:|---:|---:|---:|---:|
+| 1,000 | 11,000 | 1.885 | 1.143 | 3.091 |
+| 5,000 | 52,721 | 2.075 | 4.073 | 15.314 |
+| 10,000 | 102,721 | 2.316 | 7.914 | 30.740 |
+
+The raw receipts, chart inputs, and earlier diagnostic runs are checked in
+under
+[docs/benchmark-receipts/agogo-2026-07-07](docs/benchmark-receipts/agogo-2026-07-07).
+
+Use rmatch when the workload looks like this:
+
+- You have hundreds, thousands, or tens of thousands of patterns.
+- You apply the same pattern set to large buffers or many large documents.
+- You care more about aggregate scanning throughput than PCRE-compatible syntax
+  breadth.
+- You can work within a regular-language subset and do not need captures,
+  backreferences, or lookaround.
+
+Do not use rmatch just because the API is pleasant. A convenient API is there
+to remove adoption friction; the reason to reach for this library is the
+many-pattern scaling profile.
+
+When contributing to rmatch development, performance regression testing is part
+of the work: almost all plausible matcher improvements are not improvements
+until measured against the same inputs with the same correctness expectations.
+The branch-vs-`main` protocol lives in
+[docs/performance-regression-testing.md](docs/performance-regression-testing.md).
+
+## Use from Maven Central
+
+Add rmatch to an existing Maven project:
 
 ```xml
 <dependency>
   <groupId>no.rmz</groupId>
   <artifactId>rmatch</artifactId>
-  <version>1.9.0</version>
+  <version>1.9.1</version>
 </dependency>
 ```
 
 `1.9.x` is compiled with `--release 21`, so consumers should use Java 21 or
-newer. Release smoke tests have also been run with newer JDKs.
+newer. Maven Central also publishes source and Javadoc artifacts for IDEs and
+API browsers.
+
+For Gradle:
+
+```kotlin
+dependencies {
+    implementation("no.rmz:rmatch:1.9.1")
+}
+```
 
 ## Copy-Paste Example
 
@@ -57,7 +120,7 @@ For a complete scratch project, use this full `pom.xml`:
     <dependency>
       <groupId>no.rmz</groupId>
       <artifactId>rmatch</artifactId>
-      <version>1.9.0</version>
+      <version>1.9.1</version>
     </dependency>
   </dependencies>
 </project>
@@ -112,10 +175,9 @@ matched buffer and inclusive start/end offsets. rmatch reports the longest match
 for each start position; overlapping matches from different start positions may
 therefore be reported.
 
-Use rmatch when you have many patterns and you want to scan the same large text
-stream or corpus without running a separate regex search for every pattern.
 For one small pattern against one small string, `java.util.regex` is usually the
-simpler tool.
+simpler tool. rmatch is for many-pattern workloads where avoiding a separate
+regex search for every pattern matters.
 
 ## Supported Syntax in 1.9.x
 
@@ -149,46 +211,6 @@ These constructs are not part of the supported `1.9.x` surface:
 Backreferences are intentionally out of scope because they are non-regular.
 Other limitations are candidates for the 2.0 work, especially the anchor and
 boundary-assertion machinery.
-
-## Performance Comparisons
-
-The benchmark question we care about is not "can rmatch beat one regex on one
-short string?" It is: when many patterns must be applied to the same corpus, how
-does a one-pass multi-pattern engine compare with engines that normally run one
-compiled pattern at a time?
-
-We therefore compare rmatch against:
-
-- `java.util.regex` naive loop: compile the same pattern set, then run each
-  compiled Java regex over the corpus.
-- RE2J loop: compile the same pattern set with RE2J, then run each compiled RE2J
-  regex over the corpus.
-- rmatch: register the same pattern set in one matcher and scan the corpus once.
-
-The comparisons use the supported rmatch syntax subset only. Patterns and corpus
-files are kept byte-identical across engines, and benchmark runs check that
-match counts remain consistent before performance numbers are treated as useful.
-This matters: a faster run with different inputs or different match semantics is
-not evidence.
-
-The numbers and tables we use come from the separate
-[rmatch-perftest](https://github.com/la3lma/rmatch-perftest) harness. That
-harness records raw per-job measurements such as:
-
-- `compilation_ns`: time to compile/register the pattern set.
-- `scanning_ns`: time spent scanning the corpus after compilation.
-- `total_ns`: end-to-end time for the benchmark job.
-- `match_count`: number of matches reported for correctness/provenance checks.
-
-For release gating, we use median `scanning_ns` over repeated runs, compare
-candidate and baseline runs on the same machine, and require byte-identical
-input files. The current `1.9.1` release-prep gate used the stable 10K-pattern
-moderate workload in `rmatch-perftest`, with 1 MB and 10 MB corpora, and passed
-without performance regression after the Java 21 baseline change.
-
-Longer benchmark campaigns, charts, and reports belong in `rmatch-perftest` and
-`rmatch-meta`; this repository keeps the Maven library and the short public
-explanation close to the code.
 
 ## Release Notes and Roadmap
 

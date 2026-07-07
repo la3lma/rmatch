@@ -10,30 +10,36 @@ the rest of the release work here as it becomes explicit.
   candidate line.
 - [x] Keep `rmatch-tester` out of the Maven Central release lane.
 - [x] Publish only `no.rmz:rmatch-parent` and `no.rmz:rmatch`.
-- [ ] Decide whether the release branch should be merged to `main` before
+- [x] Decide whether the release branch should be merged to `main` before
   upload or kept as a dedicated release branch until Central validation passes.
-- [ ] Decide whether the next development version after `1.9.0` is
-  `1.9.1-SNAPSHOT`, `1.10.0-SNAPSHOT`, or back to `2.0-SNAPSHOT`.
+  Decision for `1.9.1`: keep the dedicated release branch through Central
+  validation, then merge/cherry-pick public docs and receipts back as needed.
+- [x] Decide whether the next development version after `1.9.1` is
+  `1.9.2-SNAPSHOT`, `1.10.0-SNAPSHOT`, or back to `2.0-SNAPSHOT`. Decision:
+  continue mainline development on `2.0-SNAPSHOT`; use the `1.9.x` release
+  branch only for release-candidate stabilization.
 
 ## Identity and Access
 
 - [x] Create a current GPG release-signing key.
 - [x] Verify the GPG key locally with a detached-signature smoke test.
 - [x] Publish and verify the public key on `keys.openpgp.org`.
-- [ ] Verify that the `no.rmz` namespace is available/approved in the Central
+- [x] Verify that the `no.rmz` namespace is available/approved in the Central
   Portal.
-- [ ] Create or verify Central Portal user token credentials.
+- [x] Create or verify Central Portal user token credentials.
 - [x] Confirm `~/.m2/settings.xml` has a `central` server entry matching
   `publishingServerId`.
 - [x] Retry Central upload after Maven credentials are configured. Attempt on
   2026-07-05 stopped before upload because `~/.m2/settings.xml` was not present
   and no Central/Sonatype/Maven credential environment variables were set.
   Retry on 2026-07-07 succeeded after fixing the Maven settings wrapper and
-  setting server id `central`.
+  setting server id `central`. Do not publish the old validated `1.9.0`
+  deployment for the `1.9.1` release; create a fresh `1.9.1` deployment after
+  the final version bump and validation pass.
 
 ## POM and Artifact Hygiene
 
-- [x] Set release POM versions to `1.9.0` on the release-prep branch.
+- [x] Set release POM versions to `1.9.1` on the release-prep branch.
 - [x] Ensure parent and library POMs have name, description, URL, licenses,
   developers, organization, and SCM metadata.
 - [x] Remove inherited test dependencies from the public compile/runtime graph.
@@ -48,11 +54,14 @@ the rest of the release work here as it becomes explicit.
   bumped JUnit, Mockito, Byte Buddy, Spotless, SpotBugs,
   compiler/dependency/resources/shade/assembly plugins, and added Maven
   Enforcer while leaving milestone/beta plugin lines alone.
-- [ ] Before every major release, run a dependency hygiene check: review direct
+- [x] Before every major release, run a dependency hygiene check: review direct
   and transitive dependencies for known vulnerabilities, stale or unmaintained
   packages, unnecessary public/transitive exposure, license compatibility and
   reasonable upgrades to current stable versions; record the decisions and
-  validation evidence here.
+  validation evidence here. Result for `1.9.1`: dependency freshness and OSV
+  checks were run on 2026-07-07; Guava and JetBrains annotations were removed
+  from the public dependency surface; the remaining compile/runtime dependency
+  is Aho-Corasick.
 - [x] Remove obsolete Cobertura and FindBugs hooks; SpotBugs is the active
   static-analysis tool.
 - [x] Review Guava usage and decide whether it must remain a public transitive
@@ -100,6 +109,9 @@ the rest of the release work here as it becomes explicit.
   README now explains the comparison model against naive `java.util.regex` and
   RE2J loops, the rmatch one-pass setup, the measured fields, and the
   byte-identical-input/match-count discipline used for release gates.
+- [x] Confirm the README leads with the performance/scaling reason to use
+  rmatch; API convenience supports the pitch but does not replace it.
+- [x] Update README dependency snippets to `1.9.1` for the release candidate.
 - [x] Update end-user-facing Javadocs before the `1.9.1` release. Result on
   2026-07-07: `Matcher`, `Action`, `Buffer`, `MatcherImpl`, `MatcherFactory`,
   `MultiMatcher`, `RegexStringBuffer`, `LookaheadBuffer`, `CounterAction`, and
@@ -143,6 +155,15 @@ the rest of the release work here as it becomes explicit.
   tests, 0 failures, 0 errors, 3 skipped; `rmatch-tester` tests reported 16
   tests, 0 failures, 0 errors, 2 skipped; Spotless and SpotBugs passed in both
   modules.
+- [x] Run full final-version release-lane verification after bumping POMs to
+  `1.9.1`. Result on 2026-07-07:
+  `mvn -pl rmatch -am clean verify` succeeded; `rmatch` tests reported
+  312 tests, 0 failures, 0 errors, 3 skipped; Spotless and SpotBugs passed.
+- [x] Run tester-inclusive verification as a non-release-lane smoke check.
+  Result on 2026-07-07: `mvn -pl rmatch-tester -am clean verify` succeeded;
+  `rmatch-tester` tests reported 16 tests, 0 failures, 0 errors, 2 skipped.
+  Note: `rmatch-tester` remains outside the Central release lane and keeps its
+  own snapshot wiring.
 - [x] Verify Java 21 public baseline. Result on 2026-07-07:
   `mvn -pl rmatch-tester -am clean verify` succeeded after changing the
   compiler configuration to `--release 21`; `rmatch` tests reported 312 tests,
@@ -167,6 +188,19 @@ the rest of the release work here as it becomes explicit.
   2026-07-07: `mvn -pl rmatch -am -Pcentral-release -DskipTests
   -Dspotbugs.skip=true -Dgpg.keyname=55D9C01E75B1E582 verify` succeeded and
   generated signed artifacts plus javadocs.
+- [x] Run final `1.9.1` Central release-profile verify without deployment.
+  Result on 2026-07-07:
+  `mvn -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true
+  -Dgpg.keyname=55D9C01E75B1E582 verify` succeeded and generated signed
+  `1.9.1` artifacts plus javadocs.
+- [x] Verify final `1.9.1` signatures locally. Result on 2026-07-07:
+  `gpg --verify` reported good signatures for parent POM, rmatch POM, main
+  JAR, source JAR, and Javadoc JAR using key
+  `9017955845408C9B4422B5DE55D9C01E75B1E582`.
+- [x] Inspect final `1.9.1` JAR manifest and POM properties. Result on
+  2026-07-07: `rmatch-1.9.1.jar` manifest has `Java-Version: 21`, no
+  application-style `Main-Class`, and embedded pom properties report
+  `groupId=no.rmz`, `artifactId=rmatch`, `version=1.9.1`.
 - [x] Run OSV vulnerability check for the bumped dependency/plugin set. Result
   on 2026-07-07: no vulnerabilities returned for 39 queried Maven coordinates.
 - [x] Run an external consumer smoke test using a clean temporary Maven
@@ -192,6 +226,11 @@ the rest of the release work here as it becomes explicit.
   post-cleanup `1.9.1-SNAPSHOT` locally. Result on 2026-07-07: the same
   temporary project resolved the updated artifact and printed
   `user token match: user:alice` and `log-level match: WARN`.
+- [x] Run an external consumer smoke test for final `1.9.1` after local
+  install. Result on 2026-07-07:
+  `/tmp/rmatch-191-final-consumer-smoke.RLTC9k`, command
+  `mvn -q clean verify exec:java -Dexec.mainClass=Example`, output included
+  `user token match: user:alice` and `log-level match: WARN`.
 - [x] Run the chosen release benchmark smoke/gate and record exact result paths.
   Result on 2026-07-07: perftest stable 10K moderate gate, baseline
   `results/local_gate_dep_baseline_clean_20260707_124944`, candidate
@@ -211,32 +250,47 @@ the rest of the release work here as it becomes explicit.
   `corpus_10MB.txt`) and identical match counts. Median `scanning_ns` ratios
   were 0.986x for 1MB and 0.968x for 10MB, both within the 1.10 slowdown gate;
   no performance regression detected.
+- [x] Run the benchmark-framework README evidence guardrails. Result on
+  2026-07-07: `make test-readme-efficiency` in `rmatch-perftest` passed
+  6 tests, covering deterministic literal-token inputs, large README config
+  scale, corpus fallback safety, cross-engine match-count mismatch rejection,
+  and median scan/total summaries.
+- [x] Generate public README performance chart only from a semantics-aligned
+  benchmark receipt. Result on 2026-07-07: agogo Docker run
+  `readme_efficiency_large_20260707_191000`, deterministic literal-token
+  patterns over an 8 MiB corpus, match counts agreed across `rmatch`, RE2J, and
+  `java-native-naive` in every charted cell.
 
 ## Central Portal Upload
 
-- [x] Confirm there are no uncommitted release-branch changes.
-- [x] Confirm the release commit hash to upload: `81435dda`.
+- [ ] Confirm there are no uncommitted release-branch changes.
+- [ ] Confirm the `1.9.1` release commit hash to upload.
 - [x] Configure Central upload for manual validation:
   `autoPublish=false`, `waitUntil=VALIDATED`.
-- [x] Run the Central deploy command with `autoPublish=false`.
-- [ ] Inspect the uploaded deployment in Central Portal. Deployment id:
-  `27700f0f-46da-40a1-a9b1-ba192cdc02e3`.
-- [x] Confirm Central Portal validation status. Deployment
+- [ ] Run the Central deploy command with `autoPublish=false` for `1.9.1`.
+- [ ] Inspect the uploaded `1.9.1` deployment in Central Portal.
+- [x] Historical note: previous deployment
   `27700f0f-46da-40a1-a9b1-ba192cdc02e3` validated successfully on
-  2026-07-07; it still requires manual publishing.
-- [ ] Only after validation, publish/release the deployment.
+  2026-07-07, but it belongs to the earlier `1.9.0` release-prep state and
+  should not be published as the `1.9.1` release.
+- [ ] Confirm Central Portal validation status for the fresh `1.9.1`
+  deployment.
+- [ ] Only after validation, publish/release the `1.9.1` deployment.
 
 ## Git Tagging and Post-Release
 
-- [ ] Create the `rmatch-1.9.0` tag only after Central validation is known.
+- [ ] Create the `rmatch-1.9.1` tag only after Central validation is known.
 - [ ] Push the release tag.
 - [ ] Confirm artifact availability from Maven Central.
 - [ ] Confirm the MvnRepository page updates.
+- [ ] Update the MvnRepository banner at the bottom of any README or project
+  page where it is still used, and make sure it points to the latest version on
+  Maven Central.
 - [ ] Update README if any "after publication" language should become present
   tense.
-- [ ] After `1.9.1` is published and resolvable from Maven Central, update the
-  README dependency and scratch-project examples from `1.9.0` to `1.9.1`, then
-  rerun the clean-repository scratch-project smoke test against Central.
+- [ ] After `1.9.1` is published and resolvable from Maven Central, rerun the
+  clean-repository scratch-project smoke test against Central using the README
+  `1.9.1` snippets.
 - [ ] Bump repository back to the agreed next development snapshot.
 - [ ] Add a post-release note summarizing exactly what was published.
 

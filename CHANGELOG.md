@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.9.1 - pre-2.0 Maven Central release candidate
+
+`1.9.1` tightens the Maven Central release package after the first `1.9.x`
+publication pass. It keeps the same pre-2.0 positioning, but improves the
+public dependency surface, Java baseline, documentation, and performance
+evidence.
+
+### Highlights
+
+- Lowered the public Java baseline to Java 21 by compiling with
+  `--release 21`, while keeping newer JDKs usable for development and testing.
+- Removed Guava and JetBrains annotations from the public dependency surface.
+  The `no.rmz:rmatch` compile/runtime graph now contains only Aho-Corasick.
+- Expanded end-user-facing Javadocs for matcher lifecycle, callback offset
+  semantics, buffer behavior, factory behavior, and parse-error meaning.
+- Reworked the README so the main reason to try rmatch is explicit:
+  many-pattern scanning performance, not merely API convenience.
+- Added README performance receipts from a Docker run on a 32-logical-CPU AMD
+  Ryzen 9 9950X3D machine. The public chart uses deterministic literal-token
+  patterns over an 8 MiB corpus and only reports cells where rmatch, RE2J, and
+  `java.util.regex` agree on match counts.
+- Added release checklist items for dependency hygiene, README performance
+  evidence guardrails, Javadoc publication through javadoc.io, and
+  post-release Maven Central verification.
+
+### Deliberate limitations
+
+- `1.9.1` is still not a full Java/PCRE regex compatibility claim.
+- Line anchors `^` and `$`, word boundaries `\b`/`\B`, lookaround,
+  backreferences, scoped flags, and capture-group semantics remain outside the
+  supported `1.9.x` surface.
+- `rmatch-tester` remains local project tooling and is not part of the Maven
+  Central release lane.
+
 ## 1.9.0 - pre-2.0 Maven Central release candidate
 
 `1.9.0` is the first release-candidate line aimed at Maven Central. The engine

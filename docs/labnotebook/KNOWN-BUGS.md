@@ -48,7 +48,7 @@ it throws "Expected char after escape char" precisely when a next char EXISTS.
 Any pattern containing an escape fails at add() time (loud, not silent).
 Scheduled for the Tier-1 escapes work in the syntax program, test-first.
 
-## KB-4: negated character sets unsound by construction
+## Negated character sets were unsound by construction
 
 **Status:** FIXED 2026-07-05 (CharSetBuilder complement ranges). Found by the
 new differential suite within its first run. `[^a]` compiled as "match any
@@ -68,12 +68,14 @@ past the ender) was silently dropped when it died non-final. Matches now
 remember their largest final end and commit with it. Ancient — affected the
 eager engine identically.
 
-## KB-3: anchors `^` and `$` throw UnsupportedOperationException
+## Anchors `^` and `$` throw UnsupportedOperationException
 
-**Status:** OPEN. The README claims anchor support; the compiler throws
-"Not supported yet" for both. Descoped from the current syntax program
-(needs real context-assertion machinery); the README must stop claiming it,
-and \b/MULTILINE wait on the same machinery.
+**Status:** OPEN. Tracked in
+[issue #267](https://github.com/la3lma/rmatch/issues/267). The README used to
+claim anchor support; the compiler throws "Not supported yet" for both.
+Descoped from the current syntax program (needs real context-assertion
+machinery); the README must stop claiming it, and \b/MULTILINE wait on the
+same machinery.
 
 **Plan (campaign):** Run a dedicated correctness campaign after the current optimization
 campaign (rmz decision, 2026-07-05): differential fuzzing against
