@@ -23,11 +23,13 @@ the rest of the release work here as it becomes explicit.
 - [ ] Verify that the `no.rmz` namespace is available/approved in the Central
   Portal.
 - [ ] Create or verify Central Portal user token credentials.
-- [ ] Confirm `~/.m2/settings.xml` has a `central` server entry matching
+- [x] Confirm `~/.m2/settings.xml` has a `central` server entry matching
   `publishingServerId`.
-- [ ] Retry Central upload after Maven credentials are configured. Attempt on
+- [x] Retry Central upload after Maven credentials are configured. Attempt on
   2026-07-05 stopped before upload because `~/.m2/settings.xml` was not present
   and no Central/Sonatype/Maven credential environment variables were set.
+  Retry on 2026-07-07 succeeded after fixing the Maven settings wrapper and
+  setting server id `central`.
 
 ## POM and Artifact Hygiene
 
@@ -95,13 +97,16 @@ the rest of the release work here as it becomes explicit.
 
 ## Central Portal Upload
 
-- [ ] Confirm there are no uncommitted release-branch changes.
-- [ ] Confirm the release commit hash to upload.
+- [x] Confirm there are no uncommitted release-branch changes.
+- [x] Confirm the release commit hash to upload: `81435dda`.
 - [x] Configure Central upload for manual validation:
   `autoPublish=false`, `waitUntil=VALIDATED`.
-- [ ] Run the Central deploy command with `autoPublish=false`.
-- [ ] Inspect the uploaded deployment in Central Portal.
-- [ ] Confirm Central Portal validation status.
+- [x] Run the Central deploy command with `autoPublish=false`.
+- [ ] Inspect the uploaded deployment in Central Portal. Deployment id:
+  `27700f0f-46da-40a1-a9b1-ba192cdc02e3`.
+- [x] Confirm Central Portal validation status. Deployment
+  `27700f0f-46da-40a1-a9b1-ba192cdc02e3` validated successfully on
+  2026-07-07; it still requires manual publishing.
 - [ ] Only after validation, publish/release the deployment.
 
 ## Git Tagging and Post-Release
