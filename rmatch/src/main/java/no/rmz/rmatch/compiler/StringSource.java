@@ -15,12 +15,10 @@ package no.rmz.rmatch.compiler;
 
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
-// XXX This looks like it could be improved!
-
-/** A source of character used by the compiler to get input characters. */
+/** Cursor over a pattern string used by the surface parser. */
 public final class StringSource {
 
-  /** The string we're getting the characters from. */
+  /** Pattern text being read. */
   private final String string;
 
   /** The current index into the string. */
@@ -30,9 +28,9 @@ public final class StringSource {
   private final int len;
 
   /**
-   * Create a new instance of the StringSource.
+   * Create a parser source over a pattern string.
    *
-   * @param string ther string we will be getting characters from.
+   * @param string pattern text to read
    */
   public StringSource(final String string) {
     this.string = checkNotNull(string);
@@ -41,37 +39,36 @@ public final class StringSource {
   }
 
   /**
-   * Are there more characters?
+   * Return whether more characters can be read.
    *
-   * @return true iff more chars to read.
+   * @return {@code true} if another character is available
    */
   public boolean hasNext() {
     return index < len;
   }
 
   /**
-   * Get next character and increment index.
+   * Return the next character and advance the source position.
    *
-   * @return the next character.
+   * @return next character
    */
   public char next() {
     return string.charAt(index++);
   }
 
   /**
-   * The index of the next character to be read.
+   * Return the index of the next character to be read.
    *
-   * @return current position in the source string.
+   * @return zero-based source position
    */
   public int getIndex() {
     return index;
   }
 
   /**
-   * If more characters after thd current, then return then return the next character without
-   * advancing the index pointer, otherwise return null.
+   * Return the next character without consuming it.
    *
-   * @return next character or null if there are no more characters to read.
+   * @return next character, or {@code null} if no more characters are available
    */
   public Character peek() {
     if (hasNext()) {

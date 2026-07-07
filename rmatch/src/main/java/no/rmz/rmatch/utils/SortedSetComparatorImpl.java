@@ -19,11 +19,12 @@ import java.util.Iterator;
 import java.util.SortedSet;
 
 /**
- * Implements a comparator for sorted sets of T. All the elements in the set must be comparable, and
- * since the sets are sortable we can traverse the elements in lexographical order. The first set to
- * contain something the other set doesn't contain is larger than the other.
+ * Lexicographic comparator for sorted sets.
  *
- * @param <T>
+ * <p>Elements are compared in the iteration order supplied by the sorted sets. If all shared
+ * positions compare equal, the longer set is ordered after the shorter set.
+ *
+ * @param <T> comparable element type
  */
 public final class SortedSetComparatorImpl<T extends Comparable>
     implements Comparator<SortedSet<T>>, Serializable {

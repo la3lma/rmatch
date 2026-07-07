@@ -21,25 +21,48 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.logging.Logger;
 import no.rmz.rmatch.interfaces.Match;
 
+/**
+ * Priority queue used to decide which overlapping match candidates may run.
+ *
+ * <p>The matcher can have several legal candidates for the same expression and input region. The
+ * domination heap keeps those candidates ordered so dominated candidates can be suppressed before
+ * actions are invoked.
+ */
 public final class DominationHeap {
 
   private static final Logger LOG = Logger.getLogger(DominationHeap.class.getName());
 
   private final PriorityBlockingQueue<Match> heap;
 
+  /** Create a domination heap using the default match-domination ordering. */
   public DominationHeap() {
     this(Match.COMPARE_BY_DOMINATION);
   }
 
+  /**
+   * Create a domination heap with an explicit ordering.
+   *
+   * @param comparator ordering used to decide candidate priority
+   */
   public DominationHeap(final Comparator<Match> comparator) {
     heap = new PriorityBlockingQueue<>(11, comparator);
   }
 
+  /**
+   * Add a match candidate to the heap.
+   *
+   * @param m candidate to add
+   */
   public void addMatch(final Match m) {
     checkNotNull(m);
     heap.add(m);
   }
 
+  /**
+   * Remove a match candidate from the heap.
+   *
+   * @param m candidate to remove
+   */
   public void remove(final Match m) {
     checkNotNull(m);
     checkState(!isEmpty());
@@ -47,18 +70,39 @@ public final class DominationHeap {
     heap.remove(m);
   }
 
+  /**
+   * Return whether the heap contains no candidates.
+   *
+   * @return {@code true} if empty
+   */
   public boolean isEmpty() {
     return heap.isEmpty();
   }
 
+  /**
+   * Return the highest-priority candidate without removing it.
+   *
+   * @return first candidate, or {@code null} if the heap is empty
+   */
   public Match getFirstMatch() {
     return heap.peek();
   }
 
+  /**
+   * Return whether the heap contains a candidate.
+   *
+   * @param m candidate to look up
+   * @return {@code true} if {@code m} is present
+   */
   public boolean containsMatch(final Match m) {
     return heap.contains(m);
   }
 
+  /**
+   * Return the number of candidates in the heap.
+   *
+   * @return candidate count
+   */
   public int size() {
     return heap.size();
   }

@@ -14,25 +14,25 @@
 package no.rmz.rmatch.compiler;
 
 /**
- * A intermidate structure used by the compiler to represent ranges of characters.
+ * Inclusive character range used while compiling character classes.
  *
- * @param start The smallest character in the range.
- * @param end The largest character in the range.
+ * @param start smallest character in the range
+ * @param end largest character in the range
  */
 public record CharRange(Character start, Character end) implements Comparable<CharRange> {
 
   /**
    * Create a new character range.
    *
-   * @param start The smallest character in the range.
-   * @param end The largest character in the range.
+   * @param start smallest character in the range
+   * @param end largest character in the range
    */
   public CharRange {}
 
   /**
-   * The smallest character in the range.
+   * Return the smallest character in the range.
    *
-   * @return the smallest char.
+   * @return range start
    */
   @Override
   public Character start() {
@@ -40,9 +40,9 @@ public record CharRange(Character start, Character end) implements Comparable<Ch
   }
 
   /**
-   * Get the largest character in the range.
+   * Return the largest character in the range.
    *
-   * @return the largest char.
+   * @return range end
    */
   @Override
   public Character end() {

@@ -14,10 +14,9 @@
 package no.rmz.rmatch.utils;
 
 /**
- * Enumeration of counter types used for performance monitoring. Replaces string-based counter names
- * to eliminate string hashing overhead and improve performance.
+ * Counter categories used by rmatch diagnostics.
  *
- * <p>Each counter type corresponds to a specific operation being monitored in the rmatch system.
+ * <p>Each enum constant owns one slot in the shared diagnostic counter array.
  */
 public enum CounterType {
   /** Counter for AbstractNDFANode instances created. */
@@ -45,9 +44,9 @@ public enum CounterType {
   }
 
   /**
-   * Get the legacy string name for this counter type.
+   * Return the historical display name for this counter.
    *
-   * @return the legacy name used in the old string-based system
+   * @return diagnostic display name
    */
   public String getLegacyName() {
     return legacyName;

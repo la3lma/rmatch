@@ -21,7 +21,7 @@ import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
 
-/** A node that matches any character. */
+/** NDFA node that consumes one arbitrary character. */
 public final class AnyCharNode extends AbstractNDFANode {
 
   /** The node to go to after matching the input character. */

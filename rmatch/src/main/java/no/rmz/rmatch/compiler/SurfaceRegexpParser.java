@@ -19,34 +19,35 @@ package no.rmz.rmatch.compiler;
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 /**
- * A parser for regular expressions, will parse strings, and generate abstract regular expression
- * trees from those strings through an AbstractRegexBuilder.
+ * Parser for the supported rmatch regular-expression surface syntax.
+ *
+ * <p>The parser does not build automata directly. Instead, it reports parsed constructs to an
+ * {@link AbstractRegexBuilder}, which decides how to represent them.
  */
 public final class SurfaceRegexpParser {
 
-  /** Boolean constants are poor man's enumerations. ;) */
+  /** Commit mode used when buffered literal text should be emitted only if non-empty. */
   private static final boolean COMMIT_ONLY_IF_SOMETHING_IN_SB = true;
 
-  /** Another poor man's enum. */
+  /** Commit mode used when an empty literal fragment is meaningful. */
   private static final boolean COMMIT_EMPTY_STRING_IF_NOTHING_IN_SB = false;
 
-  /** A recipient of abstract regexp syntax, used as a backend for the compiler. */
+  /** Recipient of parsed regular-expression events. */
   private final AbstractRegexBuilder arb;
 
   /**
-   * Create a new parser with a ARB backend.
+   * Create a parser that reports parsed constructs to the supplied builder.
    *
-   * @param arb Compiler backend.
+   * @param arb builder that receives parse events
    */
   public SurfaceRegexpParser(final AbstractRegexBuilder arb) {
     this.arb = checkNotNull(arb);
   }
 
   /**
-   * Parse a string int a regular expression.
+   * Parse a regular-expression string.
    *
-   * @param regexString the string to parse.
-   * @throws RegexpParserException when bd things happen.
+   * @throws RegexpParserException if the string is malformed or uses unsupported syntax
    */
   public void parse(final String regexString) throws RegexpParserException {
     new PAux(regexString, arb).parse();

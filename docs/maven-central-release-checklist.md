@@ -123,6 +123,13 @@ the rest of the release work here as it becomes explicit.
 - [x] Build generated Javadocs after the public-doc pass. Result on 2026-07-07:
   `mvn -q -pl rmatch -am -DskipTests -Dspotbugs.skip=true javadoc:javadoc`
   succeeded.
+- [x] Before 2.0, perform a rendered Javadoc quality pass for all public API
+  documentation: inspect the generated pages, fix spelling mistakes and awkward
+  wording, and verify that every description remains technically correct. Track
+  this under [issue #271](https://github.com/la3lma/rmatch/issues/271). Result
+  on 2026-07-08: public interfaces, compiler helpers, matcher implementations,
+  and diagnostic utility docs were rewritten for clarity; generated Javadocs
+  were built and swept for the known typo/placeholder language.
 - [x] Decide where hosted API docs should live and wire the release path. First
   publication target is javadoc.io via the Maven Central `-javadoc.jar`.
   `make javadocs` builds browsable local docs, and
@@ -172,6 +179,14 @@ the rest of the release work here as it becomes explicit.
   0 failures, 0 errors, 2 skipped; Spotless and SpotBugs passed in both
   modules. `javap` on `no.rmz.rmatch.impls.MatcherImpl` reported classfile
   major version 65.
+- [ ] Before release, audit source, tests, benchmark harnesses, and build/release
+  scripts for deprecated method/API usage. Remove deprecated calls where
+  practical; document and track any unavoidable remaining usage. Track this
+  under [issue #272](https://github.com/la3lma/rmatch/issues/272).
+- [ ] Before 2.0, audit for unused methods, classes, and interfaces that are not
+  part of the intended external API. Remove unused accidental/internal surface
+  where safe; document any unused public surface that is intentionally retained.
+  Track this under [issue #273](https://github.com/la3lma/rmatch/issues/273).
 - [x] Verify post-cleanup compile dependency tree. Result on 2026-07-07:
   `no.rmz:rmatch` has only `org.ahocorasick:ahocorasick:0.6.3` in compile
   scope; `rmatch-tester` has `rmatch` and Aho-Corasick in compile scope when

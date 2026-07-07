@@ -28,9 +28,11 @@ import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.utils.SortedSetComparatorImpl;
 
 /**
- * Implement the subset construction mechanism, but also keep track of a "StartNode" NDFA node that
- * has the particular property that it is always present, and all NDFAs that are added to the
- * storage can be reached from the startnode via an epsilon edge.
+ * Default {@link NodeStorage} implementation for lazy subset construction.
+ *
+ * <p>The storage owns one global {@link StartNode}. Every compiled expression is attached to that
+ * start node by an epsilon edge, and DFA nodes are created on demand from sets of reachable NDFA
+ * nodes as input is scanned.
  */
 public final class NodeStorageImpl implements NodeStorage {
 
@@ -45,10 +47,7 @@ public final class NodeStorageImpl implements NodeStorage {
   /** There is only one start node, and this is that node. */
   private final StartNode sn;
 
-  /**
-   * A map mapping sorted sets of NDFANodes into DFAnodes. Used to map sets of NDFANodes to
-   * previously compiled DFAnodes representing that set of NDFANodes.
-   */
+  /** Map from NDFA state sets to the DFA nodes that represent them. */
   private final Map<SortedSet<NDFANode>, DFANode> ndfamap =
       new ConcurrentSkipListMap<>(SORTED_NDFANODE_SET_COMPARATOR);
 
@@ -106,15 +105,12 @@ public final class NodeStorageImpl implements NodeStorage {
   }
 
   /**
-   * Checks if the internal representation of the NodeStorage has cached an DFA representation for
-   * the NDFA node n.
+   * Return whether an NDFA node is attached directly to the global start node.
    *
-   * <p>This method is not part of the NodeStorage interface, and is thus intended to be used only
-   * for testing. If it is ever used for anything else, then the NodeStorage interface should be
-   * expanded to include it.
+   * <p>This method is primarily for tests and diagnostics.
    *
-   * @param n an NDFA node that we wish to know if is cached or not.
-   * @return true iff the NDFNode is connected from the startnode through an epsilon edge.
+   * @param n NDFA node to check
+   * @return {@code true} if {@code n} is an epsilon destination of the start node
    */
   public boolean isConnectedToStartnode(final NDFANode n) {
     checkNotNull(n, "Illegal to look for null NDFANode");
@@ -218,11 +214,10 @@ public final class NodeStorageImpl implements NodeStorage {
   }
 
   /**
-   * Traverse all the nodes in a collection of NDFANodes and update all the regexps that are made
-   * final by this DFANode.
+   * Update expression terminal-node state for a newly created DFA node.
    *
-   * @param dfaNode the set of DFA nodes to update.
-   * @param ndfaset The set of NDFA nodes to update.
+   * @param dfaNode DFA node that represents {@code ndfaset}
+   * @param ndfaset NDFA state set represented by {@code dfaNode}
    */
   private void updateFinalStatuses(final DFANode dfaNode, final Collection<NDFANode> ndfaset) {
 

@@ -28,18 +28,17 @@ import java.util.SortedSet;
 public interface NodeStorage {
 
   /**
-   * Add a new NDFANode to the startnode associated with the NodeStoarge.
+   * Add a compiled NDFA start node to this storage's global start node.
    *
-   * @param n a node to add.
+   * @param n pattern start node to add
    */
   void addToStartnode(final NDFANode n);
 
   /**
-   * Get the determinstic node that represents the beginning of all matches starting from the
-   * startnode that begins with the character ch.
+   * Return the deterministic start transition for a first input character.
    *
-   * @param ch an input character.
-   * @return a relevant DFANode, or null if no node could be found.
+   * @param ch first input character at a candidate start position
+   * @return relevant DFA node, or {@code null} if no expression can start with {@code ch}
    */
   DFANode getNextFromStartNode(final Character ch);
 
@@ -48,7 +47,7 @@ public interface NodeStorage {
    *
    * @param ch an input character
    * @param context positional context for assertions adjacent to this transition
-   * @return a relevant DFANode, or null if no node could be found
+   * @return relevant DFA node, or {@code null} if no expression can start in this context
    */
   DFANode getNextFromStartNode(final Character ch, final MatchContext context);
 
@@ -59,25 +58,26 @@ public interface NodeStorage {
   boolean hasContextAssertions();
 
   /**
-   * Given a set of NDFANodes, return a DFANode representing that set of NDFANOdes.
+   * Return the DFA node representing a set of NDFA nodes.
    *
-   * @param ndfaset A set of nondeterminstic nodes we want to represent with a single deterministic
-   *     node.
-   * @return A new deterministic node representing the input.
+   * <p>The storage may return an existing DFA node if this NDFA set has already been represented.
+   *
+   * @param ndfaset nondeterministic node set to represent as one deterministic state
+   * @return deterministic node for {@code ndfaset}
    */
   DFANode getDFANode(final SortedSet<NDFANode> ndfaset);
 
   /**
-   * Get a snapshot of the currently stored NDFANodes.
+   * Return a snapshot of currently stored NDFA nodes.
    *
-   * @return All the NDFANodes know to the NodeStorage.
+   * @return known NDFA nodes
    */
   Collection<NDFANode> getNDFANodes();
 
   /**
-   * Get a snapshot of the currently stored DFAodes.
+   * Return a snapshot of currently stored DFA nodes.
    *
-   * @return All the NDFANodes know to the NodeStorage.
+   * @return known DFA nodes
    */
   Collection<DFANode> getDFANodes();
 }

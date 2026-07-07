@@ -23,9 +23,11 @@ import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.interfaces.ZeroWidthAssertion;
 
 /**
- * A (partial) compiler that will produce NDFAs that represents regular expressions. The compiler
- * implements the AbstractRegexBuilder interface which will feed it with parsed elements of the
- * regexp.
+ * Builder/compiler that turns parsed regular-expression events into an NDFA fragment.
+ *
+ * <p>{@link SurfaceRegexpParser} calls the methods from {@link AbstractRegexBuilder}; this class
+ * keeps the partially built fragments on a stack and finally exposes the NDFA entry node through
+ * {@link #getResult()}.
  */
 public final class ARegexpCompiler implements AbstractRegexBuilder {
 
@@ -41,7 +43,7 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
     return builders.peek();
   }
 
-  /** The last, and hence an epsilon-node going out of the last element of the resultFragments. */
+  /** Terminal node attached after the final compiled fragment. */
   private final TerminalNode terminal;
 
   /** The regexp we're compiling. */
@@ -54,9 +56,9 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
   private CharSetBuilder charSetStringBuilder;
 
   /**
-   * Create a new compiler for a particular regexp.
+   * Create a compiler for one regular expression.
    *
-   * @param regexp The Regexp we are compiling.
+   * @param regexp expression state being compiled
    */
   public ARegexpCompiler(final Regexp regexp) {
     this.regexp = checkNotNull(regexp);
@@ -65,10 +67,12 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
   }
 
   /**
-   * XXX Once this method has been called, no further content can be added. This is currently not
-   * reflected in the implementations, so errors can be introduced!!! must be fixed asap.
+   * Finish compilation and return the NDFA entry node.
    *
-   * @return Returns an NDFANode that represent the compilation of the regexp.
+   * <p>Call this after the parser has reported the entire pattern. The compiler expects all groups
+   * to be balanced at that point.
+   *
+   * @return NDFA entry node for the compiled expression
    */
   public NDFANode getResult() {
     checkState(builders.size() == 1, "Unbalanced group: missing ')' or ')' without '('");

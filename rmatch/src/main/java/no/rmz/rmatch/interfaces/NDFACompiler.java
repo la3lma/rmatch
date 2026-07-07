@@ -15,17 +15,16 @@ package no.rmz.rmatch.interfaces;
 
 import no.rmz.rmatch.compiler.RegexpParserException;
 
-/** A compiler for regular expressions. */
+/** Compiler that turns rmatch regular-expression state into an NDFA start node. */
 public interface NDFACompiler {
 
   /**
-   * Compile a regular expression, using a RegexpStorage, and return an NDFANode instance that
-   * represents the entry point for the compiled expression.
+   * Compile an expression and return the entry point of its nondeterministic automaton.
    *
-   * @param regexp A regular expression.
-   * @param rs A regexp storage.
-   * @return An NDFANode that will match the regexp.
-   * @throws RegexpParserException when the regexp doesn't parse.
+   * @param regexp expression state to compile
+   * @param rs expression storage used when compilation needs to resolve or register patterns
+   * @return NDFA entry node for {@code regexp}
+   * @throws RegexpParserException if the pattern text cannot be parsed by rmatch
    */
   NDFANode compile(final Regexp regexp, final RegexpStorage rs) throws RegexpParserException;
 }
