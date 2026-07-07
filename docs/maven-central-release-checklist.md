@@ -70,6 +70,9 @@ the rest of the release work here as it becomes explicit.
 - [x] Create and push the `rmatch-1.9.2` tag. Result on 2026-07-08:
   annotated tag `rmatch-1.9.2` points at uploaded release commit `48151212`
   and was pushed to `origin`.
+- [x] Bump repository back to the next development snapshot. Result on
+  2026-07-08: POMs moved from final `1.9.2` release versions to
+  `1.9.3-SNAPSHOT`; README examples remain on the published `1.9.2` version.
 
 ## Identity and Access
 

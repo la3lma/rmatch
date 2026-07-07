@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.9.3-SNAPSHOT - in development
+
 ## 1.9.2 - pre-2.0 Maven Central release candidate
 
 `1.9.2` adds the first context-sensitive zero-width assertions to the
