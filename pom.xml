@@ -37,8 +37,6 @@
     <properties>
         <maven.plugin.validation>DEFAULT</maven.plugin.validation>
         <java.version>25</java.version>
-        <guava.version>33.6.0-jre</guava.version>
-        <jetbrains-annotations.version>26.1.0</jetbrains-annotations.version>
         <ahocorasick.version>0.6.3</ahocorasick.version>
         <jmh.version>1.37</jmh.version>
         <junit-jupiter.version>6.1.1</junit-jupiter.version>
@@ -124,17 +122,6 @@
             </dependency>
 
             <!-- Third-party Libraries -->
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains</groupId>
-                <artifactId>annotations</artifactId>
-                <version>${jetbrains-annotations.version}</version>
-                <scope>compile</scope>
-            </dependency>
             <dependency>
                 <groupId>org.ahocorasick</groupId>
                 <artifactId>ahocorasick</artifactId>

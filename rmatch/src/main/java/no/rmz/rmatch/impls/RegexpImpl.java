@@ -13,8 +13,8 @@
  */
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkArgument;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import no.rmz.rmatch.interfaces.*;
-import org.jetbrains.annotations.NotNull;
 
 /** Representation of a parsed regular expression. */
 public final class RegexpImpl implements Regexp {
@@ -246,7 +245,7 @@ public final class RegexpImpl implements Regexp {
   }
 
   @Override
-  public int compareTo(final @NotNull Regexp other) {
+  public int compareTo(final Regexp other) {
     checkNotNull(other);
     return this.getRexpString().compareTo(other.getRexpString());
   }

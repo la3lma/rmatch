@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.interfaces;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 /**
  * An edge used for printing. The label is a descriptive label describing what type of input is

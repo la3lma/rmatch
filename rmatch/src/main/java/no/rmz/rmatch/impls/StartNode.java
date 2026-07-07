@@ -17,7 +17,7 @@ package no.rmz.rmatch.impls;
 //     a charmap (and
 //     epsilons), or use something else. Don't mix!!!
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.*;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;

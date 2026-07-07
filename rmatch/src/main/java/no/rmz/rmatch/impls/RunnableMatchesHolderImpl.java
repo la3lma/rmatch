@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static no.rmz.rmatch.internal.Checks.checkArgument;
 
 import java.util.Collections;
 import java.util.HashSet;

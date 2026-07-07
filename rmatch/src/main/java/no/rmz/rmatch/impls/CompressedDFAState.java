@@ -13,14 +13,13 @@
  */
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import no.rmz.rmatch.interfaces.NDFANode;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Compressed representation of a DFA state using compact integer arrays instead of heavyweight
@@ -139,7 +138,7 @@ public final class CompressedDFAState implements Comparable<CompressedDFAState> 
   }
 
   @Override
-  public int compareTo(final @NotNull CompressedDFAState other) {
+  public int compareTo(final CompressedDFAState other) {
     checkNotNull(other, "Cannot compare to null CompressedDFAState");
 
     // Compare array lengths first

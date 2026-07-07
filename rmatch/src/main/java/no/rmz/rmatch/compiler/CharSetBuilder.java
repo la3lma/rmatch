@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.compiler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;

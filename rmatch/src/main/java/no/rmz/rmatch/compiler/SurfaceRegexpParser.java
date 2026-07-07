@@ -16,7 +16,7 @@
 
 package no.rmz.rmatch.compiler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 /**
  * A parser for regular expressions, will parse strings, and generate abstract regular expression

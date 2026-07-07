@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.abstracts;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +24,6 @@ import no.rmz.rmatch.utils.CounterType;
 import no.rmz.rmatch.utils.FastCounter;
 import no.rmz.rmatch.utils.FastCounters;
 import no.rmz.rmatch.utils.LifoSet;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * An abstract implementation of the NDANode interface. In fact, this implementation is designed so
@@ -280,7 +279,7 @@ public abstract class AbstractNDFANode implements NDFANode {
   }
 
   @Override
-  public final int compareTo(final @NotNull NDFANode t) {
+  public final int compareTo(final NDFANode t) {
     if (!(t instanceof AbstractNDFANode ta)) {
       throw new UnsupportedOperationException("Not supported yet.");
     } else {

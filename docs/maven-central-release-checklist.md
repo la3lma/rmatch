@@ -37,21 +37,28 @@ the rest of the release work here as it becomes explicit.
 - [x] Ensure parent and library POMs have name, description, URL, licenses,
   developers, organization, and SCM metadata.
 - [x] Remove inherited test dependencies from the public compile/runtime graph.
-- [x] Confirm `no.rmz:rmatch` compile/runtime dependencies are only Guava,
-  JetBrains annotations, and Aho-Corasick.
+- [x] Confirm `no.rmz:rmatch` compile/runtime dependencies are only
+  Aho-Corasick after the `1.9.1-SNAPSHOT` dependency-surface cleanup.
 - [x] Run a dependency freshness pass and try to use current stable versions of
   all direct dependencies where possible. Do not upgrade blindly: each upgrade
   must pass the normal release validation gates. First `1.9.1-SNAPSHOT` pass on
-  2026-07-07 bumped Guava, JetBrains annotations, JUnit, Mockito, Byte Buddy,
-  Spotless, SpotBugs, compiler/dependency/resources/shade/assembly plugins, and
-  added Maven Enforcer while leaving milestone/beta plugin lines alone.
+  2026-07-07 bumped Guava and JetBrains annotations first, then removed both
+  from the public dependency surface after confirming they were only used for
+  simple precondition checks and three `compareTo` annotations. The same pass
+  bumped JUnit, Mockito, Byte Buddy, Spotless, SpotBugs,
+  compiler/dependency/resources/shade/assembly plugins, and added Maven
+  Enforcer while leaving milestone/beta plugin lines alone.
 - [x] Remove obsolete Cobertura and FindBugs hooks; SpotBugs is the active
   static-analysis tool.
-- [ ] Review Guava usage and decide whether it must remain a public transitive
+- [x] Review Guava usage and decide whether it must remain a public transitive
   dependency, can be reduced, or should stay for pragmatic `1.9.x` stability.
-- [ ] Review JetBrains annotation usage and decide whether annotations should
+  Decision on 2026-07-07: remove it. Usage was limited to `Preconditions`; a
+  minimal internal helper now preserves the same exception behavior without
+  making Guava transitive for consumers.
+- [x] Review JetBrains annotation usage and decide whether annotations should
   remain compile-scoped, become optional/provided, or be removed from public
-  dependency surface.
+  dependency surface. Decision on 2026-07-07: remove it. Usage was limited to
+  three internal `@NotNull` annotations on `compareTo` parameters.
 - [x] Remove application-style `Main-Class` and `Class-Path` manifest entries
   from the library JAR.
 - [x] Generate source JAR.
@@ -59,10 +66,10 @@ the rest of the release work here as it becomes explicit.
 - [x] Generate GPG signatures for POM, main JAR, source JAR, and javadoc JAR.
 - [x] Verify generated `.asc` signatures locally.
 - [ ] Review whether Java 25 is the intended public baseline for `1.9.0`.
-- [ ] Review whether Guava should remain a public transitive dependency before
-  `2.0.0`.
-- [ ] Review whether JetBrains annotations should remain compile-scoped or move
-  to optional/provided.
+- [x] Review whether Guava should remain a public transitive dependency before
+  `2.0.0`. Decision: no, remove before `1.9.1`.
+- [x] Review whether JetBrains annotations should remain compile-scoped or move
+  to optional/provided. Decision: no, remove before `1.9.1`.
 
 ## Documentation
 
@@ -88,17 +95,30 @@ the rest of the release work here as it becomes explicit.
 - [x] Inspect generated JAR manifest.
 - [x] Inspect generated POM metadata.
 - [x] Confirm `rmatch-tester` still builds with tests skipped.
-- [ ] Run full reactor tests including `rmatch-tester` if practical.
+- [x] Run full reactor tests including `rmatch-tester` if practical.
 - [x] Run full bumped `1.9.1-SNAPSHOT` reactor test including `rmatch-tester`.
   Result on 2026-07-07: `mvn -pl rmatch-tester -am verify` succeeded;
   `rmatch` tests reported 312 tests, 0 failures, 0 errors, 3 skipped;
   `rmatch-tester` tests reported 16 tests, 0 failures, 0 errors, 2 skipped;
   SpotBugs reported 0 findings.
+- [x] Re-run full `1.9.1-SNAPSHOT` reactor verification after removing Guava
+  and JetBrains annotations. Result on 2026-07-07:
+  `mvn -pl rmatch-tester -am verify` succeeded; `rmatch` tests reported 312
+  tests, 0 failures, 0 errors, 3 skipped; `rmatch-tester` tests reported 16
+  tests, 0 failures, 0 errors, 2 skipped; Spotless and SpotBugs passed in both
+  modules.
+- [x] Verify post-cleanup compile dependency tree. Result on 2026-07-07:
+  `no.rmz:rmatch` has only `org.ahocorasick:ahocorasick:0.6.3` in compile
+  scope; `rmatch-tester` has `rmatch` and Aho-Corasick in compile scope when
+  resolved through the reactor.
 - [x] Run bumped `1.9.1-SNAPSHOT` Central release-profile verify without
   deployment. Result on 2026-07-07:
   `mvn -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true
   -Dgpg.keyname=55D9C01E75B1E582 verify` succeeded and generated signed
   artifacts.
+- [x] Re-run bumped `1.9.1-SNAPSHOT` Central release-profile verify without
+  deployment after removing Guava and JetBrains annotations. Result on
+  2026-07-07: the same command succeeded and generated signed artifacts.
 - [x] Run OSV vulnerability check for the bumped dependency/plugin set. Result
   on 2026-07-07: no vulnerabilities returned for 39 queried Maven coordinates.
 - [x] Run an external consumer smoke test using a clean temporary Maven
@@ -120,11 +140,21 @@ the rest of the release work here as it becomes explicit.
   `/tmp/rmatch-191-consumer-smoke.xqqeOm`, command
   `mvn -q clean verify exec:java`, output included
   `user token match: user:alice` and `log-level match: WARN`.
-- [ ] Run the chosen release benchmark smoke/gate and record exact result paths.
-- [ ] After the Guava/annotation decision is implemented, run a speed regression
-  test against the previous release baseline. If performance changes
-  materially, record whether it is a regression or improvement and investigate
-  the cause before release.
+- [x] Re-run the external consumer smoke test after installing the
+  post-cleanup `1.9.1-SNAPSHOT` locally. Result on 2026-07-07: the same
+  temporary project resolved the updated artifact and printed
+  `user token match: user:alice` and `log-level match: WARN`.
+- [x] Run the chosen release benchmark smoke/gate and record exact result paths.
+  Result on 2026-07-07: perftest stable 10K moderate gate, baseline
+  `results/local_gate_dep_baseline_clean_20260707_124944`, candidate
+  `results/local_gate_dep_candidate_clean_20260707_125341`.
+- [x] Run a speed regression test against the previous dependency-surface
+  baseline. Result on 2026-07-07: compared commit `1fd41ae8` against the
+  Guava/JB-pruned candidate using `rmatch-perftest` stable 10K moderate config.
+  Inputs were byte-identical (`patterns_10000.txt`, `corpus_1MB.txt`,
+  `corpus_10MB.txt`) and match counts were identical. Median `scanning_ns`
+  ratios were 0.980x for 1MB and 1.005x for 10MB, both within the 1.10 slowdown
+  gate; no performance regression detected.
 
 ## Central Portal Upload
 

@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.impls;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.MatchSet;
