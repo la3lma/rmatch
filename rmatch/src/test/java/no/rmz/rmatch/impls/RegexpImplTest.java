@@ -126,7 +126,7 @@ public class RegexpImplTest {
   @Test
   public void testAddAction() {
     re.add(a);
-    assertTrue(re.hasAction(a));
+    assertTrue(re.hasActions());
   }
 
   /** Checking that removing an action works. */
@@ -134,7 +134,7 @@ public class RegexpImplTest {
   public void testRemoveAction() {
     testAddAction();
     re.remove(a);
-    assertFalse(re.hasAction(a));
+    assertFalse(re.hasActions());
   }
 
   /** Mock up a match to use when testing the match registration mechanism. */

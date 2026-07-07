@@ -67,14 +67,6 @@ class NodeStorageImplTest {
     emptyNdfaNodeSet = new TreeSet<>();
   }
 
-  /** Test adding to the startnode. */
-  @Test
-  public final void testAddToStartnode() {
-    assertFalse(nsi.isConnectedToStartnode(ndfaNode), "Node shouldn't initially be stored");
-    nsi.addToStartnode(ndfaNode);
-    assertTrue(nsi.isConnectedToStartnode(ndfaNode), "Node should now be stored");
-  }
-
   /** XXX Incomplete test of getting a next character from the buffer. */
   @Test
   public final void testGetNext() {

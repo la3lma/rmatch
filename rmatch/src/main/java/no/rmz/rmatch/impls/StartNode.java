@@ -19,7 +19,8 @@ package no.rmz.rmatch.impls;
 
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.SortedSet;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.*;
 
@@ -44,21 +45,10 @@ public final class StartNode extends AbstractNDFANode {
   /** A monitor that is used to synchronize access to the StartNode instance. */
   private final Object topDfaMonitor = new Object();
 
-  /** Map of directly outgoing NDFANodes. XXX Never added to. Review and most likely delete. */
-  private final Map<Character, NDFANode> ndfaOutMap;
-
-  /**
-   * Create a start node for a node storage.
-   *
-   * @param ns node storage associated with this start node
-   */
-  public StartNode(final NodeStorage ns) {
+  /** Create a start node. */
+  public StartNode() {
     super(START_NO_REGEXP, false);
-    this.ndfaOutMap = new HashMap<>();
   }
-
-  // XXX Since we already have the NodeStorage, why do we need
-  //     a parameter for it? This is almost certainly a bug. Fix.
 
   /**
    * Return the DFA start transition for a specific input character.
@@ -117,7 +107,7 @@ public final class StartNode extends AbstractNDFANode {
 
   @Override
   public NDFANode getNextNDFA(final Character ch) {
-    return ndfaOutMap.get(ch);
+    return null;
   }
 
   public DFANodeImpl asDfaNode() {

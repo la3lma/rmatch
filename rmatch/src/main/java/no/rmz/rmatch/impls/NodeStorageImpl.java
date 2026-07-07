@@ -58,7 +58,7 @@ public final class NodeStorageImpl implements NodeStorage {
 
   /** Create a new instance of the node storage. */
   public NodeStorageImpl() {
-    sn = new StartNode(this);
+    sn = new StartNode();
   }
 
   @Override
@@ -69,19 +69,6 @@ public final class NodeStorageImpl implements NodeStorage {
     // transition, so the cached start transitions must be recomputed.
     Arrays.fill(asciiNextFromStart, null);
     nextFromDFAMap.clear();
-  }
-
-  /**
-   * Return whether an NDFA node is attached directly to the global start node.
-   *
-   * <p>This method is primarily for tests and diagnostics.
-   *
-   * @param n NDFA node to check
-   * @return {@code true} if {@code n} is an epsilon destination of the start node
-   */
-  public boolean isConnectedToStartnode(final NDFANode n) {
-    checkNotNull(n, "Illegal to look for null NDFANode");
-    return sn.getEpsilons().contains(n);
   }
 
   private final ConcurrentHashMap<Character, DFANode> nextFromDFAMap = new ConcurrentHashMap<>();

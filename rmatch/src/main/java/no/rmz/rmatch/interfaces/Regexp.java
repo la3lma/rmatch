@@ -95,15 +95,6 @@ public interface Regexp extends Comparable<Regexp> {
   String getRexpString();
 
   /**
-   * Return whether the supplied action is associated with this expression.
-   *
-   * @param a an action
-   * @return {@code true} if {@code a} is registered for this expression
-   */
-  // XXX Only for testing, should be moved to implementation class.
-  boolean hasAction(final Action a);
-
-  /**
    * Return whether this expression has any registered actions.
    *
    * <p>An expression without actions has no observable application effect and can often be ignored

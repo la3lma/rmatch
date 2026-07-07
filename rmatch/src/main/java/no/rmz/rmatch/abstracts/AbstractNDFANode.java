@@ -350,18 +350,5 @@ public abstract class AbstractNDFANode implements NDFANode {
     }
   }
 
-  /**
-   * Add a bunch of nodes that can be epsilon-reached.
-   *
-   * @param alternatives A set of epsilon-reachable nodes.
-   */
-  public final void addEpsilonReachableNodes(final Collection<NDFANode> alternatives) {
-    synchronized (monitor) {
-      for (final NDFANode n : alternatives) {
-        addEpsilonEdge(n);
-      }
-    }
-  }
-
   private record ContextTransitionKey(Character ch, MatchContext context) {}
 }

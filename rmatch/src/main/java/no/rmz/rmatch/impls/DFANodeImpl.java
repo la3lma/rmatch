@@ -159,26 +159,6 @@ public final class DFANodeImpl implements DFANode {
     return id;
   }
 
-  /**
-   * Get the nextmap. This is a "backdoor" into the implementation, and should only be used by those
-   * who know what they are doing. It is emphatically not intended to be used during matching.
-   * Currently, it is only used to print graphs, and that is done when the matcher isn't running. Be
-   * careful!
-   *
-   * @return the map of nodes going out of this DFA node.
-   */
-  public Map<Character, DFANode> getNextMap() {
-    // Merge the ASCII fast-path edges with the map-based (non-ASCII) edges.
-    final Map<Character, DFANode> merged = new HashMap<>(nextMap);
-    for (int i = 0; i < ASCII_LIMIT; i++) {
-      final DFANode n = asciiNext[i];
-      if (n != null && n != NO_TRANSITION) {
-        merged.put((char) i, n);
-      }
-    }
-    return Collections.unmodifiableMap(merged);
-  }
-
   @Override
   public boolean isActiveFor(final Regexp r) {
     return r.isActiveFor(this);
