@@ -21,45 +21,37 @@ import java.util.Set;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 
-/**
- * An implementation of the regular expression storage interface. It stores all of its regular
- * expressions in memory.
- */
+/** In-memory {@link RegexpStorage} implementation used by production matchers. */
 public final class RegexpStorageImpl implements RegexpStorage {
 
-  /**
-   * A map mapping string representations of regular expressions to Regexps instances representing
-   * those strings.
-   */
+  /** Map from pattern text to compiled expression state. */
   private final Map<String, Regexp> regexps = new HashMap<>();
 
-  /** A NodeStorage instance that is used when creating new nondeterminstic nodes. */
+  /** Node storage used when compiled expressions create new NDFA nodes. */
   private final NodeStorage storage;
 
-  /** A compiler that is used when compiling strings into nondeterminstic nodes. */
+  /** Compiler used to turn pattern strings into NDFA nodes. */
   private final NDFACompiler compiler;
 
   /** A factory that will produce a Regexp instance for our strings. */
   private final RegexpFactory regexpFactory;
 
   /**
-   * Create a new RegexpStorageImpl instance using the default regexp factory. This is the creator
-   * that should be used in production settings.
+   * Create storage using the default regular-expression factory.
    *
-   * @param storage the NodeStorage.
-   * @param compiler the compiler.
+   * @param storage node storage to receive compiled expressions
+   * @param compiler compiler used to compile expressions
    */
   public RegexpStorageImpl(final NodeStorage storage, final NDFACompiler compiler) {
     this(storage, compiler, RegexpFactory.DEFAULT_REGEXP_FACTORY);
   }
 
   /**
-   * This creator allows a particular RegexpFactory to be used. This creator is only intended to be
-   * used to inject mocked RegexpFactories during testing.
+   * Create storage with an explicit regular-expression factory.
    *
-   * @param storage the NodeStorage.
-   * @param compiler the compiler.
-   * @param regexpFactory A RegexpFactory instance to use.
+   * @param storage node storage to receive compiled expressions
+   * @param compiler compiler used to compile expressions
+   * @param regexpFactory factory used to create expression state objects
    */
   public RegexpStorageImpl(
       final NodeStorage storage, final NDFACompiler compiler, final RegexpFactory regexpFactory) {

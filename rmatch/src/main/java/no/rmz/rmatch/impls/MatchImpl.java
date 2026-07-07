@@ -22,7 +22,7 @@ import no.rmz.rmatch.utils.CounterType;
 import no.rmz.rmatch.utils.FastCounter;
 import no.rmz.rmatch.utils.FastCounters;
 
-/** A representation of a match implementing the Match interface. */
+/** Default {@link Match} implementation used by the engine. */
 public final class MatchImpl implements Match {
   /**
    * A counter that is increased every time a new MatchImpl is generated. Used for logging and
@@ -56,21 +56,21 @@ public final class MatchImpl implements Match {
    */
   private int lastFinalEnd = -1;
 
-  /** The Regexp for which this match is valued. */
+  /** Expression being matched by this candidate. */
   private final Regexp r;
 
-  /** The MatchSet of which this Match is a part.. */
+  /** Match set that owns this candidate. */
   private final MatchSet ms;
 
-  /** An unique ID for the set of matches. */
+  /** Unique identifier for this candidate. */
   private final long id;
 
   /**
-   * Create a new Match implementation.
+   * Create a match candidate.
    *
-   * @param ms The MatchSet with which this Match is associated.
-   * @param r The Regexp with which this match is associated.
-   * @param isFinal True iff the match is final from the get-go.
+   * @param ms owning match set
+   * @param r expression being matched
+   * @param isFinal whether the candidate starts in a final state
    */
   public MatchImpl(final MatchSet ms, final Regexp r, final boolean isFinal) {
     this.ms = checkNotNull(ms, "MatchSet can't be null");
@@ -92,10 +92,10 @@ public final class MatchImpl implements Match {
   }
 
   /**
-   * Create a new Match implementation. Assumes that the match is not initially final.
+   * Create a match candidate that is not initially final.
    *
-   * @param ms The MatchSet with which this Match is associated.
-   * @param r The Regexp with which this match is associated.
+   * @param ms owning match set
+   * @param r expression being matched
    */
   public MatchImpl(final MatchSet ms, final Regexp r) {
     this(ms, r, false); //  By default matches are not final

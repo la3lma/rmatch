@@ -28,35 +28,35 @@ public interface MatchSet {
   /**
    * Commit any final, undominated matches from this set to the supplied target.
    *
-   * @param target the recipient of matches that are committed.
+   * @param target recipient for committed matches
    */
   void finalCommit(final RunnableMatchesHolder target);
 
   /**
    * Return the matches currently associated with this set.
    *
-   * @return a set of Match instances.
+   * @return current match candidates
    */
   Set<Match> getMatches();
 
   /**
-   * The start position for all the matches in the input.
+   * Return the input position where this match set began.
    *
-   * @return a start position.
+   * @return zero-based start position
    */
   int getStart();
 
   /**
-   * True if there are any matches in this MatchSet.
+   * Return whether this set currently contains any match candidates.
    *
-   * @return do we have any matches?
+   * @return {@code true} if at least one candidate is present
    */
   boolean hasMatches();
 
   /**
-   * An identifier that uniquely identifies the match set.
+   * Return the matcher-local identifier for this match set.
    *
-   * @return an id.
+   * @return unique match-set identifier
    */
   long getId();
 
@@ -67,10 +67,10 @@ public interface MatchSet {
    * matches that can validly terminate are staged in {@code runnableMatches}. If several matches
    * overlap for the same expression, domination rules decide which callbacks are eventually run.
    *
-   * @param ns A node storage instance used to get new DFA nodes.
-   * @param currentChar The current char.
-   * @param currentPos The current position.
-   * @param runnableMatches The set of runnable matches.
+   * @param ns node storage used to create or reuse DFA nodes
+   * @param currentChar character currently being consumed
+   * @param currentPos zero-based input position of {@code currentChar}
+   * @param runnableMatches recipient for matches that become runnable
    */
   void progress(
       final NodeStorage ns,
@@ -81,10 +81,10 @@ public interface MatchSet {
   /**
    * Context-aware progress used when zero-width assertions are present.
    *
-   * @param ns A node storage instance used to get new DFA nodes.
-   * @param currentChar The current char.
-   * @param currentPos The current position.
-   * @param runnableMatches The set of runnable matches.
+   * @param ns node storage used to create or reuse DFA nodes
+   * @param currentChar character currently being consumed
+   * @param currentPos zero-based input position of {@code currentChar}
+   * @param runnableMatches recipient for matches that become runnable
    * @param context positional context for assertions adjacent to this transition
    */
   void progress(
@@ -95,9 +95,9 @@ public interface MatchSet {
       final MatchContext context);
 
   /**
-   * Remove a match from the MatchSet instance.
+   * Remove a candidate from this match set.
    *
-   * @param m a match.
+   * @param m candidate to remove
    */
   void removeMatch(final Match m);
 

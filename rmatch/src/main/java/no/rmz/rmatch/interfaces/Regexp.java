@@ -26,170 +26,168 @@ import no.rmz.rmatch.impls.DominationHeap;
 public interface Regexp extends Comparable<Regexp> {
 
   /**
-   * Remove all references that the regexp has to the match m.
+   * Remove all references from this expression to a match candidate.
    *
-   * @param m the match to remove references to.
+   * @param m match candidate to abandon
+   * @param currentChar character being processed when abandonment occurs
    */
   void abandonMatch(final Match m, final Character currentChar);
 
   /**
-   * Add an action to a regexp.
+   * Associate an action with this expression.
    *
-   * @param a the action.
+   * @param a action to run when this expression matches
    */
   void add(final Action a);
 
   /**
-   * Add a node and treat it as active.
+   * Mark a node as active for this expression.
    *
-   * @param n the node to check for.
+   * @param n node that may continue candidates for this expression
    */
   // XXX This should be DFA nodes. It never happens for NDFAs.
   void addActive(final Node n);
 
   /**
-   * Allow a node to be treated as terminal.
+   * Mark a node as terminal for this expression.
    *
-   * @param n a node
+   * @param n node that may complete candidates for this expression
    */
   void addTerminalNode(final Node n); // Can be both N and D FA.
 
   /**
-   * Add all the matches that are not dominated to the set of runnable matches.
+   * Add final, undominated candidates for this expression to the runnable set.
    *
-   * @param runnableMatches A holder of matches.
+   * @param runnableMatches recipient for candidates whose actions may be run
    */
   void commitUndominated(final RunnableMatchesHolder runnableMatches);
 
   /**
-   * Get a domination heap for a MatchSet.
+   * Return the domination heap for a match set, creating it on demand.
+   *
+   * <p>The domination heap records overlapping candidates so the engine can prefer the candidates
+   * that should produce callbacks.
    *
    * @param ms the MatchSet
-   * @return the corresponding DominationHeap.
+   * @return domination heap for {@code ms}
    */
   DominationHeap getDominationHeapCreateIfNotPresent(final MatchSet ms);
 
   /**
-   * Remove all references to a particular MatchSet, and the matches within it.
+   * Remove this expression's references to a match set and its candidates.
    *
-   * @param ms a MatchSet instance..
+   * @param ms match set to abandon
    */
   void abandonMatchSet(final MatchSet ms);
 
   /**
-   * Get the NDFANode representing the start state for the NDFA that will match this regular
-   * expression.
+   * Return the start node of this expression's compiled NDFA.
    *
-   * @return the node representing this regexp.
+   * @return compiled NDFA start node
    */
   NDFANode getMyNode();
 
   /**
-   * A string representing the same regexp as the Regexp instance.
+   * Return the pattern text used to create this expression.
    *
-   * @return the regexp string for this regular expression.
+   * @return original regular-expression string
    */
   String getRexpString();
 
   /**
-   * True iff the the regexp has actions.
+   * Return whether this expression has any registered actions.
    *
-   * @param a an action
-   * @return true if the action is associated with the regexp.
-   */
-  // XXX Only for testing, should be moved to implementation class.
-  boolean hasAction(final Action a);
-
-  /**
-   * True iff the regexp has any actions (if it doesn't it can be ignored since it can have no
-   * observable impact).
+   * <p>An expression without actions has no observable application effect and can often be ignored
+   * by the matcher.
    *
-   * @return true iff the regexp has any actions associated with it.
+   * @return {@code true} if at least one action is registered
    */
   boolean hasActions();
 
   /**
-   * True iff there are matches associated with this regexp.
+   * Return whether this expression currently has active match candidates.
    *
-   * @return True iff there are matches associated with the regexp.
+   * @return {@code true} if one or more candidates are associated with this expression
    */
   boolean hasMatches(); // XXX  Bogus?
 
   /**
-   * True if a node is active for this regexp.
+   * Return whether a node may continue candidates for this expression.
    *
    * @param n a node
-   * @return true iff ithe node is active for the Regexp.
+   * @return {@code true} if {@code n} is active for this expression
    */
   boolean isActiveFor(final Node n);
 
   /**
-   * True iff the regexp has been compiled into an NDFA.
+   * Return whether this expression has been compiled to an NDFA.
    *
-   * @return true iff the regex is compiled to an ndfa.
+   * @return {@code true} after compilation has produced an NDFA start node
    */
   boolean isCompiled();
 
   /**
-   * True iff a match is dominating over all other matches for this regexp.
+   * Return whether a candidate dominates all competing candidates for this expression.
    *
    * @param m the match
-   * @return is it dominating?
+   * @return {@code true} if {@code m} is the dominating candidate
    */
   boolean isDominating(final Match m);
 
   /**
-   * True iff the the node is terminal for this regexp.
+   * Return whether a node is terminal for this expression's NDFA.
    *
    * @param n the node.
-   * @return true iff n is terminal for this regexp.
+   * @return {@code true} if {@code n} can complete this expression
    */
   boolean hasTerminalNdfaNode(final Node n);
 
   /**
-   * True iff the match is strongly dominated XXX Whatever that is!!
+   * Return whether a candidate is strongly dominated by another candidate.
+   *
+   * <p>A strongly dominated candidate cannot produce an action because an overlapping candidate for
+   * the same expression has priority.
    *
    * @param m a match
-   * @return true iff strongly dominated.
+   * @return {@code true} if {@code m} should not be committed
    */
   boolean isStronglyDominated(Match m);
 
   /**
-   * Perform all actions on a buffer with a start a end location.
+   * Run this expression's actions for a completed match.
    *
    * @param b the buffer
-   * @param start the start location
-   * @param end the end location
+   * @param start zero-based inclusive start offset
+   * @param end zero-based inclusive end offset
    */
   void performActions(final Buffer b, final int start, final int end);
 
   /**
    * Register a match with this regexp.
    *
-   * @param m a match that is registred with this regexp.
+   * @param m match candidate to associate with this expression
    */
   void registerMatch(final Match m);
 
   /**
    * Remove an action from this regexp.
    *
-   * @param a removing an action from this regexp.
+   * @param a action to remove
    */
   void remove(final Action a);
 
   /**
-   * Set the compilation result to be an NDFA Node representing this regexp.
+   * Store the start node produced when this expression is compiled.
    *
-   * @param myNode The NDFA node representing the entry point for the NDFA representing the regexp.
+   * @param myNode compiled NDFA start node
    */
   void setMyNDFANode(final NDFANode myNode);
 
   /**
-   * True if the regexp is associated with a particular match. For testing use only (XXX So it
-   * should be removed to the implementation class and used from there only).
+   * Return whether this expression is associated with a particular candidate.
    *
    * @param m a match
-   * @return true iff the match is associated with this regexp.
+   * @return {@code true} if {@code m} is registered with this expression
    */
   boolean hasMatch(final Match m);
 
@@ -198,7 +196,7 @@ public interface Regexp extends Comparable<Regexp> {
    * character matches and epsilon transitions from the start node.
    *
    * @param ch the character to check
-   * @return true if the regexp can start with the given character
+   * @return {@code true} if the expression can start with {@code ch}
    */
   boolean canStartWith(final Character ch);
 
@@ -207,13 +205,13 @@ public interface Regexp extends Comparable<Regexp> {
    *
    * @param ch the character to check
    * @param context positional context for assertions adjacent to this transition
-   * @return true if the regexp can start with the character in this context
+   * @return {@code true} if the expression can start with the character in this context
    */
   boolean canStartWith(final Character ch, final MatchContext context);
 
-  /** Mark this regexp as using context-sensitive zero-width assertions. */
+  /** Mark this expression as using context-sensitive zero-width assertions. */
   void markUsesContextAssertions();
 
-  /** Return true when this regexp uses context-sensitive zero-width assertions. */
+  /** Return true when this expression uses context-sensitive zero-width assertions. */
   boolean usesContextAssertions();
 }

@@ -18,7 +18,7 @@ import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 import no.rmz.rmatch.interfaces.RegexpStorage;
 
-/** An implementation of a compiler. */
+/** Production compiler from rmatch regular-expression state to NDFA nodes. */
 public final class NDFACompilerImpl implements NDFACompiler {
 
   @Override

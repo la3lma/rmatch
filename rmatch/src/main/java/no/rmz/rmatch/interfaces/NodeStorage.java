@@ -13,7 +13,6 @@
  */
 package no.rmz.rmatch.interfaces;
 
-import java.util.Collection;
 import java.util.SortedSet;
 
 /**
@@ -21,25 +20,23 @@ import java.util.SortedSet;
  *
  * <p>When a pattern is compiled, rmatch first builds nondeterministic automaton nodes and then
  * creates deterministic nodes lazily as input is scanned. This keeps large pattern sets from
- * requiring all theoretical deterministic states up front. The public {@link
- * Matcher#getNodeStorage} hook exists for diagnostics and graph/debug tooling; application code
- * does not need to use this interface for normal matching.
+ * requiring all theoretical deterministic states up front. Application code does not need to use
+ * this interface for normal matching.
  */
 public interface NodeStorage {
 
   /**
-   * Add a new NDFANode to the startnode associated with the NodeStoarge.
+   * Add a compiled NDFA start node to this storage's global start node.
    *
-   * @param n a node to add.
+   * @param n pattern start node to add
    */
   void addToStartnode(final NDFANode n);
 
   /**
-   * Get the determinstic node that represents the beginning of all matches starting from the
-   * startnode that begins with the character ch.
+   * Return the deterministic start transition for a first input character.
    *
-   * @param ch an input character.
-   * @return a relevant DFANode, or null if no node could be found.
+   * @param ch first input character at a candidate start position
+   * @return relevant DFA node, or {@code null} if no expression can start with {@code ch}
    */
   DFANode getNextFromStartNode(final Character ch);
 
@@ -48,7 +45,7 @@ public interface NodeStorage {
    *
    * @param ch an input character
    * @param context positional context for assertions adjacent to this transition
-   * @return a relevant DFANode, or null if no node could be found
+   * @return relevant DFA node, or {@code null} if no expression can start in this context
    */
   DFANode getNextFromStartNode(final Character ch, final MatchContext context);
 
@@ -59,25 +56,12 @@ public interface NodeStorage {
   boolean hasContextAssertions();
 
   /**
-   * Given a set of NDFANodes, return a DFANode representing that set of NDFANOdes.
+   * Return the DFA node representing a set of NDFA nodes.
    *
-   * @param ndfaset A set of nondeterminstic nodes we want to represent with a single deterministic
-   *     node.
-   * @return A new deterministic node representing the input.
+   * <p>The storage may return an existing DFA node if this NDFA set has already been represented.
+   *
+   * @param ndfaset nondeterministic node set to represent as one deterministic state
+   * @return deterministic node for {@code ndfaset}
    */
   DFANode getDFANode(final SortedSet<NDFANode> ndfaset);
-
-  /**
-   * Get a snapshot of the currently stored NDFANodes.
-   *
-   * @return All the NDFANodes know to the NodeStorage.
-   */
-  Collection<NDFANode> getNDFANodes();
-
-  /**
-   * Get a snapshot of the currently stored DFAodes.
-   *
-   * @return All the NDFANodes know to the NodeStorage.
-   */
-  Collection<DFANode> getDFANodes();
 }

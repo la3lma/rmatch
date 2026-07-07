@@ -37,10 +37,10 @@ import no.rmz.rmatch.interfaces.*;
  */
 public final class MatcherImpl implements Matcher {
 
-  /** The regexp storage we will use. */
+  /** Storage for registered expressions. */
   private final RegexpStorage rs;
 
-  /** Our precious MatchEngine. */
+  /** Engine used to scan buffers. */
   private final MatchEngine me;
 
   /**
@@ -54,7 +54,7 @@ public final class MatcherImpl implements Matcher {
   /** Flag to enable fast-path optimization. */
   private final boolean useFastPath = "fastpath".equalsIgnoreCase(engineType);
 
-  /** Our equally prescious NodeStorage. Our precioussss. */
+  /** Node storage used by the matcher engine. */
   private final NodeStorage ns;
 
   /** Indicates that the engine-specific prefilter needs to be rebuilt. */
@@ -75,7 +75,6 @@ public final class MatcherImpl implements Matcher {
    * @param regexpFactory factory used to create internal regexp objects
    */
   public MatcherImpl(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
-    /** The compiler we will use. */
     NDFACompiler compiler1 = checkNotNull(compiler);
     checkNotNull(regexpFactory);
     ns = new NodeStorageImpl();
@@ -197,16 +196,6 @@ public final class MatcherImpl implements Matcher {
     synchronized (me) {
       me.match(b);
     }
-  }
-
-  /**
-   * Return the internal node storage used by this matcher.
-   *
-   * @return diagnostic node storage; normal callers do not need this
-   */
-  @Override
-  public NodeStorage getNodeStorage() {
-    return ns;
   }
 
   /** Release matcher resources. This single-engine implementation currently owns no worker pool. */

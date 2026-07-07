@@ -18,9 +18,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import no.rmz.rmatch.compiler.RegexpParserException;
@@ -28,7 +25,6 @@ import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.testutils.GraphDumper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -87,26 +83,10 @@ public class EdgeInvisibilityEnsurance {
     // Act
     m.match(buffer);
 
-    // Document
-    dumpGraph(m, 10);
-
     // Verify
     verify(denAction).performMatch(any(Buffer.class), anyInt(), anyInt());
     verify(llAction).performMatch(any(Buffer.class), anyInt(), anyInt());
     verify(ladenAction).performMatch(any(Buffer.class), anyInt(), anyInt());
     verify(defaultAction, times(0)).performMatch(any(Buffer.class), anyInt(), anyInt());
-  }
-
-  private static void dumpGraph(Matcher mi, int index) {
-    try {
-      GraphDumper.dump(
-          mi.getNodeStorage(),
-          new PrintStream(
-              String.format("graphs/ladenPostRunningNdfa-%d.gv", index), StandardCharsets.UTF_8),
-          new PrintStream(
-              String.format("graphs/ladenPostRunningDfa-%d.gv", index), StandardCharsets.UTF_8));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 }

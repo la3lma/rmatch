@@ -19,17 +19,17 @@ package no.rmz.rmatch.impls;
 
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.SortedSet;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.*;
 
 /**
- * A startnode is a special kind of node that a Node Storage has only one of. It is used to initiate
- * new matches, so all the NDFAs for all the regular expression associated with that NodeStorage
- * instance has an epsilon edge going out of the StartNode into it.
+ * Shared NDFA start node for all expressions registered in one {@link NodeStorage}.
  *
- * <p>A StartNode only has epsilon edges going in and out of it, but apart from that it's nothing
- * special.
+ * <p>Each compiled expression is attached to this node by an epsilon edge. Starting a new match
+ * therefore means asking this node which expression NDFAs can be entered for the current input
+ * character.
  */
 public final class StartNode extends AbstractNDFANode {
   /**
@@ -45,28 +45,17 @@ public final class StartNode extends AbstractNDFANode {
   /** A monitor that is used to synchronize access to the StartNode instance. */
   private final Object topDfaMonitor = new Object();
 
-  /** Map of directly outgoing NDFANodes. XXX Never added to. Review and most likely delete. */
-  private final Map<Character, NDFANode> ndfaOutMap;
-
-  /**
-   * Create a enw StartNode instance.
-   *
-   * @param ns the node storage this StartNode is associated with.
-   */
-  public StartNode(final NodeStorage ns) {
+  /** Create a start node. */
+  public StartNode() {
     super(START_NO_REGEXP, false);
-    this.ndfaOutMap = new HashMap<>();
   }
 
-  // XXX Since we already have the NodeStorage, why do we need
-  //     a parameter for it? This is almost certainly a bug. Fix.
-
   /**
-   * Get the next DFA for a specific character.
+   * Return the DFA start transition for a specific input character.
    *
-   * @param ch The charater
-   * @param ns The NodeStorage to use.
-   * @return a new DFA node.
+   * @param ch input character
+   * @param ns node storage used to create or reuse DFA nodes
+   * @return DFA node reached from the global start state, or {@code null}
    */
   public DFANode getNextDFA(final Character ch, final NodeStorage ns) {
 
@@ -93,7 +82,7 @@ public final class StartNode extends AbstractNDFANode {
    * @param ch input character
    * @param ns node storage
    * @param context positional context for assertion edges
-   * @return a new DFA node, or null
+   * @return DFA node reached from the global start state, or {@code null}
    */
   public DFANode getNextDFA(final Character ch, final NodeStorage ns, final MatchContext context) {
     if (context == MatchContext.NONE) {
@@ -107,9 +96,9 @@ public final class StartNode extends AbstractNDFANode {
   }
 
   /**
-   * Add a new NDFA Node to the startnode.
+   * Add an expression NDFA start node to the global start node.
    *
-   * @param n The node to add through an epsilon edge.
+   * @param n expression start node to attach
    */
   public void add(final NDFANode n) {
     checkNotNull(n, "Can't add null NDFA node");
@@ -118,12 +107,7 @@ public final class StartNode extends AbstractNDFANode {
 
   @Override
   public NDFANode getNextNDFA(final Character ch) {
-    return ndfaOutMap.get(ch);
-  }
-
-  @Override
-  public Collection<PrintableEdge> getEdgesToPrint() {
-    return getEpsilonEdgesToPrint();
+    return null;
   }
 
   public DFANodeImpl asDfaNode() {

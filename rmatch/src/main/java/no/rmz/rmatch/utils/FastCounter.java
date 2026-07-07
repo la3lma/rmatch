@@ -18,10 +18,10 @@ import static no.rmz.rmatch.internal.Checks.checkNotNull;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
- * High-performance counter implementation using primitive array access.
+ * Lightweight counter backed by a shared atomic array.
  *
- * <p>Provides O(1) increment/decrement operations without string hashing or map lookups.
- * Thread-safe using atomic operations on a shared array.
+ * <p>This class is used by rmatch diagnostics to count hot-path events without paying for string
+ * keys or map lookups on every increment.
  */
 public final class FastCounter {
   private final CounterType type;
@@ -29,7 +29,7 @@ public final class FastCounter {
   private final int index;
 
   /**
-   * Create a new FastCounter.
+   * Create a counter view over one slot in the shared counter array.
    *
    * @param type the counter type
    * @param countersArray the shared atomic array for all counters
@@ -41,7 +41,7 @@ public final class FastCounter {
   }
 
   /**
-   * Increment the counter by one and return the new value.
+   * Increment this counter by one.
    *
    * @return the new value
    */
@@ -50,7 +50,7 @@ public final class FastCounter {
   }
 
   /**
-   * Decrement the counter by one and return the new value.
+   * Decrement this counter by one.
    *
    * @return the new value
    */
@@ -59,7 +59,7 @@ public final class FastCounter {
   }
 
   /**
-   * Get the current value of the counter.
+   * Return the current counter value.
    *
    * @return the current value
    */

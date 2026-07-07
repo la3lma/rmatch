@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.NodeStorage;
 
 /**
  * The intent of this class is to look for matches in the wuthering heights corpus as it appears
@@ -133,11 +132,6 @@ public class JavaRegexpMatcher implements Matcher {
 
   @Override
   public void remove(String r, Action a) {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public NodeStorage getNodeStorage() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

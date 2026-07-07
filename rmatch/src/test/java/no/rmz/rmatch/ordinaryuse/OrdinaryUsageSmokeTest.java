@@ -23,7 +23,6 @@ import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.Regexp;
-import no.rmz.rmatch.testutils.GraphDumper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,8 +68,6 @@ public class OrdinaryUsageSmokeTest {
     m.add("ab", action);
 
     m.match(b);
-
-    GraphDumper.dump("fnord", m.getNodeStorage());
 
     verify(action).performMatch(any(Buffer.class), eq(0), eq("ab".length() - 1));
     verify(action)

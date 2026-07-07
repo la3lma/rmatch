@@ -36,7 +36,7 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
   /** The current character. */
   private char currentChar;
 
-  /** A montor instance used when synchronizing access to this instance. */
+  /** Monitor used when synchronizing access to this instance. */
   private final Object monitor = new Object();
 
   /**

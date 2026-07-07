@@ -13,15 +13,15 @@
  */
 package no.rmz.rmatch.compiler;
 
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
 
 /**
- * This is a node that has only epsilon edges going into it and only epsilon edges going out of it.
- * It is used to pad other automata.
+ * NDFA node used as glue between compiled fragments.
+ *
+ * <p>A padding node consumes no input itself; it exists so fragments can be composed with epsilon
+ * edges without giving unrelated fragments the same object identity.
  */
 public final class PaddingNDFANode extends AbstractNDFANode {
 
@@ -37,10 +37,5 @@ public final class PaddingNDFANode extends AbstractNDFANode {
   @Override
   public NDFANode getNextNDFA(final Character ch) {
     return null;
-  }
-
-  @Override
-  public Collection<PrintableEdge> getEdgesToPrint() {
-    return getEpsilonEdgesToPrint();
   }
 }

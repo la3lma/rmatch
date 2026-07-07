@@ -19,18 +19,18 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.MatchContext;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.utils.SortedSetComparatorImpl;
 
 /**
- * Implement the subset construction mechanism, but also keep track of a "StartNode" NDFA node that
- * has the particular property that it is always present, and all NDFAs that are added to the
- * storage can be reached from the startnode via an epsilon edge.
+ * Default {@link NodeStorage} implementation for lazy subset construction.
+ *
+ * <p>The storage owns one global {@link StartNode}. Every compiled expression is attached to that
+ * start node by an epsilon edge, and DFA nodes are created on demand from sets of reachable NDFA
+ * nodes as input is scanned.
  */
 public final class NodeStorageImpl implements NodeStorage {
 
@@ -45,10 +45,7 @@ public final class NodeStorageImpl implements NodeStorage {
   /** There is only one start node, and this is that node. */
   private final StartNode sn;
 
-  /**
-   * A map mapping sorted sets of NDFANodes into DFAnodes. Used to map sets of NDFANodes to
-   * previously compiled DFAnodes representing that set of NDFANodes.
-   */
+  /** Map from NDFA state sets to the DFA nodes that represent them. */
   private final Map<SortedSet<NDFANode>, DFANode> ndfamap =
       new ConcurrentSkipListMap<>(SORTED_NDFANODE_SET_COMPARATOR);
 
@@ -61,38 +58,7 @@ public final class NodeStorageImpl implements NodeStorage {
 
   /** Create a new instance of the node storage. */
   public NodeStorageImpl() {
-    sn = new StartNode(this);
-  }
-
-  @Override
-  public Collection<NDFANode> getNDFANodes() {
-    final Set<NDFANode> result = new HashSet<>();
-    final Set<NDFANode> unexplored = new ConcurrentSkipListSet<>();
-    unexplored.add(sn);
-
-    while (!unexplored.isEmpty()) {
-
-      final NDFANode current = unexplored.iterator().next();
-      unexplored.remove(current);
-      if (!result.contains(current)) {
-        result.add(current);
-        final Set<NDFANode> connectedNodes = new HashSet<>(current.getEpsilons());
-        for (final PrintableEdge edge : current.getEdgesToPrint()) {
-          connectedNodes.add(edge.destination());
-        }
-        connectedNodes.removeAll(result);
-        unexplored.addAll(connectedNodes);
-      }
-    }
-    result.add(sn);
-    return result;
-  }
-
-  @Override
-  public Collection<DFANode> getDFANodes() {
-    final List<DFANode> result = new ArrayList<>(this.ndfamap.values());
-    result.add(sn.asDfaNode());
-    return result;
+    sn = new StartNode();
   }
 
   @Override
@@ -103,22 +69,6 @@ public final class NodeStorageImpl implements NodeStorage {
     // transition, so the cached start transitions must be recomputed.
     Arrays.fill(asciiNextFromStart, null);
     nextFromDFAMap.clear();
-  }
-
-  /**
-   * Checks if the internal representation of the NodeStorage has cached an DFA representation for
-   * the NDFA node n.
-   *
-   * <p>This method is not part of the NodeStorage interface, and is thus intended to be used only
-   * for testing. If it is ever used for anything else, then the NodeStorage interface should be
-   * expanded to include it.
-   *
-   * @param n an NDFA node that we wish to know if is cached or not.
-   * @return true iff the NDFNode is connected from the startnode through an epsilon edge.
-   */
-  public boolean isConnectedToStartnode(final NDFANode n) {
-    checkNotNull(n, "Illegal to look for null NDFANode");
-    return sn.getEpsilons().contains(n);
   }
 
   private final ConcurrentHashMap<Character, DFANode> nextFromDFAMap = new ConcurrentHashMap<>();
@@ -218,11 +168,10 @@ public final class NodeStorageImpl implements NodeStorage {
   }
 
   /**
-   * Traverse all the nodes in a collection of NDFANodes and update all the regexps that are made
-   * final by this DFANode.
+   * Update expression terminal-node state for a newly created DFA node.
    *
-   * @param dfaNode the set of DFA nodes to update.
-   * @param ndfaset The set of NDFA nodes to update.
+   * @param dfaNode DFA node that represents {@code ndfaset}
+   * @param ndfaset NDFA state set represented by {@code dfaNode}
    */
   private void updateFinalStatuses(final DFANode dfaNode, final Collection<NDFANode> ndfaset) {
 

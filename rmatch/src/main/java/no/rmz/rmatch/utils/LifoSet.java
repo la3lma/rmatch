@@ -19,23 +19,25 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A mixture between a set and a LIFO stack. Adding the same element more than once will not insert
- * it more than once.
+ * Set with last-in, first-out iteration semantics.
  *
- * @param <T> is the class of the instances that the LifoSet will contain.
+ * <p>Adding an element that is already present has no effect. Popping returns the most recently
+ * added element that has not yet been popped.
+ *
+ * @param <T> element type
  */
 public final class LifoSet<T> {
 
-  /** A set that holds all the member of the lifoset. */
+  /** Set used for membership tests. */
   private final Set<T> members = new HashSet<>();
 
   /** A deque that is used to represent the LIFO aspect of the LIFO set. */
   private final Deque<T> lifo = new ArrayDeque<>();
 
   /**
-   * True iff there are no members.
+   * Return whether the set is empty.
    *
-   * @return true iff no content in members.
+   * @return {@code true} when no elements are present
    */
   public boolean isEmpty() {
     synchronized (members) {
@@ -44,12 +46,10 @@ public final class LifoSet<T> {
   }
 
   /**
-   * If the element being added was already present in the LIFOset, then it isn't added again,
-   * otherwise it is added.
+   * Add an element if it is not already present.
    *
    * @param t the element to be added
-   * @return true iff the element was not already present and therefore was added by the add method,
-   *     otherwise (obviously) false.
+   * @return {@code true} if the element was newly added
    */
   public boolean add(final T t) {
     synchronized (members) {
@@ -64,9 +64,9 @@ public final class LifoSet<T> {
   }
 
   /**
-   * Return the last element that was added to the LIFOset, then remove it from the LIFOset.
+   * Remove and return the most recently added element.
    *
-   * @return the element that was last added to the LIFOset.
+   * @return most recently added element still present in the set
    */
   public T pop() {
     synchronized (members) {
@@ -80,10 +80,9 @@ public final class LifoSet<T> {
   }
 
   /**
-   * Add a set of elements to the LifoSet. The order in which they are added is the same as they
-   * would be returned in by the default iterator for the set.
+   * Add all elements from a set.
    *
-   * @param elementSet a set of elements to add.
+   * @param elementSet elements to add, in the order supplied by the set iterator
    */
   public void addAll(final Set<T> elementSet) {
     synchronized (members) {
@@ -94,10 +93,10 @@ public final class LifoSet<T> {
   }
 
   /**
-   * Return true iff the LifoSet contains the element.
+   * Return whether an element is present.
    *
-   * @param element the element to check for the presence of.
-   * @return true iff the parameter is present in the LifoSet.
+   * @param element element to look up
+   * @return {@code true} if {@code element} is present
    */
   public boolean contains(final T element) {
     synchronized (members) {

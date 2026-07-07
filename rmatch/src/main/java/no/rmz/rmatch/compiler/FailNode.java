@@ -13,10 +13,8 @@
  */
 package no.rmz.rmatch.compiler;
 
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
 
 /**
@@ -38,10 +36,5 @@ final class FailNode extends AbstractNDFANode {
   @Override
   public NDFANode getNextNDFA(final Character ch) {
     return null;
-  }
-
-  @Override
-  public Collection<PrintableEdge> getEdgesToPrint() {
-    return getEpsilonEdgesToPrint();
   }
 }

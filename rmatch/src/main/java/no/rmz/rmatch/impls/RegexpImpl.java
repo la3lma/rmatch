@@ -139,12 +139,6 @@ public final class RegexpImpl implements Regexp {
   }
 
   @Override
-  public boolean hasAction(final Action a) {
-    checkNotNull(a);
-    return actions.contains(a);
-  }
-
-  @Override
   public boolean hasActions() {
     return !actions.isEmpty();
   }

@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.NodeStorage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,9 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 /** Test the start node. */
 @ExtendWith(MockitoExtension.class)
 public class StartNodeTest {
-
-  /** A mocked NodeStorage. It's not actually used for anything by these tests. */
-  @Mock public NodeStorage ns;
 
   /**
    * A mocked NDFANode. Only used to have something to add to the startnode. No state change in the
@@ -40,7 +36,7 @@ public class StartNodeTest {
   @Test
   public final void testAddingNode() {
 
-    final StartNode startNode = new StartNode(ns);
+    final StartNode startNode = new StartNode();
     assertFalse(startNode.getEpsilons().contains(ndfaNode), "Node shouldn't initially be stored");
     startNode.add(ndfaNode);
     assertTrue(startNode.getEpsilons().contains(ndfaNode), "Node shouldn now be stored");

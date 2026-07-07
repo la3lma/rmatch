@@ -20,9 +20,12 @@ import java.util.Comparator;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
- * Simulating a heap using a TreeMap.
+ * Small heap-like wrapper backed by a {@link ConcurrentSkipListMap}.
  *
- * @param <T> The type of the elements in the simulated heap.
+ * <p>The smallest element according to the supplied comparator is available through {@link
+ * #getFirst()}.
+ *
+ * @param <T> element type
  */
 public final class SimulatedHeap<T> {
 
@@ -30,9 +33,9 @@ public final class SimulatedHeap<T> {
   private final ConcurrentSkipListMap<T, T> tm;
 
   /**
-   * Create a new simulated heap using the comparator c.
+   * Create a heap ordered by the supplied comparator.
    *
-   * @param c a comparator of T elements.
+   * @param c element comparator
    */
   public SimulatedHeap(final Comparator<T> c) {
     checkNotNull(c);
@@ -40,9 +43,9 @@ public final class SimulatedHeap<T> {
   }
 
   /**
-   * Add an element to the heap.
+   * Add an element.
    *
-   * @param m the element to add.
+   * @param m element to add
    */
   public void add(final T m) {
     checkNotNull(m);
@@ -50,10 +53,9 @@ public final class SimulatedHeap<T> {
   }
 
   /**
-   * Remove an element from the heap. Will throw a runtime exception when attempting to remove
-   * something that isn't stored in the heap.
+   * Remove an element.
    *
-   * @param m the item to remove.
+   * @param m element to remove
    */
   public void remove(final T m) {
     checkNotNull(m);
@@ -69,18 +71,18 @@ public final class SimulatedHeap<T> {
   }
 
   /**
-   * Get the first element of the heap (the smallest element).
+   * Return the smallest element.
    *
-   * @return the smallest element of the heap.
+   * @return smallest element according to the comparator
    */
   public T getFirst() {
     return tm.get(tm.firstKey());
   }
 
   /**
-   * True iff the heap contains no elements.
+   * Return whether the heap is empty.
    *
-   * @return true iff empty.
+   * @return {@code true} if no elements are present
    */
   public boolean isEmpty() {
     return tm.isEmpty();
@@ -92,19 +94,19 @@ public final class SimulatedHeap<T> {
   }
 
   /**
-   * True iff the heap contains element m.
+   * Return whether the heap contains an element.
    *
-   * @param m the element to check for.
-   * @return True iff the element is there.
+   * @param m element to look up
+   * @return {@code true} if {@code m} is present
    */
   public boolean contains(final T m) {
     return tm.containsKey(m);
   }
 
   /**
-   * Returns the number of element in the heap.
+   * Return the number of elements in the heap.
    *
-   * @return no of elements in the heap.
+   * @return element count
    */
   public int size() {
     return tm.size();

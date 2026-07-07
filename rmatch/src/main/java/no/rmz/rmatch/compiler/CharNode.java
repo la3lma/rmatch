@@ -13,13 +13,11 @@
  */
 package no.rmz.rmatch.compiler;
 
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
 
-/** A node that has an outgoing edge for a single, specific character. */
+/** NDFA node that consumes one specific character. */
 public final class CharNode extends AbstractNDFANode {
 
   /** The node we will go to after matching this character. */
@@ -60,15 +58,6 @@ public final class CharNode extends AbstractNDFANode {
       return nextNode;
     } else {
       return null;
-    }
-  }
-
-  @Override
-  public Collection<PrintableEdge> getEdgesToPrint() {
-    synchronized (monitor) {
-      final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
-      result.add(new PrintableEdge(String.valueOf(ch), nextNode));
-      return result;
     }
   }
 }

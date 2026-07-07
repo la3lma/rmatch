@@ -13,24 +13,22 @@
  */
 package no.rmz.rmatch.interfaces;
 
-/** A generic node used both in deterministic and nondeterminstic automata. */
+/** A common node contract shared by rmatch's deterministic and nondeterministic automata. */
 public interface Node {
 
   /**
-   * True iff the node is relevant for a regexp. The meaning is that if we for some reason arrive at
-   * this node and is working on a match for a particuar regexp, then we can continue to work on
-   * that match iff the node is active for that regexp.
+   * Return whether a candidate for the supplied expression may continue at this node.
    *
-   * @param r A regular expression representation.
-   * @return true iff the present node is relevant for the parameter regexp
+   * @param r compiled regular-expression state
+   * @return {@code true} if the node is active for {@code r}
    */
   boolean isActiveFor(final Regexp r);
 
   /**
-   * True iff the present node is a legal termination node for the parameter regexp.
+   * Return whether this node is a legal terminal state for the supplied expression.
    *
-   * @param r A regular expression representation.
-   * @return true iff the present node is a legl termination node for the parameter regexp.
+   * @param r compiled regular-expression state
+   * @return {@code true} if this node can complete a match for {@code r}
    */
   boolean isTerminalFor(final Regexp r);
 }

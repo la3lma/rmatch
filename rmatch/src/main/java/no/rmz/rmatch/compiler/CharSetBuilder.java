@@ -22,7 +22,7 @@ import java.util.TreeSet;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 
-/** A builder for a CharSet. */
+/** Builder for an NDFA fragment that accepts one character from a set of literals or ranges. */
 public final class CharSetBuilder {
 
   /** The set of characters that this builder will look for. */
