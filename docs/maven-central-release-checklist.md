@@ -180,6 +180,10 @@ the rest of the release work here as it becomes explicit.
   scripts for deprecated method/API usage. Remove deprecated calls where
   practical; document and track any unavoidable remaining usage. Track this
   under [issue #272](https://github.com/la3lma/rmatch/issues/272).
+- [ ] Before 2.0, audit for unused methods, classes, and interfaces that are not
+  part of the intended external API. Remove unused accidental/internal surface
+  where safe; document any unused public surface that is intentionally retained.
+  Track this under [issue #273](https://github.com/la3lma/rmatch/issues/273).
 - [x] Verify post-cleanup compile dependency tree. Result on 2026-07-07:
   `no.rmz:rmatch` has only `org.ahocorasick:ahocorasick:0.6.3` in compile
   scope; `rmatch-tester` has `rmatch` and Aho-Corasick in compile scope when
