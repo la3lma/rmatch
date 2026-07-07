@@ -13,53 +13,73 @@
  */
 package no.rmz.rmatch.interfaces;
 
-/** Buffers are the basic way to get access to the input being parsed. */
+/**
+ * Input abstraction consumed by rmatch engines.
+ *
+ * <p>Most callers should use {@code RegexStringBuffer}, which adapts a {@link String} to this
+ * interface. Custom buffer implementations are useful when input is backed by another data
+ * structure, but they must preserve the cursor semantics described here.
+ *
+ * <p>A buffer starts before the first character. Each call to {@link #getNext()} advances the
+ * cursor and returns the character at the new position. The current position is zero-based after
+ * the first character has been consumed.
+ */
 public interface Buffer extends Comparable<Buffer> {
 
   /**
-   * Return everything in the Buffer from, but not including the current character as a string. XXX
-   * This may be useful for testing, but shouldn't be i the main interface!
+   * Return the unconsumed suffix after the current position.
    *
-   * @return the string representing the rest of the buffer.
+   * <p>This method exists for older diagnostics and tests. New application code should normally use
+   * {@link #getString(int, int)} with explicit offsets.
+   *
+   * @return text after the current cursor position
    */
   @Deprecated
   String getCurrentRestString();
 
   /**
-   * We need some way to get the content of the matches out, and this is one way of doing it.
+   * Return a substring from the underlying input.
    *
-   * @param start the first character of the substring to return.
-   * @param stop The last character of the substring to return.
-   * @return part of the buffer's content.
+   * <p>The {@code stop} argument is exclusive, matching {@link String#substring(int, int)}. Match
+   * callbacks use inclusive end offsets, so the usual way to recover callback text is {@code
+   * buffer.getString(start, end + 1)}.
+   *
+   * @param start zero-based inclusive start offset
+   * @param stop zero-based exclusive stop offset
+   * @return text in the half-open range {@code [start, stop)}
    */
   String getString(final int start, final int stop);
 
   /**
-   * Are there any more characters after the current one?
+   * Return whether a subsequent call to {@link #getNext()} can advance the cursor.
    *
-   * @return true iff more characters are available
+   * @return {@code true} if another character is available
    */
   boolean hasNext();
 
   /**
-   * Get the next character.
+   * Advance the cursor and return the next character.
    *
-   * @return the next character.
+   * @return next character in the input
    */
   Character getNext();
 
   /**
-   * Get the current position in the buffer, to be used when getting strings representing matches.
+   * Return the current zero-based cursor position.
    *
-   * @return an integer representing the position in a buffer.
+   * <p>Before any characters are consumed, implementations may return {@code -1}.
+   *
+   * @return current cursor position
    */
   int getCurrentPos(); // XXX Should this be a long?
 
   /**
-   * Return a copy of the present buffer that can be modified without modifying the state of the
-   * cloned original.
+   * Return an independent cursor over the same input content.
    *
-   * @return A cloned buffer.
+   * <p>Partitioned matchers clone buffers before scanning in parallel. Implementations should make
+   * sure advancing the clone does not advance the original.
+   *
+   * @return independent buffer clone
    */
   Buffer clone();
 

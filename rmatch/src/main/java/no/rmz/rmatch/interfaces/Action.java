@@ -14,31 +14,35 @@
 package no.rmz.rmatch.interfaces;
 
 /**
- * The action interface is used when a match is identified, and the results of it must be
- * communicated to the outside world.
+ * Callback invoked when a registered expression matches an input buffer.
+ *
+ * <p>Implement this interface to collect matches, update counters, emit records, or otherwise make
+ * matches visible to application code. The callback receives the input buffer and inclusive
+ * start/end offsets. To recover the matched text, call {@code buffer.getString(start, end + 1)}.
  *
  * <p><b>Thread-safety contract:</b> actions may be invoked concurrently from multiple engine worker
- * threads. In particular, the default production matcher (a multithreaded {@code MultiMatcher})
- * partitions its regular expressions across several matchers that run in parallel, so an action
- * instance — especially one shared between several regular expressions — must be prepared for
- * concurrent {@link #performMatch} invocations. Any state an action aggregates (match counts,
- * collections of results, and so on) must be thread-safe: use {@code java.util.concurrent} types
- * such as {@code LongAdder} or {@code AtomicLong}, a synchronized block, or a concurrent
- * collection. A plain {@code int++} in an action is a lost-update bug waiting to happen.
+ * threads. In particular, {@code MatcherFactory.newMatcher()} returns a partitioned matcher on
+ * multi-core systems. An action instance, especially one shared between several expressions, must
+ * therefore be prepared for concurrent {@link #performMatch(Buffer, int, int)} invocations. Use
+ * {@code java.util.concurrent} types such as {@code LongAdder} or {@code AtomicLong}, a
+ * synchronized block, or a concurrent collection for mutable state. A plain {@code int++} counter
+ * in an action is a lost-update bug waiting to happen.
  */
 public interface Action {
 
   /**
-   * When a match is found, actions corresponding to that match is triggered.
+   * Handle a single match.
    *
-   * <p>An instance that can perform a match action must implement this interface.
+   * <p>The {@code start} and {@code end} offsets are inclusive. This is deliberately different from
+   * {@link Buffer#getString(int, int)}, whose second argument is exclusive like {@link
+   * String#substring(int, int)}.
    *
-   * <p>May be called concurrently from multiple threads; see the thread-safety contract in the
-   * class documentation.
+   * <p>This method may be called concurrently from multiple threads; see the thread-safety contract
+   * in the class documentation.
    *
-   * @param b The buffer where the match occurred.
-   * @param start The first position of the buffer that matches.
-   * @param end The last position in the buffer that matches.
+   * @param b buffer where the match occurred
+   * @param start zero-based inclusive start offset of the match
+   * @param end zero-based inclusive end offset of the match
    */
   void performMatch(final Buffer b, final int start, final int end);
 }

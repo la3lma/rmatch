@@ -18,7 +18,13 @@ import static no.rmz.rmatch.internal.Checks.checkNotNull;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.LookaheadBuffer;
 
-/** An implementation of the Buffer interface that holds all inputs as a String. */
+/**
+ * {@link Buffer} implementation backed by a {@link String}.
+ *
+ * <p>This is the standard buffer implementation for application code. It keeps a cursor over the
+ * supplied string and exposes matched text through {@link #getString(int, int)}. The input string
+ * is immutable; cloned buffers share the same string but have independent cursor positions.
+ */
 public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
 
   /** A string containing the entire content of the buffer. */
@@ -34,9 +40,12 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
   private final Object monitor = new Object();
 
   /**
-   * Create a new instance, with content as a string.
+   * Create a buffer over the supplied string.
    *
-   * @param str The string we will return character by character.
+   * <p>The initial cursor position is before the first character. The first call to {@link
+   * #getNext()} returns the character at offset {@code 0}.
+   *
+   * @param str input text to scan
    */
   public RegexStringBuffer(final String str) {
     this.str = checkNotNull(str);
@@ -54,6 +63,11 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
     this.currentChar = aThis.currentChar;
   }
 
+  /**
+   * Return whether another character can be consumed.
+   *
+   * @return {@code true} if {@link #getNext()} can advance the cursor
+   */
   @Override
   public boolean hasNext() {
     synchronized (monitor) {
@@ -70,6 +84,11 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
     }
   }
 
+  /**
+   * Advance the cursor and return the next character.
+   *
+   * @return next character in the string
+   */
   @Override
   public Character getNext() {
     synchronized (monitor) {
@@ -78,6 +97,11 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
     }
   }
 
+  /**
+   * Return the next character without advancing the cursor.
+   *
+   * @return next character, or {@code null} at end of input
+   */
   @Override
   public Character peek() {
     synchronized (monitor) {
@@ -89,6 +113,11 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
     }
   }
 
+  /**
+   * Return the current zero-based cursor position.
+   *
+   * @return current cursor position, or {@code -1} before scanning starts
+   */
   @Override
   public int getCurrentPos() {
     synchronized (monitor) {
@@ -97,9 +126,9 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
   }
 
   /**
-   * Get the length of the current string.
+   * Return the total length of the backing string.
    *
-   * @return the length of the string.
+   * @return number of characters in the backing string
    */
   public int getLength() {
     synchronized (monitor) {
@@ -107,6 +136,15 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
     }
   }
 
+  /**
+   * Return a substring from the backing string.
+   *
+   * <p>The {@code stop} argument is exclusive, just like {@link String#substring(int, int)}.
+   *
+   * @param start zero-based inclusive start offset
+   * @param stop zero-based exclusive stop offset
+   * @return text in the half-open range {@code [start, stop)}
+   */
   @Override
   public String getString(final int start, final int stop) {
     synchronized (monitor) {
@@ -115,10 +153,10 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
   }
 
   /**
-   * Get the string from the start position to the end.
+   * Return the suffix from {@code start} to the end of the backing string.
    *
-   * @param start start position.
-   * @return the string from the start position to the end.
+   * @param start zero-based inclusive start offset
+   * @return text from {@code start} through the end of input
    */
   public String getCurrentRestString(final int start) {
     synchronized (monitor) {
@@ -127,6 +165,11 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
     }
   }
 
+  /**
+   * Return the unconsumed suffix after the current cursor position.
+   *
+   * @return remaining text after the current cursor
+   */
   @Override
   public String getCurrentRestString() {
     synchronized (monitor) {
@@ -141,6 +184,11 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
     }
   }
 
+  /**
+   * Return an independent cursor over the same backing string.
+   *
+   * @return cloned buffer with the same content and current position
+   */
   @SuppressWarnings("MethodDoesntCallSuperMethod")
   @Override
   public Buffer clone() {

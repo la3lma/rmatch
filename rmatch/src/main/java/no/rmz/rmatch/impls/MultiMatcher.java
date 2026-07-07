@@ -26,10 +26,16 @@ import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 
 /**
- * A multithreaded matcher. It will keep an array of matchers, into which it will partition the
- * regular expressions. Addition/Removal goes to one of the matchers, not all of them. When running
- * matches, all the matchers are run concurrently, and the MultiMatcher's implementation of the
- * match method will not complete until all the matcher's match methods has completed.
+ * Partitioned matcher that scans with several {@link MatcherImpl} instances in parallel.
+ *
+ * <p>{@code MultiMatcher} distributes registered expressions across partitions using the expression
+ * string's hash. During {@link #match(Buffer)}, each partition scans an independent clone of the
+ * input buffer. The method returns only after all partitions finish, and any failure from a
+ * partition is rethrown to the caller.
+ *
+ * <p>Because partitions run concurrently, actions registered with this matcher must be thread-safe.
+ * Most application code should create instances through {@link MatcherFactory#newMatcher()} rather
+ * than selecting partition counts directly.
  */
 public final class MultiMatcher implements Matcher {
 
@@ -59,21 +65,21 @@ public final class MultiMatcher implements Matcher {
   private final ExecutorService executorService;
 
   /**
-   * Create a new instance of the MultiMatcher.
+   * Create a partitioned matcher using the runtime's default partition heuristic.
    *
-   * @param compiler The compiler used by all the matchers.
-   * @param regexpFactory The regular expression factory used by all the matchers.
+   * @param compiler compiler used by all partitions
+   * @param regexpFactory regular-expression factory used by all partitions
    */
   public MultiMatcher(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
     this(divineOptimalNumberOfMatchers(), compiler, regexpFactory);
   }
 
   /**
-   * Create a new instance of the MultiMatcher.
+   * Create a partitioned matcher with an explicit partition count.
    *
-   * @param noOfMatchers The number of matchers in the matchers array.
-   * @param compiler The compiler used by all the matchers.
-   * @param regexpFactory The regular expression factory used by all the matchers.
+   * @param noOfMatchers number of matcher partitions to create
+   * @param compiler compiler used by all partitions
+   * @param regexpFactory regular-expression factory used by all partitions
    */
   public MultiMatcher(
       final int noOfMatchers, final NDFACompiler compiler, final RegexpFactory regexpFactory) {
@@ -110,16 +116,37 @@ public final class MultiMatcher implements Matcher {
     return matchers[index];
   }
 
+  /**
+   * Register an expression/action pair in one partition.
+   *
+   * @param r regular-expression text in the supported rmatch syntax subset
+   * @param a action to run for each match
+   * @throws RegexpParserException if {@code r} cannot be parsed
+   */
   @Override
   public void add(final String r, final Action a) throws RegexpParserException {
     getMatcher(r).add(r, a);
   }
 
+  /**
+   * Remove an expression/action pair from its partition.
+   *
+   * @param r regular-expression text previously registered with this matcher
+   * @param a action previously associated with {@code r}
+   */
   @Override
   public void remove(final String r, final Action a) {
     getMatcher(r).remove(r, a);
   }
 
+  /**
+   * Scan the supplied buffer concurrently across all partitions.
+   *
+   * <p>Each partition receives an independent clone of {@code b}. Actions may run concurrently on
+   * worker threads.
+   *
+   * @param b input buffer to scan
+   */
   @Override
   public void match(final Buffer b) {
     assert (matchers.length == noOfMatchers);
@@ -163,6 +190,11 @@ public final class MultiMatcher implements Matcher {
     }
   }
 
+  /**
+   * Shut down all partition matchers and their worker pool.
+   *
+   * @throws InterruptedException if interrupted while waiting for worker termination
+   */
   @Override
   public void shutdown() throws InterruptedException {
     for (final Matcher matcher : matchers) {
@@ -173,6 +205,14 @@ public final class MultiMatcher implements Matcher {
     executorService.awaitTermination(3, TimeUnit.SECONDS);
   }
 
+  /**
+   * Return diagnostic node storage from the first partition.
+   *
+   * <p>This is mainly useful for graph/debug tooling and does not represent the complete
+   * multi-partition automaton.
+   *
+   * @return node storage for the first partition
+   */
   @Override
   public NodeStorage getNodeStorage() {
     // XXX This is wrong, since it only returns a subset of the

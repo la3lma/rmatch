@@ -16,10 +16,13 @@ package no.rmz.rmatch.interfaces;
 import java.util.Comparator;
 
 /**
- * A Match represents a situation where a match has been found for some pattern. There will
- * typically be one or more consumers of the match, and these will have to both extract the pattern
- * that was matched for, and the content from the Buffer being matched over that triggered the
- * match.
+ * Engine-internal representation of one in-progress or committed match candidate.
+ *
+ * <p>This type is public because older engine and diagnostic APIs expose matcher state. Normal
+ * application code should not need to create or manipulate {@code Match} instances; use {@link
+ * Matcher#add(String, Action)} and handle matches through {@link Action#performMatch(Buffer, int,
+ * int)} instead. The start and end offsets exposed here use the same inclusive convention as action
+ * callbacks.
  */
 public interface Match {
 

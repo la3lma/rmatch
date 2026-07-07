@@ -100,6 +100,21 @@ the rest of the release work here as it becomes explicit.
   README now explains the comparison model against naive `java.util.regex` and
   RE2J loops, the rmatch one-pass setup, the measured fields, and the
   byte-identical-input/match-count discipline used for release gates.
+- [x] Update end-user-facing Javadocs before the `1.9.1` release. Result on
+  2026-07-07: `Matcher`, `Action`, `Buffer`, `MatcherImpl`, `MatcherFactory`,
+  `MultiMatcher`, `RegexStringBuffer`, `LookaheadBuffer`, `CounterAction`, and
+  `RegexpParserException` now document user-facing lifecycle, callback offset
+  semantics, concurrency expectations, buffer substring behavior, factory
+  behavior, and parse-error meaning. Historical public engine types such as
+  `Match`, `MatchSet`, `Regexp`, `RegexpFactory`, and `NodeStorage` now explain
+  that they are diagnostic/internal rather than the normal application API.
+- [x] Build generated Javadocs after the public-doc pass. Result on 2026-07-07:
+  `mvn -q -pl rmatch -am -DskipTests -Dspotbugs.skip=true javadoc:javadoc`
+  succeeded.
+- [ ] Decide where hosted API docs should live and automate the publication
+  path. Candidates include javadoc.io via the Maven Central javadoc JAR,
+  GitHub Pages for a project-owned versioned docs site, GitHub Releases for
+  downloadable doc bundles, or a Maven Site/Pages pipeline.
 - [ ] Add or link API docs once published javadocs are available.
 - [ ] Decide how prominently to describe `1.9.x` as pre-2.0 in README after
   Central publication.

@@ -13,23 +13,29 @@
  */
 package no.rmz.rmatch.compiler;
 
-/** Exception thrown when we discover some error during parsing of a regular expression. */
+/**
+ * Thrown when rmatch cannot parse a regular expression.
+ *
+ * <p>This usually means the pattern is malformed or uses syntax outside the currently supported
+ * rmatch subset. The project README lists the supported constructs for each release line.
+ */
 public final class RegexpParserException extends Exception {
 
+  private static final long serialVersionUID = 1L;
+
   /**
-   * Something went bad when parsing a regexp.
+   * Create an exception with a human-readable parser error.
    *
-   * @param msg an explanation of what went wrong.
+   * @param msg explanation of what went wrong
    */
   public RegexpParserException(final String msg) {
     super(msg);
   }
 
   /**
-   * An exception caused the parsing to go wrong, this is that exception wrapped as a
-   * RegexpParserException.
+   * Wrap another exception that occurred while parsing.
    *
-   * @param e the cause of evil.
+   * @param e underlying parse failure
    */
   public RegexpParserException(final Exception e) {
     super(e);

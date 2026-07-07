@@ -23,7 +23,8 @@ import no.rmz.rmatch.interfaces.NDFANode;
 
 /**
  * Compressed representation of a DFA state using compact integer arrays instead of heavyweight
- * SortedSet<NDFANode> objects. This provides 85-99% memory reduction and O(1) state operations.
+ * {@code SortedSet<NDFANode>} objects. This provides 85-99% memory reduction and O(1) state
+ * operations.
  *
  * <p>Key optimizations:
  *

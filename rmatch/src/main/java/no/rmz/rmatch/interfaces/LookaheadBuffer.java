@@ -13,12 +13,23 @@
  */
 package no.rmz.rmatch.interfaces;
 
+/**
+ * Optional {@link Buffer} extension for buffers that can inspect the next character without
+ * advancing.
+ *
+ * <p>Application code normally does not need to implement this interface. It is useful for custom
+ * high-performance buffers because some engine optimizations can avoid speculative work when
+ * lookahead is available. Implementations must preserve the cursor contract from {@link Buffer}:
+ * {@link #peek()} must not change the value returned by {@link #getCurrentPos()} and must not
+ * consume input.
+ */
 public interface LookaheadBuffer extends Buffer {
 
   /**
-   * Will return the character that will be read after the current one.
+   * Return the character that would be returned by the next call to {@link #getNext()}.
    *
-   * @return The next character to be read. If no more characters to be read then return null.
+   * @return next character without advancing, or {@code null} when no further character is
+   *     available
    */
   Character peek();
 }

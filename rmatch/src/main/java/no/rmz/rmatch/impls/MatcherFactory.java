@@ -20,9 +20,12 @@ import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 
 /**
- * A factory instance that will generate matcher instances that are optimized for the current
- * execution environment. It's all heuristic, but it ment to represent the best guess, based on the
- * available empirical data as to what willl give the best performance.
+ * Factory for the recommended production matcher.
+ *
+ * <p>{@link #newMatcher()} returns a matcher sized for the current machine. On systems with more
+ * than two available processors this is a partitioned {@link MultiMatcher}, which can invoke
+ * actions concurrently. Use {@link MatcherImpl} directly if a single-engine matcher is preferred
+ * for a small example, deterministic debugging, or custom lifecycle control.
  */
 public class MatcherFactory {
 
@@ -34,10 +37,13 @@ public class MatcherFactory {
   private static final int AVAILABLE_PROCESSORS = OS_MBEAN.getAvailableProcessors();
 
   /**
-   * Return a matcher that is assumed to be optimal for the current execution environment. This is
-   * the recommenced way to get a matcher to use.
+   * Create the recommended matcher for this runtime.
    *
-   * @return a new Matcher instance.
+   * <p>The current heuristic uses one partition on very small machines and roughly 1.5 times the
+   * available processor count otherwise. Each call returns a new matcher with an independent
+   * pattern set and lifecycle.
+   *
+   * @return new matcher instance ready for pattern registration
    */
   public static Matcher newMatcher() {
 
@@ -53,10 +59,9 @@ public class MatcherFactory {
   }
 
   /**
-   * Get the number of cores/threads that the default matcher would use. This is useful for
-   * performance reporting and debugging.
+   * Return the number of partitions that {@link #newMatcher()} would use on this machine.
    *
-   * @return the number of partitions/threads used by the default matcher
+   * @return number of matcher partitions used by the default matcher
    */
   public static int getDefaultPartitionCount() {
     if (AVAILABLE_PROCESSORS > 2) {
@@ -67,9 +72,9 @@ public class MatcherFactory {
   }
 
   /**
-   * Get the number of available processors in the system.
+   * Return the number of processors reported by the JVM.
    *
-   * @return the number of available processors
+   * @return available processor count used by the factory heuristic
    */
   public static int getAvailableProcessors() {
     return AVAILABLE_PROCESSORS;
