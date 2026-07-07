@@ -14,7 +14,7 @@ GATE_SKIP_REBUILD ?= 0
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build test clean fmt spotless spotbugs gate-baseline gate-candidate release-central-preflight release-central-profile-check release-central-publish
+.PHONY: help build test clean fmt spotless spotbugs javadocs release-central-javadoc-check gate-baseline gate-candidate release-central-preflight release-central-profile-check release-central-publish
 
 help: ## [core] Show available top-level targets
 	@echo "Top-level rmatch Make targets"
@@ -46,6 +46,13 @@ spotless: ## [core] Apply spotless formatting
 
 spotbugs: ## [core] Run spotbugs checks
 	$(MVN) -q -B spotbugs:check
+
+javadocs: ## [core] Generate browsable local API docs under rmatch/target/reports/apidocs
+	rm -rf rmatch/target/reports/apidocs
+	$(MVN) -q -B -pl rmatch -am -DskipTests -Dspotbugs.skip=true javadoc:javadoc
+
+release-central-javadoc-check: ## [core] Verify Central profile builds the javadoc jar without signing/uploading
+	$(MVN) -q -B -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true -Dgpg.skip=true verify
 
 gate-baseline: ## [core] Capture local performance baseline from main branch
 	$(MAKE) -C $(REGEX_BENCH_FRAMEWORK_DIR) gate-local-baseline \

@@ -111,11 +111,15 @@ the rest of the release work here as it becomes explicit.
 - [x] Build generated Javadocs after the public-doc pass. Result on 2026-07-07:
   `mvn -q -pl rmatch -am -DskipTests -Dspotbugs.skip=true javadoc:javadoc`
   succeeded.
-- [ ] Decide where hosted API docs should live and automate the publication
-  path. Candidates include javadoc.io via the Maven Central javadoc JAR,
-  GitHub Pages for a project-owned versioned docs site, GitHub Releases for
-  downloadable doc bundles, or a Maven Site/Pages pipeline.
-- [ ] Add or link API docs once published javadocs are available.
+- [x] Decide where hosted API docs should live and wire the release path. First
+  publication target is javadoc.io via the Maven Central `-javadoc.jar`.
+  `make javadocs` builds browsable local docs, and
+  `make release-central-javadoc-check` verifies that the `central-release`
+  profile creates the Javadoc jar that javadoc.io will consume after Central
+  publication.
+- [ ] Post-release: after `1.9.1` is visible on javadoc.io, add a README badge
+  and API-doc link:
+  `[![Javadocs](https://javadoc.io/badge2/no.rmz/rmatch/javadoc.svg)](https://javadoc.io/doc/no.rmz/rmatch)`.
 - [ ] Decide how prominently to describe `1.9.x` as pre-2.0 in README after
   Central publication.
 
