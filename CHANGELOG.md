@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.9.2-SNAPSHOT - in development
+
+### Highlights
+
+- Added the first zero-width assertion machinery for line anchors `^` and `$`.
+  They now compile as assertion edges in the automaton rather than throwing at
+  compile time.
+- Added a dedicated line-anchor semantics suite covering buffer boundaries,
+  newline boundaries, whole-line matching, alternation, grouping, and mixed
+  anchored/unanchored pattern sets.
+- Kept assertion-aware matching on a separate path so ordinary pattern sets can
+  continue using the existing no-context hot path.
+
+### Still required before merge/release
+
+- Run the full external `rmatch-perftest` branch-vs-main gate. Local smoke data
+  is recorded under `docs/benchmark-receipts/issue-269-line-anchors`, but is not
+  sufficient release evidence.
+- Decide and document pure zero-width match semantics, for example `^$`.
+- Continue the broader #267 work for word boundaries and flag-mode behavior.
+
 ## 1.9.1 - pre-2.0 Maven Central release candidate
 
 `1.9.1` tightens the Maven Central release package after the first `1.9.x`

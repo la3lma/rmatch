@@ -31,6 +31,14 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
   void addEpsilonEdge(final NDFANode n);
 
   /**
+   * Add an epsilon-like edge guarded by a zero-width assertion.
+   *
+   * @param assertion assertion that must hold for the edge to be followed
+   * @param n destination node
+   */
+  void addAssertionEdge(final ZeroWidthAssertion assertion, final NDFANode n);
+
+  /**
    * Remove a node that is reachable from this node through an epsilon (no-input) edge.
    *
    * @param n the node to remove.
@@ -43,6 +51,13 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
    * @return All the nodes reachable by epsilon edges.
    */
   SortedSet<NDFANode> getEpsilons();
+
+  /**
+   * Get all zero-width assertion edges leaving this node.
+   *
+   * @return assertion edges reachable from this node
+   */
+  Collection<AssertionEdge> getAssertionEdges();
 
   /**
    * Give n that the nxt character is ch, what is the next NDFA node that can be reached. In the
@@ -69,6 +84,15 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
    * @return The set of nodes reachable thrugh the character ch.
    */
   SortedSet<NDFANode> getNextSet(final Character ch);
+
+  /**
+   * Context-aware variant of {@link #getNextSet(Character)} for zero-width assertions.
+   *
+   * @param ch The character we're looking through
+   * @param context positional context for assertions adjacent to this transition
+   * @return The set of nodes reachable through the character in this context.
+   */
+  SortedSet<NDFANode> getNextSet(final Character ch, final MatchContext context);
 
   /**
    * The regular expression this node is representing.

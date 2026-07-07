@@ -11,8 +11,9 @@ compilation pipeline.
 `?` `*` `+`, counted quantifiers `{m}`/`{m,n}`/`{m,}`, grouping
 `( )`/`(?: )`, any-char `.`, character classes `[abc]`, ranges `[a-z]`,
 negation `[^abc]`, common escapes and shorthand classes, and prefix-level
-`(?i)`. Line anchors `^`/`$` are not supported in 1.9.0; they throw pending
-the anchor/boundary assertion machinery.
+`(?i)`. Line anchors `^`/`$` were not supported in the published 1.9.0/1.9.1
+line; the first implementation branch is tracked as
+[issue #269](https://github.com/la3lma/rmatch/issues/269).
 
 ## Candidate features
 
@@ -39,11 +40,12 @@ Implemented, test-first, perf-gated (see labnotebook entry): grouping
 `( )`/`(?: )`, escapes + shorthand classes, counted
 quantifiers `{m}`/`{m,n}`/`{m,}` (replay expansion, cap 1000), and `(?i)`
 prefix case-insensitivity (`(?s)` accepted as no-op — `.` is DOTALL-always).
-Deliberately descoped pending anchor machinery
-([issue #267](https://github.com/la3lma/rmatch/issues/267): `^`/`$` throw
-today despite old README claims): `\b`/`\B`, MULTILINE, non-DOTALL toggle.
-Design pinned in [docs/design/anchor-machinery.md](design/anchor-machinery.md)
-— **ON HOLD** by decision (rmz, 2026-07-05) while other issues take priority.
+Deliberately descoped pending anchor machinery after 1.9.1:
+`\b`/`\B`, MULTILINE, non-DOTALL toggle, and pure zero-width match reporting.
+The first active anchor sub-issue is
+[`^`/`$` line anchors](https://github.com/la3lma/rmatch/issues/269), split out
+from [issue #267](https://github.com/la3lma/rmatch/issues/267). Design is
+pinned in [docs/design/anchor-machinery.md](design/anchor-machinery.md).
 Along the way the new semantics suite exposed and fixed two ancient engine
 bugs: negated sets were unsound, and matches could forget earlier final states.
 

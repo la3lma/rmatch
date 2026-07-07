@@ -70,15 +70,16 @@ eager engine identically.
 
 ## Anchors `^` and `$` throw UnsupportedOperationException
 
-**Status:** OPEN. Tracked in
-[issue #267](https://github.com/la3lma/rmatch/issues/267). The README used to
-claim anchor support; the compiler throws "Not supported yet" for both.
-Descoped from the current syntax program (needs real context-assertion
-machinery); the README must stop claiming it, and \b/MULTILINE wait on the
-same machinery.
+**Status:** FUNCTIONAL BRANCH. Tracked in
+[issue #269](https://github.com/la3lma/rmatch/issues/269), split out from
+[issue #267](https://github.com/la3lma/rmatch/issues/267). The compiler no
+longer throws for `^` and `$` on the feature branch, and the semantic test suite
+covers line-start/line-end behavior. Do not mark fully resolved until the
+external branch-vs-main performance gate passes and the branch is merged.
+Word boundaries and MULTILINE remain under the broader #267 machinery.
 
-**Plan (campaign):** Run a dedicated correctness campaign after the current optimization
-campaign (rmz decision, 2026-07-05): differential fuzzing against
+**Plan (campaign):** Run a dedicated correctness campaign alongside the current
+implementation work: differential fuzzing against
 `java.util.regex` over the supported syntax subset (literals, `?`, `*`, `+`,
 `.`, `|`, character classes, anchors) on random small inputs; triage every
 mismatch. Consistency is table stakes for matchers.

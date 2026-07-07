@@ -5,12 +5,12 @@
     <parent>
         <groupId>no.rmz</groupId>
         <artifactId>rmatch-parent</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>1.9.2-SNAPSHOT</version>
     </parent>
 
     <groupId>no.rmz</groupId>
     <artifactId>rmatch</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>1.9.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>rmatch</name>

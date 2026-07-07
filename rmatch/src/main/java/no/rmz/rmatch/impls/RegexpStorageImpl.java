@@ -98,6 +98,9 @@ public final class RegexpStorageImpl implements RegexpStorage {
         assert (n != null);
         r.setMyNDFANode(n);
         storage.addToStartnode(n);
+        if (r.usesContextAssertions()) {
+          storage.markContextAssertionsUsed();
+        }
       }
     }
   }

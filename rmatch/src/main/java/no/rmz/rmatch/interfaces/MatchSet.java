@@ -79,6 +79,22 @@ public interface MatchSet {
       final RunnableMatchesHolder runnableMatches);
 
   /**
+   * Context-aware progress used when zero-width assertions are present.
+   *
+   * @param ns A node storage instance used to get new DFA nodes.
+   * @param currentChar The current char.
+   * @param currentPos The current position.
+   * @param runnableMatches The set of runnable matches.
+   * @param context positional context for assertions adjacent to this transition
+   */
+  void progress(
+      final NodeStorage ns,
+      final Character currentChar,
+      final int currentPos,
+      final RunnableMatchesHolder runnableMatches,
+      final MatchContext context);
+
+  /**
    * Remove a match from the MatchSet instance.
    *
    * @param m a match.

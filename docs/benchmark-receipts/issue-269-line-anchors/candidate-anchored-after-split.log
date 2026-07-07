@@ -1,0 +1,7 @@
+patterns=1000 repeats=20 anchored=true corpusChars=180000 compileMs=21.434 expected=20000
+iter=0 matchMs=1725.721 count=20000
+iter=1 matchMs=1714.846 count=20000
+iter=2 matchMs=1746.791 count=20000
+iter=3 matchMs=1827.749 count=20000
+iter=4 matchMs=1870.128 count=20000
+medianMs=1746.791 minMs=1714.846 maxMs=1870.128

@@ -124,6 +124,9 @@ public final class MatchSetImpl implements MatchSet {
   /** An identifier uniquely identifying this MatchSetImpl among other MatchSetImpl instances. */
   private final long id;
 
+  /** True when this match set must use context-aware DFA transitions and terminal checks. */
+  private final boolean contextSensitive;
+
   /**
    * Create a new MatchSetImpl.
    *
@@ -161,16 +164,38 @@ public final class MatchSetImpl implements MatchSet {
       final DFANode newCurrentNode,
       final Character currentChar,
       final Set<Regexp> preComputedCandidates) {
+    this(startIndex, newCurrentNode, currentChar, preComputedCandidates, MatchContext.NONE);
+  }
+
+  /**
+   * Create a new MatchSetImpl with optional zero-width assertion context.
+   *
+   * @param startIndex The start position in the input.
+   * @param newCurrentNode The deterministic start node to start with.
+   * @param currentChar The current character being processed.
+   * @param preComputedCandidates Pre-filtered regexps that can start with currentChar.
+   * @param context positional context for assertions adjacent to the first character
+   */
+  public MatchSetImpl(
+      final int startIndex,
+      final DFANode newCurrentNode,
+      final Character currentChar,
+      final Set<Regexp> preComputedCandidates,
+      final MatchContext context) {
     checkNotNull(newCurrentNode, "newCurrentNode can't be null");
     checkArgument(startIndex >= 0, "Start index can't be negative");
     this.currentNode = newCurrentNode;
     start = startIndex;
     id = MY_COUNTER.inc();
+    contextSensitive = context != MatchContext.NONE;
 
     if (preComputedCandidates != null) {
       candidates = preComputedCandidates;
     } else if (currentChar != null) {
-      candidates = this.currentNode.getRegexpsThatCanStartWith(currentChar);
+      candidates =
+          contextSensitive
+              ? this.currentNode.getRegexpsThatCanStartWith(currentChar, context)
+              : this.currentNode.getRegexpsThatCanStartWith(currentChar);
     } else {
       candidates = this.currentNode.getRegexps();
     }
@@ -178,7 +203,7 @@ public final class MatchSetImpl implements MatchSet {
     // Materialize matches only for regexps that are final already at the first character
     // (length-1 matches). Everything else stays implicit until it reaches a terminal state.
     if (!candidates.isEmpty()) {
-      materializeNewlyTerminal(startIndex);
+      materializeNewlyTerminal(startIndex, context);
     } else {
       currentNode = null; // Nothing can ever match from here.
     }
@@ -189,7 +214,11 @@ public final class MatchSetImpl implements MatchSet {
    * materialized. Such a match is created final and active, ending at the current position.
    */
   private void materializeNewlyTerminal(final int currentPos) {
-    final Set<Regexp> terminals = terminalRegexpsFor(currentNode);
+    materializeNewlyTerminal(currentPos, MatchContext.NONE);
+  }
+
+  private void materializeNewlyTerminal(final int currentPos, final MatchContext context) {
+    final Set<Regexp> terminals = terminalRegexpsFor(currentNode, context);
     if (terminals.isEmpty()) {
       return;
     }
@@ -240,6 +269,16 @@ public final class MatchSetImpl implements MatchSet {
       final Character currentChar,
       final int currentPos,
       final RunnableMatchesHolder runnableMatches) {
+    progress(ns, currentChar, currentPos, runnableMatches, MatchContext.NONE);
+  }
+
+  @Override
+  public void progress(
+      final NodeStorage ns,
+      final Character currentChar,
+      final int currentPos,
+      final RunnableMatchesHolder runnableMatches,
+      final MatchContext context) {
 
     // Hot path: called once per input character per active match set. Internal invariants
     // (non-null arguments, non-negative position) are guaranteed by the engine loop, so no
@@ -249,7 +288,10 @@ public final class MatchSetImpl implements MatchSet {
       return;
     }
 
-    currentNode = currentNode.getNext(currentChar, ns);
+    currentNode =
+        contextSensitive
+            ? currentNode.getNext(currentChar, ns, context)
+            : currentNode.getNext(currentChar, ns);
 
     if (currentNode == null) {
       terminateAssociatedMatches(currentChar, runnableMatches);
@@ -266,11 +308,11 @@ public final class MatchSetImpl implements MatchSet {
 
     // Progress matches that have observable state.
     if (!materialized.isEmpty()) {
-      progressMaterializedMatches(currentPos, runnableMatches, currentChar);
+      progressMaterializedMatches(currentPos, runnableMatches, currentChar, context);
     }
 
     // Materialize matches for regexps that just reached a terminal state.
-    materializeNewlyTerminal(currentPos);
+    materializeNewlyTerminal(currentPos, context);
 
     // Exact liveness test, mirroring the eager implementation's lifetime: a match set is dead
     // as soon as nothing is materialized AND no unconsumed candidate is still alive at the
@@ -320,9 +362,17 @@ public final class MatchSetImpl implements MatchSet {
       final int currentPos,
       final RunnableMatchesHolder runnableMatches,
       final Character currentChar) {
+    progressMaterializedMatches(currentPos, runnableMatches, currentChar, MatchContext.NONE);
+  }
+
+  private void progressMaterializedMatches(
+      final int currentPos,
+      final RunnableMatchesHolder runnableMatches,
+      final Character currentChar,
+      final MatchContext context) {
 
     final Set<Regexp> activeRegexpsAtNode = currentNode.getRegexps();
-    final Set<Regexp> terminalRegexpsAtNode = terminalRegexpsFor(currentNode);
+    final Set<Regexp> terminalRegexpsAtNode = terminalRegexpsFor(currentNode, context);
 
     matchSnapshot.clear();
     matchSnapshot.addAll(materialized.values());
@@ -428,6 +478,10 @@ public final class MatchSetImpl implements MatchSet {
    * tests).
    */
   private static Set<Regexp> terminalRegexpsFor(final DFANode dfaNode) {
+    return terminalRegexpsFor(dfaNode, MatchContext.NONE);
+  }
+
+  private static Set<Regexp> terminalRegexpsFor(final DFANode dfaNode, final MatchContext context) {
     if (dfaNode instanceof DFANodeImpl impl) {
       return impl.getTerminalRegexpsCached();
     }

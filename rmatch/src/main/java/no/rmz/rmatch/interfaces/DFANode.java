@@ -46,6 +46,16 @@ public interface DFANode extends Node {
   DFANode getNext(final Character ch, final NodeStorage ns);
 
   /**
+   * Context-aware transition used when the pattern set contains zero-width assertions.
+   *
+   * @param ch input character
+   * @param ns node storage for subset construction
+   * @param context positional context for assertions adjacent to this transition
+   * @return reachable deterministic node, or null
+   */
+  DFANode getNext(final Character ch, final NodeStorage ns, final MatchContext context);
+
+  /**
    * Get the set of regexps that are associated with the present node.
    *
    * @return a set of regexps.
@@ -60,6 +70,15 @@ public interface DFANode extends Node {
    * @return a set of regexps that can start with the given character
    */
   Set<Regexp> getRegexpsThatCanStartWith(final Character ch);
+
+  /**
+   * Context-aware first-character filter used when assertions are active.
+   *
+   * @param ch the character to filter by
+   * @param context positional context for assertions adjacent to this transition
+   * @return a set of regexps that can start with the character in this context
+   */
+  Set<Regexp> getRegexpsThatCanStartWith(final Character ch, final MatchContext context);
 
   /**
    * True iff there is an outgoing link for the character.
