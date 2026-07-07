@@ -156,22 +156,49 @@ public final class FastPathMatchEngine implements MatchEngine {
 
     // Only activate prefiltering for this invocation if we can safely extract text.
     final boolean prefilterActive = preparePrefilterForMatch(b);
+    final boolean contextAssertions = ns.hasContextAssertions();
 
     // Get a reusable holder for runnable matches
     final RunnableMatchesHolder runnableMatches = new RunnableMatchesHolderImpl();
 
-    // Main matching loop
-    while (b.hasNext()) {
-      final Character nextChar = b.getNext();
-      final int currentPos = b.getCurrentPos();
-
-      // Use ASCII fast-path if applicable
-      if (AsciiOptimizer.isAscii(nextChar)) {
-        matcherProgressAscii(
-            b, nextChar, currentPos, activeMatchSets, runnableMatches, prefilterActive);
-      } else {
-        matcherProgressUnicode(
-            b, nextChar, currentPos, activeMatchSets, runnableMatches, prefilterActive);
+    if (contextAssertions) {
+      Character previousChar = null;
+      while (b.hasNext()) {
+        final Character nextChar = b.getNext();
+        final int currentPos = b.getCurrentPos();
+        final MatchContext context = contextForPosition(b, currentPos, previousChar);
+        if (AsciiOptimizer.isAscii(nextChar)) {
+          matcherProgressAscii(
+              b, nextChar, currentPos, activeMatchSets, runnableMatches, prefilterActive, context);
+        } else {
+          matcherProgressUnicode(
+              b, nextChar, currentPos, activeMatchSets, runnableMatches, prefilterActive, context);
+        }
+        previousChar = nextChar;
+      }
+    } else {
+      while (b.hasNext()) {
+        final Character nextChar = b.getNext();
+        final int currentPos = b.getCurrentPos();
+        if (AsciiOptimizer.isAscii(nextChar)) {
+          matcherProgressAscii(
+              b,
+              nextChar,
+              currentPos,
+              activeMatchSets,
+              runnableMatches,
+              prefilterActive,
+              MatchContext.NONE);
+        } else {
+          matcherProgressUnicode(
+              b,
+              nextChar,
+              currentPos,
+              activeMatchSets,
+              runnableMatches,
+              prefilterActive,
+              MatchContext.NONE);
+        }
       }
     }
 
@@ -194,7 +221,8 @@ public final class FastPathMatchEngine implements MatchEngine {
       final int currentPos,
       final Set<MatchSet> activeMatchSets,
       final RunnableMatchesHolder runnableMatches,
-      final boolean prefilterActive) {
+      final boolean prefilterActive,
+      final MatchContext context) {
 
     // Hot path: called once per input character. Internal invariants (non-null char,
     // non-negative position) are guaranteed by the match() loop, so no precondition
@@ -207,7 +235,11 @@ public final class FastPathMatchEngine implements MatchEngine {
     if (!activeMatchSets.isEmpty()) {
       final Set<MatchSet> toRemove = new HashSet<>();
       for (final MatchSet ms : activeMatchSets) {
-        ms.progress(ns, currentChar, currentPos, runnableMatches);
+        if (context == MatchContext.NONE) {
+          ms.progress(ns, currentChar, currentPos, runnableMatches);
+        } else {
+          ms.progress(ns, currentChar, currentPos, runnableMatches, context);
+        }
         if (!ms.hasMatches()) {
           toRemove.add(ms);
         }
@@ -227,7 +259,10 @@ public final class FastPathMatchEngine implements MatchEngine {
     }
 
     if (shouldStartMatch) {
-      final DFANode startNode = ns.getNextFromStartNode(currentChar);
+      final DFANode startNode =
+          context == MatchContext.NONE
+              ? ns.getNextFromStartNode(currentChar)
+              : ns.getNextFromStartNode(currentChar, context);
       if (startNode != null) {
         Set<Regexp> candidateRegexps;
 
@@ -240,12 +275,12 @@ public final class FastPathMatchEngine implements MatchEngine {
             candidateRegexps = startCandidates(b, currentChar, startNode);
           }
         } else {
-          candidateRegexps = startCandidates(b, currentChar, startNode);
+          candidateRegexps = startCandidates(b, currentChar, startNode, context);
         }
 
         if (!candidateRegexps.isEmpty()) {
           final MatchSet ms =
-              new MatchSetImpl(currentPos, startNode, currentChar, candidateRegexps);
+              new MatchSetImpl(currentPos, startNode, currentChar, candidateRegexps, context);
           if (ms.hasMatches()) {
             activeMatchSets.add(ms);
           }
@@ -278,11 +313,12 @@ public final class FastPathMatchEngine implements MatchEngine {
       final int currentPos,
       final Set<MatchSet> activeMatchSets,
       final RunnableMatchesHolder runnableMatches,
-      final boolean prefilterActive) {
+      final boolean prefilterActive,
+      final MatchContext context) {
     // For now, use the same logic as ASCII
     // Could be optimized differently for Unicode in the future
     matcherProgressAscii(
-        b, currentChar, currentPos, activeMatchSets, runnableMatches, prefilterActive);
+        b, currentChar, currentPos, activeMatchSets, runnableMatches, prefilterActive, context);
   }
 
   /**
@@ -291,7 +327,7 @@ public final class FastPathMatchEngine implements MatchEngine {
    * @return true when prefilter candidates are prepared and can be used
    */
   private boolean preparePrefilterForMatch(final Buffer b) {
-    if (!prefilterEnabled || prefilter == null) {
+    if (ns.hasContextAssertions() || !prefilterEnabled || prefilter == null) {
       resetPrefilterCandidates();
       return false;
     }
@@ -413,6 +449,14 @@ public final class FastPathMatchEngine implements MatchEngine {
    * non-ASCII characters — so this is purely an optimization layer, never a semantic change.
    */
   private Set<Regexp> startCandidates(final Buffer b, final char c1, final DFANode startNode) {
+    return startCandidates(b, c1, startNode, MatchContext.NONE);
+  }
+
+  private Set<Regexp> startCandidates(
+      final Buffer b, final char c1, final DFANode startNode, final MatchContext context) {
+    if (context != MatchContext.NONE) {
+      return startNode.getRegexpsThatCanStartWith(c1, context);
+    }
     final Set<Regexp> oneChar = startNode.getRegexpsThatCanStartWith(c1);
     if (oneChar.isEmpty() || c1 >= ASCII_LIMIT || !(b instanceof LookaheadBuffer lookahead)) {
       return oneChar;
@@ -470,5 +514,21 @@ public final class FastPathMatchEngine implements MatchEngine {
       return oneChar;
     }
     return Collections.unmodifiableSet(result);
+  }
+
+  private static MatchContext contextForPosition(
+      final Buffer b, final int currentPos, final Character previousChar) {
+    if (b instanceof LookaheadBuffer lookahead) {
+      return MatchContext.forPosition(currentPos, previousChar, lookahead.peek());
+    }
+    try {
+      final Buffer clone = b.clone();
+      final Character nextChar = clone.hasNext() ? clone.getNext() : null;
+      return MatchContext.forPosition(currentPos, previousChar, nextChar);
+    } catch (RuntimeException ex) {
+      // Custom buffers are expected to clone, but EOF-only context is safer than guessing.
+    }
+    return new MatchContext(
+        currentPos == 0 || previousChar != null && previousChar == '\n', !b.hasNext());
   }
 }

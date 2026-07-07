@@ -195,6 +195,8 @@ is not a drop-in replacement for `java.util.regex` or PCRE.
 - Character classes: `[abc]`, ranges `[a-z]`, negated classes `[^abc]`
 - Shorthand classes: `\d`, `\D`, `\w`, `\W`, `\s`, `\S`
 - Escapes: `\\`, `\.`, `\*`, `\+`, `\?`, `\[`, `\(`, `\n`, `\t`, `\r`, `\f`
+- Line anchors: `^` and `$` in line-oriented mode. `^` matches at buffer start
+  and after `\n`; `$` matches at EOF and before `\n`.
 - Pattern-prefix flags: `(?i)` for case-insensitive matching; `(?s)` is
   accepted because `.` is already DOTALL
 
@@ -202,7 +204,8 @@ is not a drop-in replacement for `java.util.regex` or PCRE.
 
 These constructs are not part of the supported `1.9.x` surface:
 
-- Line anchors `^` and `$`
+- Pure zero-width patterns such as `^$` are not yet part of the public support
+  contract; match reporting currently assumes consumed spans.
 - Word boundaries `\b` and `\B`
 - Lookaround: `(?=...)`, `(?!...)`, `(?<=...)`, `(?<!...)`
 - Backreferences and capture-group features
@@ -210,7 +213,7 @@ These constructs are not part of the supported `1.9.x` surface:
 - `MULTILINE` mode and a non-DOTALL `.` toggle
 
 Backreferences are intentionally out of scope because they are non-regular.
-Other limitations are candidates for the 2.0 work, especially the anchor and
+Other limitations are candidates for the 2.0 work, especially the remaining
 boundary-assertion machinery.
 
 ## Release Notes and Roadmap

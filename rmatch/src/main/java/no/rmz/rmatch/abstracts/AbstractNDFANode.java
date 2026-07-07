@@ -17,9 +17,12 @@ import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import no.rmz.rmatch.interfaces.AssertionEdge;
+import no.rmz.rmatch.interfaces.MatchContext;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.interfaces.ZeroWidthAssertion;
 import no.rmz.rmatch.utils.CounterType;
 import no.rmz.rmatch.utils.FastCounter;
 import no.rmz.rmatch.utils.FastCounters;
@@ -47,8 +50,15 @@ public abstract class AbstractNDFANode implements NDFANode {
    */
   final ConcurrentHashMap<Character, SortedSet<NDFANode>> nextSetCache = new ConcurrentHashMap<>();
 
+  /** Context-aware transition cache used only when zero-width assertions are present. */
+  private final ConcurrentHashMap<ContextTransitionKey, SortedSet<NDFANode>> contextNextSetCache =
+      new ConcurrentHashMap<>();
+
   /** The set of epsilon-edges going out of this node. */
   private final SortedSet<NDFANode> epsilonSet = new TreeSet<>();
+
+  /** Epsilon-like assertion edges going out of this node. */
+  private final Collection<AssertionEdge> assertionEdges = new ArrayList<>();
 
   /** The regular expression associated with this NDFA. */
   private final Regexp regexp;
@@ -155,6 +165,15 @@ public abstract class AbstractNDFANode implements NDFANode {
     return nextSetCache.computeIfAbsent(ch, this::getNextSetNonThreadsafe);
   }
 
+  @Override
+  public final SortedSet<NDFANode> getNextSet(final Character ch, final MatchContext context) {
+    if (context == MatchContext.NONE) {
+      return getNextSet(ch);
+    }
+    return contextNextSetCache.computeIfAbsent(
+        new ContextTransitionKey(ch, context), key -> getNextSetNonThreadsafe(key.ch, key.context));
+  }
+
   /**
    * Implement breadth first search through the set of nodes for NDFA nodes that are valid
    * successors to the current node, through the parameter "ch".
@@ -163,6 +182,11 @@ public abstract class AbstractNDFANode implements NDFANode {
    * @return a set of NDFA nodes representing the next state for the DFA.
    */
   private SortedSet<NDFANode> getNextSetNonThreadsafe(final Character ch) {
+    return getNextSetNonThreadsafe(ch, MatchContext.NONE);
+  }
+
+  private SortedSet<NDFANode> getNextSetNonThreadsafe(
+      final Character ch, final MatchContext context) {
 
     // Eventually, the result we'll collect and return will go into this
     // set.
@@ -194,7 +218,7 @@ public abstract class AbstractNDFANode implements NDFANode {
         resultNodes.add(nextNode);
       }
 
-      final Set<NDFANode> newNodes = extendByFollowingEpsilons(current);
+      final Set<NDFANode> newNodes = extendByFollowingEpsilons(current, context);
 
       // Remove new nodes that are already in the resultNodes
       removeDuplicates(newNodes, resultNodes);
@@ -205,7 +229,7 @@ public abstract class AbstractNDFANode implements NDFANode {
       }
     }
 
-    followEpsilonLinks(resultNodes);
+    followEpsilonLinks(resultNodes, context);
 
     // Updating the counter.
     cachedEdgesCounter.inc();
@@ -222,7 +246,8 @@ public abstract class AbstractNDFANode implements NDFANode {
     }
   }
 
-  private Set<NDFANode> extendByFollowingEpsilons(final NDFANode current) {
+  private Set<NDFANode> extendByFollowingEpsilons(
+      final NDFANode current, final MatchContext context) {
     // Now we calculate a set difference between the  nodes
     // that can be reached from the current node through its
     // epsilons, and all the nodes we have already put into the
@@ -233,6 +258,13 @@ public abstract class AbstractNDFANode implements NDFANode {
     if (!epsilons.isEmpty()) {
       newNodes.addAll(epsilons);
     }
+    if (context != MatchContext.NONE) {
+      for (final AssertionEdge edge : current.getAssertionEdges()) {
+        if (edge.isSatisfiedBy(context)) {
+          newNodes.add(edge.destination());
+        }
+      }
+    }
     return newNodes;
   }
 
@@ -240,19 +272,35 @@ public abstract class AbstractNDFANode implements NDFANode {
    * Then follow all epsilon links for the nodes in the resultNodes set (transitively reflexive
    * closure of epsilon links) and add all of those to the result set.
    */
-  private static void followEpsilonLinks(final SortedSet<NDFANode> resultNodes) {
+  private static void followEpsilonLinks(
+      final SortedSet<NDFANode> resultNodes, final MatchContext context) {
 
     final Set<NDFANode> epsilonClosure = new HashSet<>();
     for (final NDFANode r : resultNodes) {
       epsilonClosure.addAll(r.getEpsilons());
+      if (context != MatchContext.NONE) {
+        addSatisfiedAssertionDestinations(r, context, epsilonClosure);
+      }
     }
 
     while (!epsilonClosure.isEmpty()) {
       final NDFANode next = epsilonClosure.iterator().next();
       if (resultNodes.add(next)) {
         epsilonClosure.addAll(next.getEpsilons());
+        if (context != MatchContext.NONE) {
+          addSatisfiedAssertionDestinations(next, context, epsilonClosure);
+        }
       }
       epsilonClosure.remove(next);
+    }
+  }
+
+  private static void addSatisfiedAssertionDestinations(
+      final NDFANode node, final MatchContext context, final Set<NDFANode> destinations) {
+    for (final AssertionEdge edge : node.getAssertionEdges()) {
+      if (edge.isSatisfiedBy(context)) {
+        destinations.add(edge.destination());
+      }
     }
   }
 
@@ -264,10 +312,26 @@ public abstract class AbstractNDFANode implements NDFANode {
   }
 
   @Override
+  public final Collection<AssertionEdge> getAssertionEdges() {
+    synchronized (monitor) {
+      return List.copyOf(assertionEdges);
+    }
+  }
+
+  @Override
   public final void addEpsilonEdge(final NDFANode n) {
     synchronized (monitor) {
       checkNotNull(n, "It is meaningless to add a NULL NDFANode " + "as an epsilon reachable node");
       epsilonSet.add(n);
+    }
+  }
+
+  @Override
+  public final void addAssertionEdge(final ZeroWidthAssertion assertion, final NDFANode n) {
+    synchronized (monitor) {
+      checkNotNull(assertion, "Assertion can't be null");
+      checkNotNull(n, "Assertion edge destination can't be null");
+      assertionEdges.add(new AssertionEdge(assertion, n));
     }
   }
 
@@ -314,7 +378,12 @@ public abstract class AbstractNDFANode implements NDFANode {
       for (final NDFANode n : epsilonSet) {
         result.add(new PrintableEdge(null, n));
       }
+      for (final AssertionEdge edge : assertionEdges) {
+        result.add(new PrintableEdge(edge.assertion().name(), edge.destination()));
+      }
     }
     return result;
   }
+
+  private record ContextTransitionKey(Character ch, MatchContext context) {}
 }

@@ -20,6 +20,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
+import no.rmz.rmatch.interfaces.ZeroWidthAssertion;
 
 /**
  * A (partial) compiler that will produce NDFAs that represents regular expressions. The compiler
@@ -143,12 +144,19 @@ public final class ARegexpCompiler implements AbstractRegexBuilder {
 
   @Override
   public void addBeginningOfLine() {
-    throw new UnsupportedOperationException("Not supported yet.");
+    addAssertion(ZeroWidthAssertion.LINE_START);
   }
 
   @Override
   public void addEndOfLine() {
-    throw new UnsupportedOperationException("Not supported yet.");
+    addAssertion(ZeroWidthAssertion.LINE_END);
+  }
+
+  private void addAssertion(final ZeroWidthAssertion assertion) {
+    regexp.markUsesContextAssertions();
+    final CompiledFragment fragment = new CompiledFragment(regexp);
+    fragment.getArrivalNode().addAssertionEdge(assertion, fragment.getEndingNode());
+    alternativesBuilder().addLast(fragment);
   }
 
   @Override

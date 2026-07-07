@@ -44,6 +44,21 @@ public interface NodeStorage {
   DFANode getNextFromStartNode(final Character ch);
 
   /**
+   * Context-aware start transition used when zero-width assertions are present.
+   *
+   * @param ch an input character
+   * @param context positional context for assertions adjacent to this transition
+   * @return a relevant DFANode, or null if no node could be found
+   */
+  DFANode getNextFromStartNode(final Character ch, final MatchContext context);
+
+  /** Mark this storage as containing at least one zero-width assertion edge. */
+  void markContextAssertionsUsed();
+
+  /** Return true when this storage contains zero-width assertion edges. */
+  boolean hasContextAssertions();
+
+  /**
    * Given a set of NDFANodes, return a DFANode representing that set of NDFANOdes.
    *
    * @param ndfaset A set of nondeterminstic nodes we want to represent with a single deterministic

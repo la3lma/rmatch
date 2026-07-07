@@ -88,6 +88,25 @@ public final class StartNode extends AbstractNDFANode {
   }
 
   /**
+   * Context-aware start transition used when zero-width assertions are present.
+   *
+   * @param ch input character
+   * @param ns node storage
+   * @param context positional context for assertion edges
+   * @return a new DFA node, or null
+   */
+  public DFANode getNextDFA(final Character ch, final NodeStorage ns, final MatchContext context) {
+    if (context == MatchContext.NONE) {
+      return getNextDFA(ch, ns);
+    }
+    final SortedSet<NDFANode> nextSet = getNextSet(ch, context);
+    if (!nextSet.isEmpty()) {
+      return ns.getDFANode(nextSet);
+    }
+    return null;
+  }
+
+  /**
    * Add a new NDFA Node to the startnode.
    *
    * @param n The node to add through an epsilon edge.

@@ -65,6 +65,9 @@ public final class DFANodeImpl implements DFANode {
    */
   private final DFANode[] asciiNext = new DFANode[ASCII_LIMIT];
 
+  /** Context-aware transition cache used only when zero-width assertions are active. */
+  private final ConcurrentMap<ContextCharKey, DFANode> contextNextMap = new ConcurrentHashMap<>();
+
   /** Direct-indexed cache of getRegexpsThatCanStartWith results for ASCII characters. */
   @SuppressWarnings("unchecked")
   private final Set<Regexp>[] asciiStartCache = new Set[ASCII_LIMIT];
@@ -233,6 +236,20 @@ public final class DFANodeImpl implements DFANode {
     return getRegexpsThatCanStartWithNonAscii(ch);
   }
 
+  @Override
+  public Set<Regexp> getRegexpsThatCanStartWith(final Character ch, final MatchContext context) {
+    if (context == MatchContext.NONE) {
+      return getRegexpsThatCanStartWith(ch);
+    }
+    final Set<Regexp> filteredRegexps = new HashSet<>();
+    for (final Regexp r : regexps) {
+      if (r.canStartWith(ch, context)) {
+        filteredRegexps.add(r);
+      }
+    }
+    return Collections.unmodifiableSet(filteredRegexps);
+  }
+
   private synchronized Set<Regexp> getRegexpsThatCanStartWithNonAscii(final Character ch) {
     // Return cached result if available
     Set<Regexp> cachedResult = firstCharRegexpCache.get(ch);
@@ -283,12 +300,16 @@ public final class DFANodeImpl implements DFANode {
    * @return A set of NDFANodes that serves as the basis for the next DFANode.
    */
   private SortedSet<NDFANode> getNextThroughBasis(final Character ch) {
+    return getNextThroughBasis(ch, MatchContext.NONE);
+  }
+
+  private SortedSet<NDFANode> getNextThroughBasis(final Character ch, final MatchContext context) {
     final TreeSet<NDFANode> result = new TreeSet<>();
 
     // Use compressed representation for better memory efficiency
     final List<NDFANode> basisNodes = getBasisList();
     for (final NDFANode n : basisNodes) {
-      result.addAll(n.getNextSet(ch));
+      result.addAll(context == MatchContext.NONE ? n.getNextSet(ch) : n.getNextSet(ch, context));
     }
 
     return result;
@@ -322,10 +343,30 @@ public final class DFANodeImpl implements DFANode {
     return nextMap.computeIfAbsent(ch, key -> computeNext(key, ns));
   }
 
+  @Override
+  public DFANode getNext(final Character ch, final NodeStorage ns, final MatchContext context) {
+    if (context == MatchContext.NONE) {
+      return getNext(ch, ns);
+    }
+    final ContextCharKey key = new ContextCharKey(ch, context);
+    final DFANode cachedNode = contextNextMap.get(key);
+    if (cachedNode != null) {
+      return cachedNode == NO_TRANSITION ? null : cachedNode;
+    }
+    final DFANode computed = computeNext(ch, ns, context);
+    contextNextMap.put(key, computed == null ? NO_TRANSITION : computed);
+    return computed;
+  }
+
   private DFANode computeNext(final Character ch, final NodeStorage ns) {
+    return computeNext(ch, ns, MatchContext.NONE);
+  }
+
+  private DFANode computeNext(
+      final Character ch, final NodeStorage ns, final MatchContext context) {
     KNOWN_DFA_EDGES_COUNTER.inc();
 
-    final SortedSet<NDFANode> nodes = getNextThroughBasis(ch);
+    final SortedSet<NDFANode> nodes = getNextThroughBasis(ch, context);
     if (!nodes.isEmpty()) {
       return ns.getDFANode(nodes);
     }
@@ -418,4 +459,6 @@ public final class DFANodeImpl implements DFANode {
     }
     return basisList;
   }
+
+  private record ContextCharKey(Character ch, MatchContext context) {}
 }

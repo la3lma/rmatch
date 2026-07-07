@@ -16,6 +16,7 @@ package no.rmz.rmatch.impls;
 import static no.rmz.rmatch.internal.Checks.checkArgument;
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -64,6 +65,9 @@ public final class RegexpImpl implements Regexp {
 
   /** ASCII first-character cache: 0 = unknown, 1 = can start, 2 = cannot start. */
   private final byte[] asciiFirstCharCache = new byte[ASCII_LIMIT];
+
+  /** True when this regexp contains zero-width assertions that need input context. */
+  private boolean usesContextAssertions = false;
 
   /**
    * Make a new instance of Regexp representing a regular expression.
@@ -290,6 +294,29 @@ public final class RegexpImpl implements Regexp {
       return result;
     }
     return canStartWithNonAscii(ch);
+  }
+
+  @Override
+  public boolean canStartWith(final Character ch, final MatchContext context) {
+    if (!usesContextAssertions) {
+      return canStartWith(ch);
+    }
+    if (myNode == null) {
+      return false;
+    }
+    return !myNode.getNextSet(ch, context).isEmpty();
+  }
+
+  @Override
+  public void markUsesContextAssertions() {
+    usesContextAssertions = true;
+    firstCharacterCache.clear();
+    Arrays.fill(asciiFirstCharCache, (byte) 0);
+  }
+
+  @Override
+  public boolean usesContextAssertions() {
+    return usesContextAssertions;
   }
 
   private synchronized boolean canStartWithNonAscii(final Character ch) {

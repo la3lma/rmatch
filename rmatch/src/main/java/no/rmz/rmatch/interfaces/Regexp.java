@@ -201,4 +201,19 @@ public interface Regexp extends Comparable<Regexp> {
    * @return true if the regexp can start with the given character
    */
   boolean canStartWith(final Character ch);
+
+  /**
+   * Context-aware first-character check used for zero-width assertions.
+   *
+   * @param ch the character to check
+   * @param context positional context for assertions adjacent to this transition
+   * @return true if the regexp can start with the character in this context
+   */
+  boolean canStartWith(final Character ch, final MatchContext context);
+
+  /** Mark this regexp as using context-sensitive zero-width assertions. */
+  void markUsesContextAssertions();
+
+  /** Return true when this regexp uses context-sensitive zero-width assertions. */
+  boolean usesContextAssertions();
 }

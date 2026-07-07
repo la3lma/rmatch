@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import no.rmz.rmatch.interfaces.DFANode;
+import no.rmz.rmatch.interfaces.MatchContext;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.NodeStorage;
 import no.rmz.rmatch.interfaces.PrintableEdge;
@@ -135,6 +136,9 @@ public final class NodeStorageImpl implements NodeStorage {
   /** Direct-indexed start-node transitions for ASCII characters. */
   private final DFANode[] asciiNextFromStart = new DFANode[ASCII_LIMIT];
 
+  /** True when at least one compiled regexp uses zero-width assertions. */
+  private volatile boolean contextAssertionsUsed = false;
+
   // XXX This is really startnode specific and shouldn't necessarily
   //     be tightly coupled with the NodeStorage implementation.
   @Override
@@ -150,6 +154,26 @@ public final class NodeStorageImpl implements NodeStorage {
       return computed;
     }
     return nextFromDFAMap.computeIfAbsent(ch, key -> sn.getNextDFA(ch, this));
+  }
+
+  @Override
+  public DFANode getNextFromStartNode(final Character ch, final MatchContext context) {
+    if (context == MatchContext.NONE) {
+      return getNextFromStartNode(ch);
+    }
+    return sn.getNextDFA(ch, this, context);
+  }
+
+  @Override
+  public void markContextAssertionsUsed() {
+    contextAssertionsUsed = true;
+    Arrays.fill(asciiNextFromStart, null);
+    nextFromDFAMap.clear();
+  }
+
+  @Override
+  public boolean hasContextAssertions() {
+    return contextAssertionsUsed;
   }
 
   @Override

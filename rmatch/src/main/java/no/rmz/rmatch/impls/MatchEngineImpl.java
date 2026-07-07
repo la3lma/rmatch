@@ -178,6 +178,17 @@ public final class MatchEngineImpl implements MatchEngine {
       final int currentPos,
       final Set<MatchSet> activeMatchSets,
       final boolean prefilterActive) {
+    matcherProgress(
+        b, currentChar, currentPos, activeMatchSets, prefilterActive, MatchContext.NONE);
+  }
+
+  private void matcherProgress(
+      final Buffer b,
+      final Character currentChar,
+      final int currentPos,
+      final Set<MatchSet> activeMatchSets,
+      final boolean prefilterActive,
+      final MatchContext context) {
 
     // Hot path: called once per input character. Internal invariants (non-null char,
     // non-negative position) are guaranteed by the match() loop, so no precondition
@@ -194,7 +205,11 @@ public final class MatchEngineImpl implements MatchEngine {
       // Reuse collection to avoid repeated allocations
       reusableSetsToRemove.clear();
       for (final MatchSet ms : activeMatchSets) {
-        ms.progress(ns, currentChar, currentPos, runnableMatches);
+        if (context == MatchContext.NONE) {
+          ms.progress(ns, currentChar, currentPos, runnableMatches);
+        } else {
+          ms.progress(ns, currentChar, currentPos, runnableMatches, context);
+        }
         if (!ms.hasMatches()) {
           reusableSetsToRemove.add(ms);
         }
@@ -214,7 +229,10 @@ public final class MatchEngineImpl implements MatchEngine {
     }
 
     if (shouldStartMatch) {
-      final DFANode startOfNewMatches = ns.getNextFromStartNode(currentChar);
+      final DFANode startOfNewMatches =
+          context == MatchContext.NONE
+              ? ns.getNextFromStartNode(currentChar)
+              : ns.getNextFromStartNode(currentChar, context);
       if (startOfNewMatches != null) {
         Set<Regexp> candidateRegexps;
 
@@ -226,13 +244,17 @@ public final class MatchEngineImpl implements MatchEngine {
           candidateRegexps = positionToRegexps.get(currentPos);
         } else {
           // Fallback: Check if any regexps can start with this character BEFORE creating MatchSet
-          candidateRegexps = startOfNewMatches.getRegexpsThatCanStartWith(currentChar);
+          candidateRegexps =
+              context == MatchContext.NONE
+                  ? startOfNewMatches.getRegexpsThatCanStartWith(currentChar)
+                  : startOfNewMatches.getRegexpsThatCanStartWith(currentChar, context);
         }
 
         if (!candidateRegexps.isEmpty()) {
           // Pass pre-computed candidates to avoid redundant filtering in MatchSetImpl
           final MatchSet ms =
-              new MatchSetImpl(currentPos, startOfNewMatches, currentChar, candidateRegexps);
+              new MatchSetImpl(
+                  currentPos, startOfNewMatches, currentChar, candidateRegexps, context);
           if (ms.hasMatches()) {
             activeMatchSets.add(ms);
           }
@@ -272,12 +294,24 @@ public final class MatchEngineImpl implements MatchEngine {
 
     // Only activate prefiltering for this invocation if we can safely extract text.
     final boolean prefilterActive = preparePrefilterForMatch(b);
+    final boolean contextAssertions = ns.hasContextAssertions();
 
-    // Advance all match sets forward one character.
-    while (b.hasNext()) {
-      final Character nextChar = b.getNext();
-      final int currentPos = b.getCurrentPos();
-      matcherProgress(b, nextChar, currentPos, activeMatchSets, prefilterActive);
+    if (contextAssertions) {
+      Character previousChar = null;
+      while (b.hasNext()) {
+        final Character nextChar = b.getNext();
+        final int currentPos = b.getCurrentPos();
+        final MatchContext context = contextForPosition(b, currentPos, previousChar);
+        matcherProgress(b, nextChar, currentPos, activeMatchSets, prefilterActive, context);
+        previousChar = nextChar;
+      }
+    } else {
+      // Advance all match sets forward one character without carrying assertion context.
+      while (b.hasNext()) {
+        final Character nextChar = b.getNext();
+        final int currentPos = b.getCurrentPos();
+        matcherProgress(b, nextChar, currentPos, activeMatchSets, prefilterActive);
+      }
     }
 
     // Handle the stragglers
@@ -304,7 +338,7 @@ public final class MatchEngineImpl implements MatchEngine {
    * @return true when prefilter candidates are prepared and can be used
    */
   private boolean preparePrefilterForMatch(final Buffer b) {
-    if (!prefilterEnabled || prefilter == null) {
+    if (ns.hasContextAssertions() || !prefilterEnabled || prefilter == null) {
       candidatePositions = null;
       positionToRegexps = null;
       return false;
@@ -354,5 +388,21 @@ public final class MatchEngineImpl implements MatchEngine {
     // Set the references to point to our reusable collections
     candidatePositions = reusableCandidatePositions;
     positionToRegexps = reusablePositionToRegexps;
+  }
+
+  private static MatchContext contextForPosition(
+      final Buffer b, final int currentPos, final Character previousChar) {
+    if (b instanceof LookaheadBuffer lookahead) {
+      return MatchContext.forPosition(currentPos, previousChar, lookahead.peek());
+    }
+    try {
+      final Buffer clone = b.clone();
+      final Character nextChar = clone.hasNext() ? clone.getNext() : null;
+      return MatchContext.forPosition(currentPos, previousChar, nextChar);
+    } catch (RuntimeException ex) {
+      // Custom buffers are expected to clone, but EOF-only context is safer than guessing.
+    }
+    return new MatchContext(
+        currentPos == 0 || previousChar != null && previousChar == '\n', !b.hasNext());
   }
 }
