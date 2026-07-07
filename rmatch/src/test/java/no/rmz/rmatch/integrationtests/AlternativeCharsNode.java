@@ -15,12 +15,10 @@ package no.rmz.rmatch.integrationtests;
 
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.compiler.CharNode;
 import no.rmz.rmatch.compiler.TerminalNode;
 import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
 
 /**
@@ -29,15 +27,6 @@ import no.rmz.rmatch.interfaces.Regexp;
  * should work too.
  */
 final class AlternativeCharsNode extends AbstractNDFANode {
-
-  /** One of the characters to allow through. */
-  private final Character first;
-
-  /** The other character to allow through. */
-  private final Character second;
-
-  /** The terminal node for the entire compiled regexp. */
-  private final NDFANode terminal;
 
   /**
    * This is a convenience class that is intended only to be used for testing. It tests fot the
@@ -51,12 +40,12 @@ final class AlternativeCharsNode extends AbstractNDFANode {
    */
   public AlternativeCharsNode(final Character first, final Character second, final Regexp regexp) {
     super(regexp, false);
-    this.first = checkNotNull(first);
-    this.second = checkNotNull(second);
+    final Character checkedFirst = checkNotNull(first);
+    final Character checkedSecond = checkNotNull(second);
 
-    terminal = new TerminalNode(regexp);
-    final NDFANode nf = new CharNode(terminal, first, regexp);
-    final NDFANode ns = new CharNode(terminal, second, regexp);
+    final NDFANode terminal = new TerminalNode(regexp);
+    final NDFANode nf = new CharNode(terminal, checkedFirst, regexp);
+    final NDFANode ns = new CharNode(terminal, checkedSecond, regexp);
 
     addEpsilonEdge(ns);
     addEpsilonEdge(nf);
@@ -72,13 +61,5 @@ final class AlternativeCharsNode extends AbstractNDFANode {
   @Override
   public NDFANode getNextNDFA(final Character ch) {
     return null;
-  }
-
-  @Override
-  public Collection<PrintableEdge> getEdgesToPrint() {
-    final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
-    result.add(new PrintableEdge(String.valueOf(first), terminal));
-    result.add(new PrintableEdge(String.valueOf(second), terminal));
-    return result;
   }
 }

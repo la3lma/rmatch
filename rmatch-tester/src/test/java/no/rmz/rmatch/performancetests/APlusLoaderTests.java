@@ -19,7 +19,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import java.util.logging.Logger;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.compiler.RegexpParserException;
@@ -145,15 +144,6 @@ class APlusLoaderTests {
     @Override
     public NDFANode getNextNDFA(final Character ch) {
       return ch.equals(myChar) ? this : null;
-    }
-
-    @Override
-    public Collection<PrintableEdge> getEdgesToPrint() {
-      synchronized (monitor) {
-        final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
-        result.add(new PrintableEdge(String.valueOf(myChar), this));
-        return result;
-      }
     }
   }
 }

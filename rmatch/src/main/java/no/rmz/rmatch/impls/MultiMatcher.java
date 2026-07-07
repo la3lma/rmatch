@@ -204,21 +204,4 @@ public final class MultiMatcher implements Matcher {
     //noinspection ResultOfMethodCallIgnored
     executorService.awaitTermination(3, TimeUnit.SECONDS);
   }
-
-  /**
-   * Return diagnostic node storage from the first partition.
-   *
-   * <p>This is mainly useful for graph/debug tooling and does not represent the complete
-   * multi-partition automaton.
-   *
-   * @return node storage for the first partition
-   */
-  @Override
-  public NodeStorage getNodeStorage() {
-    // XXX This is wrong, since it only returns a subset of the
-    //     nodes the multimatcher is using, but it's better than
-    //     nothing if the objective is just to get a big graph to
-    //     show someone.
-    return matchers[0].getNodeStorage();
-  }
 }

@@ -16,7 +16,6 @@ package no.rmz.rmatch.impls;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
@@ -66,14 +65,6 @@ class NodeStorageImplTest {
     nsi = new NodeStorageImpl();
     buffer = new RegexStringBuffer("a");
     emptyNdfaNodeSet = new TreeSet<>();
-  }
-
-  /** Test adding to the startnode. */
-  @Test
-  public final void testAddToStartnode() {
-    assertFalse(nsi.isConnectedToStartnode(ndfaNode), "Node shouldn't initially be stored");
-    nsi.addToStartnode(ndfaNode);
-    assertTrue(nsi.isConnectedToStartnode(ndfaNode), "Node should now be stored");
   }
 
   /** XXX Incomplete test of getting a next character from the buffer. */
@@ -153,11 +144,6 @@ class NodeStorageImplTest {
     @Override
     public NDFANode getNextNDFA(final Character ch) {
       return this;
-    }
-
-    @Override
-    public Collection<PrintableEdge> getEdgesToPrint() {
-      return getEpsilonEdgesToPrint();
     }
   }
 

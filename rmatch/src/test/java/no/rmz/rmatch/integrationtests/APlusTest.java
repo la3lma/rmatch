@@ -20,13 +20,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.testutils.GraphDumper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,7 +100,6 @@ public final class APlusTest {
 
     m.match(b);
 
-    GraphDumper.dump("testMockedMatchLength1bTerminated", m.getNodeStorage());
     // Starting out accepting any kind of match
     verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
   }
@@ -115,7 +112,6 @@ public final class APlusTest {
     m.add(aplusString, action);
 
     m.match(b);
-    GraphDumper.dump("testMockedMatchLength1bTerminatedbPrefixed", m.getNodeStorage());
 
     verify(action).performMatch(any(Buffer.class), eq(1), eq(1));
   }
@@ -163,7 +159,6 @@ public final class APlusTest {
     m.add(aplusString, action);
 
     m.match(b);
-    GraphDumper.dump("testMockedTripleMatchLength7", m.getNodeStorage());
 
     verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
     verify(action).performMatch(any(Buffer.class), eq(2), eq(2));
@@ -182,15 +177,6 @@ public final class APlusTest {
     @Override
     public NDFANode getNextNDFA(final Character ch) {
       return ch.equals(myChar) ? this : null;
-    }
-
-    @Override
-    public Collection<PrintableEdge> getEdgesToPrint() {
-      synchronized (monitor) {
-        final Collection<PrintableEdge> result = getEpsilonEdgesToPrint();
-        result.add(new PrintableEdge(String.valueOf(myChar), this));
-        return result;
-      }
     }
   }
 }

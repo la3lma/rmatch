@@ -17,10 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
-import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.interfaces.Regexp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -140,11 +138,6 @@ public class AbstractNDFANodeTest {
     @Override
     public NDFANode getNextNDFA(final Character ch) {
       throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Collection<PrintableEdge> getEdgesToPrint() {
-      return getEpsilonEdgesToPrint();
     }
   }
 }

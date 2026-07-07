@@ -198,16 +198,6 @@ public final class MatcherImpl implements Matcher {
     }
   }
 
-  /**
-   * Return the internal node storage used by this matcher.
-   *
-   * @return diagnostic node storage; normal callers do not need this
-   */
-  @Override
-  public NodeStorage getNodeStorage() {
-    return ns;
-  }
-
   /** Release matcher resources. This single-engine implementation currently owns no worker pool. */
   @Override
   public void shutdown() {}

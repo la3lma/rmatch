@@ -112,16 +112,6 @@ public interface NDFANode extends Node, Comparable<NDFANode> {
   boolean isActiveFor(final Regexp rexp);
 
   /**
-   * Return edges intended for diagnostic graph rendering.
-   *
-   * <p>This method is not part of matching semantics. It exists for historical graph/debug tools
-   * and may omit information that is irrelevant to those tools.
-   *
-   * @return printable diagnostic edges, or {@code null} if unavailable
-   */
-  Collection<PrintableEdge> getEdgesToPrint();
-
-  /**
    * Return an identifier that is unique within the owning matcher.
    *
    * @return matcher-local node identifier

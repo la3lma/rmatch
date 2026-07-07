@@ -23,7 +23,6 @@ import no.rmz.rmatch.compiler.TerminalNode;
 import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.testutils.GraphDumper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -169,9 +168,6 @@ public class SequenceNodeTest {
     m.add(AB_STRING, action);
 
     m.match(b);
-
-    GraphDumper.dump(
-        "testTwoPatternsStartWithTheSameLetterAndBothTriggeringMatches", m.getNodeStorage());
 
     verify(action).performMatch(any(Buffer.class), eq(AB_START), eq(AB_END));
     verify(action).performMatch(any(Buffer.class), eq(AC_START), eq(AC_END));

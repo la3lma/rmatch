@@ -71,16 +71,6 @@ public interface Matcher {
   void match(final Buffer b);
 
   /**
-   * Return the internal node storage used by this matcher.
-   *
-   * <p>This method is mainly useful for diagnostics and graph/debug tooling. It is not needed for
-   * normal matching.
-   *
-   * @return internal node storage for this matcher
-   */
-  NodeStorage getNodeStorage();
-
-  /**
    * Release resources owned by the matcher.
    *
    * <p>Single-threaded implementations may have nothing to do. Partitioned implementations use

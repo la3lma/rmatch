@@ -19,12 +19,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.MatchContext;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.NodeStorage;
-import no.rmz.rmatch.interfaces.PrintableEdge;
 import no.rmz.rmatch.utils.SortedSetComparatorImpl;
 
 /**
@@ -60,38 +58,7 @@ public final class NodeStorageImpl implements NodeStorage {
 
   /** Create a new instance of the node storage. */
   public NodeStorageImpl() {
-    sn = new StartNode(this);
-  }
-
-  @Override
-  public Collection<NDFANode> getNDFANodes() {
-    final Set<NDFANode> result = new HashSet<>();
-    final Set<NDFANode> unexplored = new ConcurrentSkipListSet<>();
-    unexplored.add(sn);
-
-    while (!unexplored.isEmpty()) {
-
-      final NDFANode current = unexplored.iterator().next();
-      unexplored.remove(current);
-      if (!result.contains(current)) {
-        result.add(current);
-        final Set<NDFANode> connectedNodes = new HashSet<>(current.getEpsilons());
-        for (final PrintableEdge edge : current.getEdgesToPrint()) {
-          connectedNodes.add(edge.destination());
-        }
-        connectedNodes.removeAll(result);
-        unexplored.addAll(connectedNodes);
-      }
-    }
-    result.add(sn);
-    return result;
-  }
-
-  @Override
-  public Collection<DFANode> getDFANodes() {
-    final List<DFANode> result = new ArrayList<>(this.ndfamap.values());
-    result.add(sn.asDfaNode());
-    return result;
+    sn = new StartNode();
   }
 
   @Override
@@ -102,19 +69,6 @@ public final class NodeStorageImpl implements NodeStorage {
     // transition, so the cached start transitions must be recomputed.
     Arrays.fill(asciiNextFromStart, null);
     nextFromDFAMap.clear();
-  }
-
-  /**
-   * Return whether an NDFA node is attached directly to the global start node.
-   *
-   * <p>This method is primarily for tests and diagnostics.
-   *
-   * @param n NDFA node to check
-   * @return {@code true} if {@code n} is an epsilon destination of the start node
-   */
-  public boolean isConnectedToStartnode(final NDFANode n) {
-    checkNotNull(n, "Illegal to look for null NDFANode");
-    return sn.getEpsilons().contains(n);
   }
 
   private final ConcurrentHashMap<Character, DFANode> nextFromDFAMap = new ConcurrentHashMap<>();
