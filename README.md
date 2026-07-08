@@ -75,7 +75,7 @@ Add rmatch to an existing Maven project:
 <dependency>
   <groupId>no.rmz</groupId>
   <artifactId>rmatch</artifactId>
-  <version>1.9.2</version>
+  <version>1.9.3</version>
 </dependency>
 ```
 
@@ -87,7 +87,7 @@ For Gradle:
 
 ```kotlin
 dependencies {
-    implementation("no.rmz:rmatch:1.9.2")
+    implementation("no.rmz:rmatch:1.9.3")
 }
 ```
 
@@ -121,7 +121,7 @@ For a complete scratch project, use this full `pom.xml`:
     <dependency>
       <groupId>no.rmz</groupId>
       <artifactId>rmatch</artifactId>
-      <version>1.9.2</version>
+      <version>1.9.3</version>
     </dependency>
   </dependencies>
 </project>
