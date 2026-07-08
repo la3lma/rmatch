@@ -23,7 +23,7 @@ import no.rmz.rmatch.utils.FastCounter;
 import no.rmz.rmatch.utils.FastCounters;
 
 /** Default {@link Match} implementation used by the engine. */
-public final class MatchImpl implements Match {
+final class MatchImpl implements Match {
   /**
    * A counter that is increased every time a new MatchImpl is generated. Used for logging and
    * benchmarking.

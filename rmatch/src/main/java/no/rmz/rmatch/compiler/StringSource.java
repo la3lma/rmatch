@@ -16,7 +16,7 @@ package no.rmz.rmatch.compiler;
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 /** Cursor over a pattern string used by the surface parser. */
-public final class StringSource {
+final class StringSource {
 
   /** Pattern text being read. */
   private final String string;

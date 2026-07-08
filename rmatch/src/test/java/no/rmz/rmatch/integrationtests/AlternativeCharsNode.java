@@ -11,13 +11,11 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.integrationtests;
+package no.rmz.rmatch.compiler;
 
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
-import no.rmz.rmatch.compiler.CharNode;
-import no.rmz.rmatch.compiler.TerminalNode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 

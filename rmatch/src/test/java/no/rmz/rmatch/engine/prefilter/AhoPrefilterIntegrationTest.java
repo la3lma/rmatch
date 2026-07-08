@@ -11,14 +11,12 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.engine.prefilter;
+package no.rmz.rmatch.impls;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import no.rmz.rmatch.impls.MatchEngineImpl;
-import no.rmz.rmatch.impls.NodeStorageImpl;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.NodeStorage;
 import no.rmz.rmatch.utils.RegexStringBuffer;

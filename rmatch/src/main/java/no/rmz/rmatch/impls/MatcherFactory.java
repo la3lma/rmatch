@@ -23,11 +23,11 @@ import no.rmz.rmatch.interfaces.RegexpFactory;
  * Factory for the recommended production matcher.
  *
  * <p>{@link #newMatcher()} returns a matcher sized for the current machine. On systems with more
- * than two available processors this is a partitioned {@link MultiMatcher}, which can invoke
- * actions concurrently. Use {@link MatcherImpl} directly if a single-engine matcher is preferred
- * for a small example, deterministic debugging, or custom lifecycle control.
+ * than two available processors this is a partitioned matcher, which can invoke actions
+ * concurrently. Use {@link #newSingleMatcher()} when deterministic single-engine execution is
+ * preferred.
  */
-public class MatcherFactory {
+public final class MatcherFactory {
 
   /** A management bean that we use to probe the execution environment. */
   private static final OperatingSystemMXBean OS_MBEAN =
@@ -56,6 +56,19 @@ public class MatcherFactory {
 
     return new MultiMatcher(
         noOfPartitions, new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
+  }
+
+  /**
+   * Create a single-engine matcher.
+   *
+   * <p>This is useful for small examples, deterministic debugging, and callers that do not want
+   * partitioned matching. Production throughput-oriented callers should normally prefer {@link
+   * #newMatcher()}.
+   *
+   * @return new single-engine matcher instance
+   */
+  public static Matcher newSingleMatcher() {
+    return new MatcherImpl();
   }
 
   /**

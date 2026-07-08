@@ -22,8 +22,8 @@ import static org.mockito.Mockito.when;
 
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
+import no.rmz.rmatch.impls.TestMatchers;
 import no.rmz.rmatch.interfaces.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,7 +78,7 @@ public final class APlusTest {
           }
         };
 
-    m = new MatcherImpl(compiler, regexpFactory);
+    m = TestMatchers.newSingleMatcher(compiler, regexpFactory);
   }
 
   /**

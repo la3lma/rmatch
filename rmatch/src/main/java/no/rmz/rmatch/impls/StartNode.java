@@ -31,7 +31,7 @@ import no.rmz.rmatch.interfaces.*;
  * therefore means asking this node which expression NDFAs can be entered for the current input
  * character.
  */
-public final class StartNode extends AbstractNDFANode {
+final class StartNode extends AbstractNDFANode {
   /**
    * The regexp that is nominally associated with the start node. It is an empty expression that
    * does not match anything.
@@ -46,7 +46,7 @@ public final class StartNode extends AbstractNDFANode {
   private final Object topDfaMonitor = new Object();
 
   /** Create a start node. */
-  public StartNode() {
+  StartNode() {
     super(START_NO_REGEXP, false);
   }
 

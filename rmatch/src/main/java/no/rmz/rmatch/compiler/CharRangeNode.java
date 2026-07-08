@@ -20,7 +20,7 @@ import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 
 /** NDFA node that consumes one character within an inclusive range. */
-public final class CharRangeNode extends AbstractNDFANode {
+final class CharRangeNode extends AbstractNDFANode {
 
   /** The first character in the range. */
   private final Character start;

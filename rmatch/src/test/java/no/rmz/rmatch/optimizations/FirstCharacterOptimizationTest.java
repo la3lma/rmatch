@@ -11,16 +11,13 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.optimizations;
+package no.rmz.rmatch.impls;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashSet;
 import java.util.Set;
-import no.rmz.rmatch.compiler.ARegexpCompiler;
-import no.rmz.rmatch.impls.DFANodeImpl;
-import no.rmz.rmatch.impls.MatchSetImpl;
-import no.rmz.rmatch.impls.RegexpImpl;
+import no.rmz.rmatch.compiler.NDFACompilerImpl;
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
@@ -162,22 +159,9 @@ public class FirstCharacterOptimizationTest {
     assertTrue(matchSetWithoutOptim.hasMatches(), "Match set must stay alive for its candidates");
   }
 
-  /** Helper method to compile a regexp using ARegexpCompiler directly. */
+  /** Helper method to compile a regexp through the production compiler. */
   private void compileRegexp(final Regexp regexp) throws Exception {
-    final ARegexpCompiler compiler = new ARegexpCompiler(regexp);
-
-    // Parse the regexp string character by character
-    final String regexpString = regexp.getRexpString();
-    for (int i = 0; i < regexpString.length(); i++) {
-      final char ch = regexpString.charAt(i);
-      if (ch == '.') {
-        compiler.addAnyChar();
-      } else {
-        compiler.addString(String.valueOf(ch));
-      }
-    }
-
-    final NDFANode compiledNode = compiler.getResult();
+    final NDFANode compiledNode = new NDFACompilerImpl().compile(regexp, null);
     regexp.setMyNDFANode(compiledNode);
   }
 }

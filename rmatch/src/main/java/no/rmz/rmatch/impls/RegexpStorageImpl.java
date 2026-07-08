@@ -22,7 +22,7 @@ import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 
 /** In-memory {@link RegexpStorage} implementation used by production matchers. */
-public final class RegexpStorageImpl implements RegexpStorage {
+final class RegexpStorageImpl implements RegexpStorage {
 
   /** Map from pattern text to compiled expression state. */
   private final Map<String, Regexp> regexps = new HashMap<>();

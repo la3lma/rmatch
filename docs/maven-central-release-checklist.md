@@ -94,6 +94,14 @@ the rest of the release work here as it becomes explicit.
 
 ## POM and Artifact Hygiene
 
+- [ ] Before 2.0, complete a public API closure pass: make implementation-only
+  classes package-private or private where possible, prefer final classes for
+  non-extension APIs, and verify that README/Javadocs teach factory/interface
+  usage rather than direct implementation construction.
+- [ ] Before publishing a JPMS-bearing release, resolve or explicitly accept the
+  Aho-Corasick automatic-module warning emitted by `javac`; do not treat the
+  module descriptor as fully clean until this dependency-boundary decision is
+  recorded.
 - [x] Set release POM versions to `1.9.1` on the release-prep branch.
 - [x] Ensure parent and library POMs have name, description, URL, licenses,
   developers, organization, and SCM metadata.

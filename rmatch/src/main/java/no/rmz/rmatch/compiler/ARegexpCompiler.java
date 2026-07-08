@@ -29,7 +29,7 @@ import no.rmz.rmatch.interfaces.ZeroWidthAssertion;
  * keeps the partially built fragments on a stack and finally exposes the NDFA entry node through
  * {@link #getResult()}.
  */
-public final class ARegexpCompiler implements AbstractRegexBuilder {
+final class ARegexpCompiler implements AbstractRegexBuilder {
 
   /**
    * A stack of alternatives builders: the bottom element builds the whole expression, and each open

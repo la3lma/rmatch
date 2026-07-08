@@ -28,14 +28,14 @@ import no.rmz.rmatch.interfaces.Match;
  * domination heap keeps those candidates ordered so dominated candidates can be suppressed before
  * actions are invoked.
  */
-public final class DominationHeap {
+final class DominationHeap {
 
   private static final Logger LOG = Logger.getLogger(DominationHeap.class.getName());
 
   private final PriorityBlockingQueue<Match> heap;
 
   /** Create a domination heap using the default match-domination ordering. */
-  public DominationHeap() {
+  DominationHeap() {
     this(Match.COMPARE_BY_DOMINATION);
   }
 
@@ -44,7 +44,7 @@ public final class DominationHeap {
    *
    * @param comparator ordering used to decide candidate priority
    */
-  public DominationHeap(final Comparator<Match> comparator) {
+  DominationHeap(final Comparator<Match> comparator) {
     heap = new PriorityBlockingQueue<>(11, comparator);
   }
 

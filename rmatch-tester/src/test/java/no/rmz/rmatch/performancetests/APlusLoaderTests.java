@@ -17,13 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.logging.Logger;
-import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.impls.MatcherImpl;
-import no.rmz.rmatch.impls.RegexpImpl;
+import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
@@ -53,38 +50,17 @@ class APlusLoaderTests {
   /** Mocke action, used to count matches. */
   @Mock Action action;
 
-  /** Mocked compiler used to inject precooked NDFA at appropriate spot. */
-  @Mock NDFACompiler compiler;
-
   /** The string "a+". */
   private String aPlusString;
 
   /** Test item, a matcher. */
   private Matcher m;
 
-  /** Test item, a regexp for "a+". */
-  private Regexp regexp;
-
   /** Set up test items and context. */
   @BeforeEach
-  public void setUp() throws RegexpParserException {
-    final String finalAPlus = "a+";
-    aPlusString = finalAPlus;
-    regexp = new RegexpImpl(aPlusString);
-    final NDFANode aplus = new TestCharPlusNode('a', regexp, true);
-
-    when(compiler.compile(any(Regexp.class), any(RegexpStorage.class))).thenReturn(aplus);
-
-    final RegexpFactory regexpFactory =
-        regexpString -> {
-          if (regexpString.equals(finalAPlus)) {
-            return regexp;
-          } else {
-            return RegexpFactory.DEFAULT_REGEXP_FACTORY.newRegexp(regexpString);
-          }
-        };
-
-    m = new MatcherImpl(compiler, regexpFactory);
+  public void setUp() {
+    aPlusString = "a+";
+    m = MatcherFactory.newSingleMatcher();
   }
 
   /** Look for the pattern in a very long sequence where there will be many matches. */
@@ -130,20 +106,5 @@ class APlusLoaderTests {
     final int finalCount = counterAction.getCounter();
     LOG.info("Total no of 'a*' matches in Wuthering Heights is " + finalCount);
     assertTrue(finalCount > REASONABLE_MINIMUM_GUESS_OF_ASTARS_IN_WUTHERING_HEIGTHS);
-  }
-
-  /** Local test helper: node that matches one-or-more occurrences of one character. */
-  private static final class TestCharPlusNode extends AbstractNDFANode {
-    private final Character myChar;
-
-    private TestCharPlusNode(final Character ch, final Regexp r, final boolean isTerminal) {
-      super(r, isTerminal);
-      this.myChar = ch;
-    }
-
-    @Override
-    public NDFANode getNextNDFA(final Character ch) {
-      return ch.equals(myChar) ? this : null;
-    }
   }
 }

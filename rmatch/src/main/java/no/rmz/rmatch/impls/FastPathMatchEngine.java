@@ -37,7 +37,7 @@ import no.rmz.rmatch.interfaces.*;
  *
  * <p>Enable via system property: {@code -Drmatch.engine=fastpath}
  */
-public final class FastPathMatchEngine implements MatchEngine {
+final class FastPathMatchEngine implements MatchEngine {
   private static final int[] EMPTY_INT_ARRAY = new int[0];
 
   /** Number of characters covered by the two-character start-filter cache. */

@@ -13,8 +13,6 @@
  */
 package no.rmz.rmatch.interfaces;
 
-import no.rmz.rmatch.impls.DominationHeap;
-
 /**
  * Engine-internal compiled regular-expression state.
  *
@@ -61,17 +59,6 @@ public interface Regexp extends Comparable<Regexp> {
    * @param runnableMatches recipient for candidates whose actions may be run
    */
   void commitUndominated(final RunnableMatchesHolder runnableMatches);
-
-  /**
-   * Return the domination heap for a match set, creating it on demand.
-   *
-   * <p>The domination heap records overlapping candidates so the engine can prefer the candidates
-   * that should produce callbacks.
-   *
-   * @param ms the MatchSet
-   * @return domination heap for {@code ms}
-   */
-  DominationHeap getDominationHeapCreateIfNotPresent(final MatchSet ms);
 
   /**
    * Remove this expression's references to a match set and its candidates.

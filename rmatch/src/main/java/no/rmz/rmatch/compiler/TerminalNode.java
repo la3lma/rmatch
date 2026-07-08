@@ -18,7 +18,7 @@ import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 
 /** A node that is terminal for the regexp it represents. */
-public final class TerminalNode extends AbstractNDFANode {
+final class TerminalNode extends AbstractNDFANode {
 
   /**
    * Create a new instance of a terminal node for a regexp.

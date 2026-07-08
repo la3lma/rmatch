@@ -23,19 +23,16 @@ import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 
 /**
- * Single-engine {@link Matcher} implementation used by the README examples and by partitioned
- * matchers internally.
+ * Single-engine {@link Matcher} implementation used by partitioned matchers internally.
  *
- * <p>{@code MatcherImpl} is a good direct choice when the caller wants a simple matcher instance
- * without worker-thread partitioning. Register expressions with {@link #add(String, Action)}, scan
- * input with {@link #match(Buffer)}, and call {@link #shutdown()} when finished. The default
+ * <p>Application code should create matchers through {@link MatcherFactory}. The default
  * constructor uses the fast-path engine unless the {@code rmatch.engine} system property selects
  * another engine variant.
  *
  * <p>Callbacks receive inclusive start/end offsets. Use {@code buffer.getString(start, end + 1)} to
  * recover the matched text.
  */
-public final class MatcherImpl implements Matcher {
+final class MatcherImpl implements Matcher {
 
   /** Storage for registered expressions. */
   private final RegexpStorage rs;
@@ -61,7 +58,7 @@ public final class MatcherImpl implements Matcher {
   private volatile boolean prefilterDirty = false;
 
   /** Create a new matcher using the default compiler, regexp factory, and engine selection. */
-  public MatcherImpl() {
+  MatcherImpl() {
     this(new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
   }
 
@@ -69,12 +66,12 @@ public final class MatcherImpl implements Matcher {
    * Create a matcher with explicitly supplied compiler and regexp factory.
    *
    * <p>This constructor is primarily useful for tests and experiments. Normal users should prefer
-   * {@link #MatcherImpl()} or {@link MatcherFactory#newMatcher()}.
+   * {@link MatcherFactory#newMatcher()} or {@link MatcherFactory#newSingleMatcher()}.
    *
    * @param compiler compiler used to turn registered expressions into automata
    * @param regexpFactory factory used to create internal regexp objects
    */
-  public MatcherImpl(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
+  MatcherImpl(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
     NDFACompiler compiler1 = checkNotNull(compiler);
     checkNotNull(regexpFactory);
     ns = new NodeStorageImpl();

@@ -25,7 +25,7 @@ import no.rmz.rmatch.interfaces.Regexp;
  * startNode} is where control enters the fragment; {@code endNode} is where later fragments can be
  * attached.
  */
-public final class CompiledFragment {
+final class CompiledFragment {
 
   /** The entry-point for this fragment's NDFA. */
   private final NDFANode arrivalNode;

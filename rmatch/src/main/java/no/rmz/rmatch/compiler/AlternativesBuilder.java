@@ -21,7 +21,7 @@ import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 
 /** Compute a CompiledFragment that represents a set of alternatives, e.g. "a|b|c". */
-public final class AlternativesBuilder {
+final class AlternativesBuilder {
 
   /** The Regexp instance for which this builder compiles a fragment. */
   private final Regexp regexp;

@@ -7,6 +7,16 @@
 - Removed the deprecated `Buffer.getCurrentRestString()` method from the public
   buffer contract. Internal users now either request explicit substrings or
   collect remaining text by advancing a cloned cursor.
+- Added an explicit JPMS module descriptor for `no.rmz.rmatch` and began
+  tightening the module boundary before 2.0.
+- Stopped presenting `MatcherImpl` and `MultiMatcher` as public construction
+  APIs. `MatcherFactory` is now the stable entry point, with
+  `newSingleMatcher()` available for deterministic single-engine use.
+- Reduced accidental public surface in compiler and implementation packages:
+  compiler helper nodes/builders and most concrete engine implementation
+  classes are now package-private.
+- Removed the internal domination-heap accessor from the `Regexp` interface so
+  that match-domination bookkeeping no longer leaks through the public contract.
 
 ## 1.9.2 - pre-2.0 Maven Central release candidate
 

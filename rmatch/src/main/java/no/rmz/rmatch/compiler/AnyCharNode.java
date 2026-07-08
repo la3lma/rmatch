@@ -20,7 +20,7 @@ import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 
 /** NDFA node that consumes one arbitrary character. */
-public final class AnyCharNode extends AbstractNDFANode {
+final class AnyCharNode extends AbstractNDFANode {
 
   /** The node to go to after matching the input character. */
   private final NDFANode nextNode;

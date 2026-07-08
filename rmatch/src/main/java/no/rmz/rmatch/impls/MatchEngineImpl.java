@@ -25,7 +25,7 @@ import no.rmz.rmatch.interfaces.*;
 /**
  * An implementation of a MatchEngine that can be used to match regular expressions against input.
  */
-public final class MatchEngineImpl implements MatchEngine {
+final class MatchEngineImpl implements MatchEngine {
   /**
    * Perform matches by triggering the relevant actions.
    *
