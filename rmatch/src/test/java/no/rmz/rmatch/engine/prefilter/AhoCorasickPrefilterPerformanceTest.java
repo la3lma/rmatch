@@ -24,64 +24,62 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
-import org.ahocorasick.trie.Emit;
-import org.ahocorasick.trie.Trie;
 import org.junit.jupiter.api.Test;
 
 final class AhoCorasickPrefilterPerformanceTest {
 
   @Test
   void optimizedScanAvoidsSubstringCostOnLargeInputs() {
-    final int patternCount = 10_000;
+    final int patternCount = 1_000;
     final List<LiteralHint> hints =
         IntStream.range(0, patternCount)
             .mapToObj(i -> new LiteralHint(i, literalFor(i), 0, false, false, 0))
             .toList();
 
-    final String corpus = buildCorpus(patternCount, 60);
+    final String corpus = buildCorpus(patternCount, 20);
 
-    final AhoCorasickPrefilter optimized = new AhoCorasickPrefilter(hints);
-    final LegacyPrefilter legacy = new LegacyPrefilter(hints);
+    final AhoCorasickPrefilter internal = new AhoCorasickPrefilter(hints);
+    final NaivePrefilter naive = new NaivePrefilter(hints);
 
     // Warm-up to stabilize JVM effects.
     for (int i = 0; i < 3; i++) {
-      optimized.scan(corpus);
-      legacy.scan(corpus);
+      internal.scan(corpus);
+      naive.scan(corpus);
     }
 
     // Alternate call order to reduce warm-cache and JIT bias.
-    final List<Long> optimizedRuns = new ArrayList<>();
-    final List<Long> legacyRuns = new ArrayList<>();
+    final List<Long> internalRuns = new ArrayList<>();
+    final List<Long> naiveRuns = new ArrayList<>();
     final int rounds = 15;
     for (int i = 0; i < rounds; i++) {
       if ((i & 1) == 0) {
-        legacyRuns.add(measureOnce(legacy::scan, corpus));
-        optimizedRuns.add(measureOnce(optimized::scan, corpus));
+        naiveRuns.add(measureOnce(naive::scan, corpus));
+        internalRuns.add(measureOnce(internal::scan, corpus));
       } else {
-        optimizedRuns.add(measureOnce(optimized::scan, corpus));
-        legacyRuns.add(measureOnce(legacy::scan, corpus));
+        internalRuns.add(measureOnce(internal::scan, corpus));
+        naiveRuns.add(measureOnce(naive::scan, corpus));
       }
     }
 
-    final long optimizedNanos = median(optimizedRuns);
-    final long legacyNanos = median(legacyRuns);
+    final long internalNanos = median(internalRuns);
+    final long naiveNanos = median(naiveRuns);
 
     // Same candidates, faster scan.
-    final List<AhoCorasickPrefilter.Candidate> optimizedCandidates = optimized.scan(corpus);
-    final List<AhoCorasickPrefilter.Candidate> legacyCandidates = legacy.scan(corpus);
-    assertEquals(legacyCandidates.size(), optimizedCandidates.size());
+    final List<AhoCorasickPrefilter.Candidate> internalCandidates = sorted(internal.scan(corpus));
+    final List<AhoCorasickPrefilter.Candidate> naiveCandidates = sorted(naive.scan(corpus));
+    assertEquals(naiveCandidates, internalCandidates);
 
-    final double improvement = ((double) legacyNanos - optimizedNanos) / legacyNanos;
+    final double improvement = ((double) naiveNanos - internalNanos) / naiveNanos;
     System.out.printf(
         Locale.ROOT,
-        "Legacy=%.2f ms, Optimized=%.2f ms, Improvement=%.2f%%%n",
-        legacyNanos / 1_000_000.0,
-        optimizedNanos / 1_000_000.0,
+        "Naive=%.2f ms, Internal Aho-Corasick=%.2f ms, Improvement=%.2f%%%n",
+        naiveNanos / 1_000_000.0,
+        internalNanos / 1_000_000.0,
         improvement * 100.0);
     assertTrue(
-        optimizedNanos <= (long) (legacyNanos * 1.10),
+        internalNanos <= (long) (naiveNanos * 0.50),
         () ->
-            "Optimized scan should not regress materially (<=10% slower); improvement="
+            "Internal Aho-Corasick should comfortably beat naive scanning; improvement="
                 + String.format("%.2f%%", improvement * 100));
   }
 
@@ -96,6 +94,26 @@ final class AhoCorasickPrefilterPerformanceTest {
     final List<Long> sorted = new ArrayList<>(values);
     sorted.sort(Long::compareTo);
     return sorted.get(sorted.size() / 2);
+  }
+
+  private static List<AhoCorasickPrefilter.Candidate> sorted(
+      final List<AhoCorasickPrefilter.Candidate> candidates) {
+    final List<AhoCorasickPrefilter.Candidate> sorted = new ArrayList<>(candidates);
+    sorted.sort(AhoCorasickPrefilterPerformanceTest::compareCandidate);
+    return sorted;
+  }
+
+  private static int compareCandidate(
+      final AhoCorasickPrefilter.Candidate a, final AhoCorasickPrefilter.Candidate b) {
+    final int byEnd = Integer.compare(a.endIndexExclusive(), b.endIndexExclusive());
+    if (byEnd != 0) {
+      return byEnd;
+    }
+    final int byLength = Integer.compare(b.literalLength(), a.literalLength());
+    if (byLength != 0) {
+      return byLength;
+    }
+    return Integer.compare(a.patternId(), b.patternId());
   }
 
   private static String buildCorpus(final int patternCount, final int repeats) {
@@ -116,37 +134,34 @@ final class AhoCorasickPrefilterPerformanceTest {
     return "literal-" + suffix + "-payload-" + suffix + "-segment";
   }
 
-  private static final class LegacyPrefilter {
-    private final Trie trie;
+  private static final class NaivePrefilter {
     private final Map<String, List<LiteralHint>> buckets = new HashMap<>();
 
-    LegacyPrefilter(final Collection<LiteralHint> hints) {
-      final Trie.TrieBuilder builder = Trie.builder();
+    NaivePrefilter(final Collection<LiteralHint> hints) {
       for (final LiteralHint hint : hints) {
         for (final String key : keyedLiterals(hint)) {
           buckets.computeIfAbsent(key, k -> new ArrayList<>()).add(hint);
-          builder.addKeyword(key);
         }
       }
-      this.trie = builder.build();
     }
 
     List<AhoCorasickPrefilter.Candidate> scan(final CharSequence text) {
       final String s = text.toString();
       final List<AhoCorasickPrefilter.Candidate> out = new ArrayList<>();
-      for (final Emit emit : trie.parseText(s)) {
-        final String lit = s.substring(emit.getStart(), emit.getEnd() + 1);
-        final List<LiteralHint> hints = buckets.get(lit);
-        if (hints == null) {
-          continue;
-        }
-        final int endIdxExclusive = emit.getEnd() + 1;
-        for (final LiteralHint hint : hints) {
-          out.add(
-              new AhoCorasickPrefilter.Candidate(
-                  hint.patternId(), endIdxExclusive, lit.length(), hint.literalOffsetInMatch()));
+      for (final Map.Entry<String, List<LiteralHint>> entry : buckets.entrySet()) {
+        final String lit = entry.getKey();
+        int start = s.indexOf(lit);
+        while (start >= 0) {
+          final int endIdxExclusive = start + lit.length();
+          for (final LiteralHint hint : entry.getValue()) {
+            out.add(
+                new AhoCorasickPrefilter.Candidate(
+                    hint.patternId(), endIdxExclusive, lit.length(), hint.literalOffsetInMatch()));
+          }
+          start = s.indexOf(lit, start + 1);
         }
       }
+      out.sort(AhoCorasickPrefilterPerformanceTest::compareCandidate);
       return out;
     }
   }

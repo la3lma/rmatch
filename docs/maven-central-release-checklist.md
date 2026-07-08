@@ -189,12 +189,19 @@ the rest of the release work here as it becomes explicit.
   classes package-private or private where possible, prefer final classes for
   non-extension APIs, and verify that README/Javadocs teach factory/interface
   usage rather than direct implementation construction.
-- [ ] Before publishing a JPMS-bearing `2.0.0` release, resolve or explicitly
+- [x] Before publishing a JPMS-bearing `2.0.0` release, resolve or explicitly
   accept the Aho-Corasick automatic-module warning emitted by `javac`; do not
   treat the module descriptor as fully clean until this dependency-boundary
   decision is recorded. Track this under
   [issue #282](https://github.com/la3lma/rmatch/issues/282) and
   [the JPMS/Aho-Corasick boundary note](design/jpms-aho-corasick-boundary.md).
+  Result on 2026-07-08: branch
+  `u/la3lma/codex/issue-282-internal-prefilter` replaces the implementation-only
+  `org.ahocorasick:ahocorasick` dependency with an internal Aho-Corasick
+  prefilter, removes `requires ahocorasick`, and makes the Central-profile
+  build warning-free. The agogo Docker gate against the Aho-backed baseline
+  passed on a 32-logical-CPU AMD Ryzen 9 9950X3D host with identical match
+  counts. Median `scanning_ns` ratios were 1.015 on 1MB and 1.004 on 10MB.
 - [x] Set release POM versions to `1.9.1` on the release-prep branch.
 - [x] Ensure parent and library POMs have name, description, URL, licenses,
   developers, organization, and SCM metadata.

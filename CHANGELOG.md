@@ -2,7 +2,18 @@
 
 ## 1.9.4-SNAPSHOT - in development
 
-- No changes yet.
+- Replaced the external `org.ahocorasick:ahocorasick` literal-prefilter
+  dependency with a small internal Aho-Corasick implementation. The original
+  library served rmatch well and deserves credit; the replacement is about
+  keeping the pre-2.0 JPMS and Maven Central boundary clean as the project
+  moves forward.
+- Removed the `requires ahocorasick` JPMS dependency and the compile-scope
+  Maven dependency. Local Central-profile verification no longer emits the
+  filename-derived automatic-module warning.
+- Verified the replacement on agogo against the Aho-backed baseline using the
+  stable 10K-pattern Docker gate. Median scan-time ratios were 1.015 on 1MB and
+  1.004 on 10MB with identical match counts, so the replacement reaches parity
+  under the current release gate.
 
 ## 1.9.3 - pre-2.0 Maven Central release candidate
 
