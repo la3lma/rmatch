@@ -83,6 +83,38 @@ public class AhoCorasickPrefilterTest {
   }
 
   @Test
+  public void testScanSuffixMatchesThroughFailureLinks() {
+    final List<LiteralHint> hints =
+        Arrays.asList(
+            new LiteralHint(1, "she", 0, false, false, 0),
+            new LiteralHint(2, "he", 0, false, false, 0),
+            new LiteralHint(3, "hers", 0, false, false, 0));
+    final AhoCorasickPrefilter prefilter = new AhoCorasickPrefilter(hints);
+    final List<AhoCorasickPrefilter.Candidate> candidates = prefilter.scan("ushers");
+
+    assertEquals(3, candidates.size());
+    assertTrue(candidates.stream().anyMatch(c -> c.patternId() == 1 && c.endIndexExclusive() == 4));
+    assertTrue(candidates.stream().anyMatch(c -> c.patternId() == 2 && c.endIndexExclusive() == 4));
+    assertTrue(candidates.stream().anyMatch(c -> c.patternId() == 3 && c.endIndexExclusive() == 6));
+  }
+
+  @Test
+  public void testScanNestedPrefixMatches() {
+    final List<LiteralHint> hints =
+        Arrays.asList(
+            new LiteralHint(1, "a", 0, false, false, 0),
+            new LiteralHint(2, "aa", 0, false, false, 0),
+            new LiteralHint(3, "aaa", 0, false, false, 0));
+    final AhoCorasickPrefilter prefilter = new AhoCorasickPrefilter(hints);
+    final List<AhoCorasickPrefilter.Candidate> candidates = prefilter.scan("aaaa");
+
+    assertEquals(9, candidates.size());
+    assertEquals(4, candidates.stream().filter(c -> c.patternId() == 1).count());
+    assertEquals(3, candidates.stream().filter(c -> c.patternId() == 2).count());
+    assertEquals(2, candidates.stream().filter(c -> c.patternId() == 3).count());
+  }
+
+  @Test
   public void testScanCaseInsensitive() {
     final List<LiteralHint> hints = Arrays.asList(new LiteralHint(1, "FOO", 0, false, true, 0));
     final AhoCorasickPrefilter prefilter = new AhoCorasickPrefilter(hints);
