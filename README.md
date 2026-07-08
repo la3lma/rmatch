@@ -67,12 +67,9 @@ until measured against the same inputs with the same correctness expectations.
 The branch-vs-`main` protocol lives in
 [docs/performance-regression-testing.md](docs/performance-regression-testing.md).
 
-## Use from Maven
+## Use from Maven Central
 
-The examples below use the public API on the current development branch,
-targeted for the next `1.9.4` release. Until that release is visible on Maven
-Central, install this repository locally and depend on `1.9.4-SNAPSHOT`, or use
-the currently published `1.9.3` artifact together with the `1.9.3` Javadocs.
+The examples below use the public API published with `1.9.4`.
 
 Add rmatch to an existing Maven project:
 
@@ -80,7 +77,7 @@ Add rmatch to an existing Maven project:
 <dependency>
   <groupId>no.rmz</groupId>
   <artifactId>rmatch</artifactId>
-  <version>1.9.4-SNAPSHOT</version>
+  <version>1.9.4</version>
 </dependency>
 ```
 
@@ -92,7 +89,7 @@ For Gradle:
 
 ```kotlin
 dependencies {
-    implementation("no.rmz:rmatch:1.9.4-SNAPSHOT")
+    implementation("no.rmz:rmatch:1.9.4")
 }
 ```
 
@@ -126,7 +123,7 @@ For a complete scratch project, use this full `pom.xml`:
     <dependency>
       <groupId>no.rmz</groupId>
       <artifactId>rmatch</artifactId>
-      <version>1.9.4-SNAPSHOT</version>
+      <version>1.9.4</version>
     </dependency>
   </dependencies>
 </project>

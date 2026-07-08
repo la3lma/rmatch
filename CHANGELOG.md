@@ -1,6 +1,9 @@
 # Changelog
 
-## 1.9.4-SNAPSHOT - in development
+## 1.9.4 - pre-2.0 Maven Central release candidate
+
+`1.9.4` removes the last external compile-scope dependency and tightens the
+documented public API around the root `no.rmz.rmatch` facade.
 
 - Replaced the external `org.ahocorasick:ahocorasick` literal-prefilter
   dependency with a small internal Aho-Corasick implementation. The original
@@ -14,6 +17,12 @@
   stable 10K-pattern Docker gate. Median scan-time ratios were 1.015 on 1MB and
   1.004 on 10MB with identical match counts, so the replacement reaches parity
   under the current release gate.
+- Added `RMatch` as the recommended public facade and moved `Action`, `Buffer`,
+  `Matcher`, and `RegexpParserException` into the root package.
+- Changed the JPMS descriptor to export only `no.rmz.rmatch`.
+- Restricted the published Javadocs to the supported facade package so
+  implementation types such as compiler internals, node-management interfaces,
+  and utility classes are no longer presented as public documentation.
 
 ## 1.9.3 - pre-2.0 Maven Central release candidate
 
