@@ -137,12 +137,33 @@ the rest of the release work here as it becomes explicit.
   2026-07-08: `/tmp/rmatch-193-consumer-smoke.5LjXgY`, command
   `mvn -q clean verify exec:java -Dexec.mainClass=Example`, printed
   `log-level match: WARN` and `user token match: user:alice`.
-- [ ] Upload the `1.9.3` release commit to Central Portal.
-- [ ] Publish the validated `1.9.3` Central deployment.
-- [ ] Confirm `1.9.3` artifact availability from Maven Central.
-- [ ] Run a clean-repository consumer smoke test against Maven Central `1.9.3`.
-- [ ] Create and push the `rmatch-1.9.3` tag.
-- [ ] Bump repository back to the next development snapshot.
+- [x] Upload the `1.9.3` release commit to Central Portal. Result on
+  2026-07-08: release commit `e65a540a` deployed as Central deployment
+  `24d52176-5474-474f-bbce-3b91f0aa961b`; validation succeeded.
+- [x] Publish the validated `1.9.3` Central deployment. Result on 2026-07-08:
+  the deployment moved from `VALIDATED` to `PUBLISHING` via the Central
+  Publisher API and then reached `PUBLISHED`.
+- [x] Confirm `1.9.3` artifact availability from Maven Central. Result on
+  2026-07-08: direct checks for
+  `https://repo.maven.apache.org/maven2/no/rmz/rmatch/1.9.3/rmatch-1.9.3.pom`,
+  the corresponding main JAR, Javadoc JAR, and parent POM all returned
+  HTTP 200.
+- [x] Run a clean-repository consumer smoke test against Maven Central
+  `1.9.3`. Result on 2026-07-08:
+  `/tmp/rmatch-193-central-consumer-smoke.JXmoKd` with empty Maven repository
+  `/tmp/rmatch-193-central-m2.dCge7P`, command
+  `mvn -Dmaven.repo.local=/tmp/rmatch-193-central-m2.dCge7P -q clean verify
+  exec:java -Dexec.mainClass=Example`, printed `log-level match: WARN` and
+  `user token match: user:alice`.
+- [x] Create and push the `rmatch-1.9.3` tag. Result on 2026-07-08:
+  annotated tag `rmatch-1.9.3` points at uploaded release commit `e65a540a`
+  and was pushed to `origin`.
+- [x] Bump repository back to the next development snapshot. Result on
+  2026-07-08: POMs moved from final `1.9.3` release versions to
+  `1.9.4-SNAPSHOT`; README examples remain on the published `1.9.3` version.
+  Post-bump sanity command
+  `./mvnw -q -B -pl rmatch -am -DskipTests -Dspotbugs.skip=true verify`
+  succeeded.
 
 ## Identity and Access
 
