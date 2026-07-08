@@ -1,6 +1,15 @@
 # Changelog
 
-## 1.9.2-SNAPSHOT - in development
+## 1.9.3-SNAPSHOT - in development
+
+## 1.9.2 - pre-2.0 Maven Central release candidate
+
+`1.9.2` adds the first context-sensitive zero-width assertions to the
+published `1.9.x` line. It keeps the same pre-2.0 positioning as `1.9.1`, but
+now supports line anchors and ASCII word boundaries.
+
+Published to Maven Central on 2026-07-08 as `no.rmz:rmatch:1.9.2`, with the
+Git tag `rmatch-1.9.2` pointing at release commit `48151212`.
 
 ### Highlights
 
@@ -24,10 +33,11 @@
   `\b`/`\B`: same generated data, correctness pass, identical match counts,
   scanning ratios 0.911 on 1MB and 1.018 on 10MB.
 
-### Still required before release
+### Deliberate limitations and future work
 
-- Decide and document pure zero-width match semantics, for example `^$`.
-- Continue the broader #267 work for input anchors and flag-mode behavior.
+- Pure zero-width match reporting, for example `^$`, is still outside the
+  public support contract because callbacks currently report consumed spans.
+- The broader #267 work continues for input anchors and flag-mode behavior.
 
 ## 1.9.1 - pre-2.0 Maven Central release candidate
 
