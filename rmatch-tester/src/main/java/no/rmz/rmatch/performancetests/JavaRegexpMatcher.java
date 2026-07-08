@@ -101,12 +101,20 @@ public class JavaRegexpMatcher implements Matcher {
 
   @Override
   public void match(final Buffer b) {
-    makeMatchers(b, b.getCurrentRestString());
+    makeMatchers(b, collectRemainingText(b.clone()));
     try {
       es.invokeAll(matchers);
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
     }
+  }
+
+  private static String collectRemainingText(final Buffer cursor) {
+    final StringBuilder text = new StringBuilder();
+    while (cursor.hasNext()) {
+      text.append(cursor.getNext());
+    }
+    return text.toString();
   }
 
   private Set<String> getSetForAction(final Action action) {

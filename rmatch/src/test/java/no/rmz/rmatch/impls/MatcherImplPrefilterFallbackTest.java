@@ -88,11 +88,6 @@ public final class MatcherImplPrefilterFallbackTest {
     }
 
     @Override
-    public String getCurrentRestString() {
-      return text.substring(Math.min(currentPos + 1, text.length()));
-    }
-
-    @Override
     public String getString(final int start, final int stop) {
       return text.substring(Math.max(0, start), Math.min(stop, text.length()));
     }

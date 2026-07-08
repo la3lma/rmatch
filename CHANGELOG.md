@@ -2,6 +2,12 @@
 
 ## 1.9.3-SNAPSHOT - in development
 
+### Release hygiene
+
+- Removed the deprecated `Buffer.getCurrentRestString()` method from the public
+  buffer contract. Internal users now either request explicit substrings or
+  collect remaining text by advancing a cloned cursor.
+
 ## 1.9.2 - pre-2.0 Maven Central release candidate
 
 `1.9.2` adds the first context-sensitive zero-width assertions to the

@@ -27,17 +27,6 @@ package no.rmz.rmatch.interfaces;
 public interface Buffer extends Comparable<Buffer> {
 
   /**
-   * Return the unconsumed suffix after the current position.
-   *
-   * <p>This method exists for older diagnostics and tests. New application code should normally use
-   * {@link #getString(int, int)} with explicit offsets.
-   *
-   * @return text after the current cursor position
-   */
-  @Deprecated
-  String getCurrentRestString();
-
-  /**
    * Return a substring from the underlying input.
    *
    * <p>The {@code stop} argument is exclusive, matching {@link String#substring(int, int)}. Match

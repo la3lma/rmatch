@@ -30,14 +30,6 @@ public class LookaheadBufferImpl implements LookaheadBuffer, Cloneable {
   }
 
   @Override
-  @Deprecated
-  public String getCurrentRestString() {
-    synchronized (lock) {
-      return buffer.getCurrentRestString();
-    }
-  }
-
-  @Override
   public String getString(int start, int stop) {
     synchronized (lock) {
       return buffer.getString(start, stop);

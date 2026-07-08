@@ -122,11 +122,6 @@ public class WordBoundarySemanticsTest {
     }
 
     @Override
-    public String getCurrentRestString() {
-      return text.substring(Math.min(currentPos + 1, text.length()));
-    }
-
-    @Override
     public String getString(final int start, final int stop) {
       return text.substring(start, stop);
     }
