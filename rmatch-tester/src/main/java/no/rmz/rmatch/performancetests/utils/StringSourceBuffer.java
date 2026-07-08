@@ -15,7 +15,7 @@ package no.rmz.rmatch.performancetests.utils;
 
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
-import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.Buffer;
 
 /** An implementation of the Buffer interface, that holds all of the input as a String. */
 public final class StringSourceBuffer implements Buffer, Cloneable {

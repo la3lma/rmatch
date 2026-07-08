@@ -19,7 +19,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import java.util.logging.Logger;
-import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.performancetests.utils.StringSourceBuffer;

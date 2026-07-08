@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.performancetests.utils;
 
-import no.rmz.rmatch.interfaces.Action;
+import no.rmz.rmatch.Action;
 
 public interface MatchDetector {
 

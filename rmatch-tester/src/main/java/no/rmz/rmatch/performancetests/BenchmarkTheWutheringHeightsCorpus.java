@@ -16,9 +16,9 @@ package no.rmz.rmatch.performancetests;
 import static no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer.LOCATION_OF_WUTHERING_HEIGHTS;
 
 import java.util.Arrays;
-import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
-import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 
 /**

@@ -16,8 +16,8 @@ package no.rmz.rmatch.impls;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.RegexpParserException;
 import org.junit.jupiter.api.Test;
 
 /**

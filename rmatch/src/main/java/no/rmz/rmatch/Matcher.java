@@ -11,9 +11,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.interfaces;
-
-import no.rmz.rmatch.compiler.RegexpParserException;
+package no.rmz.rmatch;
 
 /**
  * Main public API for registering regular expressions and matching them against buffers.
@@ -66,7 +64,7 @@ public interface Matcher {
    * clone of it for partitioned implementations) plus inclusive start/end offsets for the matched
    * text.
    *
-   * @param b input buffer to scan; callers normally use {@code new RegexStringBuffer(text)}
+   * @param b input buffer to scan; callers normally use {@link RMatch#buffer(String)}
    */
   void match(final Buffer b);
 

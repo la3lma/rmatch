@@ -19,7 +19,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Set;
-import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Set;
 import java.util.TreeSet;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;

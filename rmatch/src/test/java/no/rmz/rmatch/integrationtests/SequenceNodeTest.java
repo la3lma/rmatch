@@ -17,6 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.impls.TestMatchers;
 import no.rmz.rmatch.interfaces.*;

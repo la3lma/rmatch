@@ -25,7 +25,6 @@ import no.rmz.rmatch.interfaces.ZeroWidthAssertion;
 import no.rmz.rmatch.utils.CounterType;
 import no.rmz.rmatch.utils.FastCounter;
 import no.rmz.rmatch.utils.FastCounters;
-import no.rmz.rmatch.utils.LifoSet;
 
 /**
  * Base implementation for nodes in rmatch's nondeterministic finite automata.

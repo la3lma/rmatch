@@ -20,11 +20,11 @@ import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
-import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.TestMatchers;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -55,7 +55,7 @@ public class EdgeInvisibilityEnsurance {
                 ll
                 laden""";
 
-    no.rmz.rmatch.interfaces.Buffer buffer = new no.rmz.rmatch.utils.RegexStringBuffer(origString);
+    no.rmz.rmatch.Buffer buffer = new no.rmz.rmatch.utils.RegexStringBuffer(origString);
 
     Matcher m = TestMatchers.newSingleMatcher();
 

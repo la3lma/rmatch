@@ -17,8 +17,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
 
 /**
  * Thread-safe {@link Action} implementation that counts matches.

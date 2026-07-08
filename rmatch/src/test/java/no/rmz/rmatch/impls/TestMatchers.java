@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.Matcher;
+import no.rmz.rmatch.Matcher;
 import no.rmz.rmatch.interfaces.NDFACompiler;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 

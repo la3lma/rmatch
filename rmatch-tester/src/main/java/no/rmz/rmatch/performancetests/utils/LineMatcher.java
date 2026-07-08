@@ -15,8 +15,8 @@ package no.rmz.rmatch.performancetests.utils;
 
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
 
 public final class LineMatcher {
   private final LineSource lineSource;

@@ -16,6 +16,7 @@ package no.rmz.rmatch.impls;
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.*;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
 import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;

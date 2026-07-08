@@ -15,8 +15,8 @@ package no.rmz.rmatch.impls;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import no.rmz.rmatch.Matcher;
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
-import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 
 /**

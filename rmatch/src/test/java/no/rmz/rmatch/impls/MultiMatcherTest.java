@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;

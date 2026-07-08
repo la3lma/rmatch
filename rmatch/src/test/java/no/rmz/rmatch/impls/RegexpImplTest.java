@@ -15,6 +15,8 @@ package no.rmz.rmatch.impls;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.BeforeEach;

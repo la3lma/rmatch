@@ -11,12 +11,11 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.impls;
+package no.rmz.rmatch.utils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Comparator;
-import no.rmz.rmatch.utils.SimulatedHeap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

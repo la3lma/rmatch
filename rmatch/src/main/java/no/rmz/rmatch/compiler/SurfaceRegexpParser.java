@@ -18,6 +18,8 @@ package no.rmz.rmatch.compiler;
 
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
+import no.rmz.rmatch.RegexpParserException;
+
 /**
  * Parser for the supported rmatch regular-expression surface syntax.
  *

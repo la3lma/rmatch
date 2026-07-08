@@ -13,6 +13,10 @@
  */
 package no.rmz.rmatch.interfaces;
 
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+
 /**
  * Engine-internal compiled regular-expression state.
  *

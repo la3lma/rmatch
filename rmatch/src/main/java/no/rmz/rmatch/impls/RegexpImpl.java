@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.interfaces.*;
 
 /** Representation of a parsed regular expression. */

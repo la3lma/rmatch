@@ -13,6 +13,8 @@
  */
 package no.rmz.rmatch.interfaces;
 
+import no.rmz.rmatch.Buffer;
+
 /**
  * Optional {@link Buffer} extension for buffers that can inspect the next character without
  * advancing.

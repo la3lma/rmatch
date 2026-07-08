@@ -67,7 +67,12 @@ until measured against the same inputs with the same correctness expectations.
 The branch-vs-`main` protocol lives in
 [docs/performance-regression-testing.md](docs/performance-regression-testing.md).
 
-## Use from Maven Central
+## Use from Maven
+
+The examples below use the public API on the current development branch,
+targeted for the next `1.9.4` release. Until that release is visible on Maven
+Central, install this repository locally and depend on `1.9.4-SNAPSHOT`, or use
+the currently published `1.9.3` artifact together with the `1.9.3` Javadocs.
 
 Add rmatch to an existing Maven project:
 
@@ -75,7 +80,7 @@ Add rmatch to an existing Maven project:
 <dependency>
   <groupId>no.rmz</groupId>
   <artifactId>rmatch</artifactId>
-  <version>1.9.3</version>
+  <version>1.9.4-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -87,7 +92,7 @@ For Gradle:
 
 ```kotlin
 dependencies {
-    implementation("no.rmz:rmatch:1.9.3")
+    implementation("no.rmz:rmatch:1.9.4-SNAPSHOT")
 }
 ```
 
@@ -121,7 +126,7 @@ For a complete scratch project, use this full `pom.xml`:
     <dependency>
       <groupId>no.rmz</groupId>
       <artifactId>rmatch</artifactId>
-      <version>1.9.3</version>
+      <version>1.9.4-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
@@ -131,14 +136,13 @@ Put this in `src/main/java/Example.java`. It registers two patterns once, scans
 one buffer, and prints both matches.
 
 ```java
-import no.rmz.rmatch.impls.MatcherFactory;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.utils.RegexStringBuffer;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RMatch;
 
 public class Example {
   public static void main(String[] args) throws Exception {
-    Matcher matcher = MatcherFactory.newMatcher();
+    Matcher matcher = RMatch.newMatcher();
 
     matcher.add("ERROR|WARN", (buffer, start, end) -> {
       System.out.println("log-level match: " + matchedText(buffer, start, end));
@@ -148,7 +152,7 @@ public class Example {
       System.out.println("user token match: " + matchedText(buffer, start, end));
     });
 
-    matcher.match(new RegexStringBuffer("INFO user:alice WARN disk nearly full"));
+    matcher.match(RMatch.buffer("INFO user:alice WARN disk nearly full"));
     matcher.shutdown();
   }
 
@@ -165,14 +169,15 @@ Run it:
 mvn -q compile exec:java -Dexec.mainClass=Example
 ```
 
-Expected output:
+Expected output contains both lines. The order may vary because
+`RMatch.newMatcher()` may use worker threads:
 
 ```text
 user token match: user:alice
 log-level match: WARN
 ```
 
-`MatcherFactory.newMatcher()` creates the recommended production matcher. The
+`RMatch.newMatcher()` creates the recommended production matcher. The
 callback receives the matched buffer and inclusive start/end offsets. rmatch
 reports the longest match for each start position; overlapping matches from
 different start positions may therefore be reported.

@@ -22,9 +22,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.TestMatchers;
-import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;
 

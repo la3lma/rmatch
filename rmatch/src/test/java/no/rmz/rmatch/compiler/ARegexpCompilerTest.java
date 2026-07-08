@@ -18,6 +18,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.impls.TestMatchers;
 import no.rmz.rmatch.interfaces.*;

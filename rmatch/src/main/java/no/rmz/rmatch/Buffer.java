@@ -11,12 +11,12 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.interfaces;
+package no.rmz.rmatch;
 
 /**
  * Input abstraction consumed by rmatch engines.
  *
- * <p>Most callers should use {@code RegexStringBuffer}, which adapts a {@link String} to this
+ * <p>Most callers should use {@link RMatch#buffer(String)}, which adapts a {@link String} to this
  * interface. Custom buffer implementations are useful when input is backed by another data
  * structure, but they must preserve the cursor semantics described here.
  *

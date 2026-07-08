@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.impls.MatcherImpl;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 

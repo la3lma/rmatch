@@ -16,12 +16,12 @@ package no.rmz.rmatch.impls;
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.*;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
 import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
 import no.rmz.rmatch.engine.prefilter.PrefilterSafety;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.utils.SimpleBloomFilter;
 
 /**
  * Advanced match engine using Bloom filter pre-screening and hierarchical filtering to achieve O(l

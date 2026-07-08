@@ -13,15 +13,18 @@
  */
 package no.rmz.rmatch.ordinaryuse;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-import no.rmz.rmatch.compiler.RegexpParserException;
+import java.util.concurrent.atomic.AtomicReference;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RMatch;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.TestMatchers;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.Regexp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,8 +64,7 @@ public class OrdinaryUsageSmokeTest {
   /** Test matching the two regexps concurrently. */
   @Test
   public final void testUseOfOrdinaryMatcherImpl() throws RegexpParserException {
-    final no.rmz.rmatch.utils.RegexStringBuffer b =
-        new no.rmz.rmatch.utils.RegexStringBuffer(("ab" + " " + "ac"));
+    final Buffer b = RMatch.buffer(("ab" + " " + "ac"));
 
     m.add("ac", action);
     m.add("ab", action);
@@ -73,5 +75,18 @@ public class OrdinaryUsageSmokeTest {
     verify(action)
         .performMatch(
             any(Buffer.class), eq("ab".length() + 1), eq("ab".length() + 1 + "ac".length() - 1));
+  }
+
+  /** Test the public facade shown in the README copy-paste example. */
+  @Test
+  public final void testPublicFacadeCreatesMatcherAndStringBuffer() throws Exception {
+    final AtomicReference<String> matched = new AtomicReference<>();
+    final Matcher matcher = RMatch.newSingleMatcher();
+    matcher.add("WARN", (buffer, start, end) -> matched.set(buffer.getString(start, end + 1)));
+
+    matcher.match(RMatch.buffer("INFO user:alice WARN disk nearly full"));
+    matcher.shutdown();
+
+    assertEquals("WARN", matched.get());
   }
 }

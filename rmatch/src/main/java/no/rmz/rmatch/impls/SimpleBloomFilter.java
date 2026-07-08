@@ -11,7 +11,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.utils;
+package no.rmz.rmatch.impls;
 
 import java.util.BitSet;
 
@@ -22,7 +22,7 @@ import java.util.BitSet;
  * false}, the item was not added. They may produce false positives, so {@code true} means "possibly
  * present," not "definitely present."
  */
-public final class SimpleBloomFilter {
+final class SimpleBloomFilter {
   private final BitSet bitSet;
   private final int numHashFunctions;
   private final int bitSetSize;
@@ -33,7 +33,7 @@ public final class SimpleBloomFilter {
    * @param expectedElements expected number of inserted elements
    * @param falsePositiveRate desired false-positive rate, for example {@code 0.01} for one percent
    */
-  public SimpleBloomFilter(final int expectedElements, final double falsePositiveRate) {
+  SimpleBloomFilter(final int expectedElements, final double falsePositiveRate) {
     this.bitSetSize = optimalBitSetSize(expectedElements, falsePositiveRate);
     this.numHashFunctions = optimalNumHashFunctions(bitSetSize, expectedElements);
     this.bitSet = new BitSet(bitSetSize);

@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.impls;
 
-import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.interfaces.LookaheadBuffer;
 
 public class LookaheadBufferImpl implements LookaheadBuffer, Cloneable {

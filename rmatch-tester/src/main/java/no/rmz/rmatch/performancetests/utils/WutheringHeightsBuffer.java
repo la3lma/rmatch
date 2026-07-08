@@ -14,7 +14,7 @@
 package no.rmz.rmatch.performancetests.utils;
 
 import java.io.File;
-import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.Buffer;
 
 /**
  * A buffer implementation that delivers the full txt from Emily Bronte's novel "Wuthering Heights".

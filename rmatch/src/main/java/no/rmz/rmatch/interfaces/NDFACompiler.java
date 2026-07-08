@@ -13,7 +13,7 @@
  */
 package no.rmz.rmatch.interfaces;
 
-import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.RegexpParserException;
 
 /** Compiler that turns rmatch regular-expression state into an NDFA start node. */
 public interface NDFACompiler {

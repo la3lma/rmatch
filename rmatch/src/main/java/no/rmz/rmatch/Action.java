@@ -11,7 +11,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.interfaces;
+package no.rmz.rmatch;
 
 /**
  * Callback invoked when a registered expression matches an input buffer.
@@ -21,12 +21,12 @@ package no.rmz.rmatch.interfaces;
  * start/end offsets. To recover the matched text, call {@code buffer.getString(start, end + 1)}.
  *
  * <p><b>Thread-safety contract:</b> actions may be invoked concurrently from multiple engine worker
- * threads. In particular, {@code MatcherFactory.newMatcher()} returns a partitioned matcher on
- * multi-core systems. An action instance, especially one shared between several expressions, must
- * therefore be prepared for concurrent {@link #performMatch(Buffer, int, int)} invocations. Use
- * {@code java.util.concurrent} types such as {@code LongAdder} or {@code AtomicLong}, a
- * synchronized block, or a concurrent collection for mutable state. A plain {@code int++} counter
- * in an action is a lost-update bug waiting to happen.
+ * threads. In particular, {@code RMatch.newMatcher()} returns a partitioned matcher on multi-core
+ * systems. An action instance, especially one shared between several expressions, must therefore be
+ * prepared for concurrent {@link #performMatch(Buffer, int, int)} invocations. Use {@code
+ * java.util.concurrent} types such as {@code LongAdder} or {@code AtomicLong}, a synchronized
+ * block, or a concurrent collection for mutable state. A plain {@code int++} counter in an action
+ * is a lost-update bug waiting to happen.
  */
 public interface Action {
 

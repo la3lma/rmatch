@@ -18,7 +18,8 @@ import static no.rmz.rmatch.internal.Checks.checkNotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 
 /** In-memory {@link RegexpStorage} implementation used by production matchers. */

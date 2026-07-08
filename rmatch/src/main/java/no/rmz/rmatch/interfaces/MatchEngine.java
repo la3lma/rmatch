@@ -13,6 +13,8 @@
  */
 package no.rmz.rmatch.interfaces;
 
+import no.rmz.rmatch.Buffer;
+
 /** Engine component that scans an input buffer and commits matching callbacks. */
 public interface MatchEngine {
 

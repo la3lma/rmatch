@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.RegexStringBuffer;
