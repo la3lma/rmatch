@@ -407,11 +407,6 @@ public final class BloomFilterMatchEngine implements MatchEngine {
     }
 
     @Override
-    public String getCurrentRestString() {
-      return pos >= 0 ? text.substring(Math.min(pos + 1, text.length())) : text;
-    }
-
-    @Override
     public String getString(final int start, final int stop) {
       return text.substring(Math.max(0, start), Math.min(text.length(), stop));
     }

@@ -165,18 +165,6 @@ public final class RegexStringBuffer implements LookaheadBuffer, Cloneable {
     }
   }
 
-  /**
-   * Return the unconsumed suffix after the current cursor position.
-   *
-   * @return remaining text after the current cursor
-   */
-  @Override
-  public String getCurrentRestString() {
-    synchronized (monitor) {
-      return getCurrentRestString(getCurrentPos() + 1);
-    }
-  }
-
   @Override
   public String toString() {
     synchronized (monitor) {

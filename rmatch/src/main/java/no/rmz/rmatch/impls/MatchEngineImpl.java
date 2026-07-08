@@ -326,10 +326,19 @@ public final class MatchEngineImpl implements MatchEngine {
   /** Collects the full text from the buffer for prefilter scanning without consuming it. */
   private String collectBufferText(final Buffer b) {
     try {
-      return b.clone().getCurrentRestString();
+      return collectRemainingText(b.clone());
     } catch (RuntimeException ex) {
       return null;
     }
+  }
+
+  /** Collect the remaining text by advancing a cloned cursor. */
+  private static String collectRemainingText(final Buffer cursor) {
+    final StringBuilder text = new StringBuilder();
+    while (cursor.hasNext()) {
+      text.append(cursor.getNext());
+    }
+    return text.toString();
   }
 
   /**

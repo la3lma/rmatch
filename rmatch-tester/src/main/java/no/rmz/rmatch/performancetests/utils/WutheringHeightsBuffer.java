@@ -77,11 +77,6 @@ public final class WutheringHeightsBuffer implements Buffer, Cloneable {
     return sb.getLength();
   }
 
-  @Override
-  public String getCurrentRestString() {
-    return sb.getCurrentRestString();
-  }
-
   /**
    * Get the substring from position 'pos' going on to the end of the text.
    *

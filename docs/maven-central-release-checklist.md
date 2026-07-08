@@ -238,11 +238,10 @@ the rest of the release work here as it becomes explicit.
   scripts for deprecated method/API usage. Remove deprecated calls where
   practical; document and track any unavoidable remaining usage. Track this
   under [issue #272](https://github.com/la3lma/rmatch/issues/272). Result for
-  `1.9.2` on 2026-07-08: source/test/build grep found the public deprecated
-  `Buffer.getCurrentRestString()` method and its test implementation delegate.
-  This is deliberate compatibility surface and should not be removed during the
-  `1.9.2` release cut; keep the cleanup tracked under
-  [issue #272](https://github.com/la3lma/rmatch/issues/272).
+  `1.9.3-SNAPSHOT`: the deprecated `Buffer.getCurrentRestString()` API was
+  removed from the public buffer contract, internal call sites were replaced
+  with explicit cursor/substring logic, and the warning-visible Maven test pass
+  no longer reports deprecation warnings.
 - [ ] Before 2.0, audit for unused methods, classes, and interfaces that are not
   part of the intended external API. Remove unused accidental/internal surface
   where safe; document any unused public surface that is intentionally retained.

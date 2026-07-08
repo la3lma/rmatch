@@ -347,10 +347,19 @@ public final class FastPathMatchEngine implements MatchEngine {
   /** Collect buffer text for prefilter scanning without consuming the original buffer. */
   private String collectBufferText(final Buffer b) {
     try {
-      return b.clone().getCurrentRestString();
+      return collectRemainingText(b.clone());
     } catch (RuntimeException ex) {
       return null;
     }
+  }
+
+  /** Collect the remaining text by advancing a cloned cursor. */
+  private static String collectRemainingText(final Buffer cursor) {
+    final StringBuilder text = new StringBuilder();
+    while (cursor.hasNext()) {
+      text.append(cursor.getNext());
+    }
+    return text.toString();
   }
 
   /** Run prefilter scan to identify candidate positions. */
