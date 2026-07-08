@@ -74,6 +74,97 @@ the rest of the release work here as it becomes explicit.
   2026-07-08: POMs moved from final `1.9.2` release versions to
   `1.9.3-SNAPSHOT`; README examples remain on the published `1.9.2` version.
 
+## 1.9.3 Release Run
+
+- [x] Sync release worktree from current `origin/main`. Result on 2026-07-08:
+  release branch `u/la3lma/codex/release-1.9.3` starts at `a3d160d9`, the
+  merge of PR #280 with the API-closure sweep.
+- [x] Remove the deprecated public buffer API before release. Result:
+  `Buffer.getCurrentRestString()` was removed and internal call sites now use
+  explicit cursor and substring logic.
+- [x] Tighten the public API surface before release. Result: factory/interface
+  usage is documented, `MatcherImpl` and `MultiMatcher` are no longer presented
+  as construction APIs, implementation-only classes were narrowed where safe,
+  and the domination-heap accessor was removed from `Regexp`.
+- [x] Add JPMS metadata before release. Result: `module-info.java` declares
+  module `no.rmz.rmatch`.
+- [x] Explicitly accept the JPMS caveat for this pre-2.0 release candidate:
+  `javac` still warns that `org.ahocorasick:ahocorasick:0.6.3` is an automatic
+  module. This is not treated as a `1.9.3` blocker, but it remains a `2.0.0`
+  dependency-boundary cleanup item.
+- [x] Run full tester-inclusive verification after merging the API closure work.
+  Result on 2026-07-08:
+  `./mvnw -B -pl rmatch-tester -am verify -Dspotbugs.skip=true` succeeded;
+  `rmatch` reported 333 tests, 0 failures, 0 errors, 3 skipped; `rmatch-tester`
+  reported 16 tests, 0 failures, 0 errors, 2 skipped.
+- [x] Run agogo Docker performance regression gate against the previous
+  published version before release. Result on 2026-07-08: copied the exact
+  release candidate and `rmatch-perftest` harness to agogo, ran inside
+  `maven:3.9-eclipse-temurin-26`, installed `1.9.3-SNAPSHOT` locally, compared
+  against `no.rmz:rmatch:1.9.2` using
+  `test_matrix/stable_10k_moderate_rmatch.json`. Host hardware:
+  32 logical CPUs, AMD Ryzen 9 9950X3D. Result directories:
+  `/home/rmz/git/rmatch-agogo-release-1.9.3-gate-20260708_004142/rmatch-perftest/benchmarking/framework/regex_bench_framework/results/agogo_release_1_9_3_baseline_1_9_2_20260708_004301`
+  and
+  `/home/rmz/git/rmatch-agogo-release-1.9.3-gate-20260708_004142/rmatch-perftest/benchmarking/framework/regex_bench_framework/results/agogo_release_1_9_3_candidate_snapshot_20260708_004601`.
+  Median `scanning_ns` ratios: 0.867 on 1MB and 1.018 on 10MB; no performance
+  regression detected.
+- [x] Set release POM versions and README snippets to `1.9.3`.
+- [x] Run full release preflight for final `1.9.3`. Result on 2026-07-08:
+  `make release-central-preflight` succeeded.
+- [x] Run Central profile check for final `1.9.3` without signing/uploading.
+  Result on 2026-07-08: `make release-central-profile-check` succeeded.
+- [x] Run signed Central release-profile verify for final `1.9.3`. Result on
+  2026-07-08:
+  `./mvnw -B -pl rmatch -am -Pcentral-release -DskipTests
+  -Dspotbugs.skip=true -Dgpg.keyname=55D9C01E75B1E582 clean verify`
+  succeeded. A non-clean verify was deliberately discarded after artifact
+  inspection showed a stale module descriptor; the clean run generated the
+  final `1.9.3` artifacts.
+- [x] Verify generated `1.9.3` `.asc` signatures locally. Result on
+  2026-07-08: `gpg --verify` reported good signatures for the parent POM,
+  rmatch POM, main JAR, source JAR, and Javadoc JAR using key
+  `9017955845408C9B4422B5DE55D9C01E75B1E582`.
+- [x] Inspect final `1.9.3` JAR manifest, embedded POM properties, JPMS module
+  descriptor, and Java baseline. Result on 2026-07-08: manifest has
+  `Java-Version: 21`, no application-style `Main-Class`, embedded properties
+  report `no.rmz:rmatch:1.9.3`, `jar --describe-module` reports
+  `no.rmz.rmatch@1.9.3`, and `javap` reports classfile major version 65.
+- [x] Verify final `1.9.3` compile dependency tree. Result on 2026-07-08:
+  `no.rmz:rmatch` has only `org.ahocorasick:ahocorasick:0.6.3` in compile
+  scope.
+- [x] Run downstream consumer smoke test after local install. Result on
+  2026-07-08: `/tmp/rmatch-193-consumer-smoke.5LjXgY`, command
+  `mvn -q clean verify exec:java -Dexec.mainClass=Example`, printed
+  `log-level match: WARN` and `user token match: user:alice`.
+- [x] Upload the `1.9.3` release commit to Central Portal. Result on
+  2026-07-08: release commit `e65a540a` deployed as Central deployment
+  `24d52176-5474-474f-bbce-3b91f0aa961b`; validation succeeded.
+- [x] Publish the validated `1.9.3` Central deployment. Result on 2026-07-08:
+  the deployment moved from `VALIDATED` to `PUBLISHING` via the Central
+  Publisher API and then reached `PUBLISHED`.
+- [x] Confirm `1.9.3` artifact availability from Maven Central. Result on
+  2026-07-08: direct checks for
+  `https://repo.maven.apache.org/maven2/no/rmz/rmatch/1.9.3/rmatch-1.9.3.pom`,
+  the corresponding main JAR, Javadoc JAR, and parent POM all returned
+  HTTP 200.
+- [x] Run a clean-repository consumer smoke test against Maven Central
+  `1.9.3`. Result on 2026-07-08:
+  `/tmp/rmatch-193-central-consumer-smoke.JXmoKd` with empty Maven repository
+  `/tmp/rmatch-193-central-m2.dCge7P`, command
+  `mvn -Dmaven.repo.local=/tmp/rmatch-193-central-m2.dCge7P -q clean verify
+  exec:java -Dexec.mainClass=Example`, printed `log-level match: WARN` and
+  `user token match: user:alice`.
+- [x] Create and push the `rmatch-1.9.3` tag. Result on 2026-07-08:
+  annotated tag `rmatch-1.9.3` points at uploaded release commit `e65a540a`
+  and was pushed to `origin`.
+- [x] Bump repository back to the next development snapshot. Result on
+  2026-07-08: POMs moved from final `1.9.3` release versions to
+  `1.9.4-SNAPSHOT`; README examples remain on the published `1.9.3` version.
+  Post-bump sanity command
+  `./mvnw -q -B -pl rmatch -am -DskipTests -Dspotbugs.skip=true verify`
+  succeeded.
+
 ## Identity and Access
 
 - [x] Create a current GPG release-signing key.

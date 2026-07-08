@@ -1,6 +1,18 @@
 # Changelog
 
-## 1.9.3-SNAPSHOT - in development
+## 1.9.4-SNAPSHOT - in development
+
+- No changes yet.
+
+## 1.9.3 - pre-2.0 Maven Central release candidate
+
+`1.9.3` tightens the public API surface before the eventual `2.0.0` line. It
+keeps the same matcher behavior as the post-`1.9.2` mainline, but removes a
+deprecated buffer method, narrows several implementation-only classes, and adds
+the first JPMS module descriptor for `no.rmz.rmatch`.
+
+Published to Maven Central on 2026-07-08 as `no.rmz:rmatch:1.9.3`, with the
+Git tag `rmatch-1.9.3` pointing at release commit `e65a540a`.
 
 ### Release hygiene
 
@@ -17,6 +29,22 @@
   classes are now package-private.
 - Removed the internal domination-heap accessor from the `Regexp` interface so
   that match-domination bookkeeping no longer leaks through the public contract.
+
+### Validation
+
+- Full tester-inclusive verification passed after the API-closure changes:
+  `./mvnw -B -pl rmatch-tester -am verify -Dspotbugs.skip=true`.
+- Agogo Docker performance gate passed against the published `1.9.2` baseline
+  on a 32-logical-CPU AMD Ryzen 9 9950X3D machine. Median `scanning_ns` ratios
+  were 0.867 on the 1MB corpus and 1.018 on the 10MB corpus, both within the
+  1.10 release gate.
+
+### Deliberate limitations and future work
+
+- The JPMS descriptor is useful for consumers that want an explicit module
+  name, but the compile path still emits an automatic-module warning for the
+  Aho-Corasick dependency. That dependency-boundary decision is accepted for
+  this pre-2.0 release candidate and remains tracked before `2.0.0`.
 
 ## 1.9.2 - pre-2.0 Maven Central release candidate
 
