@@ -19,10 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import no.rmz.rmatch.compiler.NDFACompilerImpl;
-import no.rmz.rmatch.impls.MatcherImpl;
+import no.rmz.rmatch.impls.TestMatchers;
 import no.rmz.rmatch.interfaces.Matcher;
-import no.rmz.rmatch.interfaces.RegexpFactory;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -112,7 +110,7 @@ public class BasicMatchingSemanticsTest {
 
   private static Set<String> matchesOf(final String[] patterns, final String input)
       throws Exception {
-    final Matcher m = new MatcherImpl(new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
+    final Matcher m = TestMatchers.newSingleMatcher();
     final Set<String> found = new TreeSet<>();
     for (final String pattern : patterns) {
       final String pat = pattern;

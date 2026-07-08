@@ -23,7 +23,7 @@ import no.rmz.rmatch.interfaces.Regexp;
  * <p>A padding node consumes no input itself; it exists so fragments can be composed with epsilon
  * edges without giving unrelated fragments the same object identity.
  */
-public final class PaddingNDFANode extends AbstractNDFANode {
+final class PaddingNDFANode extends AbstractNDFANode {
 
   /**
    * Create a new padding node for a regular expression.

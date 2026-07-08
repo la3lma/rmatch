@@ -22,7 +22,7 @@ import no.rmz.rmatch.interfaces.Match;
 import no.rmz.rmatch.interfaces.RunnableMatchesHolder;
 
 /** A holder for runnable matches. */
-public final class RunnableMatchesHolderImpl implements RunnableMatchesHolder {
+final class RunnableMatchesHolderImpl implements RunnableMatchesHolder {
 
   private final Set<Match> matches;
 

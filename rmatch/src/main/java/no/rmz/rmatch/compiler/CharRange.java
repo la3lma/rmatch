@@ -19,7 +19,7 @@ package no.rmz.rmatch.compiler;
  * @param start smallest character in the range
  * @param end largest character in the range
  */
-public record CharRange(Character start, Character end) implements Comparable<CharRange> {
+record CharRange(Character start, Character end) implements Comparable<CharRange> {
 
   /**
    * Create a new character range.

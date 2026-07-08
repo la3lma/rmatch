@@ -24,7 +24,7 @@ import no.rmz.rmatch.utils.FastCounter;
 import no.rmz.rmatch.utils.FastCounters;
 
 /** An implementation of deterministic finite automata nodes DFA. */
-public final class DFANodeImpl implements DFANode {
+final class DFANodeImpl implements DFANode {
 
   /**
    * Counter used to figure out both how many DFA nodes are allocated, and to generate unique IDs

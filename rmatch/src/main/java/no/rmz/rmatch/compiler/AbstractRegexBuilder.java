@@ -21,7 +21,7 @@ package no.rmz.rmatch.compiler;
  * those events become an executable representation. The production implementation builds NDFA
  * fragments.
  */
-public interface AbstractRegexBuilder {
+interface AbstractRegexBuilder {
 
   /**
    * Add a string, to be treated as a sequence of individual characters.

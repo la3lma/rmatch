@@ -23,7 +23,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.impls.MatcherImpl;
+import no.rmz.rmatch.impls.TestMatchers;
+import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;
 
@@ -84,7 +85,7 @@ public class PrefilterCorrectnessInvariantTest {
       System.setProperty("rmatch.prefilter", prefilterEnabled ? "aho" : "off");
       System.setProperty("rmatch.prefilter.threshold", "1");
 
-      final MatcherImpl matcher = new MatcherImpl();
+      final Matcher matcher = TestMatchers.newSingleMatcher();
       final List<ObservedMatch> observed = new ArrayList<>();
       for (final String pattern : patterns) {
         matcher.add(

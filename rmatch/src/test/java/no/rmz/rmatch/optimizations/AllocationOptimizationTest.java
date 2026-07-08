@@ -11,14 +11,12 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.optimizations;
+package no.rmz.rmatch.impls;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.HashSet;
 import java.util.Set;
-import no.rmz.rmatch.impls.DFANodeImpl;
-import no.rmz.rmatch.impls.MatchSetImpl;
 import no.rmz.rmatch.interfaces.DFANode;
 import no.rmz.rmatch.interfaces.NDFANode;
 import org.junit.jupiter.api.Test;

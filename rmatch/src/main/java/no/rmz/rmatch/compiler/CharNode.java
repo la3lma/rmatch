@@ -18,7 +18,7 @@ import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 
 /** NDFA node that consumes one specific character. */
-public final class CharNode extends AbstractNDFANode {
+final class CharNode extends AbstractNDFANode {
 
   /** The node we will go to after matching this character. */
   private final NDFANode nextNode;

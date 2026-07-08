@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.impls.MatcherImpl;
+import no.rmz.rmatch.impls.TestMatchers;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
@@ -55,7 +55,7 @@ public class OrdinaryUsageSmokeTest {
    */
   @BeforeEach
   public void setUp() {
-    m = new MatcherImpl();
+    m = TestMatchers.newSingleMatcher();
   }
 
   /** Test matching the two regexps concurrently. */

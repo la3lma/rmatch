@@ -131,13 +131,14 @@ Put this in `src/main/java/Example.java`. It registers two patterns once, scans
 one buffer, and prints both matches.
 
 ```java
-import no.rmz.rmatch.impls.MatcherImpl;
+import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 
 public class Example {
   public static void main(String[] args) throws Exception {
-    MatcherImpl matcher = new MatcherImpl();
+    Matcher matcher = MatcherFactory.newMatcher();
 
     matcher.add("ERROR|WARN", (buffer, start, end) -> {
       System.out.println("log-level match: " + matchedText(buffer, start, end));
@@ -171,10 +172,10 @@ user token match: user:alice
 log-level match: WARN
 ```
 
-`MatcherImpl` uses the fast-path engine by default. The callback receives the
-matched buffer and inclusive start/end offsets. rmatch reports the longest match
-for each start position; overlapping matches from different start positions may
-therefore be reported.
+`MatcherFactory.newMatcher()` creates the recommended production matcher. The
+callback receives the matched buffer and inclusive start/end offsets. rmatch
+reports the longest match for each start position; overlapping matches from
+different start positions may therefore be reported.
 
 For one small pattern against one small string, `java.util.regex` is usually the
 simpler tool. rmatch is for many-pattern workloads where avoiding a separate

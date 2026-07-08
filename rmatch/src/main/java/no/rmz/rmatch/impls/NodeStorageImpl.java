@@ -32,7 +32,7 @@ import no.rmz.rmatch.utils.SortedSetComparatorImpl;
  * start node by an epsilon edge, and DFA nodes are created on demand from sets of reachable NDFA
  * nodes as input is scanned.
  */
-public final class NodeStorageImpl implements NodeStorage {
+final class NodeStorageImpl implements NodeStorage {
 
   /**
    * A comparator for ordered sets of NDFA Nodes that will deem a set larger than the other by

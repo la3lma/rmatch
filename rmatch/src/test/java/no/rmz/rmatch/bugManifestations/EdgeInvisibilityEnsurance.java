@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
 import java.util.List;
 import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.impls.MatcherImpl;
+import no.rmz.rmatch.impls.TestMatchers;
 import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.Buffer;
 import no.rmz.rmatch.interfaces.Matcher;
@@ -57,7 +57,7 @@ public class EdgeInvisibilityEnsurance {
 
     no.rmz.rmatch.interfaces.Buffer buffer = new no.rmz.rmatch.utils.RegexStringBuffer(origString);
 
-    Matcher m = new MatcherImpl();
+    Matcher m = TestMatchers.newSingleMatcher();
 
     final List<String> regexps = new ArrayList<>();
     regexps.add("den");

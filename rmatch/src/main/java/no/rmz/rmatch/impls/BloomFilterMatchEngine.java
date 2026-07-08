@@ -27,7 +27,7 @@ import no.rmz.rmatch.utils.SimpleBloomFilter;
  * Advanced match engine using Bloom filter pre-screening and hierarchical filtering to achieve O(l
  * * log(m)) complexity instead of O(l * m).
  */
-public final class BloomFilterMatchEngine implements MatchEngine {
+final class BloomFilterMatchEngine implements MatchEngine {
 
   /** The NodeStorage for DFA operations. */
   private final NodeStorage ns;

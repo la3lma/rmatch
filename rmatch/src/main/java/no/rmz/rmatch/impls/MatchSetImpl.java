@@ -38,7 +38,7 @@ import no.rmz.rmatch.utils.FastCounters;
  * the only point where observable state (a committable match) exists. Speculative candidates that
  * die before ever reaching a terminal state never allocate anything.
  */
-public final class MatchSetImpl implements MatchSet {
+final class MatchSetImpl implements MatchSet {
   /** A counter for MatchSetImpls. */
   private static final FastCounter MY_COUNTER = FastCounters.newCounter(CounterType.MATCH_SET_IMPL);
 

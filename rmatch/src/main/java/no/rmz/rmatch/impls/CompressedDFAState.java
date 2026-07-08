@@ -35,7 +35,7 @@ import no.rmz.rmatch.interfaces.NDFANode;
  *   <li><b>Memory Efficient:</b> ~95% reduction in memory usage vs. SortedSet approach
  * </ul>
  */
-public final class CompressedDFAState implements Comparable<CompressedDFAState> {
+final class CompressedDFAState implements Comparable<CompressedDFAState> {
 
   /** Sorted array of NDFA node IDs - the compressed representation. */
   private final int[] ndfaStateIds;

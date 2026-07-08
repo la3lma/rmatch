@@ -18,8 +18,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
+import no.rmz.rmatch.impls.TestMatchers;
 import no.rmz.rmatch.interfaces.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -120,7 +120,7 @@ public class ARegexpCompilerTest {
           }
         };
 
-    final Matcher m = new MatcherImpl(compiler, regexpFactory);
+    final Matcher m = TestMatchers.newSingleMatcher(compiler, regexpFactory);
     m.add(regexpPattern, action);
 
     final Buffer b = new no.rmz.rmatch.utils.RegexStringBuffer(testString);

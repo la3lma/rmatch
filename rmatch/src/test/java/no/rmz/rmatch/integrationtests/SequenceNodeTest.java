@@ -11,17 +11,14 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.integrationtests;
+package no.rmz.rmatch.compiler;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-import no.rmz.rmatch.compiler.CharNode;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.compiler.TerminalNode;
-import no.rmz.rmatch.impls.MatcherImpl;
 import no.rmz.rmatch.impls.RegexpImpl;
+import no.rmz.rmatch.impls.TestMatchers;
 import no.rmz.rmatch.interfaces.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,7 +104,7 @@ public class SequenceNodeTest {
           }
         };
 
-    m = new MatcherImpl(compiler, regexpFactory);
+    m = TestMatchers.newSingleMatcher(compiler, regexpFactory);
   }
 
   /** Test adding an action to the regexp. */

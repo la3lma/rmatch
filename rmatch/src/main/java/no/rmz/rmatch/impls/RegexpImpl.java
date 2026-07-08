@@ -150,8 +150,7 @@ public final class RegexpImpl implements Regexp {
     }
   }
 
-  @Override
-  public DominationHeap getDominationHeapCreateIfNotPresent(final MatchSet ms) {
+  private DominationHeap getDominationHeapCreateIfNotPresent(final MatchSet ms) {
     return heaps.computeIfAbsent(ms, k -> new DominationHeap());
   }
 

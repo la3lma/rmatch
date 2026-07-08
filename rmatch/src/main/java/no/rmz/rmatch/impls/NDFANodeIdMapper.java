@@ -22,7 +22,7 @@ import no.rmz.rmatch.interfaces.NDFANode;
  * This enables efficient conversion between legacy {@code SortedSet<NDFANode>} and new compressed
  * {@code int[]} representations.
  */
-public final class NDFANodeIdMapper {
+final class NDFANodeIdMapper {
 
   /** Cache mapping node IDs to NDFANode objects for reverse lookups. */
   private final ConcurrentHashMap<Integer, NDFANode> idToNodeCache = new ConcurrentHashMap<>();

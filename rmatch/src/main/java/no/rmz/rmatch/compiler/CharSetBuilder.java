@@ -23,7 +23,7 @@ import no.rmz.rmatch.interfaces.NDFANode;
 import no.rmz.rmatch.interfaces.Regexp;
 
 /** Builder for an NDFA fragment that accepts one character from a set of literals or ranges. */
-public final class CharSetBuilder {
+final class CharSetBuilder {
 
   /** The set of characters that this builder will look for. */
   private final StringBuilder charSetStringBuilder = new StringBuilder();

@@ -37,7 +37,7 @@ import no.rmz.rmatch.interfaces.*;
  * Most application code should create instances through {@link MatcherFactory#newMatcher()} rather
  * than selecting partition counts directly.
  */
-public final class MultiMatcher implements Matcher {
+final class MultiMatcher implements Matcher {
 
   /**
    * A simple guard against absolutely useless values of matchers. Now, 10K is probably way too high
@@ -70,7 +70,7 @@ public final class MultiMatcher implements Matcher {
    * @param compiler compiler used by all partitions
    * @param regexpFactory regular-expression factory used by all partitions
    */
-  public MultiMatcher(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
+  MultiMatcher(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
     this(divineOptimalNumberOfMatchers(), compiler, regexpFactory);
   }
 
@@ -81,7 +81,7 @@ public final class MultiMatcher implements Matcher {
    * @param compiler compiler used by all partitions
    * @param regexpFactory regular-expression factory used by all partitions
    */
-  public MultiMatcher(
+  MultiMatcher(
       final int noOfMatchers, final NDFACompiler compiler, final RegexpFactory regexpFactory) {
 
     /** The compiler used by all the matchers. */

@@ -24,7 +24,7 @@ import static no.rmz.rmatch.internal.Checks.checkNotNull;
  * <p>The parser does not build automata directly. Instead, it reports parsed constructs to an
  * {@link AbstractRegexBuilder}, which decides how to represent them.
  */
-public final class SurfaceRegexpParser {
+final class SurfaceRegexpParser {
 
   /** Commit mode used when buffered literal text should be emitted only if non-empty. */
   private static final boolean COMMIT_ONLY_IF_SOMETHING_IN_SB = true;
