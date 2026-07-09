@@ -3,6 +3,12 @@
 ## 1.9.5-SNAPSHOT - in development
 
 - Continue pre-2.0 cleanup after publishing `1.9.4`.
+- CI: the main gate now runs the full `verify` test suite (both modules,
+  Spotless/Checkstyle/SpotBugs) on Java 21 and 25, keeps a fast smoke job,
+  and adds a modest performance canary that asserts completion and an exact
+  match count over a fixed 10k-pattern Wuthering Heights workload while
+  publishing timing as information only. The Codacy workflow now triggers on
+  `main` instead of the nonexistent `master`.
 - BREAKING (2.0 contract): match callbacks now receive half-open
   `[start, end)` offsets, the same convention as `String.substring` and
   `Buffer.getString`. Matched text is `buffer.getString(start, end)`; the old

@@ -15,29 +15,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  compile:
-    name: Compile (Java 25)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Java 25
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "25"
-          cache: maven
-
-      - name: Compile and package (no tests)
-        run: ./mvnw -q -B -DskipTests -Dspotbugs.skip=true clean package
-
   smoke:
-    name: Smoke (min workload)
+    name: Smoke (fast signal)
     runs-on: ubuntu-latest
-    needs: compile
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,12 +30,112 @@ jobs:
           java-version: "25"
           cache: maven
 
-      - name: Ordinary usage smoke test
-        run: ./mvnw -q -B -pl rmatch -Dtest=no.rmz.rmatch.ordinaryuse.OrdinaryUsageSmokeTest test
-
-      - name: Wuthering Heights tiny corpus smoke
+      - name: Compile and run ordinary-usage smoke test
         run: >
-          ./mvnw -q -B -pl rmatch-tester -am
-          -Dtest=SequenceLoaderTest#testWutheringHeightsCorpusWithVeryFewRegexps
-          -Dsurefire.failIfNoSpecifiedTests=false
+          ./mvnw -q -B -pl rmatch -am
+          -Dspotbugs.skip=true
+          -Dtest=no.rmz.rmatch.ordinaryuse.OrdinaryUsageSmokeTest
           test
+
+  verify:
+    # The real functional gate: every test in both modules, plus Spotless,
+    # Checkstyle, and SpotBugs, on the published Java baseline (21) and a
+    # current JDK (25).
+    name: Full verify (Java ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ["21", "25"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      - name: Full build and test suite
+        run: ./mvnw -B clean verify
+
+      - name: Upload surefire reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports-java-${{ matrix.java }}
+          path: "**/target/surefire-reports/*"
+          retention-days: 7
+
+  perf-canary:
+    # Deliberately modest performance gate. Shared CI runners cannot support
+    # honest timing assertions, so this job asserts only two things:
+    #   1. A fixed real workload (10k patterns over the Wuthering Heights
+    #      corpus) completes inside a generous timeout — catching hangs and
+    #      order-of-magnitude regressions.
+    #   2. The match count is exactly the known-good value — catching silent
+    #      correctness regressions at scale.
+    # Timing is published to the job summary for trend-watching, never
+    # asserted. Real A/B performance work happens off-CI via the
+    # rmatch-perftest gate (see docs/performance-regression-testing.md).
+    name: Performance canary (completion + match count)
+    runs-on: ubuntu-latest
+    needs: smoke
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Install snapshot artifacts
+        run: >
+          ./mvnw -q -B -DskipTests
+          -Dspotbugs.skip=true -Dcheckstyle.skip=true
+          -Dspotless.check.skip=true -Dspotless.apply.skip=true
+          install
+
+      - name: Scan Wuthering Heights with 10k patterns
+        run: |
+          set -o pipefail
+          ./mvnw -q -B -pl rmatch-tester exec:java \
+            -Dexec.mainClass=no.rmz.rmatch.performancetests.BenchmarkTheWutheringHeightsCorpus \
+            -Dexec.args="10000" 2>&1 | tee canary.log
+
+      - name: Check match count and publish timing
+        run: |
+          # Expected count for 10k patterns from
+          # rmatch-tester/corpus/real-words-in-wuthering-heights.txt over
+          # rmatch-tester/corpus/wuthr10.txt. Update this constant only when
+          # the pattern file, corpus file, or documented match semantics
+          # change — never to make a red build green.
+          expected_matches=171410
+          metrics=$(grep -o 'PERFORMANCE_METRICS: .*' canary.log | tail -1)
+          echo "canary metrics: ${metrics}"
+          matches=$(echo "${metrics}" | sed -n 's/.*matches=\([0-9]*\).*/\1/p')
+          duration_ms=$(echo "${metrics}" | sed -n 's/.*duration_ms=\([0-9]*\).*/\1/p')
+          if [ -z "${matches}" ]; then
+            echo "::error::Canary produced no PERFORMANCE_METRICS line"
+            exit 1
+          fi
+          if [ "${matches}" != "${expected_matches}" ]; then
+            echo "::error::Match count regression: expected ${expected_matches}, got ${matches}"
+            exit 1
+          fi
+          {
+            echo "### Performance canary"
+            echo ""
+            echo "| Workload | Matches | Scan duration |"
+            echo "|---|---:|---:|"
+            echo "| 10k patterns, Wuthering Heights | ${matches} | ${duration_ms} ms |"
+            echo ""
+            echo "_Timing is informational only; this job asserts completion and match count._"
+          } >> "$GITHUB_STEP_SUMMARY"
