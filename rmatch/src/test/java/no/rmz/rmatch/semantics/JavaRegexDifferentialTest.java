@@ -116,14 +116,17 @@ public class JavaRegexDifferentialTest {
     return sb.toString();
   }
 
-  /** Per-start-longest oracle via java.util.regex full-match, longest end first. */
+  /**
+   * Per-start-longest oracle via java.util.regex full-match, longest end first. Spans are recorded
+   * in the half-open {@code start-end} convention shared with the rmatch Action contract.
+   */
   private static Set<String> javaOracle(final String pattern, final String input) {
     final java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
     final Set<String> out = new TreeSet<>();
     for (int start = 0; start < input.length(); start++) {
       for (int end = input.length(); end > start; end--) {
         if (p.matcher(input.substring(start, end)).matches()) {
-          out.add(start + "-" + (end - 1));
+          out.add(start + "-" + end);
           break;
         }
       }
@@ -138,28 +141,15 @@ public class JavaRegexDifferentialTest {
     m.add(
         pattern,
         (b, start, end) -> {
-          if (end > start || (end == start)) {
-            // Exclude zero-length matches from comparison (engine-defined semantics).
-            if (end >= start && !(end == start && matchIsZeroWidth(b, start, end, pattern))) {
-              synchronized (found) {
-                found.add(start + "-" + end);
-              }
-            }
+          // Callback offsets are half-open, so end == start would be a zero-width
+          // match. rmatch only reports consumed spans, so record everything.
+          synchronized (found) {
+            found.add(start + "-" + end);
           }
         });
     m.match(new RegexStringBuffer(input));
-    m.shutdown();
+    m.close();
     return found;
-  }
-
-  /**
-   * A length-1 match has end == start; a zero-width one would too — rmatch reports inclusive ends,
-   * so end==start is a ONE-character match, never zero-width. Zero-width matches simply do not
-   * occur in rmatch's reporting (no known reporting path), so nothing to filter in practice.
-   */
-  private static boolean matchIsZeroWidth(
-      final Object b, final int start, final int end, final String pattern) {
-    return false;
   }
 
   @Test

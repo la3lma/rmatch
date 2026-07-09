@@ -89,7 +89,9 @@ public class JavaRegexpMatcher implements Matcher {
               rmatcher.reset(strToSearchIn);
               while (rmatcher.find()) {
                 final int start = rmatcher.start();
-                final int end = rmatcher.end() - 1;
+                // java.util.regex end() is already exclusive, matching the
+                // half-open rmatch Action contract.
+                final int end = rmatcher.end();
                 action.performMatch(b, start, end);
               }
               return null;
@@ -101,7 +103,7 @@ public class JavaRegexpMatcher implements Matcher {
 
   @Override
   public void match(final Buffer b) {
-    makeMatchers(b, collectRemainingText(b.clone()));
+    makeMatchers(b, collectText(b));
     try {
       es.invokeAll(matchers);
     } catch (InterruptedException ex) {
@@ -109,10 +111,10 @@ public class JavaRegexpMatcher implements Matcher {
     }
   }
 
-  private static String collectRemainingText(final Buffer cursor) {
+  private static String collectText(final Buffer b) {
     final StringBuilder text = new StringBuilder();
-    while (cursor.hasNext()) {
-      text.append(cursor.getNext());
+    for (long i = 0; b.hasCharAt(i); i++) {
+      text.append(b.charAt(i));
     }
     return text.toString();
   }
@@ -144,5 +146,5 @@ public class JavaRegexpMatcher implements Matcher {
   }
 
   @Override
-  public void shutdown() throws InterruptedException {}
+  public void close() {}
 }

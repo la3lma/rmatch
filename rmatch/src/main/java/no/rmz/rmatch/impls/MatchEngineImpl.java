@@ -22,6 +22,7 @@ import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
 import no.rmz.rmatch.engine.prefilter.PrefilterSafety;
 import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.utils.RegexStringBuffer;
 
 /**
  * An implementation of a MatchEngine that can be used to match regular expressions against input.
@@ -299,18 +300,18 @@ final class MatchEngineImpl implements MatchEngine {
 
     if (contextAssertions) {
       Character previousChar = null;
-      while (b.hasNext()) {
-        final Character nextChar = b.getNext();
-        final int currentPos = b.getCurrentPos();
-        final MatchContext context = contextForPosition(b, currentPos, previousChar, nextChar);
+      for (long pos = 0; b.hasCharAt(pos); pos++) {
+        final Character nextChar = b.charAt(pos);
+        final int currentPos = (int) pos;
+        final MatchContext context = contextForPosition(b, pos, previousChar, nextChar);
         matcherProgress(b, nextChar, currentPos, activeMatchSets, prefilterActive, context);
         previousChar = nextChar;
       }
     } else {
       // Advance all match sets forward one character without carrying assertion context.
-      while (b.hasNext()) {
-        final Character nextChar = b.getNext();
-        final int currentPos = b.getCurrentPos();
+      for (long pos = 0; b.hasCharAt(pos); pos++) {
+        final Character nextChar = b.charAt(pos);
+        final int currentPos = (int) pos;
         matcherProgress(b, nextChar, currentPos, activeMatchSets, prefilterActive);
       }
     }
@@ -327,19 +328,17 @@ final class MatchEngineImpl implements MatchEngine {
   /** Collects the full text from the buffer for prefilter scanning without consuming it. */
   private String collectBufferText(final Buffer b) {
     try {
-      return collectRemainingText(b.clone());
+      if (b instanceof RegexStringBuffer rsb) {
+        return rsb.getString(0, rsb.getLength());
+      }
+      final StringBuilder text = new StringBuilder();
+      for (long i = 0; b.hasCharAt(i); i++) {
+        text.append(b.charAt(i));
+      }
+      return text.toString();
     } catch (RuntimeException ex) {
       return null;
     }
-  }
-
-  /** Collect the remaining text by advancing a cloned cursor. */
-  private static String collectRemainingText(final Buffer cursor) {
-    final StringBuilder text = new StringBuilder();
-    while (cursor.hasNext()) {
-      text.append(cursor.getNext());
-    }
-    return text.toString();
   }
 
   /**
@@ -402,23 +401,10 @@ final class MatchEngineImpl implements MatchEngine {
 
   private static MatchContext contextForPosition(
       final Buffer b,
-      final int currentPos,
+      final long currentPos,
       final Character previousChar,
       final Character currentChar) {
-    if (b instanceof LookaheadBuffer lookahead) {
-      return MatchContext.forPosition(currentPos, previousChar, currentChar, lookahead.peek());
-    }
-    try {
-      final Buffer clone = b.clone();
-      final Character nextChar = clone.hasNext() ? clone.getNext() : null;
-      return MatchContext.forPosition(currentPos, previousChar, currentChar, nextChar);
-    } catch (RuntimeException ex) {
-      // Custom buffers are expected to clone, but EOF-only context is safer than guessing.
-    }
-    return new MatchContext(
-        currentPos == 0 || previousChar != null && previousChar == '\n',
-        !b.hasNext(),
-        false,
-        false);
+    final Character nextChar = b.hasCharAt(currentPos + 1) ? b.charAt(currentPos + 1) : null;
+    return MatchContext.forPosition((int) currentPos, previousChar, currentChar, nextChar);
   }
 }

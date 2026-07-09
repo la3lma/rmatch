@@ -88,12 +88,13 @@ public class LineAnchorSemanticsTest {
           pat,
           (b, start, end) -> {
             synchronized (found) {
-              found.add(pat + "@" + start + "-" + end);
+              // Callback end is exclusive; expectation tables use inclusive spans.
+              found.add(pat + "@" + start + "-" + (end - 1));
             }
           });
     }
     m.match(input);
-    m.shutdown();
+    m.close();
     return found;
   }
 
@@ -118,41 +119,24 @@ public class LineAnchorSemanticsTest {
 
   private static final class PlainBuffer implements Buffer {
     private final String text;
-    private int currentPos = -1;
 
     private PlainBuffer(final String text) {
       this.text = text;
     }
 
-    private PlainBuffer(final PlainBuffer other) {
-      this.text = other.text;
-      this.currentPos = other.currentPos;
+    @Override
+    public String getString(final long start, final long stop) {
+      return text.substring(Math.toIntExact(start), Math.toIntExact(stop));
     }
 
     @Override
-    public String getString(final int start, final int stop) {
-      return text.substring(start, stop);
+    public boolean hasCharAt(final long pos) {
+      return pos >= 0 && pos < text.length();
     }
 
     @Override
-    public boolean hasNext() {
-      return currentPos < text.length() - 1;
-    }
-
-    @Override
-    public Character getNext() {
-      currentPos += 1;
-      return text.charAt(currentPos);
-    }
-
-    @Override
-    public int getCurrentPos() {
-      return currentPos;
-    }
-
-    @Override
-    public Buffer clone() {
-      return new PlainBuffer(this);
+    public char charAt(final long pos) {
+      return text.charAt(Math.toIntExact(pos));
     }
   }
 }

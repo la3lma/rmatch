@@ -123,11 +123,7 @@ public final class MatcherBenchmarker {
     LOG.log(Level.INFO, "(regexp) counter {0}", counter);
 
     matcher.match(b);
-    try {
-      matcher.shutdown();
-    } catch (InterruptedException ex) {
-      throw new RuntimeException(ex);
-    }
+    matcher.close();
     final int finalCount = wordAction.getCounter();
     LOG.log(
         Level.INFO,
@@ -152,7 +148,7 @@ public final class MatcherBenchmarker {
     FastCounters.dumpCounters();
   }
 
-  public record LoggedMatch(String matcherTypeName, String regex, int start, int end) {}
+  public record LoggedMatch(String matcherTypeName, String regex, long start, long end) {}
 
   public record TestRunResult(
       String matcherTypeName,
@@ -256,7 +252,7 @@ public final class MatcherBenchmarker {
           if (o2 == null) {
             return 1;
           }
-          int result = Integer.compare(o1.start(), o2.start());
+          int result = Long.compare(o1.start(), o2.start());
           if (result != 0) {
             return result;
           }
@@ -264,7 +260,7 @@ public final class MatcherBenchmarker {
           if (result != 0) {
             return result;
           }
-          return Integer.compare(o1.end(), o2.end());
+          return Long.compare(o1.end(), o2.end());
         }
       };
 
@@ -284,7 +280,7 @@ public final class MatcherBenchmarker {
       final Action action =
           new Action() {
             @Override
-            public void performMatch(Buffer b, int start, int end) {
+            public void performMatch(Buffer b, long start, long end) {
               final LoggedMatch ob = new LoggedMatch(matcherTypeName, regex, start, end);
               synchronized (guard) {
                 loggedMatches.add(ob);
@@ -302,11 +298,7 @@ public final class MatcherBenchmarker {
     // Run the matches
     final long timeAtStart = System.currentTimeMillis();
     matcher.match(buf);
-    try {
-      matcher.shutdown();
-    } catch (InterruptedException ex) {
-      throw new RuntimeException(ex);
-    }
+    matcher.close();
     final long timeAtEnd = System.currentTimeMillis();
     final long duration = timeAtEnd - timeAtStart;
 

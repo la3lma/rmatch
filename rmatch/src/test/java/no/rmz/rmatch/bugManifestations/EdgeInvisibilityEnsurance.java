@@ -14,7 +14,7 @@ package no.rmz.rmatch.bugManifestations;
  * limitations under the License.
  */
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -84,9 +84,9 @@ public class EdgeInvisibilityEnsurance {
     m.match(buffer);
 
     // Verify
-    verify(denAction).performMatch(any(Buffer.class), anyInt(), anyInt());
-    verify(llAction).performMatch(any(Buffer.class), anyInt(), anyInt());
-    verify(ladenAction).performMatch(any(Buffer.class), anyInt(), anyInt());
-    verify(defaultAction, times(0)).performMatch(any(Buffer.class), anyInt(), anyInt());
+    verify(denAction).performMatch(any(Buffer.class), anyLong(), anyLong());
+    verify(llAction).performMatch(any(Buffer.class), anyLong(), anyLong());
+    verify(ladenAction).performMatch(any(Buffer.class), anyLong(), anyLong());
+    verify(defaultAction, times(0)).performMatch(any(Buffer.class), anyLong(), anyLong());
   }
 }

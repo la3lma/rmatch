@@ -118,12 +118,13 @@ public class BasicMatchingSemanticsTest {
           pat,
           (b, start, end) -> {
             synchronized (found) {
-              found.add(pat + "@" + start + "-" + end);
+              // Callback end is exclusive; expectation tables use inclusive spans.
+              found.add(pat + "@" + start + "-" + (end - 1));
             }
           });
     }
     m.match(new RegexStringBuffer(input));
-    m.shutdown();
+    m.close();
     return found;
   }
 

@@ -137,10 +137,10 @@ public class ARegexpCompilerTest {
    * Verify match
    *
    * @param mb The MB instance
-   * @param stop end of match
+   * @param stop exclusive end of match
    */
-  private void verifyPerformMatch(final MB mb, final int stop) {
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(stop));
+  private void verifyPerformMatch(final MB mb, final long stop) {
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(stop));
   }
 
   /** Test of addString method, of class ARegexpCompiler. */
@@ -152,7 +152,7 @@ public class ARegexpCompilerTest {
     final MB mb =
         runMatcherFromCompiler(regexpPattern, testString, arb -> arb.addString(regexpPattern));
 
-    verifyPerformMatch(mb, 0);
+    verifyPerformMatch(mb, 1);
   }
 
   /** Test of addString method, of class ARegexpCompiler. */
@@ -170,7 +170,7 @@ public class ARegexpCompilerTest {
               arb.addString("b");
             });
 
-    verifyPerformMatch(mb, 1);
+    verifyPerformMatch(mb, 2);
   }
 
   /** Test of separateAlternatives method, of class ARegexpCompiler. */
@@ -188,7 +188,7 @@ public class ARegexpCompilerTest {
               arb.addString("b");
             });
 
-    verifyPerformMatch(mb, 0);
+    verifyPerformMatch(mb, 1);
   }
 
   /** Test recognition of a char set. */
@@ -207,7 +207,7 @@ public class ARegexpCompilerTest {
               arb.endCharSet();
             });
 
-    verifyPerformMatch(mb, 0);
+    verifyPerformMatch(mb, 1);
   }
 
   /** Test recognition of a char set. */
@@ -227,7 +227,7 @@ public class ARegexpCompilerTest {
               arb.endCharSet();
             });
 
-    verifyPerformMatch(mb, 0);
+    verifyPerformMatch(mb, 1);
   }
 
   /** Test of addRangeToCharSet method, of class ARegexpCompiler. */
@@ -245,7 +245,7 @@ public class ARegexpCompilerTest {
               arb.endCharSet();
             });
 
-    verifyPerformMatch(mb, 0);
+    verifyPerformMatch(mb, 1);
   }
 
   /** Test of addAnyChar method, of class ARegexpCompiler. */
@@ -256,7 +256,7 @@ public class ARegexpCompilerTest {
     final MB mb =
         runMatcherFromCompiler(regexpPattern, testString, AbstractRegexBuilder::addAnyChar);
 
-    verifyPerformMatch(mb, 0);
+    verifyPerformMatch(mb, 1);
   }
 
   /** Test of addBeginningOfLine method, of class ARegexpCompiler. */
@@ -275,7 +275,7 @@ public class ARegexpCompilerTest {
               arb.addAnyChar();
             });
 
-    verifyPerformMatch(mb, 0);
+    verifyPerformMatch(mb, 1);
   }
 
   /** Test of addEndOfLine method, of class ARegexpCompiler. */
@@ -293,7 +293,7 @@ public class ARegexpCompilerTest {
               arb.addString("z");
               arb.addAnyChar();
             });
-    verifyPerformMatch(mb, 0);
+    verifyPerformMatch(mb, 1);
   }
 
   /** Test of addOptionalSingular method, of class ARegexpCompiler. */
@@ -310,7 +310,7 @@ public class ARegexpCompilerTest {
               arb.addOptionalSingular();
               arb.addString("b");
             });
-    verifyPerformMatch(mb, 0);
+    verifyPerformMatch(mb, 1);
   }
 
   /** Test of addOptionalZeroOrMulti method, of class ARegexpCompiler. */
@@ -329,7 +329,7 @@ public class ARegexpCompilerTest {
               arb.addString("n");
             });
 
-    verifyPerformMatch(mb, 5);
+    verifyPerformMatch(mb, 6);
   }
 
   /** Test of addOptionalOnceOrMulti method, of class ARegexpCompiler. */
@@ -349,6 +349,6 @@ public class ARegexpCompilerTest {
               arb.addString("n");
             });
 
-    verifyPerformMatch(mb, 5);
+    verifyPerformMatch(mb, 6);
   }
 }

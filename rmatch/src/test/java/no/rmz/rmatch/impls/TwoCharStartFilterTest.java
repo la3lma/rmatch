@@ -44,12 +44,13 @@ public class TwoCharStartFilterTest {
           pattern,
           (b, start, end) -> {
             synchronized (found) {
-              found.add(pattern + "@" + start + "-" + end);
+              // Callback end is exclusive; expectation tables use inclusive spans.
+              found.add(pattern + "@" + start + "-" + (end - 1));
             }
           });
     }
     m.match(new RegexStringBuffer(input));
-    m.shutdown();
+    m.close();
     return found;
   }
 

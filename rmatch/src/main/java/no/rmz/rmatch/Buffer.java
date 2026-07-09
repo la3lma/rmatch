@@ -14,79 +14,68 @@
 package no.rmz.rmatch;
 
 /**
- * Input abstraction consumed by rmatch engines.
+ * Randomly addressable input text consumed by rmatch engines.
  *
- * <p>Most callers should use {@link RMatch#buffer(String)}, which adapts a {@link String} to this
- * interface. Custom buffer implementations are useful when input is backed by another data
- * structure, but they must preserve the cursor semantics described here.
+ * <p>A buffer is pure content. Implementations expose characters by zero-based position and
+ * substrings by half-open range; they hold no iteration state. Engines keep their own cursors,
+ * which is what lets a partitioned matcher scan one buffer instance from several threads.
+ * Implementations must therefore tolerate concurrent readers. Immutable content, such as the
+ * string-backed buffers returned by {@link RMatch#stringBuffer(String)}, satisfies this trivially.
  *
- * <p>A buffer starts before the first character. Each call to {@link #getNext()} advances the
- * cursor and returns the character at the new position. The current position is zero-based after
- * the first character has been consumed.
+ * <p>Positions are {@code long} so that implementations larger than the {@code int} range remain
+ * possible. The built-in string-backed buffers are naturally limited by {@link String} and reject
+ * out-of-range arguments.
+ *
+ * <p>End of input is expressed positionally: {@link #hasCharAt(long)} returning {@code false} means
+ * the input ends before {@code pos}. There is deliberately no total-length method, so
+ * bounded-window implementations over long or streaming inputs stay expressible: such an
+ * implementation may block in {@code hasCharAt} while fetching more input, and may restrict {@link
+ * #getString(long, long)} to a documented retention window. Engines only scan forward and look back
+ * at most one character for context assertions; match-text recovery via {@code getString} is the
+ * caller's own lookback requirement.
  */
-public interface Buffer extends Comparable<Buffer> {
+public interface Buffer {
 
   /**
-   * Return a substring from the underlying input.
+   * Return whether the input contains a character at the given position.
+   *
+   * <p>Returning {@code false} means the input ends before {@code pos}. Implementations backed by a
+   * stream may block here while fetching more input.
+   *
+   * @param pos zero-based position
+   * @return {@code true} if {@link #charAt(long)} is defined for {@code pos}
+   */
+  boolean hasCharAt(long pos);
+
+  /**
+   * Return the character at the given position.
+   *
+   * <p>Defined when {@link #hasCharAt(long)} is {@code true} for {@code pos}.
+   *
+   * @param pos zero-based position
+   * @return character at {@code pos}
+   */
+  char charAt(long pos);
+
+  /**
+   * Return the text in the half-open range {@code [start, stop)}.
    *
    * <p>The {@code stop} argument is exclusive, matching {@link String#substring(int, int)}. Match
-   * callbacks use inclusive end offsets, so the usual way to recover callback text is {@code
-   * buffer.getString(start, end + 1)}.
+   * callbacks use the same convention, so callback text is recovered with {@code
+   * buffer.getString(start, end)}.
+   *
+   * <p>The default implementation assembles the result with {@link #charAt(long)}; string-backed
+   * implementations should override it with a direct substring.
    *
    * @param start zero-based inclusive start offset
    * @param stop zero-based exclusive stop offset
    * @return text in the half-open range {@code [start, stop)}
    */
-  String getString(final int start, final int stop);
-
-  /**
-   * Return whether a subsequent call to {@link #getNext()} can advance the cursor.
-   *
-   * @return {@code true} if another character is available
-   */
-  boolean hasNext();
-
-  /**
-   * Advance the cursor and return the next character.
-   *
-   * @return next character in the input
-   */
-  Character getNext();
-
-  /**
-   * Return the current zero-based cursor position.
-   *
-   * <p>Before any characters are consumed, implementations may return {@code -1}.
-   *
-   * @return current cursor position
-   */
-  int getCurrentPos(); // XXX Should this be a long?
-
-  /**
-   * Return an independent cursor over the same input content.
-   *
-   * <p>Partitioned matchers clone buffers before scanning in parallel. Implementations should make
-   * sure advancing the clone does not advance the original.
-   *
-   * @return independent buffer clone
-   */
-  Buffer clone();
-
-  private static int compoundCompare(int... results) {
-    for (int result : results) {
-      if (result != 0) {
-        return result;
-      }
+  default String getString(final long start, final long stop) {
+    final StringBuilder sb = new StringBuilder(Math.toIntExact(stop - start));
+    for (long i = start; i < stop; i++) {
+      sb.append(charAt(i));
     }
-    return 0;
-  }
-
-  @Override
-  default int compareTo(Buffer other) {
-    return compoundCompare(
-        Integer.compare(this.getCurrentPos(), other.getCurrentPos()),
-        this.getString(0, this.getCurrentPos())
-            .compareTo(other.getString(0, other.getCurrentPos())),
-        Boolean.compare(this.hasNext(), other.hasNext()));
+    return sb.toString();
   }
 }

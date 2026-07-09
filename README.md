@@ -133,29 +133,22 @@ Put this in `src/main/java/Example.java`. It registers two patterns once, scans
 one buffer, and prints both matches.
 
 ```java
-import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.Matcher;
 import no.rmz.rmatch.RMatch;
 
 public class Example {
   public static void main(String[] args) throws Exception {
-    Matcher matcher = RMatch.newMatcher();
+    try (Matcher matcher = RMatch.newMatcher()) {
+      matcher.add("ERROR|WARN", (buffer, start, end) -> {
+        System.out.println("log-level match: " + buffer.getString(start, end));
+      });
 
-    matcher.add("ERROR|WARN", (buffer, start, end) -> {
-      System.out.println("log-level match: " + matchedText(buffer, start, end));
-    });
+      matcher.add("user:[a-z]+", (buffer, start, end) -> {
+        System.out.println("user token match: " + buffer.getString(start, end));
+      });
 
-    matcher.add("user:[a-z]+", (buffer, start, end) -> {
-      System.out.println("user token match: " + matchedText(buffer, start, end));
-    });
-
-    matcher.match(RMatch.buffer("INFO user:alice WARN disk nearly full"));
-    matcher.shutdown();
-  }
-
-  private static String matchedText(Buffer buffer, int start, int end) {
-    // rmatch callbacks use inclusive start/end offsets.
-    return buffer.getString(start, end + 1);
+      matcher.match(RMatch.stringBuffer("INFO user:alice WARN disk nearly full"));
+    }
   }
 }
 ```
@@ -174,14 +167,58 @@ user token match: user:alice
 log-level match: WARN
 ```
 
-`RMatch.newMatcher()` creates the recommended production matcher. The
-callback receives the matched buffer and inclusive start/end offsets. rmatch
+`RMatch.newMatcher()` creates the recommended production matcher. Matchers are
+`AutoCloseable`; closing releases the worker threads a partitioned matcher
+owns, so try-with-resources is the natural usage pattern. The callback
+receives the matched buffer and half-open `[start, end)` offsets — the same
+convention as `String.substring`, so the matched text is exactly
+`buffer.getString(start, end)` and its length is `end - start`. rmatch
 reports the longest match for each start position; overlapping matches from
 different start positions may therefore be reported.
 
 For one small pattern against one small string, `java.util.regex` is usually the
 simpler tool. rmatch is for many-pattern workloads where avoiding a separate
 regex search for every pattern matters.
+
+## Buffer Inputs and Streams
+
+The public input helpers are named `RMatch.stringBuffer(...)`. That is an
+intentional choice, not an accident of the example code: these helpers read the
+whole input into a `String` and match over that materialized text.
+
+rmatch buffers are pure content: a `Buffer` answers `hasCharAt(pos)`,
+`charAt(pos)`, and `getString(start, stop)`, and holds no iteration state.
+Engines keep their own cursors, which is how the partitioned matcher scans one
+buffer from several threads — implementations must tolerate concurrent
+readers, which immutable content does trivially. Match callbacks receive start
+and end offsets, and user code commonly asks the buffer for the matched text
+by offset, so content must be replayable within whatever retention window the
+implementation documents.
+
+If your input starts as a file, `Reader`, or `InputStream`, the convenience
+overloads can read and decode it for you:
+
+```java
+Buffer fromString = RMatch.stringBuffer("plain text");
+Buffer fromPath = RMatch.stringBuffer(path, StandardCharsets.UTF_8);
+Buffer fromReader = RMatch.stringBuffer(reader);
+Buffer fromStream = RMatch.stringBuffer(inputStream, StandardCharsets.UTF_8);
+```
+
+All of these forms still materialize the whole input as a `String`. The
+`Buffer` contract deliberately has no total-length method: end of input is the
+positional question `hasCharAt(pos)`, which a bounded-window implementation
+over a long or streaming input can answer by fetching more data, restricting
+`getString` to its documented lookback window. rmatch does not ship such an
+adapter yet, but the interface is shaped so that it stays possible.
+
+The escape hatch is deliberately simple: `Buffer` is public, and
+`Matcher.match(Buffer)` accepts any implementation. If you want to experiment
+with a file-backed, windowed, mmap-backed, or otherwise specialized input
+adapter, implement `Buffer` and pass it directly to the matcher. The contract
+is three methods: character lookup by position, substring lookup by half-open
+range, and a positional end-of-input probe — plus tolerance for concurrent
+readers.
 
 ## Supported Syntax in 1.9.x
 

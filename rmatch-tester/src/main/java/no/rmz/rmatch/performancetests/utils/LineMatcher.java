@@ -35,31 +35,20 @@ public final class LineMatcher {
 
   public void match(final Buffer b) {
     checkNotNull(b);
-    while (b.hasNext()) {
-      lineSource.setCurrentLine(readLine(b));
+    long pos = 0;
+    while (b.hasCharAt(pos)) {
+      final StringBuilder line = new StringBuilder();
+      while (b.hasCharAt(pos)) {
+        final char ch = b.charAt(pos++);
+        if (isEol(ch)) {
+          break;
+        }
+        line.append(ch);
+      }
+      lineSource.setCurrentLine(line.toString());
       noOfLines += 1;
       matchDetector.detectMatchesForCurrentLine();
     }
-  }
-
-  /**
-   * Read a new line. We will assume that the input buffer has at least one character available.
-   *
-   * @param b a source of characters
-   * @return a line of text.
-   */
-  private String readLine(final Buffer b) {
-    checkNotNull(b);
-    final StringBuilder sb = new StringBuilder();
-    do {
-      final Character ch = b.getNext();
-      if (isEol(ch)) {
-        return sb.toString();
-      }
-      sb.append(ch);
-    } while (b.hasNext());
-
-    return sb.toString();
   }
 
   /**

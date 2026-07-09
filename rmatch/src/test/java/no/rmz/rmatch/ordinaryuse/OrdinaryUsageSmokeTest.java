@@ -18,6 +18,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
+import java.io.ByteArrayInputStream;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 import no.rmz.rmatch.Action;
 import no.rmz.rmatch.Buffer;
@@ -64,17 +69,17 @@ public class OrdinaryUsageSmokeTest {
   /** Test matching the two regexps concurrently. */
   @Test
   public final void testUseOfOrdinaryMatcherImpl() throws RegexpParserException {
-    final Buffer b = RMatch.buffer(("ab" + " " + "ac"));
+    final Buffer b = RMatch.stringBuffer(("ab" + " " + "ac"));
 
     m.add("ac", action);
     m.add("ab", action);
 
     m.match(b);
 
-    verify(action).performMatch(any(Buffer.class), eq(0), eq("ab".length() - 1));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq((long) "ab".length()));
     verify(action)
         .performMatch(
-            any(Buffer.class), eq("ab".length() + 1), eq("ab".length() + 1 + "ac".length() - 1));
+            any(Buffer.class), eq("ab".length() + 1L), eq("ab".length() + 1L + "ac".length()));
   }
 
   /** Test the public facade shown in the README copy-paste example. */
@@ -82,11 +87,37 @@ public class OrdinaryUsageSmokeTest {
   public final void testPublicFacadeCreatesMatcherAndStringBuffer() throws Exception {
     final AtomicReference<String> matched = new AtomicReference<>();
     final Matcher matcher = RMatch.newSingleMatcher();
-    matcher.add("WARN", (buffer, start, end) -> matched.set(buffer.getString(start, end + 1)));
+    matcher.add("WARN", (buffer, start, end) -> matched.set(buffer.getString(start, end)));
 
-    matcher.match(RMatch.buffer("INFO user:alice WARN disk nearly full"));
-    matcher.shutdown();
+    matcher.match(RMatch.stringBuffer("INFO user:alice WARN disk nearly full"));
+    matcher.close();
 
     assertEquals("WARN", matched.get());
+  }
+
+  /** Test the explicit materializing string-buffer overloads. */
+  @Test
+  public final void testStringBufferConvenienceMethodsMaterializeInput() throws Exception {
+    assertBufferContainsExactly(RMatch.stringBuffer("alpha"), "alpha");
+    assertBufferContainsExactly(RMatch.stringBuffer(new StringBuilder("bravo")), "bravo");
+
+    final Path path = Files.createTempFile("rmatch-string-buffer-", ".txt");
+    try {
+      Files.writeString(path, "charlie", StandardCharsets.UTF_8);
+      assertBufferContainsExactly(RMatch.stringBuffer(path, StandardCharsets.UTF_8), "charlie");
+    } finally {
+      Files.deleteIfExists(path);
+    }
+
+    assertBufferContainsExactly(RMatch.stringBuffer(new StringReader("delta")), "delta");
+    assertBufferContainsExactly(
+        RMatch.stringBuffer(
+            new ByteArrayInputStream("echo".getBytes(StandardCharsets.UTF_8)),
+            StandardCharsets.UTF_8),
+        "echo");
+  }
+
+  private static void assertBufferContainsExactly(final Buffer buffer, final String expected) {
+    assertEquals(expected, buffer.getString(0, expected.length()));
   }
 }

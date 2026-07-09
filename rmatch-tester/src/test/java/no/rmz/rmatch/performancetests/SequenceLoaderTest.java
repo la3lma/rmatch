@@ -276,10 +276,10 @@ public class SequenceLoaderTest {
 
     LOG.info("no of words to look for: " + noOfThingsToLookFor);
 
-    final Buffer b = new WutheringHeightsBuffer();
+    final WutheringHeightsBuffer b = new WutheringHeightsBuffer();
     m.match(b);
 
-    LOG.info("No of characters read:  " + b.getCurrentPos() + " chars from " + regexpFile);
+    LOG.info("No of characters read:  " + b.getLength() + " chars from " + regexpFile);
     final int noOfMatches = allWordsAction.getCounter();
     LOG.log(
         Level.INFO,

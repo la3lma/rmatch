@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>rmatch 2.0 release checklist</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">rmatch 2.0 release checklist</h1>
+</header>
+<h1 id="rmatch-2.0-release-checklist">rmatch 2.0 release checklist</h1>
+<p>This is the broad pre-2.0 checklist. It is intentionally
+over-inclusive: assume items here should be completed unless they are
+explicitly removed before the 2.0 release lane starts.</p>
+<h2 id="release-goal">Release Goal</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />State the 2.0 promise in one
+paragraph: what rmatch is for, what it is not for, and what
+compatibility promises start at 2.0.</label></li>
+<li><label><input type="checkbox" />Decide whether the last preview
+before 2.0 is <code>1.9.x</code>, <code>1.99.x</code>, or direct
+<code>2.0.0</code>.</label></li>
+<li><label><input type="checkbox" />Decide whether to cut
+<code>2.0.0-RC1</code> instead of using a <code>1.99.x</code> preview
+line.</label></li>
+<li><label><input type="checkbox" />Decide the exact Java baseline for
+2.0 and document it in README, Javadocs, POM metadata, and release
+notes.</label></li>
+<li><label><input type="checkbox" />Confirm that
+<code>rmatch-tester</code> remains unpublished and
+project-local.</label></li>
+<li><label><input type="checkbox" />Confirm that the public Maven
+Central artifacts remain only <code>no.rmz:rmatch-parent</code> and
+<code>no.rmz:rmatch</code>.</label></li>
+</ul>
+<h2 id="public-api-surface">Public API Surface</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Verify that ordinary users can do
+the important work using only the root <code>no.rmz.rmatch</code>
+package.</label></li>
+<li><label><input type="checkbox" />Verify that the published JPMS
+module exports only intentional public API.</label></li>
+<li><label><input type="checkbox" />Verify that Javadocs expose only
+intentional public API, not compiler, engine, implementation, utility,
+node-management, test, or diagnostic packages.</label></li>
+<li><label><input type="checkbox" />Inspect the generated
+<code>-javadoc.jar</code>, not just local generated HTML.</label></li>
+<li><label><input type="checkbox" />Inspect javadoc.io after publication
+and confirm it shows the intended surface.</label></li>
+<li><label><input type="checkbox" />Remove or hide public implementation
+classes that do not need to be public.</label></li>
+<li><label><input type="checkbox" />Make implementation classes
+<code>final</code> where subclassing is not a supported extension
+point.</label></li>
+<li><label><input type="checkbox" />Make implementation methods and
+fields <code>private</code>, package-private, or <code>protected</code>
+only where that is part of a deliberate internal design.</label></li>
+<li><label><input type="checkbox" />Remove accidental public
+constructors and factories for internal types.</label></li>
+<li><label><input type="checkbox" />Remove public interfaces that are
+only internal wiring unless they are truly extension
+contracts.</label></li>
+<li><label><input type="checkbox" />Review whether <code>Buffer</code>,
+<code>Matcher</code>, <code>Action</code>, <code>RMatch</code>, and
+<code>RegexpParserException</code> are the complete intended public
+facade.</label></li>
+<li><label><input type="checkbox" />Ensure public names are clear enough
+that examples do not need to explain surprising behavior.</label></li>
+<li><label><input type="checkbox" />Decide whether match callback
+offsets should become half-open <code>[start, end)</code> in 2.0,
+matching <code>String.substring</code>, <code>MatchResult</code>, and
+common Java convention.</label></li>
+<li><label><input type="checkbox" />If callback offsets remain
+inclusive, add a public helper so user code does not repeatedly write
+<code>buffer.getString(start, end + 1)</code>.</label></li>
+<li><label><input type="checkbox" />Decide whether <code>Matcher</code>
+should extend <code>AutoCloseable</code>.</label></li>
+<li><label><input type="checkbox" />If <code>Matcher</code> extends
+<code>AutoCloseable</code>, update README examples to use
+try-with-resources.</label></li>
+<li><label><input type="checkbox" />Decide whether
+<code>shutdown()</code> remains part of the public lifecycle API, is
+renamed, or is complemented by <code>close()</code>.</label></li>
+<li><label><input type="checkbox" />Decide whether matcher worker
+threads should be daemon threads as a safety net.</label></li>
+<li><label><input type="checkbox" />Reserve a future-compatible API
+shape for flags, such as <code>add(pattern, flags, action)</code>, even
+if not all flags ship in 2.0.</label></li>
+<li><label><input type="checkbox" />Decide the public representation for
+flags before 2.0 freezes: enum set, integer bit flags, or another
+explicit type.</label></li>
+<li><label><input type="checkbox" />Document what happens when an
+<code>Action</code> throws during matching.</label></li>
+<li><label><input type="checkbox" />Document whether one throwing action
+aborts the scan immediately or after already-started partitions
+finish.</label></li>
+<li><label><input type="checkbox" />Document whether <code>add()</code>
+or <code>remove()</code> during an in-flight <code>match()</code> is
+legal.</label></li>
+<li><label><input type="checkbox" />Document whether calling
+<code>match()</code> concurrently from several threads on the same
+matcher is legal.</label></li>
+<li><label><input type="checkbox" />Document whether
+<code>match()</code> after <code>shutdown()</code> or
+<code>close()</code> is defined.</label></li>
+</ul>
+<h2 id="buffer-and-input-contract">Buffer and Input Contract</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Keep the public materializing
+helpers named <code>RMatch.stringBuffer(...)</code>, so callers see that
+the whole input is read into a <code>String</code>.</label></li>
+<li><label><input type="checkbox" />Provide convenience overloads for
+<code>String</code>, <code>CharSequence</code>, <code>Path</code> with
+<code>Charset</code>, <code>Reader</code>, and <code>InputStream</code>
+with <code>Charset</code>, if retained after API review.</label></li>
+<li><label><input type="checkbox" />Document that <code>Reader</code>
+and <code>InputStream</code> helpers consume but do not close the
+supplied object.</label></li>
+<li><label><input type="checkbox" />Document that current public helpers
+are not streaming, windowed, mmap, or lazy file-backed
+implementations.</label></li>
+<li><label><input type="checkbox" />Document why the current
+<code>Buffer</code> contract requires finite, replayable input with
+substring lookup by offsets and independent cloned cursors.</label></li>
+<li><label><input type="checkbox" />Document that custom
+<code>Buffer</code> implementations can be passed directly to
+<code>Matcher.match(Buffer)</code>.</label></li>
+<li><label><input type="checkbox" />State the contract a custom
+<code>Buffer</code> must preserve: cursor movement, offset-based
+substring lookup, comparison behavior, and independent
+clones.</label></li>
+<li><label><input type="checkbox" />Explicitly separate finite
+file-backed buffers from arbitrary/infinite streams in the
+docs.</label></li>
+<li><label><input type="checkbox" />Record that arbitrary streaming
+would need a separate bounded-window or maximum-lookback design and is
+not part of 2.0 unless intentionally added.</label></li>
+<li><label><input type="checkbox" />Add tests for every retained public
+<code>stringBuffer(...)</code> overload.</label></li>
+<li><label><input type="checkbox" />Add at least one small example or
+test showing that a user-supplied <code>Buffer</code> can be matched
+directly.</label></li>
+<li><label><input type="checkbox" />Decide whether <code>Buffer</code>
+should stop extending
+<code>Comparable&lt;Buffer&gt;</code>.</label></li>
+<li><label><input type="checkbox" />If
+<code>Comparable&lt;Buffer&gt;</code> is retained, fix or document
+comparison behavior on fresh buffers where the current position is
+before the first character.</label></li>
+<li><label><input type="checkbox" />If
+<code>Comparable&lt;Buffer&gt;</code> is retained, assess and document
+the cost of prefix materialization during comparison.</label></li>
+<li><label><input type="checkbox" />Remove the
+<code>// XXX Should this be a long?</code> comment from
+<code>getCurrentPos()</code> before 2.0.</label></li>
+<li><label><input type="checkbox" />Decide whether
+<code>getCurrentPos()</code> should remain <code>int</code>, become
+<code>long</code>, or be otherwise constrained by the string-backed
+facade.</label></li>
+<li><label><input type="checkbox" />If positions remain
+<code>int</code>, document the practical maximum input-size
+implication.</label></li>
+<li><label><input type="checkbox" />Decide whether
+<code>Character getNext()</code> should remain boxed or become a
+primitive <code>char</code>-based contract before 2.0.</label></li>
+<li><label><input type="checkbox" />If the hot path bypasses public
+<code>Buffer.getNext()</code>, document that custom buffer implementers
+do not need to infer scan-path performance from the boxed return
+type.</label></li>
+</ul>
+<h2 id="deprecated-and-unused-api">Deprecated and Unused API</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Search for all deprecated classes,
+methods, constructors, and fields.</label></li>
+<li><label><input type="checkbox" />Remove deprecated API that is unused
+or can be made unused by sensible internal changes.</label></li>
+<li><label><input type="checkbox" />If a deprecated API is still needed,
+remove the deprecation and document why it remains part of the public or
+internal contract.</label></li>
+<li><label><input type="checkbox" />Search for public methods that are
+not part of the obvious external interface.</label></li>
+<li><label><input type="checkbox" />Remove unused public methods where
+they are not needed for real extension points.</label></li>
+<li><label><input type="checkbox" />Remove unused internal methods where
+they do not clarify the design.</label></li>
+<li><label><input type="checkbox" />Run tests after each removal
+sweep.</label></li>
+</ul>
+<h2 id="graph-and-diagnostic-code">Graph and Diagnostic Code</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Review graph-printing support,
+including <code>getEdgesToPrint</code> and related classes or
+methods.</label></li>
+<li><label><input type="checkbox" />Decide whether graph-printing
+belongs in core at all.</label></li>
+<li><label><input type="checkbox" />If graph-printing is retained, move
+it behind a clearly internal or diagnostic boundary.</label></li>
+<li><label><input type="checkbox" />If graph-printing can be
+reconstructed by inspecting core structures, remove dedicated
+graph-printing API from production surfaces.</label></li>
+<li><label><input type="checkbox" />Ensure graph-printing code does not
+leak into public Javadocs.</label></li>
+</ul>
+<h2 id="regex-syntax-contract">Regex Syntax Contract</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Freeze and document the 2.0
+supported syntax list.</label></li>
+<li><label><input type="checkbox" />Freeze and document deliberate
+exclusions: backreferences, captures, lookaround, or other
+non-goals.</label></li>
+<li><label><input type="checkbox" />Verify line anchors <code>^</code>
+and <code>$</code> behavior with tests and documentation.</label></li>
+<li><label><input type="checkbox" />Verify word boundaries
+<code>\b</code> and <code>\B</code> behavior with tests and
+documentation.</label></li>
+<li><label><input type="checkbox" />Decide whether input anchors
+<code>\A</code>, <code>\z</code>, or <code>\Z</code> are in or out for
+2.0.</label></li>
+<li><label><input type="checkbox" />Decide whether pure zero-width match
+reporting is in or out for 2.0.</label></li>
+<li><label><input type="checkbox" />Decide whether
+<code>MULTILINE</code>, non-DOTALL <code>.</code>, scoped flags, or
+other mode machinery is in or out for 2.0.</label></li>
+<li><label><input type="checkbox" />Ensure unsupported syntax fails
+clearly, not mysteriously.</label></li>
+<li><label><input type="checkbox" />Keep regex syntax examples in README
+aligned with the tested behavior.</label></li>
+</ul>
+<h2 id="correctness-test-gate">Correctness Test Gate</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Run the full <code>rmatch</code>
+unit and semantics test suite.</label></li>
+<li><label><input type="checkbox" />Run the full
+<code>rmatch-tester</code> suite.</label></li>
+<li><label><input type="checkbox" />Run differential tests against
+<code>java.util.regex</code> for the supported syntax
+subset.</label></li>
+<li><label><input type="checkbox" />Verify match counts before treating
+benchmark timings as evidence.</label></li>
+<li><label><input type="checkbox" />Verify edge cases for overlapping
+matches, longest-match behavior, anchors, word boundaries, negated
+classes, counted quantifiers, and case-insensitive
+matching.</label></li>
+<li><label><input type="checkbox" />Confirm all skipped tests are either
+intentionally skipped or removed.</label></li>
+<li><label><input type="checkbox" />Add regression tests for every bug
+fixed during the 1.9.x line.</label></li>
+</ul>
+<h2 id="ci-gate">CI Gate</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Add or verify a GitHub Actions
+workflow that runs the full Maven test suite on pull
+requests.</label></li>
+<li><label><input type="checkbox" />Ensure CI runs more than smoke tests
+before 2.0.</label></li>
+<li><label><input type="checkbox" />Review <code>main-gate.yml</code> or
+its successor and ensure it does not merely compile plus run a tiny
+smoke subset.</label></li>
+<li><label><input type="checkbox" />Run CI on the documented Java
+baseline, expected to be Java 21 unless changed
+deliberately.</label></li>
+<li><label><input type="checkbox" />Run CI on a current newer Java
+version as well, such as Java 25 or 26.</label></li>
+<li><label><input type="checkbox" />Fix or remove workflows that target
+<code>master</code> if the repository default branch is
+<code>main</code>.</label></li>
+<li><label><input type="checkbox" />Specifically fix, replace, or delete
+any stale Codacy workflow if it is still configured for
+<code>master</code> instead of <code>main</code>.</label></li>
+<li><label><input type="checkbox" />Add an API-compatibility gate such
+as japicmp or revapi after the 2.0 API is frozen.</label></li>
+<li><label><input type="checkbox" />Configure the API-compatibility gate
+so accidental 2.0.x breaking changes fail before release.</label></li>
+</ul>
+<h2 id="performance-gate">Performance Gate</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Run the standard Docker performance
+regression gate on the agreed high-core benchmark host.</label></li>
+<li><label><input type="checkbox" />Compare the 2.0 candidate against
+the latest published pre-2.0 release.</label></li>
+<li><label><input type="checkbox" />Compare rmatch against naive
+<code>java.util.regex</code> looping and RE2J looping using
+byte-identical corpora and pattern sets.</label></li>
+<li><label><input type="checkbox" />Use deterministic benchmark inputs
+and record the generator settings.</label></li>
+<li><label><input type="checkbox" />Require equal match counts before
+comparing timings.</label></li>
+<li><label><input type="checkbox" />Capture raw benchmark receipts,
+summaries, and charts in
+<code>docs/benchmark-receipts/...</code>.</label></li>
+<li><label><input type="checkbox" />Update the README performance chart
+from a recent run of the current implementation.</label></li>
+<li><label><input type="checkbox" />Make the chart label hardware by
+class, CPU model, and core/thread count, not by private machine
+nickname.</label></li>
+<li><label><input type="checkbox" />Keep the developer performance
+regression protocol as a separate linked document, not a giant README
+section.</label></li>
+<li><label><input type="checkbox" />Investigate any material performance
+regression before release.</label></li>
+<li><label><input type="checkbox" />Record any material performance
+improvement in release notes, with receipts.</label></li>
+</ul>
+<h2 id="dependency-hygiene">Dependency Hygiene</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Run a dependency freshness pass
+before the 2.0 release candidate.</label></li>
+<li><label><input type="checkbox" />Prefer current stable versions of
+dependencies and plugins where tests and compatibility
+allow.</label></li>
+<li><label><input type="checkbox" />Avoid beta, milestone, or abandoned
+dependencies unless explicitly justified.</label></li>
+<li><label><input type="checkbox" />Confirm <code>no.rmz:rmatch</code>
+has no unintended compile/runtime dependencies.</label></li>
+<li><label><input type="checkbox" />Confirm test-only dependencies do
+not leak into compile/runtime scopes.</label></li>
+<li><label><input type="checkbox" />Confirm the external Aho-Corasick
+dependency remains removed unless a new deliberate decision reintroduces
+it.</label></li>
+<li><label><input type="checkbox" />Run dependency tree checks for
+compile, runtime, and test scopes.</label></li>
+<li><label><input type="checkbox" />Run vulnerability or risk-oriented
+dependency checks if available in the local toolchain.</label></li>
+<li><label><input type="checkbox" />Record any accepted dependency risk
+in the release notes or release checklist.</label></li>
+</ul>
+<h2 id="jpms-and-packaging">JPMS and Packaging</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Verify <code>module-info.java</code>
+names the module <code>no.rmz.rmatch</code>.</label></li>
+<li><label><input type="checkbox" />Verify
+<code>jar --describe-module</code> reports the intended module
+metadata.</label></li>
+<li><label><input type="checkbox" />Verify no automatic-module warnings
+remain in the Central release profile.</label></li>
+<li><label><input type="checkbox" />Verify the main JAR does not contain
+stale classes from previous builds.</label></li>
+<li><label><input type="checkbox" />Run release verification from a
+clean checkout or after <code>clean</code>.</label></li>
+<li><label><input type="checkbox" />Inspect the JAR
+manifest.</label></li>
+<li><label><input type="checkbox" />Inspect embedded Maven POM
+properties.</label></li>
+<li><label><input type="checkbox" />Verify classfile major version
+matches the documented Java baseline.</label></li>
+<li><label><input type="checkbox" />Verify source and Javadoc JARs are
+attached.</label></li>
+<li><label><input type="checkbox" />Verify generated <code>.asc</code>
+signatures for all published artifacts.</label></li>
+</ul>
+<h2 id="shipped-jar-hygiene">Shipped Jar Hygiene</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Remove direct
+<code>System.out.println</code> usage from library code.</label></li>
+<li><label><input type="checkbox" />Route retained diagnostic output
+through <code>java.util.logging</code> or another deliberate logging
+boundary.</label></li>
+<li><label><input type="checkbox" />Review whether
+<code>BloomFilterMatchEngine</code> is live production code or a
+leftover experiment.</label></li>
+<li><label><input type="checkbox" />Remove dead experimental engines
+from the published artifact, or move them behind an internal/diagnostic
+boundary.</label></li>
+<li><label><input type="checkbox" />Turn Javadoc doclint back on for the
+public facade if feasible before 2.0.</label></li>
+<li><label><input type="checkbox" />If doclint remains disabled,
+document the reason and a follow-up path.</label></li>
+<li><label><input type="checkbox" />Extract duplicated matcher
+partition-count heuristics into one place, if the duplication still
+exists.</label></li>
+<li><label><input type="checkbox" />Fix stale messages such as threshold
+text that disagrees with constants.</label></li>
+<li><label><input type="checkbox" />Review
+<code>MultiMatcher.shutdown()</code> timeout behavior.</label></li>
+<li><label><input type="checkbox" />Either wait for worker termination
+robustly or document any timeout and failure semantics.</label></li>
+</ul>
+<h2 id="documentation">Documentation</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Make README usable by an experienced
+Java developer in under five minutes.</label></li>
+<li><label><input type="checkbox" />Include Maven Central dependency
+instructions near the top of README.</label></li>
+<li><label><input type="checkbox" />Include Gradle dependency
+instructions near the top of README.</label></li>
+<li><label><input type="checkbox" />Keep the README copy-paste example
+minimal, correct, and tested against a clean consumer
+project.</label></li>
+<li><label><input type="checkbox" />Explain when to use rmatch and when
+not to use it.</label></li>
+<li><label><input type="checkbox" />Explain how rmatch performance
+comparisons are made.</label></li>
+<li><label><input type="checkbox" />Link from README to the performance
+regression protocol.</label></li>
+<li><label><input type="checkbox" />Remove stale references to
+historical experiments that do not represent the current
+implementation.</label></li>
+<li><label><input type="checkbox" />Remove internal-only bug IDs or
+notes that are meaningless to users.</label></li>
+<li><label><input type="checkbox" />Ensure README examples use only
+public API.</label></li>
+<li><label><input type="checkbox" />Ensure README examples match the
+latest Maven Central release once 2.0 is published.</label></li>
+<li><label><input type="checkbox" />Add a README idiom showing how to
+know which pattern matched, such as a closure-per-pattern
+example.</label></li>
+<li><label><input type="checkbox" />Add a README sentence explaining
+parse errors and pointing to
+<code>RegexpParserException</code>.</label></li>
+<li><label><input type="checkbox" />Add a clear <code>1.x</code> to
+<code>2.0</code> migration section in
+<code>CHANGELOG.md</code>.</label></li>
+<li><label><input type="checkbox" />Include package flattening, removed
+aliases, callback-offset decisions, lifecycle changes, and buffer helper
+changes in the migration guide.</label></li>
+<li><label><input type="checkbox" />Add or update
+<code>CONTRIBUTING.md</code> with build, test, benchmark, and PR
+expectations.</label></li>
+<li><label><input type="checkbox" />Add or update
+<code>SECURITY.md</code> with a vulnerability-reporting
+channel.</label></li>
+<li><label><input type="checkbox" />Decide whether to ship a
+zero-callback or collecting convenience for evaluators.</label></li>
+<li><label><input type="checkbox" />If a collecting convenience is
+added, make it thread-safe and document its memory
+behavior.</label></li>
+<li><label><input type="checkbox" />If no collecting convenience is
+added, explain the callback pattern well enough that first-time
+evaluators do not need to invent it.</label></li>
+<li><label><input type="checkbox" />Update the Maven Repository or Maven
+Central badge/banner after release.</label></li>
+<li><label><input type="checkbox" />Add or update the javadoc.io badge
+after release if needed.</label></li>
+</ul>
+<h2 id="javadoc-quality">Javadoc Quality</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Review every public Javadoc as
+prose, not just as generated API metadata.</label></li>
+<li><label><input type="checkbox" />Make public Javadocs precise,
+respectful, and readable.</label></li>
+<li><label><input type="checkbox" />Fix spelling, grammar, stale
+parameter names, and misleading phrasing.</label></li>
+<li><label><input type="checkbox" />Ensure Javadocs describe behavior,
+constraints, thread-safety, ownership, and lifecycle where
+relevant.</label></li>
+<li><label><input type="checkbox" />Document whether callbacks may be
+invoked concurrently.</label></li>
+<li><label><input type="checkbox" />Document matcher shutdown
+expectations.</label></li>
+<li><label><input type="checkbox" />Document callback offset semantics
+and substring recovery.</label></li>
+<li><label><input type="checkbox" />Document exceptions thrown by public
+methods.</label></li>
+<li><label><input type="checkbox" />Avoid exposing internal
+implementation names in user-facing Javadocs unless
+unavoidable.</label></li>
+<li><label><input type="checkbox" />Generate and inspect local Javadocs
+before release.</label></li>
+<li><label><input type="checkbox" />Inspect the published javadoc.io
+rendering after release.</label></li>
+</ul>
+<h2 id="maven-central-release-mechanics">Maven Central Release
+Mechanics</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Confirm Central Portal namespace
+access for <code>no.rmz</code>.</label></li>
+<li><label><input type="checkbox" />Confirm
+<code>~/.m2/settings.xml</code> has the correct Central token server
+entry.</label></li>
+<li><label><input type="checkbox" />Confirm GPG key is available,
+current, and verified.</label></li>
+<li><label><input type="checkbox" />Run Central profile check without
+upload.</label></li>
+<li><label><input type="checkbox" />Run signed Central release-profile
+verify.</label></li>
+<li><label><input type="checkbox" />Verify detached signatures
+locally.</label></li>
+<li><label><input type="checkbox" />Run a clean downstream consumer
+smoke test after local install.</label></li>
+<li><label><input type="checkbox" />Upload to Central Portal with
+auto-publish disabled unless intentionally changed.</label></li>
+<li><label><input type="checkbox" />Inspect Central validation results
+before publishing.</label></li>
+<li><label><input type="checkbox" />Publish the validated
+deployment.</label></li>
+<li><label><input type="checkbox" />Confirm Maven Central artifact
+availability by direct HTTP checks.</label></li>
+<li><label><input type="checkbox" />Run a clean-repository consumer
+smoke test against the published Central artifact.</label></li>
+<li><label><input type="checkbox" />Create and push the annotated
+<code>rmatch-2.0.0</code> tag only after Central validation/publication
+is confirmed.</label></li>
+<li><label><input type="checkbox" />Bump mainline to the next snapshot
+after the 2.0 release.</label></li>
+</ul>
+<h2 id="release-notes">Release Notes</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Write user-facing 2.0 release notes
+before publishing.</label></li>
+<li><label><input type="checkbox" />State the stable public API
+surface.</label></li>
+<li><label><input type="checkbox" />State supported syntax and
+deliberate exclusions.</label></li>
+<li><label><input type="checkbox" />State Java baseline.</label></li>
+<li><label><input type="checkbox" />State dependency
+surface.</label></li>
+<li><label><input type="checkbox" />State performance evidence with
+links to receipts.</label></li>
+<li><label><input type="checkbox" />State any known limitations
+honestly.</label></li>
+<li><label><input type="checkbox" />State migration notes from
+<code>1.9.x</code>, including removed aliases such as
+<code>RMatch.buffer(String)</code> if applicable.</label></li>
+<li><label><input type="checkbox" />Include a short example using the
+final 2.0 API.</label></li>
+</ul>
+<h2 id="github-and-issue-hygiene">GitHub and Issue Hygiene</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Review open GitHub issues before
+release.</label></li>
+<li><label><input type="checkbox" />Close issues that are fixed and
+verified.</label></li>
+<li><label><input type="checkbox" />Move non-blocking post-2.0 work to
+clearly labeled future issues.</label></li>
+<li><label><input type="checkbox" />Ensure known blockers are either
+fixed or explicitly accepted.</label></li>
+<li><label><input type="checkbox" />Ensure important design notes are
+linked from relevant issues.</label></li>
+<li><label><input type="checkbox" />Ensure PRs for 2.0 blockers are
+merged or deliberately deferred.</label></li>
+<li><label><input type="checkbox" />Confirm <code>main</code> contains
+the intended release commit before tagging.</label></li>
+</ul>
+<h2 id="post-release-checks">Post-Release Checks</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Confirm Maven Central marks
+<code>2.0.0</code> as the latest release.</label></li>
+<li><label><input type="checkbox" />Confirm javadoc.io serves
+<code>2.0.0</code>.</label></li>
+<li><label><input type="checkbox" />Confirm README badges point to the
+right latest artifacts.</label></li>
+<li><label><input type="checkbox" />Confirm README dependency snippets
+use <code>2.0.0</code>.</label></li>
+<li><label><input type="checkbox" />Confirm a clean external consumer
+project can compile and run with
+<code>no.rmz:rmatch:2.0.0</code>.</label></li>
+<li><label><input type="checkbox" />Announce the release only after
+Central, javadoc.io, README, and smoke tests are all green.</label></li>
+<li><label><input type="checkbox" />Create a fresh post-2.0 snapshot and
+record the next development focus.</label></li>
+</ul>
+</body>
+</html>

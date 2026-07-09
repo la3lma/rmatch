@@ -74,7 +74,7 @@ public class PerformanceValidationTest {
     final RegexStringBuffer buffer = new RegexStringBuffer(testInput);
     matcher.match(buffer);
 
-    matcher.shutdown();
+    matcher.close();
   }
 
   /** Generate test patterns with diverse starting characters. */

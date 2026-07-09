@@ -32,9 +32,10 @@ import no.rmz.rmatch.interfaces.*;
  * Partitioned matcher that scans with several {@link MatcherImpl} instances in parallel.
  *
  * <p>{@code MultiMatcher} distributes registered expressions across partitions using the expression
- * string's hash. During {@link #match(Buffer)}, each partition scans an independent clone of the
- * input buffer. The method returns only after all partitions finish, and any failure from a
- * partition is rethrown to the caller.
+ * string's hash. During {@link #match(Buffer)}, each partition scans the same content buffer with
+ * its own cursor, which is why {@link Buffer} implementations must tolerate concurrent readers. The
+ * method returns only after all partitions finish, and any failure from a partition is rethrown to
+ * the caller.
  *
  * <p>Because partitions run concurrently, actions registered with this matcher must be thread-safe.
  * Most application code should create instances through {@link MatcherFactory#newMatcher()} rather
@@ -145,8 +146,8 @@ final class MultiMatcher implements Matcher {
   /**
    * Scan the supplied buffer concurrently across all partitions.
    *
-   * <p>Each partition receives an independent clone of {@code b}. Actions may run concurrently on
-   * worker threads.
+   * <p>All partitions scan {@code b} concurrently, each with an independent cursor. Actions may run
+   * concurrently on worker threads.
    *
    * @param b input buffer to scan
    */
@@ -164,7 +165,7 @@ final class MultiMatcher implements Matcher {
       final Runnable runnable =
           () -> {
             try {
-              matcher.match(b.clone());
+              matcher.match(b);
             } catch (final Throwable t) {
               firstFailure.compareAndSet(null, t);
             } finally {
@@ -196,15 +197,22 @@ final class MultiMatcher implements Matcher {
   /**
    * Shut down all partition matchers and their worker pool.
    *
-   * @throws InterruptedException if interrupted while waiting for worker termination
+   * <p>Idempotent. If the calling thread is interrupted while waiting for worker termination, the
+   * pool is shut down forcibly and the interrupt flag is restored.
    */
   @Override
-  public void shutdown() throws InterruptedException {
+  public void close() {
     for (final Matcher matcher : matchers) {
-      matcher.shutdown();
+      matcher.close();
     }
     executorService.shutdown();
-    //noinspection ResultOfMethodCallIgnored
-    executorService.awaitTermination(3, TimeUnit.SECONDS);
+    try {
+      if (!executorService.awaitTermination(3, TimeUnit.SECONDS)) {
+        executorService.shutdownNow();
+      }
+    } catch (final InterruptedException e) {
+      executorService.shutdownNow();
+      Thread.currentThread().interrupt();
+    }
   }
 }

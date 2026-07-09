@@ -24,6 +24,7 @@ import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
 import no.rmz.rmatch.engine.prefilter.PrefilterSafety;
 import no.rmz.rmatch.interfaces.*;
+import no.rmz.rmatch.utils.RegexStringBuffer;
 
 /**
  * Enhanced MatchEngine with fast-path optimizations for common cases.
@@ -164,10 +165,10 @@ final class FastPathMatchEngine implements MatchEngine {
 
     if (contextAssertions) {
       Character previousChar = null;
-      while (b.hasNext()) {
-        final Character nextChar = b.getNext();
-        final int currentPos = b.getCurrentPos();
-        final MatchContext context = contextForPosition(b, currentPos, previousChar, nextChar);
+      for (long pos = 0; b.hasCharAt(pos); pos++) {
+        final Character nextChar = b.charAt(pos);
+        final int currentPos = (int) pos;
+        final MatchContext context = contextForPosition(b, pos, previousChar, nextChar);
         if (AsciiOptimizer.isAscii(nextChar)) {
           matcherProgressAscii(
               b, nextChar, currentPos, activeMatchSets, runnableMatches, prefilterActive, context);
@@ -178,9 +179,9 @@ final class FastPathMatchEngine implements MatchEngine {
         previousChar = nextChar;
       }
     } else {
-      while (b.hasNext()) {
-        final Character nextChar = b.getNext();
-        final int currentPos = b.getCurrentPos();
+      for (long pos = 0; b.hasCharAt(pos); pos++) {
+        final Character nextChar = b.charAt(pos);
+        final int currentPos = (int) pos;
         if (AsciiOptimizer.isAscii(nextChar)) {
           matcherProgressAscii(
               b,
@@ -273,10 +274,10 @@ final class FastPathMatchEngine implements MatchEngine {
               && mappedRegexPositions[mappedRegexCursor] == currentPos) {
             candidateRegexps = mappedRegexps.get(mappedRegexCursor);
           } else {
-            candidateRegexps = startCandidates(b, currentChar, startNode);
+            candidateRegexps = startCandidates(b, currentPos, currentChar, startNode);
           }
         } else {
-          candidateRegexps = startCandidates(b, currentChar, startNode, context);
+          candidateRegexps = startCandidates(b, currentPos, currentChar, startNode, context);
         }
 
         if (!candidateRegexps.isEmpty()) {
@@ -345,20 +346,14 @@ final class FastPathMatchEngine implements MatchEngine {
     return true;
   }
 
-  /** Collect buffer text for prefilter scanning without consuming the original buffer. */
+  /** Collect buffer text for prefilter scanning. Buffers are content-only and unaffected. */
   private String collectBufferText(final Buffer b) {
-    try {
-      return collectRemainingText(b.clone());
-    } catch (RuntimeException ex) {
-      return null;
+    if (b instanceof RegexStringBuffer rsb) {
+      return rsb.getString(0, rsb.getLength());
     }
-  }
-
-  /** Collect the remaining text by advancing a cloned cursor. */
-  private static String collectRemainingText(final Buffer cursor) {
     final StringBuilder text = new StringBuilder();
-    while (cursor.hasNext()) {
-      text.append(cursor.getNext());
+    for (long i = 0; b.hasCharAt(i); i++) {
+      text.append(b.charAt(i));
     }
     return text.toString();
   }
@@ -453,31 +448,35 @@ final class FastPathMatchEngine implements MatchEngine {
 
   /**
    * Compute the set of regexps worth starting a match for at the current position, using up to two
-   * characters of context when the buffer supports lookahead.
+   * characters of context read directly from the buffer.
    *
-   * <p>Falls back to the one-character filter when the buffer cannot peek, at end of input, or for
-   * non-ASCII characters — so this is purely an optimization layer, never a semantic change.
+   * <p>Falls back to the one-character filter at end of input or for non-ASCII characters — so this
+   * is purely an optimization layer, never a semantic change.
    */
-  private Set<Regexp> startCandidates(final Buffer b, final char c1, final DFANode startNode) {
-    return startCandidates(b, c1, startNode, MatchContext.NONE);
+  private Set<Regexp> startCandidates(
+      final Buffer b, final int currentPos, final char c1, final DFANode startNode) {
+    return startCandidates(b, currentPos, c1, startNode, MatchContext.NONE);
   }
 
   private Set<Regexp> startCandidates(
-      final Buffer b, final char c1, final DFANode startNode, final MatchContext context) {
+      final Buffer b,
+      final int currentPos,
+      final char c1,
+      final DFANode startNode,
+      final MatchContext context) {
     if (context != MatchContext.NONE) {
       return startNode.getRegexpsThatCanStartWith(c1, context);
     }
     final Set<Regexp> oneChar = startNode.getRegexpsThatCanStartWith(c1);
-    if (oneChar.isEmpty() || c1 >= ASCII_LIMIT || !(b instanceof LookaheadBuffer lookahead)) {
+    if (oneChar.isEmpty() || c1 >= ASCII_LIMIT) {
       return oneChar;
     }
-    final Character peeked = lookahead.peek();
-    if (peeked == null) {
+    if (!b.hasCharAt(currentPos + 1L)) {
       // Last character of the buffer: only length-1 matches are possible, but the
       // one-character set is a safe (and tiny-cost) over-approximation here.
       return oneChar;
     }
-    final char c2 = peeked;
+    final char c2 = b.charAt(currentPos + 1L);
     if (c2 >= ASCII_LIMIT) {
       return oneChar;
     }
@@ -528,23 +527,10 @@ final class FastPathMatchEngine implements MatchEngine {
 
   private static MatchContext contextForPosition(
       final Buffer b,
-      final int currentPos,
+      final long currentPos,
       final Character previousChar,
       final Character currentChar) {
-    if (b instanceof LookaheadBuffer lookahead) {
-      return MatchContext.forPosition(currentPos, previousChar, currentChar, lookahead.peek());
-    }
-    try {
-      final Buffer clone = b.clone();
-      final Character nextChar = clone.hasNext() ? clone.getNext() : null;
-      return MatchContext.forPosition(currentPos, previousChar, currentChar, nextChar);
-    } catch (RuntimeException ex) {
-      // Custom buffers are expected to clone, but EOF-only context is safer than guessing.
-    }
-    return new MatchContext(
-        currentPos == 0 || previousChar != null && previousChar == '\n',
-        !b.hasNext(),
-        false,
-        false);
+    final Character nextChar = b.hasCharAt(currentPos + 1) ? b.charAt(currentPos + 1) : null;
+    return MatchContext.forPosition((int) currentPos, previousChar, currentChar, nextChar);
   }
 }

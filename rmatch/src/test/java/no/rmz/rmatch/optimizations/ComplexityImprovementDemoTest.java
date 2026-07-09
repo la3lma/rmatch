@@ -77,7 +77,7 @@ public class ComplexityImprovementDemoTest {
     // Should find matches (this validates that optimization doesn't break functionality)
     assertTrue(action.getCounter() > 0, "Should find some matches with diverse patterns");
 
-    matcher.shutdown();
+    matcher.close();
   }
 
   /** Test with patterns that mostly share prefixes to ensure optimization still works. */
@@ -170,6 +170,6 @@ public class ComplexityImprovementDemoTest {
     final RegexStringBuffer buffer = new RegexStringBuffer(testInput);
     matcher.match(buffer);
 
-    matcher.shutdown();
+    matcher.close();
   }
 }

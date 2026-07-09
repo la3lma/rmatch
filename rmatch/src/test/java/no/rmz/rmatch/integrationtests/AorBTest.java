@@ -99,7 +99,7 @@ public final class AorBTest {
     m.match(b);
 
     // Starting out accepting any kind of match
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(1L));
   }
 
   /** Look for match in second alternative. */
@@ -112,7 +112,7 @@ public final class AorBTest {
     m.match(b);
 
     // Starting out accepting any kind of match
-    verify(action).performMatch(any(Buffer.class), eq(1), eq(1));
+    verify(action).performMatch(any(Buffer.class), eq(1L), eq(2L));
   }
 
   /** Look for match of first alternative sandwiched between two nonmatching characters. */
@@ -125,7 +125,7 @@ public final class AorBTest {
     m.match(b);
 
     // Starting out accepting any kind of match
-    verify(action).performMatch(any(Buffer.class), eq(1), eq(1));
+    verify(action).performMatch(any(Buffer.class), eq(1L), eq(2L));
   }
 
   /** Look for match of second alternative sandwiched between to nonmatching characters. */
@@ -138,6 +138,6 @@ public final class AorBTest {
     m.match(b);
 
     // Starting out accepting any kind of match
-    verify(action).performMatch(any(Buffer.class), eq(1), eq(1));
+    verify(action).performMatch(any(Buffer.class), eq(1L), eq(2L));
   }
 }

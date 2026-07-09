@@ -104,7 +104,7 @@ public final class APlusTest {
     m.match(b);
 
     // Starting out accepting any kind of match
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(1L));
   }
 
   /** Check that at match is found in the string "bab". */
@@ -116,7 +116,7 @@ public final class APlusTest {
 
     m.match(b);
 
-    verify(action).performMatch(any(Buffer.class), eq(1), eq(1));
+    verify(action).performMatch(any(Buffer.class), eq(1L), eq(2L));
   }
 
   /** Check that the string "a" matches. */
@@ -127,7 +127,7 @@ public final class APlusTest {
     m.add(aplusString, action);
     m.match(b);
 
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(1L));
   }
 
   /** Test that the string "aa" matches. */
@@ -139,7 +139,7 @@ public final class APlusTest {
 
     m.match(b);
 
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(1));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(2L));
   }
 
   /** Test that the string "aaa" matches. */
@@ -151,7 +151,7 @@ public final class APlusTest {
 
     m.match(b);
 
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(2));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(3L));
   }
 
   /** Find multiple matches for the string "ababaab". */
@@ -163,9 +163,9 @@ public final class APlusTest {
 
     m.match(b);
 
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
-    verify(action).performMatch(any(Buffer.class), eq(2), eq(2));
-    verify(action).performMatch(any(Buffer.class), eq(4), eq(5));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(1L));
+    verify(action).performMatch(any(Buffer.class), eq(2L), eq(3L));
+    verify(action).performMatch(any(Buffer.class), eq(4L), eq(6L));
   }
 
   /** Local test helper: node that matches one-or-more occurrences of one character. */

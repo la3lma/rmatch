@@ -53,10 +53,10 @@ public class RegexpImplTest {
   private Buffer firedBuffer;
 
   /** The start position that was seen when firing the action. */
-  private int firedStart;
+  private long firedStart;
 
   /** The end position that was seen when firing the action. */
-  private int firedEnd;
+  private long firedEnd;
 
   /** The buffer used to give input to the matcher, or in this case used when firing an action. */
   private Buffer b;
@@ -181,7 +181,8 @@ public class RegexpImplTest {
       assertEquals(timesFired, 1);
       assertEquals(firedBuffer, b);
       assertEquals(firedStart, start);
-      assertEquals(firedEnd, end);
+      // performActions receives inclusive ends; actions receive exclusive ends.
+      assertEquals(firedEnd, end + 1);
     }
   }
 }

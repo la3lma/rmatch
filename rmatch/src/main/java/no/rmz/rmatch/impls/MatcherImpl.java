@@ -32,8 +32,8 @@ import no.rmz.rmatch.interfaces.*;
  * constructor uses the fast-path engine unless the {@code rmatch.engine} system property selects
  * another engine variant.
  *
- * <p>Callbacks receive inclusive start/end offsets. Use {@code buffer.getString(start, end + 1)} to
- * recover the matched text.
+ * <p>Callbacks receive half-open {@code [start, end)} offsets. Use {@code buffer.getString(start,
+ * end)} to recover the matched text.
  */
 final class MatcherImpl implements Matcher {
 
@@ -200,7 +200,7 @@ final class MatcherImpl implements Matcher {
 
   /** Release matcher resources. This single-engine implementation currently owns no worker pool. */
   @Override
-  public void shutdown() {}
+  public void close() {}
 
   /**
    * Configure engine-specific prefilters on-demand. This avoids rebuilding heavy data structures

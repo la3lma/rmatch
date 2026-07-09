@@ -72,7 +72,7 @@ class NodeStorageImplTest {
   @Test
   public final void testGetNext() {
     // XXX Incomplete test
-    nsi.getNextFromStartNode(buffer.getNext());
+    nsi.getNextFromStartNode(buffer.charAt(0));
   }
 
   /**

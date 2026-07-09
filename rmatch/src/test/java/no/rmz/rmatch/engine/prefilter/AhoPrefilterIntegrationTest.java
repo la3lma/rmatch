@@ -62,7 +62,7 @@ public class AhoPrefilterIntegrationTest {
         () -> {
           // Can't actually test matching without full pattern setup,
           // but we can test that the engine accepts the buffer
-          assertTrue(buffer.hasNext());
+          assertTrue(buffer.hasCharAt(0));
         });
   }
 

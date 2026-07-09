@@ -53,7 +53,7 @@ public final class CounterAction implements Action {
   private final AtomicInteger counter = new AtomicInteger(0);
 
   @Override
-  public void performMatch(final Buffer b, final int start, final int end) {
+  public void performMatch(final Buffer b, final long start, final long end) {
     int currentCount = counter.incrementAndGet();
 
     // This is the common case, only once in a very few times we will even attempt
@@ -88,20 +88,17 @@ public final class CounterAction implements Action {
           }
 
           final long duration = now - globalLastTick;
-          final long ticks = b.getCurrentPos() - globalLastPosition;
-          globalLastPosition = b.getCurrentPos();
+          // Buffers no longer carry a cursor; the match end offset is the
+          // engine's current scan position for rate-reporting purposes.
+          final long ticks = end - globalLastPosition;
+          globalLastPosition = end;
           double currentMillisPerTick = (double) duration / ticks;
 
           LOG.log(
               Level.INFO,
               "milliseconds/tick = {0}, duration = {1} millis, start/end = {2}/{3}, match string = ''{4}'' {5}",
               new Object[] {
-                currentMillisPerTick,
-                duration,
-                start,
-                end,
-                b.getString(start, end + 1),
-                sb.toString(),
+                currentMillisPerTick, duration, start, end, b.getString(start, end), sb.toString(),
               });
 
           // Update the global timestamp

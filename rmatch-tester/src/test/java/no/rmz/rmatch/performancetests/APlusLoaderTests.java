@@ -74,7 +74,8 @@ class APlusLoaderTests {
     final int noOfPatterns = 600;
     final String pattern = "ab";
     final int startIndexInPattern = 0;
-    final int endIndexInPattern = 0;
+    // Exclusive end: the "a" match spans [0, 1) within each "ab" repetition.
+    final int endIndexInPattern = 1;
     final int lengthOfPattern = pattern.length();
 
     // Build t
@@ -92,7 +93,9 @@ class APlusLoaderTests {
       final int offset = lengthOfPattern * i;
       verify(action)
           .performMatch(
-              any(Buffer.class), eq(offset + startIndexInPattern), eq(offset + endIndexInPattern));
+              any(Buffer.class),
+              eq((long) (offset + startIndexInPattern)),
+              eq((long) (offset + endIndexInPattern)));
     }
   }
 

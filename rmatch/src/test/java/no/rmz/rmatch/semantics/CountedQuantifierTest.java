@@ -39,11 +39,12 @@ public class CountedQuantifierTest {
         pattern,
         (b, start, end) -> {
           synchronized (found) {
-            found.add(start + "-" + end);
+            // Callback end is exclusive; expectation tables use inclusive spans.
+            found.add(start + "-" + (end - 1));
           }
         });
     m.match(new RegexStringBuffer(input));
-    m.shutdown();
+    m.close();
     return found;
   }
 

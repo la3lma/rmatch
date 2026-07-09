@@ -107,11 +107,7 @@ public final class MatcherBenchmarkerWithMemory {
     Thread.yield();
     final long memoryAfterMatching = (runtime.totalMemory() - runtime.freeMemory()) / mb;
 
-    try {
-      matcher.shutdown();
-    } catch (InterruptedException ex) {
-      throw new RuntimeException(ex);
-    }
+    matcher.close();
 
     // Final memory measurement
     System.gc();

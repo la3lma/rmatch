@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
  * outputs. This guards against false negatives introduced by heuristic prefilter decisions.
  */
 public class PrefilterCorrectnessInvariantTest {
-  private record ObservedMatch(String regex, int start, int end) {}
+  private record ObservedMatch(String regex, long start, long end) {}
 
   @Test
   public void curatedScenariosPrefilterOnAndOffProduceSameMatches() throws RegexpParserException {
@@ -95,8 +95,8 @@ public class PrefilterCorrectnessInvariantTest {
       matcher.match(new RegexStringBuffer(text));
       observed.sort(
           Comparator.comparing(ObservedMatch::regex)
-              .thenComparingInt(ObservedMatch::start)
-              .thenComparingInt(ObservedMatch::end));
+              .thenComparingLong(ObservedMatch::start)
+              .thenComparingLong(ObservedMatch::end));
       return observed;
     } finally {
       restoreSystemProperty("rmatch.prefilter", oldPrefilter);

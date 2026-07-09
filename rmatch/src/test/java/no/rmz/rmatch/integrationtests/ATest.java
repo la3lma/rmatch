@@ -97,7 +97,7 @@ public final class ATest {
     m.match(b);
 
     // Starting out accepting any kind of match
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(1L));
   }
 
   /** Look for a match terminated by end of string. */
@@ -110,6 +110,6 @@ public final class ATest {
     m.match(b);
 
     // Starting out accepting any kind of match
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(1L));
   }
 }

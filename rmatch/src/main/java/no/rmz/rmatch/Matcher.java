@@ -21,17 +21,20 @@ package no.rmz.rmatch;
  * <ol>
  *   <li>Register one or more patterns with {@link #add(String, Action)}.
  *   <li>Call {@link #match(Buffer)} for each input buffer that should be scanned.
- *   <li>Call {@link #shutdown()} when the matcher is no longer needed.
+ *   <li>Call {@link #close()} when the matcher is no longer needed, typically via
+ *       try-with-resources.
  * </ol>
  *
  * <p>rmatch is designed for workloads where many patterns are reused against large inputs. For a
  * single small pattern and a single small string, {@code java.util.regex} is usually simpler.
  *
  * <p>The regular-expression syntax is intentionally a supported subset of Java regular expressions;
- * see the project README for the current list. Match callbacks receive inclusive start/end offsets,
- * while {@link Buffer#getString(int, int)} uses Java substring-style exclusive end offsets.
+ * see the project README for the current list. Match callbacks receive half-open {@code [start,
+ * end)} offsets, the same convention as {@link String#substring(int, int)} and {@link
+ * Buffer#getString(int, int)}, so matched text is recovered with {@code buffer.getString(start,
+ * end)}.
  */
-public interface Matcher {
+public interface Matcher extends AutoCloseable {
 
   /**
    * Register a regular expression and the action to invoke whenever that expression matches.
@@ -60,11 +63,10 @@ public interface Matcher {
   /**
    * Scan the supplied buffer with all currently registered expressions.
    *
-   * <p>Actions are invoked during the scan. Match callbacks receive the same buffer instance (or a
-   * clone of it for partitioned implementations) plus inclusive start/end offsets for the matched
-   * text.
+   * <p>Actions are invoked during the scan. Match callbacks receive the same buffer instance plus
+   * half-open {@code [start, end)} offsets for the matched text.
    *
-   * @param b input buffer to scan; callers normally use {@link RMatch#buffer(String)}
+   * @param b input buffer to scan; callers normally use {@link RMatch#stringBuffer(String)}
    */
   void match(final Buffer b);
 
@@ -72,9 +74,12 @@ public interface Matcher {
    * Release resources owned by the matcher.
    *
    * <p>Single-threaded implementations may have nothing to do. Partitioned implementations use
-   * worker threads and should be shut down when the matcher is no longer needed.
+   * worker threads and must be closed when the matcher is no longer needed, otherwise those
+   * non-daemon threads keep the JVM alive. Prefer try-with-resources.
    *
-   * @throws InterruptedException if shutdown waits for worker threads and is interrupted
+   * <p>Closing is idempotent. If the calling thread is interrupted while waiting for worker threads
+   * to terminate, implementations restore the interrupt flag and return.
    */
-  void shutdown() throws InterruptedException;
+  @Override
+  void close();
 }
