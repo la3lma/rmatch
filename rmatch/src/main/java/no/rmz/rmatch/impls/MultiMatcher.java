@@ -68,6 +68,9 @@ final class MultiMatcher implements Matcher {
   /** An executor service that is used when invoking the sub-matchers. */
   private final ExecutorService executorService;
 
+  /** Set once {@link #close()} has been called; guards against use-after-close. */
+  private volatile boolean closed = false;
+
   /**
    * Create a partitioned matcher using the runtime's default partition heuristic.
    *
@@ -129,6 +132,7 @@ final class MultiMatcher implements Matcher {
    */
   @Override
   public void add(final String r, final Action a) throws RegexpParserException {
+    ensureOpen();
     getMatcher(r).add(r, a);
   }
 
@@ -140,6 +144,7 @@ final class MultiMatcher implements Matcher {
    */
   @Override
   public void remove(final String r, final Action a) {
+    ensureOpen();
     getMatcher(r).remove(r, a);
   }
 
@@ -153,6 +158,7 @@ final class MultiMatcher implements Matcher {
    */
   @Override
   public void match(final Buffer b) {
+    ensureOpen();
     assert (matchers.length == noOfMatchers);
 
     final CountDownLatch counter = new CountDownLatch(matchers.length);
@@ -194,6 +200,12 @@ final class MultiMatcher implements Matcher {
     }
   }
 
+  private void ensureOpen() {
+    if (closed) {
+      throw new IllegalStateException("Matcher is closed");
+    }
+  }
+
   /**
    * Shut down all partition matchers and their worker pool.
    *
@@ -202,6 +214,7 @@ final class MultiMatcher implements Matcher {
    */
   @Override
   public void close() {
+    closed = true;
     for (final Matcher matcher : matchers) {
       matcher.close();
     }

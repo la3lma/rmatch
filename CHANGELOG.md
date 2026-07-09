@@ -3,6 +3,14 @@
 ## 1.9.5-SNAPSHOT - in development
 
 - Continue pre-2.0 cleanup after publishing `1.9.4`.
+- Specified and enforced the matcher behavioral contracts for 2.0: action
+  exceptions abort the scan and propagate out of `match()` (partitioned
+  matchers finish the surviving partitions, then rethrow the first failure
+  unwrapped); registration and matching must not run concurrently on one
+  instance; and after `close()` every method except `close()` throws
+  `IllegalStateException`. The lifecycle rule is now enforced with an
+  explicit closed flag in both implementations and pinned by a dedicated
+  contract test suite.
 - CI: the main gate now runs the full `verify` test suite (both modules,
   Spotless/Checkstyle/SpotBugs) on Java 21 and 25, keeps a fast smoke job,
   and adds a modest performance canary that asserts completion and an exact

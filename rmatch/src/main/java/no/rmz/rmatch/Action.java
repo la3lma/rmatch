@@ -28,6 +28,11 @@ package no.rmz.rmatch;
  * java.util.concurrent} types such as {@code LongAdder} or {@code AtomicLong}, a synchronized
  * block, or a concurrent collection for mutable state. A plain {@code int++} counter in an action
  * is a lost-update bug waiting to happen.
+ *
+ * <p><b>Exception contract:</b> exceptions thrown by an action are not swallowed. They abort the
+ * scan that invoked the action and propagate out of {@link Matcher#match(Buffer)}; see that
+ * method's documentation for the partitioned-matcher details. Actions that must not disturb the
+ * scan should catch their own exceptions.
  */
 public interface Action {
 

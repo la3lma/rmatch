@@ -60,6 +60,9 @@ final class MatcherImpl implements Matcher {
   /** Indicates that the engine-specific prefilter needs to be rebuilt. */
   private volatile boolean prefilterDirty = false;
 
+  /** Set once {@link #close()} has been called; guards against use-after-close. */
+  private volatile boolean closed = false;
+
   /** Create a new matcher using the default compiler, regexp factory, and engine selection. */
   MatcherImpl() {
     this(new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
@@ -99,6 +102,7 @@ final class MatcherImpl implements Matcher {
    */
   @Override
   public void add(final String r, final Action a) throws RegexpParserException {
+    ensureOpen();
     synchronized (rs) {
       rs.add(r, a);
 
@@ -116,6 +120,7 @@ final class MatcherImpl implements Matcher {
    */
   @Override
   public void remove(final String r, final Action a) {
+    ensureOpen();
     synchronized (rs) {
       rs.remove(r, a);
 
@@ -191,6 +196,7 @@ final class MatcherImpl implements Matcher {
    */
   @Override
   public void match(final Buffer b) {
+    ensureOpen();
     ensurePrefilterConfigured();
 
     synchronized (me) {
@@ -200,7 +206,15 @@ final class MatcherImpl implements Matcher {
 
   /** Release matcher resources. This single-engine implementation currently owns no worker pool. */
   @Override
-  public void close() {}
+  public void close() {
+    closed = true;
+  }
+
+  private void ensureOpen() {
+    if (closed) {
+      throw new IllegalStateException("Matcher is closed");
+    }
+  }
 
   /**
    * Configure engine-specific prefilters on-demand. This avoids rebuilding heavy data structures

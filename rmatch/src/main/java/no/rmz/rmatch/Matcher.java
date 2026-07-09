@@ -31,8 +31,18 @@ package no.rmz.rmatch;
  * <p>The regular-expression syntax is intentionally a supported subset of Java regular expressions;
  * see the project README for the current list. Match callbacks receive half-open {@code [start,
  * end)} offsets, the same convention as {@link String#substring(int, int)} and {@link
- * Buffer#getString(int, int)}, so matched text is recovered with {@code buffer.getString(start,
+ * Buffer#getString(long, long)}, so matched text is recovered with {@code buffer.getString(start,
  * end)}.
+ *
+ * <p><b>Threading contract:</b> a matcher instance is not a concurrent registry. Register patterns
+ * first, then match; do not call {@link #add(String, Action)} or {@link #remove(String, Action)}
+ * while a {@link #match(Buffer)} is in progress, and do not invoke {@link #match(Buffer)}
+ * concurrently from several threads on the same instance. Alternating registration and matching
+ * phases sequentially is fully supported. Partitioned implementations parallelize internally, so
+ * callers rarely need concurrent access to the matcher object itself.
+ *
+ * <p><b>Lifecycle contract:</b> after {@link #close()}, every method except {@code close()} throws
+ * {@link IllegalStateException}. Closing is idempotent.
  */
 public interface Matcher extends AutoCloseable {
 
@@ -46,6 +56,7 @@ public interface Matcher extends AutoCloseable {
    * @param r regular-expression text in the rmatch supported syntax subset
    * @param a action to run for each match
    * @throws RegexpParserException if {@code r} cannot be parsed by the supported rmatch syntax
+   * @throws IllegalStateException if the matcher has been closed
    */
   void add(final String r, final Action a) throws RegexpParserException;
 
@@ -57,6 +68,7 @@ public interface Matcher extends AutoCloseable {
    *
    * @param r regular-expression text previously registered with {@link #add(String, Action)}
    * @param a action previously associated with {@code r}
+   * @throws IllegalStateException if the matcher has been closed
    */
   void remove(final String r, final Action a);
 
@@ -66,7 +78,16 @@ public interface Matcher extends AutoCloseable {
    * <p>Actions are invoked during the scan. Match callbacks receive the same buffer instance plus
    * half-open {@code [start, end)} offsets for the matched text.
    *
+   * <p>An exception thrown by an action is not swallowed: it aborts that scan and propagates out of
+   * this method, so remaining matches in the aborted scan are not reported. In a partitioned
+   * matcher only the failing partition aborts; the other partitions run to completion (their
+   * actions are still invoked) and the first failure is then rethrown, unwrapped if it was a {@link
+   * RuntimeException} or {@link Error}. A matcher that has thrown from {@code match} stays usable
+   * for subsequent scans, but actions should treat "some matches were already delivered before the
+   * failure" as the expected state.
+   *
    * @param b input buffer to scan; callers normally use {@link RMatch#stringBuffer(String)}
+   * @throws IllegalStateException if the matcher has been closed
    */
   void match(final Buffer b);
 
@@ -77,8 +98,9 @@ public interface Matcher extends AutoCloseable {
    * worker threads and must be closed when the matcher is no longer needed, otherwise those
    * non-daemon threads keep the JVM alive. Prefer try-with-resources.
    *
-   * <p>Closing is idempotent. If the calling thread is interrupted while waiting for worker threads
-   * to terminate, implementations restore the interrupt flag and return.
+   * <p>Closing is idempotent, and it is the only method that may be called on a closed matcher; all
+   * others throw {@link IllegalStateException}. If the calling thread is interrupted while waiting
+   * for worker threads to terminate, implementations restore the interrupt flag and return.
    */
   @Override
   void close();
