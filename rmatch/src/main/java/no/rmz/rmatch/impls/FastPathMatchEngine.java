@@ -71,11 +71,10 @@ final class FastPathMatchEngine implements MatchEngine {
   private final boolean prefilterEnabled;
 
   /**
-   * Minimum pattern count threshold for prefilter activation. Default 5000 is optimal based on
-   * testing.
+   * Default minimum pattern count threshold for prefilter activation. Default 5000 is optimal based
+   * on testing.
    */
-  private static final int PREFILTER_ACTIVATION_THRESHOLD =
-      Integer.parseInt(System.getProperty("rmatch.prefilter.threshold", "5000"));
+  private static final int DEFAULT_PREFILTER_ACTIVATION_THRESHOLD = 5000;
 
   /** Sorted positions where matches should be started (when using prefilter). */
   private int[] candidatePositions = EMPTY_INT_ARRAY;
@@ -114,7 +113,7 @@ final class FastPathMatchEngine implements MatchEngine {
 
     if (!prefilterEnabled
         || patterns.isEmpty()
-        || patterns.size() < PREFILTER_ACTIVATION_THRESHOLD) {
+        || patterns.size() < prefilterActivationThreshold()) {
       prefilter = null;
       patternIdToRegexp = null;
       return;
@@ -532,5 +531,18 @@ final class FastPathMatchEngine implements MatchEngine {
       final Character currentChar) {
     final Character nextChar = b.hasCharAt(currentPos + 1) ? b.charAt(currentPos + 1) : null;
     return MatchContext.forPosition((int) currentPos, previousChar, currentChar, nextChar);
+  }
+
+  private static int prefilterActivationThreshold() {
+    try {
+      return Math.max(
+          1,
+          Integer.parseInt(
+              System.getProperty(
+                  "rmatch.prefilter.threshold",
+                  String.valueOf(DEFAULT_PREFILTER_ACTIVATION_THRESHOLD))));
+    } catch (NumberFormatException ignored) {
+      return DEFAULT_PREFILTER_ACTIVATION_THRESHOLD;
+    }
   }
 }
