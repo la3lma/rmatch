@@ -13,78 +13,69 @@
  */
 package no.rmz.rmatch.semantics;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
 import java.util.List;
 import no.rmz.rmatch.Matcher;
 import no.rmz.rmatch.RMatch;
 import no.rmz.rmatch.RegexpParserException;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 /** Regression tests for malformed patterns that previously escaped the parser contract. */
 public class MalformedPatternTest {
 
-  @TestFactory
-  List<DynamicTest> unterminatedCharacterClassesAreRejected() {
-    final List<DynamicTest> tests = new ArrayList<>();
-    for (final String pattern : List.of("[", "[^", "[abc", "[^abc", "[a-z")) {
-      tests.add(
-          DynamicTest.dynamicTest(
-              pattern,
-              () -> {
-                try (Matcher matcher = RMatch.newSingleMatcher()) {
-                  final RegexpParserException error =
-                      assertThrows(
-                          RegexpParserException.class, () -> matcher.add(pattern, (b, s, e) -> {}));
-                  assertTrue(error.getMessage().contains("character class"), error::getMessage);
-                }
-              }));
-    }
-    return tests;
+  @Test
+  void unterminatedCharacterClassesAreRejected() {
+    assertAll(
+        List.of("[", "[^", "[abc", "[^abc", "[a-z").stream()
+            .map(pattern -> (Executable) () -> assertCharacterClassRejected(pattern)));
   }
 
-  @TestFactory
-  List<DynamicTest> quantifiersWithoutPrecedingAtomsAreRejected() {
-    final List<DynamicTest> tests = new ArrayList<>();
-    for (final String pattern : List.of("?a", "*a", "+a", "a|?b", "^*a", "a$+", "\\b?word")) {
-      tests.add(
-          DynamicTest.dynamicTest(
-              pattern,
-              () -> {
-                try (Matcher matcher = RMatch.newSingleMatcher()) {
-                  final RegexpParserException error =
-                      assertThrows(
-                          RegexpParserException.class, () -> matcher.add(pattern, (b, s, e) -> {}));
-                  assertTrue(error.getMessage().contains("no preceding atom"), error::getMessage);
-                }
-              }));
-    }
-    return tests;
+  @Test
+  void quantifiersWithoutPrecedingAtomsAreRejected() {
+    assertAll(
+        List.of("?a", "*a", "+a", "a|?b", "^*a", "a$+", "\\b?word").stream()
+            .map(pattern -> (Executable) () -> assertQuantifierRejected(pattern)));
   }
 
-  @TestFactory
-  List<DynamicTest> matcherRemainsUsableAfterMalformedPattern() {
-    final List<DynamicTest> tests = new ArrayList<>();
-    for (final String pattern : List.of("[abc", "?a", "*a", "+a")) {
-      tests.add(
-          DynamicTest.dynamicTest(
-              pattern,
-              () -> {
-                try (Matcher matcher = RMatch.newSingleMatcher()) {
-                  assertThrows(
-                      RegexpParserException.class, () -> matcher.add(pattern, (b, s, e) -> {}));
-                  assertDoesNotThrow(
-                      () -> {
-                        matcher.add("valid", (b, s, e) -> {});
-                        matcher.match(RMatch.stringBuffer("valid"));
-                      });
-                }
-              }));
+  @Test
+  void matcherRemainsUsableAfterMalformedPattern() {
+    assertAll(
+        List.of("[abc", "?a", "*a", "+a").stream()
+            .map(pattern -> (Executable) () -> assertMatcherRemainsUsable(pattern)));
+  }
+
+  private static void assertCharacterClassRejected(final String pattern) {
+    try (Matcher matcher = RMatch.newSingleMatcher()) {
+      final RegexpParserException error =
+          assertThrows(
+              RegexpParserException.class, () -> matcher.add(pattern, (b, s, e) -> {}), pattern);
+      assertTrue(error.getMessage().contains("character class"), error::getMessage);
     }
-    return tests;
+  }
+
+  private static void assertQuantifierRejected(final String pattern) {
+    try (Matcher matcher = RMatch.newSingleMatcher()) {
+      final RegexpParserException error =
+          assertThrows(
+              RegexpParserException.class, () -> matcher.add(pattern, (b, s, e) -> {}), pattern);
+      assertTrue(error.getMessage().contains("no preceding atom"), error::getMessage);
+    }
+  }
+
+  private static void assertMatcherRemainsUsable(final String pattern) {
+    try (Matcher matcher = RMatch.newSingleMatcher()) {
+      assertThrows(
+          RegexpParserException.class, () -> matcher.add(pattern, (b, s, e) -> {}), pattern);
+      assertDoesNotThrow(
+          () -> {
+            matcher.add("valid", (b, s, e) -> {});
+            matcher.match(RMatch.stringBuffer("valid"));
+          });
+    }
   }
 }
