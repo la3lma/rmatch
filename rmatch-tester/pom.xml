@@ -6,12 +6,12 @@
     <parent>
         <groupId>no.rmz</groupId>
         <artifactId>rmatch-parent</artifactId>
-        <version>1.9.5-SNAPSHOT</version>
+        <version>1.9.5</version>
     </parent>
 
     <groupId>no.rmz</groupId>
     <artifactId>rmatch-tester</artifactId>
-    <version>1.9.5-SNAPSHOT</version>
+    <version>1.9.5</version>
     <packaging>jar</packaging>
 
     <name>rmatch-tester</name>

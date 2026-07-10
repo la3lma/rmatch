@@ -1,41 +1,15 @@
 # Changelog
 
-## 1.9.5-SNAPSHOT - in development
+## 1.9.5 - pre-2.0 Maven Central release candidate
 
-- Continue pre-2.0 cleanup after publishing `1.9.4`.
-- Release polish: the dormant `EdgeInvisibilityEnsurance` bug-manifestation
-  test now runs (renamed to match the test pattern; the historical bug it
-  pins is confirmed fixed), published Javadocs build under strict doclint
-  with warnings failing the build, and the repository gained
-  `CONTRIBUTING.md`, `SECURITY.md`, and README notes on pattern identity in
-  callbacks and parse-error behavior.
-- Shipped-jar hygiene: removed the experimental Bloom-filter match engine and
-  its `SimpleBloomFilter` (reachable only via `rmatch.engine=bloom`, never
-  used in production); `FastCounters` diagnostics now go through
-  `java.util.logging` instead of stdout; the partition-count heuristic lives
-  in one place in `MatcherFactory`; and the `MultiMatcher` partition guard
-  message states the actual limit.
-- Added the flags-capable registration API that fixes the 2.0 shape for
-  per-pattern options: `Matcher.add(String, Set<PatternFlag>, Action)` and the
-  matching `remove` overload, with `PatternFlag.CASE_INSENSITIVE` as the first
-  flag (equivalent to the `(?i)` prefix). Future matching modes join as new
-  enum constants, which is binary compatible.
-- The main CI gate now also runs on pushes to `main`, and the README carries
-  its status badge.
-- Specified and enforced the matcher behavioral contracts for 2.0: action
-  exceptions abort the scan and propagate out of `match()` (partitioned
-  matchers finish the surviving partitions, then rethrow the first failure
-  unwrapped); registration and matching must not run concurrently on one
-  instance; and after `close()` every method except `close()` throws
-  `IllegalStateException`. The lifecycle rule is now enforced with an
-  explicit closed flag in both implementations and pinned by a dedicated
-  contract test suite.
-- CI: the main gate now runs the full `verify` test suite (both modules,
-  Spotless/Checkstyle/SpotBugs) on Java 21 and 25, keeps a fast smoke job,
-  and adds a modest performance canary that asserts completion and an exact
-  match count over a fixed 10k-pattern Wuthering Heights workload while
-  publishing timing as information only. The Codacy workflow now triggers on
-  `main` instead of the nonexistent `master`.
+`1.9.5` is a sharper pre-2.0 contract candidate. It keeps the root
+`no.rmz.rmatch` facade introduced in `1.9.4`, then pins several behaviors that
+should not be left to accident: callback coordinate conventions, matcher
+lifecycle, registration/concurrency rules, finite string-backed buffers, and
+per-pattern flags.
+
+### Public API and behavior
+
 - BREAKING (2.0 contract): match callbacks now receive half-open
   `[start, end)` offsets, the same convention as `String.substring` and
   `Buffer.getString`. Matched text is `buffer.getString(start, end)`; the old
@@ -55,8 +29,7 @@
   implementations shrink to positional lookups; callers that only used
   `RMatch.stringBuffer(...)` are unaffected.
 - BREAKING (2.0 contract): buffer positions are now `long` throughout the
-  public API. `Buffer.getCurrentPos()` returns `long`,
-  `Buffer.getString(long, long)` takes `long` offsets, and
+  public API. `Buffer.getString(long, long)` takes `long` offsets, and
   `Action.performMatch(Buffer, long, long)` receives `long` match offsets.
   This keeps custom buffer implementations larger than the `int` range
   expressible without another breaking change later. The built-in
@@ -71,14 +44,59 @@
   try-with-resources. Partitioned matchers force-terminate their worker pool
   if it does not stop within a grace period, and restore the interrupt flag
   if interrupted while waiting.
-- Clarify that the public buffer facade is deliberately finite and
+- Added the flags-capable registration API that fixes the 2.0 shape for
+  per-pattern options: `Matcher.add(String, Set<PatternFlag>, Action)` and the
+  matching `remove` overload, with `PatternFlag.CASE_INSENSITIVE` as the first
+  flag (equivalent to the `(?i)` prefix). Future matching modes join as new
+  enum constants, which is binary compatible.
+- Specified and enforced the matcher behavioral contracts for 2.0: action
+  exceptions abort the scan and propagate out of `match()` (partitioned
+  matchers finish the surviving partitions, then rethrow the first failure
+  unwrapped); registration and matching must not run concurrently on one
+  instance; and after `close()` every method except `close()` throws
+  `IllegalStateException`. The lifecycle rule is now enforced with an
+  explicit closed flag in both implementations and pinned by a dedicated
+  contract test suite.
+- Clarified that the public buffer facade is deliberately finite and
   string-backed today: true streaming inputs must be materialized, while lazy
   file-backed or bounded-lookback stream buffers remain possible future work if
   users need them.
-- Add explicit `RMatch.stringBuffer(...)` convenience methods for strings,
+- Added explicit `RMatch.stringBuffer(...)` convenience methods for strings,
   character sequences, paths, readers, and input streams.
-- Remove the shorter `RMatch.buffer(String)` alias before 2.0 so the public
+- Removed the shorter `RMatch.buffer(String)` alias before 2.0 so the public
   helper name states the materialization behavior directly.
+
+### Correctness, release hygiene, and CI
+
+- Fixed a prefilter correctness bug where optional-suffix patterns such as
+  `ab?`, `ab*`, and `ab?c` could lose their short-form matches when the literal
+  prefilter was forced on. The prefilter now refuses prefix hints when the last
+  hinted character can disappear, and the regression is pinned by a dedicated
+  forced-prefilter test suite.
+- Made the prefilter activation threshold read dynamically when configuring an
+  engine instead of freezing one JVM-global static value at class-load time.
+  This removes test-order sensitivity when tests deliberately override
+  `rmatch.prefilter.threshold`.
+- Release polish: the dormant `EdgeInvisibilityEnsurance` bug-manifestation
+  test now runs (renamed to match the test pattern; the historical bug it
+  pins is confirmed fixed), published Javadocs build under strict doclint
+  with warnings failing the build, and the repository gained
+  `CONTRIBUTING.md`, `SECURITY.md`, and README notes on pattern identity in
+  callbacks and parse-error behavior.
+- Shipped-jar hygiene: removed the experimental Bloom-filter match engine and
+  its `SimpleBloomFilter` (reachable only via `rmatch.engine=bloom`, never
+  used in production); `FastCounters` diagnostics now go through
+  `java.util.logging` instead of stdout; the partition-count heuristic lives
+  in one place in `MatcherFactory`; and the `MultiMatcher` partition guard
+  message states the actual limit.
+- The main CI gate now also runs on pushes to `main`, and the README carries
+  its status badge.
+- CI: the main gate now runs the full `verify` test suite (both modules,
+  Spotless/Checkstyle/SpotBugs) on Java 21 and 25, keeps a fast smoke job,
+  and adds a modest performance canary that asserts completion and an exact
+  match count over a fixed 10k-pattern Wuthering Heights workload while
+  publishing timing as information only. The Codacy workflow now triggers on
+  `main` instead of the nonexistent `master`.
 
 ## 1.9.4 - pre-2.0 Maven Central release candidate
 
