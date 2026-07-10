@@ -54,7 +54,9 @@ bugs: negated sets were unsound, and matches could forget earlier final states.
 1. Grouping `( … )` / `(?: … )` — unlocks composition, parser-only.
 2. `\d \w \s` + escapes — biggest wild-pattern coverage per line of code.
 3. `{m,n}` with an explicit expansion bound.
-4. Case-insensitivity as an `add(pattern, flags, action)` API flag.
+4. Case-insensitivity as an `add(pattern, flags, action)` API flag — shipped
+   as `PatternFlag.CASE_INSENSITIVE` with the flags-capable `add`/`remove`
+   overloads (2026-07-10).
 5. `\b` / `\B` — implemented under issue #270.
 6. Input anchors, mode flags, and pure zero-width reporting — future work.
 
