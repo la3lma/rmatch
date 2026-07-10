@@ -6,6 +6,12 @@
 - Added JaCoCo coverage behind a `-Pcoverage` Maven profile and a CI job that
   uploads library-module coverage to Codacy (skipping gracefully until the
   `CODACY_PROJECT_TOKEN` repository secret is configured).
+- Release polish: the dormant `EdgeInvisibilityEnsurance` bug-manifestation
+  test now runs (renamed to match the test pattern; the historical bug it
+  pins is confirmed fixed), published Javadocs build under strict doclint
+  with warnings failing the build, and the repository gained
+  `CONTRIBUTING.md`, `SECURITY.md`, and README notes on pattern identity in
+  callbacks and parse-error behavior.
 - Shipped-jar hygiene: removed the experimental Bloom-filter match engine and
   its `SimpleBloomFilter` (reachable only via `rmatch.engine=bloom`, never
   used in production); `FastCounters` diagnostics now go through
