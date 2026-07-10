@@ -116,29 +116,6 @@ public class RegexpImplTest {
     assertEquals(re.getRexpString(), reString);
   }
 
-  /** Test that the regexp has some actions after adding an action. */
-  @Test
-  public void testHasActions() {
-    assertFalse(re.hasActions());
-    re.add(a);
-    assertTrue(re.hasActions());
-  }
-
-  /** Check that adding an action doesn't fail. */
-  @Test
-  public void testAddAction() {
-    re.add(a);
-    assertTrue(re.hasActions());
-  }
-
-  /** Checking that removing an action works. */
-  @Test
-  public void testRemoveAction() {
-    testAddAction();
-    re.remove(a);
-    assertFalse(re.hasActions());
-  }
-
   /** Mock up a match to use when testing the match registration mechanism. */
   @Mock MatchSet matchSet;
 

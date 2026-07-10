@@ -160,8 +160,9 @@ Run it:
 mvn -q compile exec:java -Dexec.mainClass=Example
 ```
 
-Expected output contains both lines. The order may vary because
-`RMatch.newMatcher()` may use worker threads:
+Expected output contains both lines. Callback order is deliberately
+unspecified, even for a single-engine matcher; the production matcher may also
+invoke actions concurrently:
 
 ```text
 user token match: user:alice
@@ -176,6 +177,14 @@ convention as `String.substring`, so the matched text is exactly
 `buffer.getString(start, end)` and its length is `end - start`. rmatch
 reports the longest match for each start position; overlapping matches from
 different start positions may therefore be reported.
+
+A matcher has a build-then-use lifecycle. Register every pattern before the
+first call to `match()`; that first scan permanently freezes registration.
+Create a replacement matcher when the rule set changes. Registering the same
+`Action` object more than once for one pattern is idempotent. Two distinct
+action objects remain distinct even if their `equals()` methods consider them
+equal, and both are invoked for each reported match. If result order matters,
+collect the callbacks and sort them explicitly.
 
 The automatic matcher uses a hardware-based heuristic intended as a sensible
 starting point, not as the best setting for every workload. Applications that
@@ -215,7 +224,7 @@ for (Rule rule : rules) {
 
 Actions may run concurrently on a partitioned matcher, so collect into a
 thread-safe structure (`LongAdder`, a concurrent collection, or a
-synchronized block).
+synchronized block). No callback order is guaranteed.
 
 For one small pattern against one small string, `java.util.regex` is usually the
 simpler tool. rmatch is for many-pattern workloads where avoiding a separate

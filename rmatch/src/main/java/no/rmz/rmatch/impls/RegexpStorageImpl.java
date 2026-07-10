@@ -99,18 +99,6 @@ final class RegexpStorageImpl implements RegexpStorage {
   }
 
   @Override
-  public void remove(final String rexp, final Action a) {
-    synchronized (regexps) {
-      final Regexp r = getRegexp(rexp);
-
-      r.remove(a);
-      if (!r.hasActions()) {
-        regexps.remove(rexp);
-      }
-    }
-  }
-
-  @Override
   public Set<String> getRegexpSet() {
     synchronized (regexps) {
       return regexps.keySet();

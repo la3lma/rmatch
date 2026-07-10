@@ -40,7 +40,6 @@ public class MatcherContractTest {
 
     assertThrows(IllegalStateException.class, () -> m.match(RMatch.stringBuffer("a")));
     assertThrows(IllegalStateException.class, () -> m.add("b", (b, start, end) -> {}));
-    assertThrows(IllegalStateException.class, () -> m.remove("a", (b, start, end) -> {}));
   }
 
   @Test
@@ -51,7 +50,6 @@ public class MatcherContractTest {
 
     assertThrows(IllegalStateException.class, () -> m.match(RMatch.stringBuffer("a")));
     assertThrows(IllegalStateException.class, () -> m.add("b", (b, start, end) -> {}));
-    assertThrows(IllegalStateException.class, () -> m.remove("a", (b, start, end) -> {}));
   }
 
   @Test

@@ -73,21 +73,6 @@ public class PatternFlagUsageTest {
   }
 
   @Test
-  public void removeWithSameFlagsRemovesTheRegistration() throws Exception {
-    try (Matcher m = RMatch.newSingleMatcher()) {
-      final Set<String> found = new TreeSet<>();
-      final no.rmz.rmatch.Action action = (b, start, end) -> found.add(b.getString(start, end));
-
-      m.add("warn", Set.of(PatternFlag.CASE_INSENSITIVE), action);
-      m.remove("warn", Set.of(PatternFlag.CASE_INSENSITIVE), action);
-
-      m.match(RMatch.stringBuffer("warn WARN"));
-
-      assertEquals(Set.of(), found, "removed registration must not fire");
-    }
-  }
-
-  @Test
   public void flaggedAddWorksOnPartitionedMatcher() throws Exception {
     try (Matcher m = RMatch.newMatcher()) {
       final Set<String> found = new ConcurrentSkipListSet<>();

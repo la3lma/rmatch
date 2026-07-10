@@ -13,8 +13,6 @@
  */
 package no.rmz.rmatch.integrationtests;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -82,16 +80,6 @@ public final class APlusTest {
         };
 
     m = TestMatchers.newSingleMatcher(compiler, regexpFactory);
-  }
-
-  /**
-   * This is kind of a tripwire test. It was written since no actions were run i testMockedMatch.
-   */
-  @Test
-  public void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
-    assertFalse(regexp.hasActions(), "the regexp should not initially have actions");
-    m.add(aplusString, action);
-    assertTrue(regexp.hasActions(), "the regexp should have actions");
   }
 
   /** Check that the string "ab" matches. */

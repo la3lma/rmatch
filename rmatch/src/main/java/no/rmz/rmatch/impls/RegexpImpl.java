@@ -16,9 +16,11 @@ package no.rmz.rmatch.impls;
 import static no.rmz.rmatch.internal.Checks.checkArgument;
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,10 +35,10 @@ public final class RegexpImpl implements Regexp {
   private final String rexpString;
 
   /**
-   * The set of actions associated with this regular expression. These actions will be invoked when
-   * a match for the regular expression is detected.
+   * Actions associated with this regular expression. Identity checks make repeated registration of
+   * the same callback instance idempotent without imposing hash-table overhead on the match path.
    */
-  private final Set<Action> actions = new HashSet<>();
+  private final List<Action> actions = new ArrayList<>(1);
 
   /**
    * The set of nodes that are currently involved in matching expressions for this regular
@@ -131,18 +133,12 @@ public final class RegexpImpl implements Regexp {
   @Override
   public void add(final Action a) {
     checkNotNull(a);
+    for (final Action registered : actions) {
+      if (registered == a) {
+        return;
+      }
+    }
     actions.add(a);
-  }
-
-  @Override
-  public void remove(final Action a) {
-    checkNotNull(a);
-    actions.remove(a);
-  }
-
-  @Override
-  public boolean hasActions() {
-    return !actions.isEmpty();
   }
 
   @Override

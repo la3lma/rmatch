@@ -36,12 +36,15 @@ import java.util.Set;
  * Buffer#getString(long, long)}, so matched text is recovered with {@code buffer.getString(start,
  * end)}.
  *
- * <p><b>Threading contract:</b> a matcher instance is not a concurrent registry. Register patterns
- * first, then match; do not call {@link #add(String, Action)} or {@link #remove(String, Action)}
- * while a {@link #match(Buffer)} is in progress, and do not invoke {@link #match(Buffer)}
- * concurrently from several threads on the same instance. Alternating registration and matching
- * phases sequentially is fully supported. Partitioned implementations parallelize internally, so
- * callers rarely need concurrent access to the matcher object itself.
+ * <p><b>Registration contract:</b> register every pattern before the first call to {@link
+ * #match(Buffer)}. That first scan permanently freezes the matcher; later calls to {@link
+ * #add(String, Action)} throw {@link IllegalStateException}. Construct a replacement matcher when
+ * the rule set changes. This build-then-use lifecycle keeps compiled automata immutable while they
+ * are being reused.
+ *
+ * <p><b>Threading contract:</b> do not invoke {@link #match(Buffer)} concurrently from several
+ * threads on the same matcher. Partitioned implementations parallelize internally, so callers
+ * rarely need concurrent access to the matcher object itself.
  *
  * <p><b>Lifecycle contract:</b> after {@link #close()}, every method except {@code close()} throws
  * {@link IllegalStateException}. Closing is idempotent.
@@ -51,6 +54,11 @@ public interface Matcher extends AutoCloseable {
   /**
    * Register a regular expression and the action to invoke whenever that expression matches.
    *
+   * <p>Registration uses action object identity. Registering the same action instance for the same
+   * expression more than once has no additional effect; distinct action instances remain distinct
+   * even if their {@link Object#equals(Object)} methods say they are equal. Every registered action
+   * is invoked once for each reported match of its expression. Callback order is unspecified.
+   *
    * <p>The same action may be registered for more than one expression. Implementations may invoke
    * actions concurrently, so action implementations must be thread-safe unless the caller knows the
    * concrete matcher is single-threaded.
@@ -58,7 +66,7 @@ public interface Matcher extends AutoCloseable {
    * @param r regular-expression text in the rmatch supported syntax subset
    * @param a action to run for each match
    * @throws RegexpParserException if {@code r} cannot be parsed by the supported rmatch syntax
-   * @throws IllegalStateException if the matcher has been closed
+   * @throws IllegalStateException if matching has started or the matcher has been closed
    */
   void add(final String r, final Action a) throws RegexpParserException;
 
@@ -67,14 +75,13 @@ public interface Matcher extends AutoCloseable {
    *
    * <p>Flags express the same semantics as the corresponding inline syntax; for example {@link
    * PatternFlag#CASE_INSENSITIVE} is equivalent to prefixing the pattern with {@code (?i)}. The
-   * flagged registration is identified by the combination of pattern and flags, so a later {@link
-   * #remove(String, Set, Action)} must supply the same flags.
+   * flagged registration is identified by the combination of pattern and flags.
    *
    * @param r regular-expression text in the rmatch supported syntax subset
    * @param flags per-pattern option flags; an empty or {@code null} set means no flags
    * @param a action to run for each match
    * @throws RegexpParserException if {@code r} cannot be parsed by the supported rmatch syntax
-   * @throws IllegalStateException if the matcher has been closed
+   * @throws IllegalStateException if matching has started or the matcher has been closed
    */
   default void add(final String r, final Set<PatternFlag> flags, final Action a)
       throws RegexpParserException {
@@ -82,36 +89,15 @@ public interface Matcher extends AutoCloseable {
   }
 
   /**
-   * Remove one association between a regular expression and an action.
-   *
-   * <p>If the same expression has several actions, only the supplied expression/action pair is
-   * removed. Removing a pair that is not present is a no-op.
-   *
-   * @param r regular-expression text previously registered with {@link #add(String, Action)}
-   * @param a action previously associated with {@code r}
-   * @throws IllegalStateException if the matcher has been closed
-   */
-  void remove(final String r, final Action a);
-
-  /**
-   * Remove an expression/action pair that was registered with flags.
-   *
-   * <p>The flags must equal the flags used at registration time.
-   *
-   * @param r regular-expression text previously registered with {@link #add(String, Set, Action)}
-   * @param flags flags supplied when the pair was registered
-   * @param a action previously associated with {@code r}
-   * @throws IllegalStateException if the matcher has been closed
-   */
-  default void remove(final String r, final Set<PatternFlag> flags, final Action a) {
-    remove(PatternFlag.applyTo(r, flags), a);
-  }
-
-  /**
    * Scan the supplied buffer with all currently registered expressions.
    *
    * <p>Actions are invoked during the scan. Match callbacks receive the same buffer instance plus
-   * half-open {@code [start, end)} offsets for the matched text.
+   * half-open {@code [start, end)} offsets for the matched text. No ordering is guaranteed between
+   * callbacks, including callbacks from a single-engine matcher; collect and sort results when
+   * order matters.
+   *
+   * <p>The first call permanently freezes pattern registration, even if the buffer is empty or the
+   * scan fails.
    *
    * <p>An exception thrown by an action is not swallowed: it aborts that scan and propagates out of
    * this method, so remaining matches in the aborted scan are not reported. In a partitioned

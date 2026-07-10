@@ -60,6 +60,9 @@ final class MatcherImpl implements Matcher {
   /** Set once {@link #close()} has been called; guards against use-after-close. */
   private volatile boolean closed = false;
 
+  /** Set by the first scan; compiled registrations are immutable from that point onward. */
+  private volatile boolean registrationFrozen = false;
+
   /** Create a new matcher using the default compiler, regexp factory, and engine selection. */
   MatcherImpl() {
     this(new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
@@ -98,23 +101,9 @@ final class MatcherImpl implements Matcher {
   @Override
   public void add(final String r, final Action a) throws RegexpParserException {
     ensureOpen();
+    ensureRegistrationOpen();
     synchronized (rs) {
       rs.add(r, a);
-      prefilterDirty = true;
-    }
-  }
-
-  /**
-   * Remove an expression/action pair from this matcher.
-   *
-   * @param r regular-expression text previously registered with this matcher
-   * @param a action previously associated with {@code r}
-   */
-  @Override
-  public void remove(final String r, final Action a) {
-    ensureOpen();
-    synchronized (rs) {
-      rs.remove(r, a);
       prefilterDirty = true;
     }
   }
@@ -186,6 +175,7 @@ final class MatcherImpl implements Matcher {
   @Override
   public void match(final Buffer b) {
     ensureOpen();
+    registrationFrozen = true;
     ensurePrefilterConfigured();
 
     synchronized (me) {
@@ -205,9 +195,15 @@ final class MatcherImpl implements Matcher {
     }
   }
 
+  private void ensureRegistrationOpen() {
+    if (registrationFrozen) {
+      throw new IllegalStateException("Matcher registrations are frozen after the first match");
+    }
+  }
+
   /**
    * Configure engine-specific prefilters on-demand. This avoids rebuilding heavy data structures
-   * for every single addition/removal when callers batch pattern registration.
+   * for every addition while callers assemble the pattern set before the first scan.
    */
   private void ensurePrefilterConfigured() {
     if (!prefilterDirty) {

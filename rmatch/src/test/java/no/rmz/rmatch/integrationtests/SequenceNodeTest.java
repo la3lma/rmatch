@@ -13,8 +13,6 @@
  */
 package no.rmz.rmatch.compiler;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 import no.rmz.rmatch.Action;
@@ -109,14 +107,6 @@ public class SequenceNodeTest {
         };
 
     m = TestMatchers.newSingleMatcher(compiler, regexpFactory);
-  }
-
-  /** Test adding an action to the regexp. */
-  @Test
-  public final void testActionTransferToRegexpThroughRegexpStorage() throws RegexpParserException {
-    assertFalse(abRegexp.hasActions(), "the regexp should not initially have actions");
-    m.add(AB_STRING, action);
-    assertTrue(abRegexp.hasActions(), "the regexp should have actions");
   }
 
   /** Test performing a match on "ab". */
