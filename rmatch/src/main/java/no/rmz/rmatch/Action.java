@@ -41,8 +41,8 @@ public interface Action {
    *
    * <p>The match spans the half-open range {@code [start, end)}: {@code start} is inclusive and
    * {@code end} is exclusive, exactly like {@link String#substring(int, int)} and {@link
-   * Buffer#getString(int, int)}. The matched text is therefore {@code b.getString(start, end)} and
-   * its length is {@code end - start}.
+   * Buffer#getString(long, long)}. The matched text is therefore {@code b.getString(start, end)}
+   * and its length is {@code end - start}.
    *
    * <p>This method may be called concurrently from multiple threads; see the thread-safety contract
    * in the class documentation.

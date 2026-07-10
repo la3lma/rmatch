@@ -190,6 +190,16 @@ line.</label></li>
 <li><label><input type="checkbox" />Decide the exact Java baseline for
 2.0 and document it in README, Javadocs, POM metadata, and release
 notes.</label></li>
+<li><label><input type="checkbox" />State the 2.x compatibility promise
+explicitly: semantic versioning covers the exported root API plus
+documented matching behavior and syntax; unexported implementation
+packages are not compatibility contracts.</label></li>
+<li><label><input type="checkbox" />State the deprecation and removal
+policy for the 2.x line, including how much notice users receive before
+a public API is removed.</label></li>
+<li><label><input type="checkbox" />Publish at least one 2.0 release
+candidate and leave a short, deliberate feedback window for external
+users before the final release.</label></li>
 <li><label><input type="checkbox" />Confirm that
 <code>rmatch-tester</code> remains unpublished and
 project-local.</label></li>
@@ -267,6 +277,20 @@ matcher is legal.</label></li>
 <li><label><input type="checkbox" />Document whether
 <code>match()</code> after <code>shutdown()</code> or
 <code>close()</code> is defined.</label></li>
+<li><label><input type="checkbox" />Decide how applications control
+matcher parallelism before freezing the facade; users should not be
+limited to either one worker or an opaque
+<code>1.5 * availableProcessors</code> heuristic.</label></li>
+<li><label><input type="checkbox" />Validate and cap the default
+parallelism heuristic on small and very large/containerized machines,
+and account for pattern count as well as CPU count.</label></li>
+<li><label><input type="checkbox" />Freeze and document result
+semantics: longest-per-start behavior, overlapping matches, callback
+ordering, duplicate registrations, and the exact effect of
+<code>remove()</code>.</label></li>
+<li><label><input type="checkbox" />Ensure parser failures identify the
+unsupported or malformed construct and its location well enough for a
+user to repair a large generated pattern.</label></li>
 </ul>
 <h2 id="buffer-and-input-contract">Buffer and Input Contract</h2>
 <ul class="task-list">
@@ -399,6 +423,13 @@ unit and semantics test suite.</label></li>
 <li><label><input type="checkbox" />Run differential tests against
 <code>java.util.regex</code> for the supported syntax
 subset.</label></li>
+<li><label><input type="checkbox" />Expand seeded differential testing
+to cover multiple seeds, anchors, word boundaries, escapes, counted
+quantifiers, flags, and interactions among many simultaneously
+registered patterns.</label></li>
+<li><label><input type="checkbox" />Exercise hostile but valid patterns
+and inputs to establish practical bounds for compilation time, state
+growth, memory use, and scan completion.</label></li>
 <li><label><input type="checkbox" />Verify match counts before treating
 benchmark timings as evidence.</label></li>
 <li><label><input type="checkbox" />Verify edge cases for overlapping
@@ -429,6 +460,13 @@ baseline, expected to be Java 21 unless changed
 deliberately.</label></li>
 <li><label><input type="checkbox" />Run CI on a current newer Java
 version as well, such as Java 25 or 26.</label></li>
+<li><label><input type="checkbox" />Test the packaged candidate from
+clean external Maven and Gradle consumer projects, both on the class
+path and as a named JPMS module; do not rely only on reactor
+tests.</label></li>
+<li><label><input type="checkbox" />Pin GitHub Actions dependencies to
+reviewed immutable commit SHAs, or document why a moving tag is
+deliberately accepted.</label></li>
 <li><label><input type="checkbox" />Fix or remove workflows that target
 <code>master</code> if the repository default branch is
 <code>main</code>.</label></li>
@@ -449,6 +487,20 @@ the latest published pre-2.0 release.</label></li>
 <li><label><input type="checkbox" />Compare rmatch against naive
 <code>java.util.regex</code> looping and RE2J looping using
 byte-identical corpora and pattern sets.</label></li>
+<li><label><input type="checkbox" />Publish a small benchmark matrix
+rather than one favorable workload: include literal-heavy,
+structured-regex, shared-prefix, and realistic mixed pattern sets over
+more than one corpus and scale.</label></li>
+<li><label><input type="checkbox" />Report registration/compilation
+cost, steady-state scan time, peak memory, and single-versus-default
+parallel execution where each is material.</label></li>
+<li><label><input type="checkbox" />Show representative cells where Java
+regex or RE2J wins as well as where rmatch wins, so the performance
+claim states a useful crossover rather than implying universal
+superiority.</label></li>
+<li><label><input type="checkbox" />Benchmark the packaged
+release-candidate JAR through the public API, not only reactor classes
+or internal benchmark hooks.</label></li>
 <li><label><input type="checkbox" />Use deterministic benchmark inputs
 and record the generator settings.</label></li>
 <li><label><input type="checkbox" />Require equal match counts before
@@ -514,6 +566,9 @@ manifest.</label></li>
 properties.</label></li>
 <li><label><input type="checkbox" />Verify classfile major version
 matches the documented Java baseline.</label></li>
+<li><label><input type="checkbox" />Make release artifacts reproducible
+where practical, including a fixed Maven build output timestamp, and
+compare clean-build hashes before release.</label></li>
 <li><label><input type="checkbox" />Verify source and Javadoc JARs are
 attached.</label></li>
 <li><label><input type="checkbox" />Verify generated <code>.asc</code>
@@ -550,6 +605,9 @@ robustly or document any timeout and failure semantics.</label></li>
 <ul class="task-list">
 <li><label><input type="checkbox" />Make README usable by an experienced
 Java developer in under five minutes.</label></li>
+<li><label><input type="checkbox" />Put the dependency snippet and
+smallest runnable example before the long benchmark discussion so a
+curious developer can try rmatch immediately.</label></li>
 <li><label><input type="checkbox" />Include Maven Central dependency
 instructions near the top of README.</label></li>
 <li><label><input type="checkbox" />Include Gradle dependency
@@ -581,6 +639,10 @@ parse errors and pointing to
 <li><label><input type="checkbox" />Add a clear <code>1.x</code> to
 <code>2.0</code> migration section in
 <code>CHANGELOG.md</code>.</label></li>
+<li><label><input type="checkbox" />Publish a stable
+syntax-and-semantics reference separate from the README, including
+character/Unicode rules, match selection, exclusions, and
+examples.</label></li>
 <li><label><input type="checkbox" />Include package flattening, removed
 aliases, callback-offset decisions, lifecycle changes, and buffer helper
 changes in the migration guide.</label></li>
@@ -656,6 +718,10 @@ before publishing.</label></li>
 deployment.</label></li>
 <li><label><input type="checkbox" />Confirm Maven Central artifact
 availability by direct HTTP checks.</label></li>
+<li><label><input type="checkbox" />Create a GitHub Release for
+<code>2.0.0</code> from the verified tag, with concise release notes and
+direct links to Maven Central, Javadocs, migration notes, and benchmark
+receipts.</label></li>
 <li><label><input type="checkbox" />Run a clean-repository consumer
 smoke test against the published Central artifact.</label></li>
 <li><label><input type="checkbox" />Create and push the annotated
@@ -717,6 +783,9 @@ project can compile and run with
 <code>no.rmz:rmatch:2.0.0</code>.</label></li>
 <li><label><input type="checkbox" />Announce the release only after
 Central, javadoc.io, README, and smoke tests are all green.</label></li>
+<li><label><input type="checkbox" />Watch installation questions, parser
+failures, and performance reports during the first post-release weeks
+and turn repeated friction into docs or a prompt 2.0.x fix.</label></li>
 <li><label><input type="checkbox" />Create a fresh post-2.0 snapshot and
 record the next development focus.</label></li>
 </ul>
