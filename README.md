@@ -30,20 +30,19 @@ The public comparison model is:
 - rmatch: register the same pattern set in one matcher and scan the corpus once.
 
 Current measurements use byte-identical inputs and require match counts to
-agree before a timing is retained. The charts below come from Docker runs on a
+agree before a timing is retained. The chart below comes from Docker runs on a
 16-core / 32-thread AMD Ryzen 9 9950X3D using deterministic 8 MiB fixtures with
 1,000 and 10,000 patterns. The logarithmic view keeps Hyperscan, rmatch, RE2/J,
-and Java regex legible on one scale.
+and Java regex legible on one scale. Each line runs from 1,000 to 10,000
+patterns, making the engines' different scaling profiles visible.
 
 ![Logarithmic comparison of Hyperscan, rmatch, RE2/J, and Java regex](docs/benchmark-plots/exploratory-2026-07-10/four-engine-overview-log.svg)
 
-The linear view makes the JVM comparison easier to read. `1T` means one
-worker. The parallel RE2/J and Java lanes partition independent, precompiled
-patterns across workers; rmatch is represented by its public single-engine
-factory. Those are deliberately labeled as different execution models rather
-than collapsed into one supposedly universal ranking.
-
-![Linear comparison of rmatch, RE2/J, and Java regex](docs/benchmark-plots/exploratory-2026-07-10/jvm-engine-comparison-linear.svg)
+`1T` means one worker. The parallel RE2/J and Java lanes partition independent,
+precompiled patterns across workers; rmatch is represented by its public
+single-engine factory. Those are deliberately labeled as different execution
+models rather than collapsed into one supposedly universal ranking. The
+benchmark project contains the more detailed linear JVM view.
 
 These are exploratory measurements from a benchmark project that is only just
 getting started, not a systematic testing campaign or a final verdict. The
