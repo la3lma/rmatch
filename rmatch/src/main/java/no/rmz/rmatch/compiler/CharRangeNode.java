@@ -46,8 +46,7 @@ final class CharRangeNode extends AbstractNDFANode {
     this.end = checkNotNull(end);
     this.next = checkNotNull(next);
     if (start.compareTo(end) > 0) {
-      // XXX Use something else than runtime exception.
-      throw new RuntimeException("Cannot have char range in which " + " end is  less than start");
+      throw new IllegalArgumentException("Cannot have a char range where end is less than start");
     }
   }
 

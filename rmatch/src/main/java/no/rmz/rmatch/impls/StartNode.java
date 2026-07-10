@@ -42,9 +42,6 @@ final class StartNode extends AbstractNDFANode {
   @SuppressWarnings("unchecked")
   private final DFANodeImpl topDFA = new DFANodeImpl(Collections.EMPTY_SET);
 
-  /** A monitor that is used to synchronize access to the StartNode instance. */
-  private final Object topDfaMonitor = new Object();
-
   /** Create a start node. */
   StartNode() {
     super(START_NO_REGEXP, false);

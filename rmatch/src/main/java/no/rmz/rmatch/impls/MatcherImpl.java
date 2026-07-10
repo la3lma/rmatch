@@ -75,7 +75,7 @@ final class MatcherImpl implements Matcher {
    * @param regexpFactory factory used to create internal regexp objects
    */
   MatcherImpl(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
-    NDFACompiler compiler1 = checkNotNull(compiler);
+    checkNotNull(compiler);
     checkNotNull(regexpFactory);
     ns = new NodeStorageImpl();
     rs = new RegexpStorageImpl(ns, compiler, regexpFactory);

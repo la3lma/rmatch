@@ -41,8 +41,7 @@ final class CompiledFragment {
    * @param endingNode If successful traversal of the NDFA, this node will be reached.
    */
   public CompiledFragment(final Regexp r, final NDFANode arrivalNode, final NDFANode endingNode) {
-    /** The regexp for which this is a compilation fragment. */
-    Regexp r1 = checkNotNull(r);
+    checkNotNull(r);
     this.arrivalNode = checkNotNull(arrivalNode);
     this.endingNode = checkNotNull(endingNode);
   }

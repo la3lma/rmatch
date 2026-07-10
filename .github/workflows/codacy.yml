@@ -37,7 +37,7 @@ jobs:
     steps:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Execute Codacy Analysis CLI and generate a SARIF output with the security issues identified during the analysis
       - name: Run Codacy Analysis CLI
@@ -55,8 +55,21 @@ jobs:
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
 
+      # GitHub code scanning now rejects a single SARIF upload containing
+      # multiple runs with the same category. Codacy can emit several runs, so
+      # assign a stable per-run category before upload.
+      - name: Normalize SARIF run categories
+        run: |
+          jq '
+            .runs = ((.runs // []) | to_entries | map(
+              .value.automationDetails = ((.value.automationDetails // {}) + {id: ("codacy/" + (.key | tostring))})
+              | .value
+            ))
+          ' results.sarif > results-normalized.sarif
+          mv results-normalized.sarif results.sarif
+
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif

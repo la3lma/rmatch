@@ -60,7 +60,8 @@ final class SimulatedHeap<T> {
   public void remove(final T m) {
     checkNotNull(m);
     if (!tm.containsKey(m)) {
-      throw new RuntimeException("Attempt to remove nonexisting " + "content from a SimulatedHeap");
+      throw new IllegalArgumentException(
+          "Attempt to remove nonexisting content from a SimulatedHeap");
     }
 
     checkArgument(true);

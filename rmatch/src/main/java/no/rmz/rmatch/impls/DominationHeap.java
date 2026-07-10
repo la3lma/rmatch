@@ -18,7 +18,6 @@ import static no.rmz.rmatch.internal.Checks.checkState;
 
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.logging.Logger;
 import no.rmz.rmatch.interfaces.Match;
 
 /**
@@ -29,8 +28,6 @@ import no.rmz.rmatch.interfaces.Match;
  * actions are invoked.
  */
 final class DominationHeap {
-
-  private static final Logger LOG = Logger.getLogger(DominationHeap.class.getName());
 
   private final PriorityBlockingQueue<Match> heap;
 

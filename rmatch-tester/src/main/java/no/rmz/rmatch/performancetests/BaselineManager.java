@@ -23,9 +23,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 
@@ -427,8 +427,8 @@ public final class BaselineManager {
     String osVersion = System.getProperty("os.version", "unknown");
 
     // Try to get git info (may fail in some environments)
-    String gitCommit = getGitInfo("rev-parse", "HEAD");
-    String gitBranch = getGitInfo("rev-parse", "--abbrev-ref", "HEAD");
+    String gitCommit = getGitCommit();
+    String gitBranch = getGitBranch();
 
     // Collect architecture info and normalization score
     String architectureId = "unknown";
@@ -445,7 +445,7 @@ public final class BaselineManager {
           no.rmz.rmatch.performancetests.utils.NormalizationBenchmark.runBenchmarkMedian(3);
 
       LOG.info("Architecture ID: " + architectureId);
-      LOG.info(String.format("Normalization score: %.2f ops/ms", normalizationScore));
+      LOG.info(String.format(Locale.ROOT, "Normalization score: %.2f ops/ms", normalizationScore));
 
     } catch (Exception e) {
       LOG.warning("Failed to collect architecture info: " + e.getMessage());
@@ -455,13 +455,17 @@ public final class BaselineManager {
         javaVersion, osName, osVersion, gitCommit, gitBranch, architectureId, normalizationScore);
   }
 
-  private static String getGitInfo(String... command) {
-    try {
-      List<String> fullCommand = new ArrayList<>();
-      fullCommand.add("git");
-      fullCommand.addAll(Arrays.asList(command));
+  private static String getGitCommit() {
+    return getGitInfo(new ProcessBuilder("git", "rev-parse", "HEAD"));
+  }
 
-      Process process = new ProcessBuilder(fullCommand).redirectErrorStream(true).start();
+  private static String getGitBranch() {
+    return getGitInfo(new ProcessBuilder("git", "rev-parse", "--abbrev-ref", "HEAD"));
+  }
+
+  private static String getGitInfo(final ProcessBuilder processBuilder) {
+    try {
+      Process process = processBuilder.redirectErrorStream(true).start();
 
       try (BufferedReader reader =
           new BufferedReader(

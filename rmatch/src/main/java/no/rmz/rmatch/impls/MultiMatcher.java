@@ -91,10 +91,8 @@ final class MultiMatcher implements Matcher {
   MultiMatcher(
       final int noOfMatchers, final NDFACompiler compiler, final RegexpFactory regexpFactory) {
 
-    /** The compiler used by all the matchers. */
-    NDFACompiler compiler1 = checkNotNull(compiler);
-    /** The regular expression factory used by all the matchers. */
-    RegexpFactory regexpFactory1 = checkNotNull(regexpFactory);
+    checkNotNull(compiler);
+    checkNotNull(regexpFactory);
     checkArgument(noOfMatchers >= 1, "No of partitions must be positive");
     checkArgument(
         noOfMatchers < MAX_NO_OF_MATCHERS,
@@ -187,7 +185,7 @@ final class MultiMatcher implements Matcher {
       counter.await();
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
-      throw new RuntimeException(ex);
+      throw new IllegalStateException("Interrupted while waiting for matcher partitions", ex);
     }
 
     final Throwable failure = firstFailure.get();
@@ -198,7 +196,7 @@ final class MultiMatcher implements Matcher {
       if (failure instanceof Error error) {
         throw error;
       }
-      throw new RuntimeException("Matcher partition failed", failure);
+      throw new IllegalStateException("Matcher partition failed", failure);
     }
   }
 
