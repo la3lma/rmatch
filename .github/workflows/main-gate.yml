@@ -101,6 +101,15 @@ jobs:
           -Dspotless.check.skip=true -Dspotless.apply.skip=true
           clean verify
 
+      - name: Diagnose Codacy token type
+        if: env.CODACY_PROJECT_TOKEN != ''
+        run: |
+          # Prints only HTTP status codes, never the token. 200 on the first
+          # probe means the stored secret is an ACCOUNT API token rather than
+          # the per-repository project token the upload endpoint expects.
+          acct=$(curl -s -o /dev/null -w "%{http_code}" -H "api-token: ${CODACY_PROJECT_TOKEN}" https://app.codacy.com/api/v3/user)
+          echo "account-token probe: HTTP ${acct}"
+
       - name: Upload coverage to Codacy
         if: env.CODACY_PROJECT_TOKEN != ''
         # v1 — pinned to a commit SHA per supply-chain hardening practice
