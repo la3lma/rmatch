@@ -3,6 +3,13 @@
 ## 1.9.5-SNAPSHOT - in development
 
 - Continue pre-2.0 cleanup after publishing `1.9.4`.
+- Added the flags-capable registration API that fixes the 2.0 shape for
+  per-pattern options: `Matcher.add(String, Set<PatternFlag>, Action)` and the
+  matching `remove` overload, with `PatternFlag.CASE_INSENSITIVE` as the first
+  flag (equivalent to the `(?i)` prefix). Future matching modes join as new
+  enum constants, which is binary compatible.
+- The main CI gate now also runs on pushes to `main`, and the README carries
+  its status badge.
 - Specified and enforced the matcher behavioral contracts for 2.0: action
   exceptions abort the scan and propagate out of `match()` (partitioned
   matchers finish the surviving partitions, then rethrow the first failure

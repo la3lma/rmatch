@@ -13,6 +13,8 @@
  */
 package no.rmz.rmatch;
 
+import java.util.Set;
+
 /**
  * Main public API for registering regular expressions and matching them against buffers.
  *
@@ -61,6 +63,25 @@ public interface Matcher extends AutoCloseable {
   void add(final String r, final Action a) throws RegexpParserException;
 
   /**
+   * Register a regular expression with per-pattern option flags.
+   *
+   * <p>Flags express the same semantics as the corresponding inline syntax; for example {@link
+   * PatternFlag#CASE_INSENSITIVE} is equivalent to prefixing the pattern with {@code (?i)}. The
+   * flagged registration is identified by the combination of pattern and flags, so a later {@link
+   * #remove(String, Set, Action)} must supply the same flags.
+   *
+   * @param r regular-expression text in the rmatch supported syntax subset
+   * @param flags per-pattern option flags; may be empty
+   * @param a action to run for each match
+   * @throws RegexpParserException if {@code r} cannot be parsed by the supported rmatch syntax
+   * @throws IllegalStateException if the matcher has been closed
+   */
+  default void add(final String r, final Set<PatternFlag> flags, final Action a)
+      throws RegexpParserException {
+    add(PatternFlag.applyTo(r, flags), a);
+  }
+
+  /**
    * Remove one association between a regular expression and an action.
    *
    * <p>If the same expression has several actions, only the supplied expression/action pair is
@@ -71,6 +92,20 @@ public interface Matcher extends AutoCloseable {
    * @throws IllegalStateException if the matcher has been closed
    */
   void remove(final String r, final Action a);
+
+  /**
+   * Remove an expression/action pair that was registered with flags.
+   *
+   * <p>The flags must equal the flags used at registration time.
+   *
+   * @param r regular-expression text previously registered with {@link #add(String, Set, Action)}
+   * @param flags flags supplied when the pair was registered
+   * @param a action previously associated with {@code r}
+   * @throws IllegalStateException if the matcher has been closed
+   */
+  default void remove(final String r, final Set<PatternFlag> flags, final Action a) {
+    remove(PatternFlag.applyTo(r, flags), a);
+  }
 
   /**
    * Scan the supplied buffer with all currently registered expressions.
