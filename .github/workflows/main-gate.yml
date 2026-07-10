@@ -72,6 +72,70 @@ jobs:
           path: "**/target/surefire-reports/*"
           retention-days: 7
 
+  coverage:
+    # Generates JaCoCo coverage for the library module and uploads it to
+    # Codacy. Skips the upload gracefully while the CODACY_PROJECT_TOKEN
+    # secret is not configured, so this job never blocks the gate on
+    # missing credentials.
+    name: Coverage (JaCoCo to Codacy)
+    runs-on: ubuntu-latest
+    needs: smoke
+    timeout-minutes: 30
+    env:
+      CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Test with coverage instrumentation
+        run: >
+          ./mvnw -B -Pcoverage -pl rmatch -am
+          -Dspotbugs.skip=true -Dcheckstyle.skip=true
+          -Dspotless.check.skip=true -Dspotless.apply.skip=true
+          clean verify
+
+      - name: Upload coverage to Codacy
+        id: codacy-upload
+        if: env.CODACY_PROJECT_TOKEN != ''
+        # Non-blocking: Codacy-side coverage initialization is outside this
+        # repo's control, so a failed upload warns loudly instead of turning
+        # the gate red. The outcome step below makes failures visible.
+        continue-on-error: true
+        # v1 — pinned to a commit SHA per supply-chain hardening practice
+        uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699
+        env:
+          # The stored secret is an account-level API token (verified by
+          # probe: /api/v3/user answers 200), so the reporter runs in
+          # api-token mode with explicit repository coordinates.
+          CODACY_API_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          CODACY_ORGANIZATION_PROVIDER: gh
+          CODACY_USERNAME: la3lma
+          CODACY_PROJECT_NAME: rmatch
+        with:
+          api-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: rmatch/target/site/jacoco/jacoco.xml
+
+      - name: Report upload outcome
+        if: env.CODACY_PROJECT_TOKEN != ''
+        run: |
+          if [ "${{ steps.codacy-upload.outcome }}" != "success" ]; then
+            echo "::warning title=Codacy coverage upload failed::Coverage was generated but not accepted by Codacy (gate not blocked). Check coverage initialization at app.codacy.com -> rmatch -> Coverage."
+            echo "### Codacy coverage upload FAILED (non-blocking)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Codacy coverage upload succeeded" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Note skipped upload
+        if: env.CODACY_PROJECT_TOKEN == ''
+        run: echo "CODACY_PROJECT_TOKEN secret not set; Codacy upload skipped." >> "$GITHUB_STEP_SUMMARY"
+
   perf-canary:
     # Deliberately modest performance gate. Shared CI runners cannot support
     # honest timing assertions, so this job asserts only two things:

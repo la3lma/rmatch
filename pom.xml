@@ -59,6 +59,10 @@
         <mavenGpgPlugin.version>3.2.8</mavenGpgPlugin.version>
         <centralPublishingMavenPlugin.version>0.11.0</centralPublishingMavenPlugin.version>
         <mavenSurefire.version>3.5.4</mavenSurefire.version>
+        <jacoco.version>0.8.13</jacoco.version>
+        <!-- Empty default so the @{argLine} hook in surefire configs resolves
+             cleanly when the coverage profile (which sets it) is not active. -->
+        <argLine></argLine>
         <byteBuddy.version>1.18.11</byteBuddy.version>
         <mockitoCore.version>5.23.0</mockitoCore.version>
         <mockitoJunitJupiter.version>5.23.0</mockitoJunitJupiter.version>
@@ -300,6 +304,36 @@
     </build>
 
     <profiles>
+        <profile>
+            <!-- Activate with -Pcoverage to instrument tests with JaCoCo and
+                 write XML reports to target/site/jacoco/jacoco.xml per module.
+                 Used by the CI coverage job that feeds Codacy. -->
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>central-release</id>
             <build>
