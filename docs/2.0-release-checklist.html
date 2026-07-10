@@ -277,13 +277,20 @@ matcher is legal.</label></li>
 <li><label><input type="checkbox" />Document whether
 <code>match()</code> after <code>shutdown()</code> or
 <code>close()</code> is defined.</label></li>
-<li><label><input type="checkbox" />Decide how applications control
-matcher parallelism before freezing the facade; users should not be
-limited to either one worker or an opaque
-<code>1.5 * availableProcessors</code> heuristic.</label></li>
-<li><label><input type="checkbox" />Validate and cap the default
-parallelism heuristic on small and very large/containerized machines,
-and account for pattern count as well as CPU count.</label></li>
+<li><label><input type="checkbox" checked="" />Let applications control
+matcher parallelism through
+<code>RMatch.newMatcher(int parallelism)</code> instead of limiting them
+to one worker or the automatic <code>1.5 * availableProcessors</code>
+heuristic.</label></li>
+<li><label><input type="checkbox" checked="" />Use 1024 as a
+deliberately high safety limit for both explicit and automatic
+parallelism. This accommodates the 576-way default produced for a
+384-thread server while guarding against accidental unbounded
+platform-thread creation.</label></li>
+<li><label><input type="checkbox" />Validate the default heuristic
+empirically on small, large, and containerized machines, and account for
+pattern count and memory bandwidth as well as processor
+count.</label></li>
 <li><label><input type="checkbox" />Freeze and document result
 semantics: longest-per-start behavior, overlapping matches, callback
 ordering, duplicate registrations, and the exact effect of

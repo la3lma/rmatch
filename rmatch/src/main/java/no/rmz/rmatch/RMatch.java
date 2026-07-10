@@ -44,10 +44,37 @@ public final class RMatch {
    * can invoke match actions concurrently. Use {@link #newSingleMatcher()} when deterministic
    * single-engine execution is more important than throughput.
    *
+   * <p>The automatic choice is a hardware-based starting point, not a promise of optimal
+   * performance for every workload. Use {@link #newMatcher(int)} to select the parallelism
+   * explicitly.
+   *
    * @return new matcher instance ready for pattern registration
    */
   public static Matcher newMatcher() {
     return MatcherFactory.newMatcher();
+  }
+
+  /**
+   * Create a matcher with application-selected parallelism.
+   *
+   * <p>The value controls how many pattern partitions are created and, for values greater than one,
+   * the maximum number of worker threads that scan those partitions concurrently. Every partition
+   * scans the same input buffer with its share of the registered patterns. More parallelism can
+   * therefore improve a sufficiently large many-pattern workload, but it also consumes more memory
+   * and memory bandwidth and may make smaller workloads slower.
+   *
+   * <p>A value of one is equivalent to {@link #newSingleMatcher()} and does not create a worker
+   * pool. Values through 1024 are supported so that large servers and workstations can use their
+   * available hardware without an artificially low ceiling. Callers selecting very high values are
+   * responsible for ensuring that the JVM and operating system can support the corresponding number
+   * of platform threads.
+   *
+   * @param parallelism requested pattern partitions and maximum concurrent workers
+   * @return new matcher instance ready for pattern registration
+   * @throws IllegalArgumentException if {@code parallelism} is outside the range 1 through 1024
+   */
+  public static Matcher newMatcher(final int parallelism) {
+    return MatcherFactory.newMatcher(parallelism);
   }
 
   /**
