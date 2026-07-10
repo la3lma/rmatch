@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>rmatch 2.0 release checklist</title>
+  <title>2.0-release-checklist</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -172,9 +172,6 @@
   </style>
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">rmatch 2.0 release checklist</h1>
-</header>
 <h1 id="rmatch-2.0-release-checklist">rmatch 2.0 release checklist</h1>
 <p>This is the broad pre-2.0 checklist. It is intentionally
 over-inclusive: assume items here should be completed unless they are
@@ -418,6 +415,10 @@ fixed during the 1.9.x line.</label></li>
 <li><label><input type="checkbox" />Add or verify a GitHub Actions
 workflow that runs the full Maven test suite on pull
 requests.</label></li>
+<li><label><input type="checkbox" />Review Codacy critical/high findings
+manually; fix real command/path, reflection, dead-code, and
+release-hygiene issues, and explicitly reject style-only false
+positives.</label></li>
 <li><label><input type="checkbox" />Ensure CI runs more than smoke tests
 before 2.0.</label></li>
 <li><label><input type="checkbox" />Review <code>main-gate.yml</code> or
@@ -452,6 +453,9 @@ byte-identical corpora and pattern sets.</label></li>
 and record the generator settings.</label></li>
 <li><label><input type="checkbox" />Require equal match counts before
 comparing timings.</label></li>
+<li><label><input type="checkbox" />Fail the high-core regression gate
+on any slowdown above 3% unless the regression is explicitly understood,
+justified, and accepted before release.</label></li>
 <li><label><input type="checkbox" />Capture raw benchmark receipts,
 summaries, and charts in
 <code>docs/benchmark-receipts/...</code>.</label></li>

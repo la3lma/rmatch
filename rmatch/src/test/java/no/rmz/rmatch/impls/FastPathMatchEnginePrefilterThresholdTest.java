@@ -13,11 +13,10 @@
  */
 package no.rmz.rmatch.impls;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import no.rmz.rmatch.interfaces.NodeStorage;
@@ -35,7 +34,7 @@ final class FastPathMatchEnginePrefilterThresholdTest {
       final FastPathMatchEngine engine = new FastPathMatchEngine(mock(NodeStorage.class));
       engine.configurePrefilter(patterns(4999), flags(4999), regexpMappings(4999));
 
-      assertNull(readPrefilter(engine));
+      assertFalse(engine.hasConfiguredPrefilterForTesting());
     } finally {
       restoreSystemProperty("rmatch.prefilter", oldPrefilter);
     }
@@ -50,16 +49,10 @@ final class FastPathMatchEnginePrefilterThresholdTest {
       final FastPathMatchEngine engine = new FastPathMatchEngine(mock(NodeStorage.class));
       engine.configurePrefilter(patterns(5000), flags(5000), regexpMappings(5000));
 
-      assertNotNull(readPrefilter(engine));
+      assertTrue(engine.hasConfiguredPrefilterForTesting());
     } finally {
       restoreSystemProperty("rmatch.prefilter", oldPrefilter);
     }
-  }
-
-  private static Object readPrefilter(final FastPathMatchEngine engine) throws Exception {
-    final Field field = FastPathMatchEngine.class.getDeclaredField("prefilter");
-    field.setAccessible(true);
-    return field.get(engine);
   }
 
   private static Map<Integer, String> patterns(final int count) {

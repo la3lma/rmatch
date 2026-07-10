@@ -15,6 +15,9 @@ package no.rmz.rmatch.performancetests.utils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -84,19 +87,20 @@ public final class SystemInfo {
   private static void collectLinuxCpuInfo(Map<String, Object> info) {
     try {
       // Try lscpu first (more structured output)
-      String lscpuOutput = executeCommand("lscpu");
+      String lscpuOutput = executeCommand(new ProcessBuilder("lscpu"));
       if (lscpuOutput != null && !lscpuOutput.isEmpty()) {
         parseLscpuOutput(lscpuOutput, info);
       }
 
       // Also try to get CPU model from /proc/cpuinfo
-      String cpuInfoOutput = executeCommand("cat /proc/cpuinfo");
+      String cpuInfoOutput = readFileIfExists(Path.of("/proc/cpuinfo"));
       if (cpuInfoOutput != null && !cpuInfoOutput.isEmpty()) {
         parseCpuInfo(cpuInfoOutput, info);
       }
 
       // Get CPU frequency info if available
-      String freqInfo = executeCommand("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq");
+      String freqInfo =
+          readFileIfExists(Path.of("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq"));
       if (freqInfo != null && !freqInfo.isEmpty()) {
         try {
           long freqKhz = Long.parseLong(freqInfo.trim());
@@ -217,13 +221,14 @@ public final class SystemInfo {
    */
   private static void collectMacCpuInfo(Map<String, Object> info) {
     try {
-      String sysctlOutput = executeCommand("sysctl -a");
+      String sysctlOutput = executeCommand(new ProcessBuilder("sysctl", "-a"));
       if (sysctlOutput != null && !sysctlOutput.isEmpty()) {
         parseSysctlOutput(sysctlOutput, info);
       }
 
       // Try to get CPU brand string
-      String cpuBrand = executeCommand("sysctl -n machdep.cpu.brand_string");
+      String cpuBrand =
+          executeCommand(new ProcessBuilder("sysctl", "-n", "machdep.cpu.brand_string"));
       if (cpuBrand != null && !cpuBrand.isEmpty()) {
         info.put("cpu_model", cpuBrand.trim());
       }
@@ -284,7 +289,12 @@ public final class SystemInfo {
     try {
       String wmicOutput =
           executeCommand(
-              "wmic cpu get Name,NumberOfCores,NumberOfLogicalProcessors,MaxClockSpeed /format:list");
+              new ProcessBuilder(
+                  "wmic",
+                  "cpu",
+                  "get",
+                  "Name,NumberOfCores,NumberOfLogicalProcessors,MaxClockSpeed",
+                  "/format:list"));
       if (wmicOutput != null && !wmicOutput.isEmpty()) {
         parseWmicOutput(wmicOutput, info);
       }
@@ -368,16 +378,14 @@ public final class SystemInfo {
   }
 
   /**
-   * Executes a shell command and returns its output.
+   * Executes a fixed command and returns its output.
    *
-   * @param command Command to execute
+   * @param command command and arguments to execute, with no shell interpolation
    * @return Command output or null if failed
    */
-  private static String executeCommand(String command) {
-    Process process = null;
+  private static String executeCommand(final ProcessBuilder processBuilder) {
     try {
-      ProcessBuilder pb = new ProcessBuilder("sh", "-c", command);
-      process = pb.start();
+      Process process = processBuilder.start();
       StringBuilder output = new StringBuilder();
       StringBuilder errorOutput = new StringBuilder();
       // Read stdout and stderr fully to avoid deadlocks
@@ -407,21 +415,17 @@ public final class SystemInfo {
       return null;
     } catch (Exception e) {
       return null;
-    } finally {
-      if (process != null) {
-        try {
-          process.getInputStream().close();
-        } catch (Exception ignored) {
-        }
-        try {
-          process.getErrorStream().close();
-        } catch (Exception ignored) {
-        }
-        try {
-          process.getOutputStream().close();
-        } catch (Exception ignored) {
-        }
+    }
+  }
+
+  private static String readFileIfExists(final Path path) {
+    try {
+      if (Files.isRegularFile(path)) {
+        return Files.readString(path, StandardCharsets.UTF_8);
       }
+      return null;
+    } catch (Exception e) {
+      return null;
     }
   }
 

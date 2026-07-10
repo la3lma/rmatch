@@ -150,8 +150,8 @@ final class FastPathMatchEngine implements MatchEngine {
   public void match(final Buffer b) {
     checkNotNull(b, "Buffer can't be null");
 
-    // Get thread-local buffers for state-set operations
-    final StateSetBuffers buffers = StateSetBuffers.get();
+    // Preserve the established fast-path warmup behavior without keeping an unused local.
+    StateSetBuffers.get();
 
     final Set<MatchSet> activeMatchSets = new HashSet<>();
 
@@ -209,6 +209,10 @@ final class FastPathMatchEngine implements MatchEngine {
     }
 
     activeMatchSets.clear();
+  }
+
+  boolean hasConfiguredPrefilterForTesting() {
+    return prefilter != null;
   }
 
   /**
