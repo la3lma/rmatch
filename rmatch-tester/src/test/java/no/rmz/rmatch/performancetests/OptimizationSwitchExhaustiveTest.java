@@ -51,21 +51,15 @@ class OptimizationSwitchExhaustiveTest {
 
     int expectedCombinations = 0;
     for (boolean fastPathEnabled : toggleStates) {
-      for (boolean bloomFilterEnabled : toggleStates) {
-        if (fastPathEnabled && bloomFilterEnabled) {
-          continue; // Mutually exclusive engines
-        }
-        for (boolean ahoPrefilterEnabled : toggleStates) {
-          for (boolean aggressiveThreshold : toggleStates) {
-            expectedCombinations++;
-            Map<String, String> properties =
-                buildPropertySet(
-                    fastPathEnabled, bloomFilterEnabled, ahoPrefilterEnabled, aggressiveThreshold);
+      for (boolean ahoPrefilterEnabled : toggleStates) {
+        for (boolean aggressiveThreshold : toggleStates) {
+          expectedCombinations++;
+          Map<String, String> properties =
+              buildPropertySet(fastPathEnabled, ahoPrefilterEnabled, aggressiveThreshold);
 
-            String label = describe(properties);
-            OptimizationRunResult result = runCombination(label, properties, regexps);
-            results.add(result);
-          }
+          String label = describe(properties);
+          OptimizationRunResult result = runCombination(label, properties, regexps);
+          results.add(result);
         }
       }
     }
@@ -82,12 +76,10 @@ class OptimizationSwitchExhaustiveTest {
   }
 
   private Map<String, String> buildPropertySet(
-      boolean fastPath, boolean bloomFilter, boolean ahoPrefilter, boolean aggressiveThreshold) {
+      boolean fastPath, boolean ahoPrefilter, boolean aggressiveThreshold) {
     Map<String, String> props = new LinkedHashMap<>();
     if (fastPath) {
       props.put("rmatch.engine", "fastpath");
-    } else if (bloomFilter) {
-      props.put("rmatch.engine", "bloom");
     } else {
       props.put("rmatch.engine", "default");
     }

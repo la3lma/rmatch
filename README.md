@@ -2,6 +2,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/no.rmz/rmatch.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/no.rmz/rmatch)
 [![Javadocs](https://javadoc.io/badge2/no.rmz/rmatch/javadoc.svg)](https://javadoc.io/doc/no.rmz/rmatch)
+[![Main Gate](https://github.com/la3lma/rmatch/actions/workflows/main-gate.yml/badge.svg?branch=main)](https://github.com/la3lma/rmatch/actions/workflows/main-gate.yml)
 
 `rmatch` is a Java library for matching many regular expressions against large
 text buffers with one pass-oriented matching pipeline. It is aimed at workloads
@@ -261,7 +262,9 @@ is not a drop-in replacement for `java.util.regex` or PCRE.
 - Word boundaries: `\b` and `\B` using ASCII word semantics aligned with
   `\w`: letters, digits, and underscore are word characters.
 - Pattern-prefix flags: `(?i)` for case-insensitive matching; `(?s)` is
-  accepted because `.` is already DOTALL
+  accepted because `.` is already DOTALL. Programmatic registration can use
+  `matcher.add(pattern, Set.of(PatternFlag.CASE_INSENSITIVE), action)`
+  instead of splicing prefixes into pattern strings
 
 ## Important Limitations
 
