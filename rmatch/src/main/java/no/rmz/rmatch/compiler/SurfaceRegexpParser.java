@@ -202,9 +202,6 @@ final class SurfaceRegexpParser {
       commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
     }
 
-    // XXX Missing {m,n}, meaning "match at least m,
-    //     but no more than n times modifier.
-
     private void parseNextChar(char ch) throws RegexpParserException {
       final int atomStart = src.getIndex() - 1;
       switch (ch) {
@@ -214,9 +211,12 @@ final class SurfaceRegexpParser {
           lastAtomStart = -1;
           break;
         case '\\':
-          parseQuotedChar();
-          lastAtomStart = atomStart;
-          lastAtomEnd = src.getIndex();
+          if (parseQuotedChar()) {
+            lastAtomStart = atomStart;
+            lastAtomEnd = src.getIndex();
+          } else {
+            lastAtomStart = -1;
+          }
           break;
         case '.':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
@@ -227,22 +227,27 @@ final class SurfaceRegexpParser {
         case '^':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
           arb.addBeginningOfLine();
+          lastAtomStart = -1;
           break;
         case '$':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
           arb.addEndOfLine();
+          lastAtomStart = -1;
           break;
         case '?':
+          requireQuantifiableAtom(ch);
           commitForQuantifier();
           arb.addOptionalSingular();
           lastAtomStart = -1; // a quantified atom cannot take another counted quantifier
           break;
         case '*':
+          requireQuantifiableAtom(ch);
           commitForQuantifier();
           arb.addOptionalZeroOrMulti();
           lastAtomStart = -1;
           break;
         case '+':
+          requireQuantifiableAtom(ch);
           commitForQuantifier();
           arb.addOptionalOnceOrMulti();
           lastAtomStart = -1;
@@ -261,6 +266,7 @@ final class SurfaceRegexpParser {
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
           parseGroupStart();
           openGroupStarts.push(atomStart);
+          lastAtomStart = -1;
           break;
         case ')':
           if (groupDepth == 0) {
@@ -277,6 +283,12 @@ final class SurfaceRegexpParser {
           lastAtomStart = atomStart;
           lastAtomEnd = src.getIndex();
           break;
+      }
+    }
+
+    private void requireQuantifiableAtom(final char quantifier) throws RegexpParserException {
+      if (lastAtomStart < 0) {
+        throw new RegexpParserException("Quantifier '" + quantifier + "' has no preceding atom");
       }
     }
 
@@ -420,7 +432,7 @@ final class SurfaceRegexpParser {
       groupDepth++;
     }
 
-    private void parseQuotedChar() throws RegexpParserException {
+    private boolean parseQuotedChar() throws RegexpParserException {
       // KB-2: this condition was inverted, making EVERY escape throw.
       if (!src.hasNext()) {
         throw new RegexpParserException("Expected char after escape char: \\");
@@ -448,11 +460,11 @@ final class SurfaceRegexpParser {
         case 'b':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
           arb.addWordBoundary();
-          break;
+          return false;
         case 'B':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
           arb.addNonWordBoundary();
-          break;
+          return false;
         // Shorthand character classes: sugar over the existing charset machinery.
         case 'd', 'D', 'w', 'W', 's', 'S':
           commitCurrentString(COMMIT_ONLY_IF_SOMETHING_IN_SB);
@@ -461,6 +473,7 @@ final class SurfaceRegexpParser {
         default:
           throw new RegexpParserException("Unsupported escape '\\" + ch + "'");
       }
+      return true;
     }
 
     /** Emit \d \D \w \W \s \S as a (possibly inverted) character set fragment. */
@@ -494,7 +507,7 @@ final class SurfaceRegexpParser {
       final Character nxt = src.peek();
 
       if (nxt == null) {
-        throw new RegexpParserException("Unterminated char set, missing ']'");
+        throw new RegexpParserException("Unterminated character class, missing ']'");
       }
 
       if (nxt == '^') {
@@ -503,9 +516,11 @@ final class SurfaceRegexpParser {
       }
 
       boolean parsingRange = false;
+      boolean terminated = false;
       while (src.hasNext()) {
         ch = src.next();
         if (ch == ']') {
+          terminated = true;
           break;
         } else if (ch == '\\') {
           if (!src.hasNext()) {
@@ -545,6 +560,10 @@ final class SurfaceRegexpParser {
         } else {
           sb.append(ch);
         }
+      }
+
+      if (!terminated) {
+        throw new RegexpParserException("Unterminated character class, missing ']'");
       }
 
       final String cs = sb.toString();
