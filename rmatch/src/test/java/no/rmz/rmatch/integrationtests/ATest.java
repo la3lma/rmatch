@@ -20,6 +20,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.impls.TestMatchers;
 import no.rmz.rmatch.interfaces.*;
@@ -93,7 +97,7 @@ public final class ATest {
     m.match(b);
 
     // Starting out accepting any kind of match
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(1L));
   }
 
   /** Look for a match terminated by end of string. */
@@ -106,6 +110,6 @@ public final class ATest {
     m.match(b);
 
     // Starting out accepting any kind of match
-    verify(action).performMatch(any(Buffer.class), eq(0), eq(0));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq(1L));
   }
 }

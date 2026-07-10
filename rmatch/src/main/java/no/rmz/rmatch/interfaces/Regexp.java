@@ -13,6 +13,10 @@
  */
 package no.rmz.rmatch.interfaces;
 
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+
 /**
  * Engine-internal compiled regular-expression state.
  *
@@ -142,6 +146,10 @@ public interface Regexp extends Comparable<Regexp> {
 
   /**
    * Run this expression's actions for a completed match.
+   *
+   * <p>The offsets use the engine-internal inclusive convention. Implementations are responsible
+   * for delivering the public half-open {@code [start, end)} convention to {@link
+   * no.rmz.rmatch.Action} callbacks.
    *
    * @param b the buffer
    * @param start zero-based inclusive start offset

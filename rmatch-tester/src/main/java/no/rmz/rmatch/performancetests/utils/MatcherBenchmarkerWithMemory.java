@@ -16,9 +16,9 @@ package no.rmz.rmatch.performancetests.utils;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.FastCounters;
 
@@ -107,11 +107,7 @@ public final class MatcherBenchmarkerWithMemory {
     Thread.yield();
     final long memoryAfterMatching = (runtime.totalMemory() - runtime.freeMemory()) / mb;
 
-    try {
-      matcher.shutdown();
-    } catch (InterruptedException ex) {
-      throw new RuntimeException(ex);
-    }
+    matcher.close();
 
     // Final memory measurement
     System.gc();

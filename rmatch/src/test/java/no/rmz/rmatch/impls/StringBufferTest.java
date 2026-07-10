@@ -15,7 +15,7 @@ package no.rmz.rmatch.impls;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

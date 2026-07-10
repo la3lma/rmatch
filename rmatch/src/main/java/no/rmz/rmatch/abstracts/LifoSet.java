@@ -11,7 +11,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.utils;
+package no.rmz.rmatch.abstracts;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -26,7 +26,7 @@ import java.util.Set;
  *
  * @param <T> element type
  */
-public final class LifoSet<T> {
+final class LifoSet<T> {
 
   /** Set used for membership tests. */
   private final Set<T> members = new HashSet<>();

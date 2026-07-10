@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Action;
 import no.rmz.rmatch.interfaces.RegexpFactory;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;
@@ -67,7 +67,7 @@ public class MultiMatcherTest {
               () -> matcher.match(new RegexStringBuffer("kaboom goes the boom")));
       assertEquals("deliberate test failure", thrown.getMessage());
     } finally {
-      matcher.shutdown();
+      matcher.close();
     }
   }
 
@@ -103,10 +103,10 @@ public class MultiMatcherTest {
         fresh.match(new RegexStringBuffer("kaboom goes the boom"));
         assertTrue(counter.sum() > 0, "expected at least one match for 'boom'");
       } finally {
-        fresh.shutdown();
+        fresh.close();
       }
     } finally {
-      matcher.shutdown();
+      matcher.close();
     }
   }
 
@@ -149,7 +149,7 @@ public class MultiMatcherTest {
               "match count must be identical across identical runs (run " + run + ")");
         }
       } finally {
-        matcher.shutdown();
+        matcher.close();
       }
     }
   }

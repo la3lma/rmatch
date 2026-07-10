@@ -21,9 +21,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
 import no.rmz.rmatch.impls.MatcherFactory;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.performancetests.utils.MatcherBenchmarker;
 import no.rmz.rmatch.performancetests.utils.WutheringHeightsBuffer;
 

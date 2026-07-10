@@ -185,10 +185,51 @@ the rest of the release work here as it becomes explicit.
 
 ## POM and Artifact Hygiene
 
-- [ ] Before 2.0, complete a public API closure pass: make implementation-only
-  classes package-private or private where possible, prefer final classes for
-  non-extension APIs, and verify that README/Javadocs teach factory/interface
-  usage rather than direct implementation construction.
+- [ ] Before 2.0, complete the remaining classpath API closure pass: make
+  implementation-only classes package-private or private where possible, prefer
+  final classes for non-extension APIs, and verify generated Javadocs expose only
+  the intended public story. Result on 2026-07-08: branch
+  `u/la3lma/codex/minimize-api-surface-2x` introduced the root public facade
+  `no.rmz.rmatch.RMatch`, moved `Action`, `Buffer`, `Matcher`, and
+  `RegexpParserException` into the root package, changed the JPMS descriptor to
+  export only `no.rmz.rmatch`, and updated README/tests to teach the facade
+  rather than direct implementation construction. Full classpath hiding of
+  remaining public implementation classes is deliberately left open for a
+  follow-up because several internals still cross package boundaries. Functional
+  verification passed with
+  `./mvnw -B -pl rmatch-tester -am -Dspotbugs.skip=true verify`, reporting
+  `rmatch`: 336 tests, 0 failures, 0 errors, 3 skipped; `rmatch-tester`: 16
+  tests, 0 failures, 0 errors, 2 skipped. Javadoc generation for the new public
+  module/API passed with
+  `./mvnw -B -pl rmatch -am -DskipTests -Dspotbugs.skip=true javadoc:javadoc`
+  after adding a module-level public API comment. A named downstream JPMS
+  consumer smoke test also compiled successfully with `requires no.rmz.rmatch`
+  and imports only from `no.rmz.rmatch`; temporary project:
+  `/tmp/rmatch-jpms-consumer-smoke.vXrerx`. The agogo Docker performance gate
+  also passed on 2026-07-08 after updating the external benchmark wrapper to
+  the public `RMatch` facade. Host hardware: 32 logical CPUs, AMD Ryzen 9
+  9950X3D. Baseline result directory:
+  `/home/rmz/git/rmatch-agogo-api-surface-gate-20260708_191453/rmatch-perftest/benchmarking/framework/regex_bench_framework/results/agogo_api_surface_baseline_main_20260708_171614`;
+  candidate result directory:
+  `/home/rmz/git/rmatch-agogo-api-surface-gate-20260708_191453/rmatch-perftest/benchmarking/framework/regex_bench_framework/results/agogo_api_surface_candidate_api_surface_20260708_172144`.
+  Median `scanning_ns` ratios were 0.956 on 1MB and 0.474 on 10MB, with
+  identical match counts in both sizes.
+- [ ] Before each release, inspect the generated Javadoc artifact as a public
+  contract artifact, not merely as a build by-product. The Javadocs and the
+  attached `-javadoc.jar` must expose only the supported facade package
+  `no.rmz.rmatch`; implementation packages such as `compiler`, `impls`,
+  `interfaces`, `utils`, and engine internals must not appear on javadoc.io.
+  This is separate from the deeper classpath-visibility cleanup: non-exported
+  implementation classes may still exist in the main JAR while the documented
+  API remains small and intentional.
+- [x] Verify current `1.9.4-SNAPSHOT` compile dependency tree after replacing the
+  external Aho-Corasick dependency with the internal prefilter. Result on
+  2026-07-08: `./mvnw -B -pl rmatch -am -DskipTests -Dspotbugs.skip=true
+  dependency:tree -Dscope=compile` reports `no.rmz:rmatch:jar:1.9.4-SNAPSHOT`
+  with no compile-scope dependencies. Maven Central still shows
+  `org.ahocorasick:ahocorasick:0.6.3` for latest published `1.9.3`; that will
+  disappear from Central only after publishing the next release built from this
+  cleanup.
 - [x] Before publishing a JPMS-bearing `2.0.0` release, resolve or explicitly
   accept the Aho-Corasick automatic-module warning emitted by `javac`; do not
   treat the module descriptor as fully clean until this dependency-boundary
@@ -268,6 +309,15 @@ the rest of the release work here as it becomes explicit.
   `no.rmz:rmatch:1.9.0`; running `mvn -q compile exec:java
   -Dexec.mainClass=Example` printed `user token match: user:alice` and
   `log-level match: WARN` in about five seconds on the local machine.
+- [x] Compile and run the README scratch-project example after introducing the
+  `RMatch` facade and root public API. Result on 2026-07-08: installed
+  `1.9.4-SNAPSHOT` locally with
+  `./mvnw -q -B -pl rmatch -am -DskipTests -Dspotbugs.skip=true install`, then
+  ran a temporary downstream project at
+  `/tmp/rmatch-readme-snapshot-smoke.NnaDsP` with
+  `mvn -q compile exec:java -Dexec.mainClass=Example`. Output contained both
+  `log-level match: WARN` and `user token match: user:alice`; README now notes
+  that line order may vary when using the production matcher.
 - [x] Add a short public performance note with exact benchmark provenance.
   README now explains the comparison model against naive `java.util.regex` and
   RE2J loops, the rmatch one-pass setup, the measured fields, and the
@@ -512,7 +562,9 @@ the rest of the release work here as it becomes explicit.
 ## Known Follow-Up Release Work
 
 - [ ] Expand public API documentation for the callback coordinate convention.
-- [ ] Decide whether to introduce a friendlier public facade before `2.0.0`.
+- [x] Decide whether to introduce a friendlier public facade before `2.0.0`.
+  Result on 2026-07-08: introduced `no.rmz.rmatch.RMatch` with
+  `newMatcher()`, `newSingleMatcher()`, and `buffer(String)`.
 - [x] Decide final anchor/boundary assertion roadmap for `^`, `$`, `\b`, and
   `\B`. Result on 2026-07-08: line anchors and word-boundary assertions are
   implemented, tested, documented, and performance-gated for the `1.9.2`

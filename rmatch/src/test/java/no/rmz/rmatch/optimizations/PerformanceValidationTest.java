@@ -15,8 +15,8 @@ package no.rmz.rmatch.optimizations;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import no.rmz.rmatch.Matcher;
 import no.rmz.rmatch.impls.MatcherFactory;
-import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;
@@ -74,7 +74,7 @@ public class PerformanceValidationTest {
     final RegexStringBuffer buffer = new RegexStringBuffer(testInput);
     matcher.match(buffer);
 
-    matcher.shutdown();
+    matcher.close();
   }
 
   /** Generate test patterns with diverse starting characters. */

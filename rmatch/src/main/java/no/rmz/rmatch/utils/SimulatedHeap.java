@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
  *
  * @param <T> element type
  */
-public final class SimulatedHeap<T> {
+final class SimulatedHeap<T> {
 
   /** We use a ConcurrentSkipListMap to represent the heap. */
   private final ConcurrentSkipListMap<T, T> tm;

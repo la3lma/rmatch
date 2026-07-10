@@ -22,16 +22,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
-import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 
 /**
  * Partitioned matcher that scans with several {@link MatcherImpl} instances in parallel.
  *
  * <p>{@code MultiMatcher} distributes registered expressions across partitions using the expression
- * string's hash. During {@link #match(Buffer)}, each partition scans an independent clone of the
- * input buffer. The method returns only after all partitions finish, and any failure from a
- * partition is rethrown to the caller.
+ * string's hash. During {@link #match(Buffer)}, each partition scans the same content buffer with
+ * its own cursor, which is why {@link Buffer} implementations must tolerate concurrent readers. The
+ * method returns only after all partitions finish, and any failure from a partition is rethrown to
+ * the caller.
  *
  * <p>Because partitions run concurrently, actions registered with this matcher must be thread-safe.
  * Most application code should create instances through {@link MatcherFactory#newMatcher()} rather
@@ -63,6 +67,9 @@ final class MultiMatcher implements Matcher {
 
   /** An executor service that is used when invoking the sub-matchers. */
   private final ExecutorService executorService;
+
+  /** Set once {@link #close()} has been called; guards against use-after-close. */
+  private volatile boolean closed = false;
 
   /**
    * Create a partitioned matcher using the runtime's default partition heuristic.
@@ -125,6 +132,7 @@ final class MultiMatcher implements Matcher {
    */
   @Override
   public void add(final String r, final Action a) throws RegexpParserException {
+    ensureOpen();
     getMatcher(r).add(r, a);
   }
 
@@ -136,19 +144,21 @@ final class MultiMatcher implements Matcher {
    */
   @Override
   public void remove(final String r, final Action a) {
+    ensureOpen();
     getMatcher(r).remove(r, a);
   }
 
   /**
    * Scan the supplied buffer concurrently across all partitions.
    *
-   * <p>Each partition receives an independent clone of {@code b}. Actions may run concurrently on
-   * worker threads.
+   * <p>All partitions scan {@code b} concurrently, each with an independent cursor. Actions may run
+   * concurrently on worker threads.
    *
    * @param b input buffer to scan
    */
   @Override
   public void match(final Buffer b) {
+    ensureOpen();
     assert (matchers.length == noOfMatchers);
 
     final CountDownLatch counter = new CountDownLatch(matchers.length);
@@ -161,7 +171,7 @@ final class MultiMatcher implements Matcher {
       final Runnable runnable =
           () -> {
             try {
-              matcher.match(b.clone());
+              matcher.match(b);
             } catch (final Throwable t) {
               firstFailure.compareAndSet(null, t);
             } finally {
@@ -190,18 +200,32 @@ final class MultiMatcher implements Matcher {
     }
   }
 
+  private void ensureOpen() {
+    if (closed) {
+      throw new IllegalStateException("Matcher is closed");
+    }
+  }
+
   /**
    * Shut down all partition matchers and their worker pool.
    *
-   * @throws InterruptedException if interrupted while waiting for worker termination
+   * <p>Idempotent. If the calling thread is interrupted while waiting for worker termination, the
+   * pool is shut down forcibly and the interrupt flag is restored.
    */
   @Override
-  public void shutdown() throws InterruptedException {
+  public void close() {
+    closed = true;
     for (final Matcher matcher : matchers) {
-      matcher.shutdown();
+      matcher.close();
     }
     executorService.shutdown();
-    //noinspection ResultOfMethodCallIgnored
-    executorService.awaitTermination(3, TimeUnit.SECONDS);
+    try {
+      if (!executorService.awaitTermination(3, TimeUnit.SECONDS)) {
+        executorService.shutdownNow();
+      }
+    } catch (final InterruptedException e) {
+      executorService.shutdownNow();
+      Thread.currentThread().interrupt();
+    }
   }
 }

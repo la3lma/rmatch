@@ -15,131 +15,37 @@ package no.rmz.rmatch.performancetests.utils;
 
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
-import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.Buffer;
 
 /** An implementation of the Buffer interface, that holds all of the input as a String. */
-public final class StringSourceBuffer implements Buffer, Cloneable {
+public final class StringSourceBuffer implements Buffer {
 
-  /** A string containing the entire content of the buffer. */
   private final String str;
 
-  /** The current position of the buffer. */
-  private int currentPos;
-
-  /** The current character. */
-  private char currentChar;
-
-  /** A monitor instance used when synchronizing access to this instance. */
-  private final Object monitor = new Object();
-
-  /**
-   * Create a new instance, with content as a string.
-   *
-   * @param str The string we will return character by character.
-   */
   public StringSourceBuffer(final String str) {
     this.str = checkNotNull(str);
-    currentPos = -1;
-  }
-
-  /**
-   * Clone the other string buffer.
-   *
-   * @param aThis the buffer to clone.
-   */
-  private StringSourceBuffer(final StringSourceBuffer aThis) {
-    this.str = aThis.str;
-    this.currentPos = aThis.currentPos;
-    this.currentChar = aThis.currentChar;
-  }
-
-  /**
-   * Set the current position to be somewhere in the string.
-   *
-   * @param pos the pos to set currentPos to.
-   */
-  public void setCurrentPos(final int pos) {
-    synchronized (monitor) {
-      assert pos > 0 && pos < str.length();
-      currentPos = pos;
-    }
   }
 
   @Override
-  public boolean hasNext() {
-    synchronized (monitor) {
-      int lastPos = getLength() - 2;
-      return currentPos <= lastPos;
-    }
-  }
-
-  /** Advance the position pointer by one, and update the currentChar value. */
-  private void progress() {
-    synchronized (monitor) {
-      currentPos += 1;
-      currentChar = str.charAt(currentPos);
-    }
+  public boolean hasCharAt(final long pos) {
+    return pos >= 0 && pos < str.length();
   }
 
   @Override
-  public Character getNext() {
-    synchronized (monitor) {
-      progress();
-      return currentChar;
-    }
+  public char charAt(final long pos) {
+    return str.charAt(Math.toIntExact(pos));
   }
 
   @Override
-  public int getCurrentPos() {
-    synchronized (monitor) {
-      return currentPos;
-    }
+  public String getString(final long start, final long stop) {
+    return str.substring(Math.toIntExact(start), Math.toIntExact(stop));
   }
 
-  /**
-   * Get the length of the current string.
-   *
-   * @return the length of the string.
-   */
   public int getLength() {
-    synchronized (monitor) {
-      return str.length();
-    }
-  }
-
-  @Override
-  public String getString(final int start, final int stop) {
-    synchronized (monitor) {
-      return str.substring(start, stop);
-    }
+    return str.length();
   }
 
   public String getString() {
     return str;
-  }
-
-  /**
-   * Get the string from the start position to the end.
-   *
-   * @param start start position.
-   * @return the string from the start position to the end.
-   */
-  public String getCurrentRestString(final int start) {
-    synchronized (monitor) {
-      int end = getLength();
-      return getString(start, end);
-    }
-  }
-
-  @Override
-  public String toString() {
-    synchronized (monitor) {
-      return "[RegexStringBuffer currentPos = " + currentPos + ". str = " + str + "]";
-    }
-  }
-
-  @Override
-  public Buffer clone() {
-    return new StringSourceBuffer(this);
   }
 }

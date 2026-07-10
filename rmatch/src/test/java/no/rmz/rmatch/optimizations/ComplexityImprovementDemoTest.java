@@ -15,8 +15,8 @@ package no.rmz.rmatch.optimizations;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import no.rmz.rmatch.Matcher;
 import no.rmz.rmatch.impls.MatcherFactory;
-import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.CounterAction;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;
@@ -77,7 +77,7 @@ public class ComplexityImprovementDemoTest {
     // Should find matches (this validates that optimization doesn't break functionality)
     assertTrue(action.getCounter() > 0, "Should find some matches with diverse patterns");
 
-    matcher.shutdown();
+    matcher.close();
   }
 
   /** Test with patterns that mostly share prefixes to ensure optimization still works. */
@@ -170,6 +170,6 @@ public class ComplexityImprovementDemoTest {
     final RegexStringBuffer buffer = new RegexStringBuffer(testInput);
     matcher.match(buffer);
 
-    matcher.shutdown();
+    matcher.close();
   }
 }

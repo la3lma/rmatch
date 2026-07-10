@@ -14,7 +14,8 @@
 package no.rmz.rmatch.interfaces;
 
 import java.util.Set;
-import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.RegexpParserException;
 
 /**
  * Engine-internal registry from pattern text to compiled regular-expression state.

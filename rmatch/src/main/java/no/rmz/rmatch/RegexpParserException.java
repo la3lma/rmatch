@@ -11,7 +11,7 @@
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.rmz.rmatch.compiler;
+package no.rmz.rmatch;
 
 /**
  * Thrown when rmatch cannot parse a regular expression.

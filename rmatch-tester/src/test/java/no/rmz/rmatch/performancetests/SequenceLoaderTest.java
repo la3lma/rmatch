@@ -24,7 +24,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import no.rmz.rmatch.compiler.RegexpParserException;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.MatcherFactory;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.performancetests.utils.FileInhaler;
@@ -273,10 +276,10 @@ public class SequenceLoaderTest {
 
     LOG.info("no of words to look for: " + noOfThingsToLookFor);
 
-    final Buffer b = new WutheringHeightsBuffer();
+    final WutheringHeightsBuffer b = new WutheringHeightsBuffer();
     m.match(b);
 
-    LOG.info("No of characters read:  " + b.getCurrentPos() + " chars from " + regexpFile);
+    LOG.info("No of characters read:  " + b.getLength() + " chars from " + regexpFile);
     final int noOfMatches = allWordsAction.getCounter();
     LOG.log(
         Level.INFO,

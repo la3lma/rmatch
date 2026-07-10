@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import no.rmz.rmatch.Matcher;
 import no.rmz.rmatch.impls.TestMatchers;
-import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -118,12 +118,13 @@ public class BasicMatchingSemanticsTest {
           pat,
           (b, start, end) -> {
             synchronized (found) {
-              found.add(pat + "@" + start + "-" + end);
+              // Callback end is exclusive; expectation tables use inclusive spans.
+              found.add(pat + "@" + start + "-" + (end - 1));
             }
           });
     }
     m.match(new RegexStringBuffer(input));
-    m.shutdown();
+    m.close();
     return found;
   }
 

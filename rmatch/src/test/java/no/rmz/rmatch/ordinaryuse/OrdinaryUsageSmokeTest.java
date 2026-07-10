@@ -13,15 +13,23 @@
  */
 package no.rmz.rmatch.ordinaryuse;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-import no.rmz.rmatch.compiler.RegexpParserException;
+import java.io.ByteArrayInputStream;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicReference;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RMatch;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.TestMatchers;
-import no.rmz.rmatch.interfaces.Action;
-import no.rmz.rmatch.interfaces.Buffer;
-import no.rmz.rmatch.interfaces.Matcher;
 import no.rmz.rmatch.interfaces.Regexp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,17 +69,55 @@ public class OrdinaryUsageSmokeTest {
   /** Test matching the two regexps concurrently. */
   @Test
   public final void testUseOfOrdinaryMatcherImpl() throws RegexpParserException {
-    final no.rmz.rmatch.utils.RegexStringBuffer b =
-        new no.rmz.rmatch.utils.RegexStringBuffer(("ab" + " " + "ac"));
+    final Buffer b = RMatch.stringBuffer(("ab" + " " + "ac"));
 
     m.add("ac", action);
     m.add("ab", action);
 
     m.match(b);
 
-    verify(action).performMatch(any(Buffer.class), eq(0), eq("ab".length() - 1));
+    verify(action).performMatch(any(Buffer.class), eq(0L), eq((long) "ab".length()));
     verify(action)
         .performMatch(
-            any(Buffer.class), eq("ab".length() + 1), eq("ab".length() + 1 + "ac".length() - 1));
+            any(Buffer.class), eq("ab".length() + 1L), eq("ab".length() + 1L + "ac".length()));
+  }
+
+  /** Test the public facade shown in the README copy-paste example. */
+  @Test
+  public final void testPublicFacadeCreatesMatcherAndStringBuffer() throws Exception {
+    final AtomicReference<String> matched = new AtomicReference<>();
+    final Matcher matcher = RMatch.newSingleMatcher();
+    matcher.add("WARN", (buffer, start, end) -> matched.set(buffer.getString(start, end)));
+
+    matcher.match(RMatch.stringBuffer("INFO user:alice WARN disk nearly full"));
+    matcher.close();
+
+    assertEquals("WARN", matched.get());
+  }
+
+  /** Test the explicit materializing string-buffer overloads. */
+  @Test
+  public final void testStringBufferConvenienceMethodsMaterializeInput() throws Exception {
+    assertBufferContainsExactly(RMatch.stringBuffer("alpha"), "alpha");
+    assertBufferContainsExactly(RMatch.stringBuffer(new StringBuilder("bravo")), "bravo");
+
+    final Path path = Files.createTempFile("rmatch-string-buffer-", ".txt");
+    try {
+      Files.writeString(path, "charlie", StandardCharsets.UTF_8);
+      assertBufferContainsExactly(RMatch.stringBuffer(path, StandardCharsets.UTF_8), "charlie");
+    } finally {
+      Files.deleteIfExists(path);
+    }
+
+    assertBufferContainsExactly(RMatch.stringBuffer(new StringReader("delta")), "delta");
+    assertBufferContainsExactly(
+        RMatch.stringBuffer(
+            new ByteArrayInputStream("echo".getBytes(StandardCharsets.UTF_8)),
+            StandardCharsets.UTF_8),
+        "echo");
+  }
+
+  private static void assertBufferContainsExactly(final Buffer buffer, final String expected) {
+    assertEquals(expected, buffer.getString(0, expected.length()));
   }
 }

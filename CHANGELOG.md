@@ -1,6 +1,70 @@
 # Changelog
 
-## 1.9.4-SNAPSHOT - in development
+## 1.9.5-SNAPSHOT - in development
+
+- Continue pre-2.0 cleanup after publishing `1.9.4`.
+- Specified and enforced the matcher behavioral contracts for 2.0: action
+  exceptions abort the scan and propagate out of `match()` (partitioned
+  matchers finish the surviving partitions, then rethrow the first failure
+  unwrapped); registration and matching must not run concurrently on one
+  instance; and after `close()` every method except `close()` throws
+  `IllegalStateException`. The lifecycle rule is now enforced with an
+  explicit closed flag in both implementations and pinned by a dedicated
+  contract test suite.
+- CI: the main gate now runs the full `verify` test suite (both modules,
+  Spotless/Checkstyle/SpotBugs) on Java 21 and 25, keeps a fast smoke job,
+  and adds a modest performance canary that asserts completion and an exact
+  match count over a fixed 10k-pattern Wuthering Heights workload while
+  publishing timing as information only. The Codacy workflow now triggers on
+  `main` instead of the nonexistent `master`.
+- BREAKING (2.0 contract): match callbacks now receive half-open
+  `[start, end)` offsets, the same convention as `String.substring` and
+  `Buffer.getString`. Matched text is `buffer.getString(start, end)`; the old
+  inclusive-end convention and its `end + 1` idiom are gone. Migration: drop
+  the `+ 1` when recovering text, add `- 1` anywhere an inclusive end offset
+  was stored or compared.
+- BREAKING (2.0 contract): `Buffer` is now pure content with three methods:
+  `hasCharAt(long)`, `charAt(long)`, and `getString(long, long)` (default
+  implementation provided). The cursor methods `getNext()`, `hasNext()`,
+  `getCurrentPos()`, plus `clone()` and the `Comparable` contract are gone;
+  engines keep their own cursors and scan a shared buffer instance from
+  several threads, so implementations must tolerate concurrent readers.
+  There is deliberately no total-length method, keeping bounded-window
+  buffers over streaming input expressible later. This also removes the
+  per-character synchronization and `Character` boxing the old cursor
+  contract forced onto the string-backed buffer. Migration: custom buffer
+  implementations shrink to positional lookups; callers that only used
+  `RMatch.stringBuffer(...)` are unaffected.
+- BREAKING (2.0 contract): buffer positions are now `long` throughout the
+  public API. `Buffer.getCurrentPos()` returns `long`,
+  `Buffer.getString(long, long)` takes `long` offsets, and
+  `Action.performMatch(Buffer, long, long)` receives `long` match offsets.
+  This keeps custom buffer implementations larger than the `int` range
+  expressible without another breaking change later. The built-in
+  string-backed buffers remain limited by `String` and reject out-of-range
+  arguments. Engine internals keep `int` positions; widening happens at the
+  callback boundary. Migration: lambda actions are source-compatible as-is;
+  explicit `Action` implementations change the parameter types to `long`,
+  and Mockito verifications need `long` matchers (`eq(0L)`, `anyLong()`).
+- BREAKING (2.0 contract): `Matcher` now extends `AutoCloseable`. The
+  `shutdown()` method (which threw `InterruptedException`) is replaced by an
+  idempotent `close()` that throws nothing, so matchers work in
+  try-with-resources. Partitioned matchers force-terminate their worker pool
+  if it does not stop within a grace period, and restore the interrupt flag
+  if interrupted while waiting.
+- Clarify that the public buffer facade is deliberately finite and
+  string-backed today: true streaming inputs must be materialized, while lazy
+  file-backed or bounded-lookback stream buffers remain possible future work if
+  users need them.
+- Add explicit `RMatch.stringBuffer(...)` convenience methods for strings,
+  character sequences, paths, readers, and input streams.
+- Remove the shorter `RMatch.buffer(String)` alias before 2.0 so the public
+  helper name states the materialization behavior directly.
+
+## 1.9.4 - pre-2.0 Maven Central release candidate
+
+`1.9.4` removes the last external compile-scope dependency and tightens the
+documented public API around the root `no.rmz.rmatch` facade.
 
 - Replaced the external `org.ahocorasick:ahocorasick` literal-prefilter
   dependency with a small internal Aho-Corasick implementation. The original
@@ -14,6 +78,12 @@
   stable 10K-pattern Docker gate. Median scan-time ratios were 1.015 on 1MB and
   1.004 on 10MB with identical match counts, so the replacement reaches parity
   under the current release gate.
+- Added `RMatch` as the recommended public facade and moved `Action`, `Buffer`,
+  `Matcher`, and `RegexpParserException` into the root package.
+- Changed the JPMS descriptor to export only `no.rmz.rmatch`.
+- Restricted the published Javadocs to the supported facade package so
+  implementation types such as compiler internals, node-management interfaces,
+  and utility classes are no longer presented as public documentation.
 
 ## 1.9.3 - pre-2.0 Maven Central release candidate
 

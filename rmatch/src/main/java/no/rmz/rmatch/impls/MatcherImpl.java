@@ -18,8 +18,11 @@ import static no.rmz.rmatch.internal.Checks.checkNotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.compiler.NDFACompilerImpl;
-import no.rmz.rmatch.compiler.RegexpParserException;
 import no.rmz.rmatch.interfaces.*;
 
 /**
@@ -29,8 +32,8 @@ import no.rmz.rmatch.interfaces.*;
  * constructor uses the fast-path engine unless the {@code rmatch.engine} system property selects
  * another engine variant.
  *
- * <p>Callbacks receive inclusive start/end offsets. Use {@code buffer.getString(start, end + 1)} to
- * recover the matched text.
+ * <p>Callbacks receive half-open {@code [start, end)} offsets. Use {@code buffer.getString(start,
+ * end)} to recover the matched text.
  */
 final class MatcherImpl implements Matcher {
 
@@ -56,6 +59,9 @@ final class MatcherImpl implements Matcher {
 
   /** Indicates that the engine-specific prefilter needs to be rebuilt. */
   private volatile boolean prefilterDirty = false;
+
+  /** Set once {@link #close()} has been called; guards against use-after-close. */
+  private volatile boolean closed = false;
 
   /** Create a new matcher using the default compiler, regexp factory, and engine selection. */
   MatcherImpl() {
@@ -96,6 +102,7 @@ final class MatcherImpl implements Matcher {
    */
   @Override
   public void add(final String r, final Action a) throws RegexpParserException {
+    ensureOpen();
     synchronized (rs) {
       rs.add(r, a);
 
@@ -113,6 +120,7 @@ final class MatcherImpl implements Matcher {
    */
   @Override
   public void remove(final String r, final Action a) {
+    ensureOpen();
     synchronized (rs) {
       rs.remove(r, a);
 
@@ -188,6 +196,7 @@ final class MatcherImpl implements Matcher {
    */
   @Override
   public void match(final Buffer b) {
+    ensureOpen();
     ensurePrefilterConfigured();
 
     synchronized (me) {
@@ -197,7 +206,15 @@ final class MatcherImpl implements Matcher {
 
   /** Release matcher resources. This single-engine implementation currently owns no worker pool. */
   @Override
-  public void shutdown() {}
+  public void close() {
+    closed = true;
+  }
+
+  private void ensureOpen() {
+    if (closed) {
+      throw new IllegalStateException("Matcher is closed");
+    }
+  }
 
   /**
    * Configure engine-specific prefilters on-demand. This avoids rebuilding heavy data structures

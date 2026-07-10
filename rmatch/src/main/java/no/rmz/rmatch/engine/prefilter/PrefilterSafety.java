@@ -37,7 +37,43 @@ public final class PrefilterSafety {
     }
     // We only trust literal prefixes with a stable zero offset in matched text.
     final int expectedPrefixOffset = regex.startsWith("^") ? 1 : 0;
-    return hint.offsetInRegex() == expectedPrefixOffset && hint.literalOffsetInMatch() == 0;
+    return hint.offsetInRegex() == expectedPrefixOffset
+        && hint.literalOffsetInMatch() == 0
+        && !prefixCanMatchWithoutLastHintChar(regex, hint);
+  }
+
+  private static boolean prefixCanMatchWithoutLastHintChar(
+      final String regex, final LiteralHint hint) {
+    final int quantifierIndex = hint.offsetInRegex() + hint.literal().length();
+    if (quantifierIndex >= regex.length()) {
+      return false;
+    }
+
+    final char quantifier = regex.charAt(quantifierIndex);
+    if (quantifier == '?' || quantifier == '*') {
+      return true;
+    }
+    return quantifier == '{' && countedQuantifierAllowsZero(regex, quantifierIndex);
+  }
+
+  private static boolean countedQuantifierAllowsZero(final String regex, final int openBrace) {
+    final int closeBrace = regex.indexOf('}', openBrace + 1);
+    if (closeBrace < 0) {
+      return false;
+    }
+
+    final String body = regex.substring(openBrace + 1, closeBrace).trim();
+    if (body.isEmpty()) {
+      return false;
+    }
+
+    final int comma = body.indexOf(',');
+    final String lowerBound = (comma >= 0 ? body.substring(0, comma) : body).trim();
+    try {
+      return Integer.parseInt(lowerBound) == 0;
+    } catch (NumberFormatException ignored) {
+      return false;
+    }
   }
 
   private PrefilterSafety() {}

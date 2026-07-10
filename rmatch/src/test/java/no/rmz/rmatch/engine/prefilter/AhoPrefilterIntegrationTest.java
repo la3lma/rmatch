@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.interfaces.NodeStorage;
 import no.rmz.rmatch.utils.RegexStringBuffer;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ public class AhoPrefilterIntegrationTest {
         () -> {
           // Can't actually test matching without full pattern setup,
           // but we can test that the engine accepts the buffer
-          assertTrue(buffer.hasNext());
+          assertTrue(buffer.hasCharAt(0));
         });
   }
 

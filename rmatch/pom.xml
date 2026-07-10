@@ -5,12 +5,12 @@
     <parent>
         <groupId>no.rmz</groupId>
         <artifactId>rmatch-parent</artifactId>
-        <version>1.9.4-SNAPSHOT</version>
+        <version>1.9.5-SNAPSHOT</version>
     </parent>
 
     <groupId>no.rmz</groupId>
     <artifactId>rmatch</artifactId>
-    <version>1.9.4-SNAPSHOT</version>
+    <version>1.9.5-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>rmatch</name>
@@ -133,6 +133,27 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <doclint>none</doclint>
+                    <sourceFileIncludes>
+                        <sourceFileInclude>module-info.java</sourceFileInclude>
+                        <sourceFileInclude>no/rmz/rmatch/*.java</sourceFileInclude>
+                    </sourceFileIncludes>
+                    <sourceFileExcludes>
+                        <sourceFileExclude>no/rmz/rmatch/abstracts/**</sourceFileExclude>
+                        <sourceFileExclude>no/rmz/rmatch/compiler/**</sourceFileExclude>
+                        <sourceFileExclude>no/rmz/rmatch/engine/**</sourceFileExclude>
+                        <sourceFileExclude>no/rmz/rmatch/impls/**</sourceFileExclude>
+                        <sourceFileExclude>no/rmz/rmatch/interfaces/**</sourceFileExclude>
+                        <sourceFileExclude>no/rmz/rmatch/internal/**</sourceFileExclude>
+                        <sourceFileExclude>no/rmz/rmatch/utils/**</sourceFileExclude>
+                    </sourceFileExcludes>
+                </configuration>
             </plugin>
 
         </plugins>

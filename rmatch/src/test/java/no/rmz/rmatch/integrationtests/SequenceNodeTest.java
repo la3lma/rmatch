@@ -17,6 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.Matcher;
+import no.rmz.rmatch.RegexpParserException;
 import no.rmz.rmatch.impls.RegexpImpl;
 import no.rmz.rmatch.impls.TestMatchers;
 import no.rmz.rmatch.interfaces.*;
@@ -47,16 +51,16 @@ public class SequenceNodeTest {
   static final String ABAC_STRING = AB_STRING + " " + AC_STRING;
 
   /** The start position of the "ab" part in the ABAC string. */
-  static final int AB_START = 0;
+  static final long AB_START = 0;
 
-  /** THe end position of the "ab" part of the ABAC string. */
-  static final int AB_END = AB_START + AB_STRING.length() - 1;
+  /** The exclusive end position of the "ab" part of the ABAC string. */
+  static final long AB_END = AB_START + AB_STRING.length();
 
   /** The start position of the "ac" part of the ABAC string. */
-  static final int AC_START = AB_START + AB_STRING.length() + 1;
+  static final long AC_START = AB_START + AB_STRING.length() + 1;
 
-  /** The end position of the "ac" part of the ABAC string. */
-  static final int AC_END = AC_START + AC_STRING.length() - 1;
+  /** The exclusive end position of the "ac" part of the ABAC string. */
+  static final long AC_END = AC_START + AC_STRING.length();
 
   /** Mocked action. Used to check that matches are found in the right locations. */
   @Mock Action action;

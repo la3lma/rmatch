@@ -20,9 +20,9 @@ import java.util.Comparator;
  *
  * <p>This type is public because older engine and diagnostic APIs expose matcher state. Normal
  * application code should not need to create or manipulate {@code Match} instances; use {@link
- * Matcher#add(String, Action)} and handle matches through {@link Action#performMatch(Buffer, int,
- * int)} instead. The start and end offsets exposed here use the same inclusive convention as action
- * callbacks.
+ * Matcher#add(String, Action)} and handle matches through {@link Action#performMatch(Buffer, long,
+ * long)} instead. The start and end offsets exposed here use the engine-internal inclusive
+ * convention; note that public action callbacks receive half-open {@code [start, end)} offsets.
  */
 public interface Match {
 

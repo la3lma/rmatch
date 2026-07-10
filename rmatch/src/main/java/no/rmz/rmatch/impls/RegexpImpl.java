@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import no.rmz.rmatch.Action;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.interfaces.*;
 
 /** Representation of a parsed regular expression. */
@@ -145,8 +147,10 @@ public final class RegexpImpl implements Regexp {
 
   @Override
   public void performActions(final Buffer b, final int start, final int end) {
+    // Engines track matches with inclusive end offsets; the public Action
+    // contract is half-open [start, end), so convert at this single point.
     for (final Action a : actions) {
-      a.performMatch(b, start, end);
+      a.performMatch(b, start, end + 1);
     }
   }
 

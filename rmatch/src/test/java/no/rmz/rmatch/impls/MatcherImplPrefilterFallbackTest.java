@@ -16,8 +16,8 @@ package no.rmz.rmatch.impls;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import no.rmz.rmatch.compiler.RegexpParserException;
-import no.rmz.rmatch.interfaces.Buffer;
+import no.rmz.rmatch.Buffer;
+import no.rmz.rmatch.RegexpParserException;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -60,41 +60,24 @@ public final class MatcherImplPrefilterFallbackTest {
   /** Minimal Buffer implementation for regression testing non-RegexStringBuffer input. */
   private static final class GenericTestBuffer implements Buffer {
     private final String text;
-    private int currentPos = -1;
 
     private GenericTestBuffer(final String text) {
       this.text = text;
     }
 
-    private GenericTestBuffer(final GenericTestBuffer other) {
-      this.text = other.text;
-      this.currentPos = other.currentPos;
+    @Override
+    public boolean hasCharAt(final long pos) {
+      return pos >= 0 && pos < text.length();
     }
 
     @Override
-    public boolean hasNext() {
-      return currentPos + 1 < text.length();
+    public char charAt(final long pos) {
+      return text.charAt(Math.toIntExact(pos));
     }
 
     @Override
-    public Character getNext() {
-      currentPos += 1;
-      return text.charAt(currentPos);
-    }
-
-    @Override
-    public int getCurrentPos() {
-      return currentPos;
-    }
-
-    @Override
-    public String getString(final int start, final int stop) {
-      return text.substring(Math.max(0, start), Math.min(stop, text.length()));
-    }
-
-    @Override
-    public Buffer clone() {
-      return new GenericTestBuffer(this);
+    public String getString(final long start, final long stop) {
+      return text.substring((int) Math.max(0, start), (int) Math.min(stop, text.length()));
     }
   }
 }

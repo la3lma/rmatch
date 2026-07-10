@@ -16,12 +16,12 @@ package no.rmz.rmatch.impls;
 import static no.rmz.rmatch.internal.Checks.checkNotNull;
 
 import java.util.*;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.engine.prefilter.AhoCorasickPrefilter;
 import no.rmz.rmatch.engine.prefilter.LiteralHint;
 import no.rmz.rmatch.engine.prefilter.LiteralPrefilter;
 import no.rmz.rmatch.engine.prefilter.PrefilterSafety;
 import no.rmz.rmatch.interfaces.*;
-import no.rmz.rmatch.utils.SimpleBloomFilter;
 
 /**
  * Advanced match engine using Bloom filter pre-screening and hierarchical filtering to achieve O(l
@@ -175,8 +175,8 @@ final class BloomFilterMatchEngine implements MatchEngine {
     final List<Character> characters = new ArrayList<>();
 
     // Collect all text from buffer
-    while (buffer.hasNext()) {
-      final Character ch = buffer.getNext();
+    for (long i = 0; buffer.hasCharAt(i); i++) {
+      final char ch = buffer.charAt(i);
       textBuilder.append(ch);
       characters.add(ch);
     }
@@ -380,42 +380,28 @@ final class BloomFilterMatchEngine implements MatchEngine {
     }
   }
 
-  private static class TextBuffer implements Buffer, Cloneable {
+  private static class TextBuffer implements Buffer {
     private final String text;
-    private int pos = -1;
 
     TextBuffer(final String text) {
       this.text = text;
     }
 
     @Override
-    public boolean hasNext() {
-      return pos + 1 < text.length();
+    public boolean hasCharAt(final long pos) {
+      return pos >= 0 && pos < text.length();
     }
 
     @Override
-    public Character getNext() {
-      if (hasNext()) {
-        return text.charAt(++pos);
-      }
-      return null;
+    public char charAt(final long pos) {
+      return text.charAt(Math.toIntExact(pos));
     }
 
     @Override
-    public int getCurrentPos() {
-      return pos;
-    }
-
-    @Override
-    public String getString(final int start, final int stop) {
-      return text.substring(Math.max(0, start), Math.min(text.length(), stop));
-    }
-
-    @Override
-    public Buffer clone() {
-      final TextBuffer cloned = new TextBuffer(text);
-      cloned.pos = this.pos;
-      return cloned;
+    public String getString(final long start, final long stop) {
+      final int from = (int) Math.max(0, start);
+      final int to = (int) Math.min(text.length(), stop);
+      return text.substring(from, to);
     }
   }
 

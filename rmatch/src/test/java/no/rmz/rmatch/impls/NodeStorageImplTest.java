@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
+import no.rmz.rmatch.Buffer;
 import no.rmz.rmatch.abstracts.AbstractNDFANode;
 import no.rmz.rmatch.interfaces.*;
 import no.rmz.rmatch.utils.RegexStringBuffer;
@@ -71,7 +72,7 @@ class NodeStorageImplTest {
   @Test
   public final void testGetNext() {
     // XXX Incomplete test
-    nsi.getNextFromStartNode(buffer.getNext());
+    nsi.getNextFromStartNode(buffer.charAt(0));
   }
 
   /**
