@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9.6-SNAPSHOT - in development
+
+- Continue pre-2.0 cleanup after publishing `1.9.5`.
+- Added JaCoCo coverage behind a `-Pcoverage` Maven profile and a CI job that
+  uploads library-module coverage to Codacy without blocking the main release
+  gate if Codacy-side coverage initialization is not ready.
+
 ## 1.9.5 - pre-2.0 Maven Central release candidate
 
 `1.9.5` is a sharper pre-2.0 contract candidate. It keeps the root

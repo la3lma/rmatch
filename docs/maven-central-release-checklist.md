@@ -165,6 +165,73 @@ the rest of the release work here as it becomes explicit.
   `./mvnw -q -B -pl rmatch -am -DskipTests -Dspotbugs.skip=true verify`
   succeeded.
 
+## 1.9.5 Release Run
+
+- [x] Sync release worktree from current `origin/main`. Result on 2026-07-10:
+  release commit `8bbb496d` was prepared from `main` after PR #289, before the
+  later Codacy coverage PR was merged into `origin/main`.
+- [x] Set release POM versions and README snippets to `1.9.5`; keep
+  `rmatch-tester` outside the Central release lane.
+- [x] Convert `1.9.5` changelog notes from snapshot wording to
+  release-candidate wording, separating public API/behavior changes from
+  correctness, release hygiene, and CI changes.
+- [x] Run full release preflight. Result on 2026-07-10:
+  `make release-central-preflight` succeeded.
+- [x] Run Central profile check without signing/uploading. Result on
+  2026-07-10: `make release-central-profile-check` succeeded.
+- [x] Run signed Central release-profile verify for final `1.9.5`. Result on
+  2026-07-10:
+  `./mvnw -B -pl rmatch -am -Pcentral-release -DskipTests
+  -Dspotbugs.skip=true -Dgpg.keyname=55D9C01E75B1E582 clean verify`
+  succeeded and signed the parent POM plus rmatch POM, main JAR, source JAR,
+  and Javadoc JAR.
+- [x] Verify generated `1.9.5` `.asc` signatures locally. Result on
+  2026-07-10: `gpg --verify` reported good signatures for the parent POM,
+  rmatch POM, main JAR, source JAR, and Javadoc JAR using key
+  `9017955845408C9B4422B5DE55D9C01E75B1E582`.
+- [x] Inspect final `1.9.5` JAR manifest, embedded POM properties, JPMS module
+  descriptor, and Java baseline. Result on 2026-07-10: manifest has
+  `Java-Version: 21`, no application-style `Main-Class`, embedded properties
+  report `no.rmz:rmatch:1.9.5`, `jar --describe-module` reports
+  `no.rmz.rmatch@1.9.5`, and `javap` reports classfile major version 65.
+- [x] Verify final `1.9.5` compile dependency tree. Result on 2026-07-10:
+  `./mvnw -B -pl rmatch -DskipTests -Dspotbugs.skip=true dependency:tree
+  -Dscope=compile` reports `no.rmz:rmatch:jar:1.9.5` with no compile-scope
+  dependencies.
+- [x] Inspect the generated `1.9.5` Javadoc artifact as a public contract
+  artifact. Result on 2026-07-10: the `-javadoc.jar` contains only the
+  exported facade package under `no.rmz.rmatch`.
+- [x] Run downstream consumer smoke test after local install. Result on
+  2026-07-10: `/tmp/rmatch-195-consumer-smoke.codex`, command
+  `mvn -q clean verify exec:java -Dexec.mainClass=Example`, printed
+  `log-level match: WARN` and `user token match: user:alice`.
+- [x] Upload the `1.9.5` release commit to Central Portal. Result on
+  2026-07-10: release commit `8bbb496d` deployed as Central deployment
+  `af9b7257-05a5-42bd-8a1f-cfe6b8b44f5e`; validation succeeded.
+- [x] Publish the validated `1.9.5` Central deployment. Result on 2026-07-10:
+  the deployment moved from `VALIDATED` to `PUBLISHING`, then Central Portal
+  reported `PUBLISHED`.
+- [x] Confirm `1.9.5` artifact availability from Maven Central. Result on
+  2026-07-10: direct checks for the `rmatch` POM, main JAR, Javadoc JAR, and
+  parent POM under `https://repo.maven.apache.org/maven2/no/rmz/.../1.9.5/`
+  returned HTTP 200.
+- [x] Run a clean-repository consumer smoke test against Maven Central
+  `1.9.5`. Result on 2026-07-10:
+  `/tmp/rmatch-195-consumer-smoke.codex` with empty Maven repository
+  `/tmp/rmatch-195-central-m2.codex`, command
+  `mvn -Dmaven.repo.local=/tmp/rmatch-195-central-m2.codex -q clean verify
+  exec:java -Dexec.mainClass=Example`, printed `log-level match: WARN` and
+  `user token match: user:alice`.
+- [x] Create and push the `rmatch-1.9.5` tag. Result on 2026-07-10:
+  annotated tag `rmatch-1.9.5` points at uploaded release commit `8bbb496d`
+  and was pushed to `origin`.
+- [x] Bump repository back to the next development snapshot. Result on
+  2026-07-10: after merging the newer `origin/main`, POMs moved from final
+  `1.9.5` release versions to `1.9.6-SNAPSHOT`; README examples remain on the
+  published `1.9.5` version. Post-bump sanity command
+  `./mvnw -q -B -pl rmatch -am -DskipTests -Dspotbugs.skip=true verify`
+  succeeded.
+
 ## Identity and Access
 
 - [x] Create a current GPG release-signing key.
