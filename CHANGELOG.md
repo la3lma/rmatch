@@ -3,6 +3,12 @@
 ## 1.9.5-SNAPSHOT - in development
 
 - Continue pre-2.0 cleanup after publishing `1.9.4`.
+- Release polish: the dormant `EdgeInvisibilityEnsurance` bug-manifestation
+  test now runs (renamed to match the test pattern; the historical bug it
+  pins is confirmed fixed), published Javadocs build under strict doclint
+  with warnings failing the build, and the repository gained
+  `CONTRIBUTING.md`, `SECURITY.md`, and README notes on pattern identity in
+  callbacks and parse-error behavior.
 - Specified and enforced the matcher behavioral contracts for 2.0: action
   exceptions abort the scan and propagate out of `match()` (partitioned
   matchers finish the surviving partitions, then rethrow the first failure

@@ -36,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * of that error situation.
  */
 @ExtendWith(MockitoExtension.class)
-public class EdgeInvisibilityEnsurance {
+public class EdgeInvisibilityEnsuranceTest {
 
   @Mock Action llAction;
 
