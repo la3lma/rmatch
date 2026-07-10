@@ -328,7 +328,8 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <doclint>none</doclint>
+                            <doclint>all</doclint>
+                            <failOnWarnings>true</failOnWarnings>
                         </configuration>
                     </plugin>
 

@@ -3,6 +3,12 @@
 ## 1.9.5-SNAPSHOT - in development
 
 - Continue pre-2.0 cleanup after publishing `1.9.4`.
+- Release polish: the dormant `EdgeInvisibilityEnsurance` bug-manifestation
+  test now runs (renamed to match the test pattern; the historical bug it
+  pins is confirmed fixed), published Javadocs build under strict doclint
+  with warnings failing the build, and the repository gained
+  `CONTRIBUTING.md`, `SECURITY.md`, and README notes on pattern identity in
+  callbacks and parse-error behavior.
 - Shipped-jar hygiene: removed the experimental Bloom-filter match engine and
   its `SimpleBloomFilter` (reachable only via `rmatch.engine=bloom`, never
   used in production); `FastCounters` diagnostics now go through

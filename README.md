@@ -177,6 +177,27 @@ convention as `String.substring`, so the matched text is exactly
 reports the longest match for each start position; overlapping matches from
 different start positions may therefore be reported.
 
+`Matcher.add` throws `RegexpParserException` when a pattern is outside the
+supported syntax subset, so unsupported constructs fail loudly at
+registration time, never silently at match time.
+
+### Knowing which pattern matched
+
+The callback does not carry a pattern identifier; the action itself is the
+identity. Register one action per pattern and let the closure capture
+whatever identity you need:
+
+```java
+for (Rule rule : rules) {
+  matcher.add(rule.pattern(), (buffer, start, end) ->
+      hits.add(new Hit(rule.id(), start, end)));
+}
+```
+
+Actions may run concurrently on a partitioned matcher, so collect into a
+thread-safe structure (`LongAdder`, a concurrent collection, or a
+synchronized block).
+
 For one small pattern against one small string, `java.util.regex` is usually the
 simpler tool. rmatch is for many-pattern workloads where avoiding a separate
 regex search for every pattern matters.
