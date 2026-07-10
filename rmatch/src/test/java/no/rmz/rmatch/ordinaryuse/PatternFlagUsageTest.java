@@ -48,6 +48,19 @@ public class PatternFlagUsageTest {
   }
 
   @Test
+  public void nullFlagSetBehavesLikePlainAdd() throws Exception {
+    try (Matcher m = RMatch.newSingleMatcher()) {
+      final Set<String> found = new TreeSet<>();
+      m.add("warn", (Set<PatternFlag>) null, (b, start, end) -> found.add(b.getString(start, end)));
+
+      m.match(RMatch.stringBuffer("warn WARN"));
+
+      assertEquals(
+          Set.of("warn"), found, "null flags mean no flags; matching stays case-sensitive");
+    }
+  }
+
+  @Test
   public void emptyFlagSetBehavesLikePlainAdd() throws Exception {
     try (Matcher m = RMatch.newSingleMatcher()) {
       final Set<String> found = new TreeSet<>();

@@ -43,14 +43,14 @@ public enum PatternFlag {
    * Rewrite a pattern so the supplied flags are expressed in inline syntax.
    *
    * <p>Flags are prepended in declaration order, so the rewritten pattern is deterministic for a
-   * given flag set. An empty flag set returns the pattern unchanged.
+   * given flag set. An empty or {@code null} flag set returns the pattern unchanged.
    *
    * @param regex pattern text in the rmatch supported syntax subset
-   * @param flags flags to apply
+   * @param flags flags to apply; {@code null} is treated as empty
    * @return pattern text with the flags expressed as inline prefixes
    */
   static String applyTo(final String regex, final Set<PatternFlag> flags) {
-    if (flags.isEmpty()) {
+    if (flags == null || flags.isEmpty()) {
       return regex;
     }
     final StringBuilder sb = new StringBuilder();

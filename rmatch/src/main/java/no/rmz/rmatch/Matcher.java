@@ -71,7 +71,7 @@ public interface Matcher extends AutoCloseable {
    * #remove(String, Set, Action)} must supply the same flags.
    *
    * @param r regular-expression text in the rmatch supported syntax subset
-   * @param flags per-pattern option flags; may be empty
+   * @param flags per-pattern option flags; an empty or {@code null} set means no flags
    * @param a action to run for each match
    * @throws RegexpParserException if {@code r} cannot be parsed by the supported rmatch syntax
    * @throws IllegalStateException if the matcher has been closed
