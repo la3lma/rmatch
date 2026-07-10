@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+<title id="title">JVM engines: single-thread and parallel task throughput</title>
+<desc id="desc">Same 8 MiB fixtures; rmatch uses its public single-engine factory, while RE2/J and Java regex also show tuned parallel task lanes</desc>
+<rect width="1200" height="720" rx="22" fill="#f7f4ed"/>
+<text x="72" y="66" font-family="Georgia, serif" font-size="34" font-weight="700" fill="#17212b">JVM engines: single-thread and parallel task throughput</text>
+<text x="72" y="98" font-family="Verdana, sans-serif" font-size="15" fill="#53606c">Same 8 MiB fixtures; rmatch uses its public single-engine factory, while RE2/J and Java regex also show tuned parallel task lanes</text>
+<rect x="72" y="130" width="17" height="17" rx="3" fill="#e4572e"/>
+<text x="97" y="144" font-family="Verdana, sans-serif" font-size="14" fill="#27333d">rmatch 1T</text>
+<rect x="175" y="130" width="17" height="17" rx="3" fill="#315c9b"/>
+<text x="200" y="144" font-family="Verdana, sans-serif" font-size="14" fill="#27333d">RE2/J 1T</text>
+<rect x="270" y="130" width="17" height="17" rx="3" fill="#4d5259"/>
+<text x="295" y="144" font-family="Verdana, sans-serif" font-size="14" fill="#27333d">Java regex 1T</text>
+<rect x="405" y="130" width="17" height="17" rx="3" fill="#6f95ca"/>
+<text x="430" y="144" font-family="Verdana, sans-serif" font-size="14" fill="#27333d">RE2/J tuned</text>
+<rect x="524" y="130" width="17" height="17" rx="3" fill="#9a9fa6"/>
+<text x="549" y="144" font-family="Verdana, sans-serif" font-size="14" fill="#27333d">Java regex 128T</text>
+<line x1="96" y1="620.0" x2="1140" y2="620.0" stroke="#d9d5ca" stroke-width="1"/>
+<text x="84" y="625.0" text-anchor="end" font-family="Verdana, sans-serif" font-size="12" fill="#687580">0</text>
+<line x1="96" y1="533.0" x2="1140" y2="533.0" stroke="#d9d5ca" stroke-width="1"/>
+<text x="84" y="538.0" text-anchor="end" font-family="Verdana, sans-serif" font-size="12" fill="#687580">500</text>
+<line x1="96" y1="446.0" x2="1140" y2="446.0" stroke="#d9d5ca" stroke-width="1"/>
+<text x="84" y="451.0" text-anchor="end" font-family="Verdana, sans-serif" font-size="12" fill="#687580">1,000</text>
+<line x1="96" y1="359.0" x2="1140" y2="359.0" stroke="#d9d5ca" stroke-width="1"/>
+<text x="84" y="364.0" text-anchor="end" font-family="Verdana, sans-serif" font-size="12" fill="#687580">1,500</text>
+<line x1="96" y1="272.0" x2="1140" y2="272.0" stroke="#d9d5ca" stroke-width="1"/>
+<text x="84" y="277.0" text-anchor="end" font-family="Verdana, sans-serif" font-size="12" fill="#687580">2,000</text>
+<line x1="96" y1="185.0" x2="1140" y2="185.0" stroke="#d9d5ca" stroke-width="1"/>
+<text x="84" y="190.0" text-anchor="end" font-family="Verdana, sans-serif" font-size="12" fill="#687580">2,500</text>
+<rect x="130.5" y="517.1" width="27" height="102.9" rx="4" fill="#e4572e"/>
+<text transform="translate(144.0,510.1) rotate(-55)" text-anchor="start" font-family="Verdana, sans-serif" font-size="10" fill="#27333d">591</text>
+<rect x="395.5" y="569.9" width="27" height="50.1" rx="4" fill="#e4572e"/>
+<text transform="translate(409.0,562.9) rotate(-55)" text-anchor="start" font-family="Verdana, sans-serif" font-size="10" fill="#27333d">288</text>
+<rect x="665.5" y="472.9" width="27" height="147.1" rx="4" fill="#e4572e"/>
+<text transform="translate(679.0,465.9) rotate(-55)" text-anchor="start" font-family="Verdana, sans-serif" font-size="10" fill="#27333d">846</text>
+<rect x="930.5" y="564.8" width="27" height="55.2" rx="4" fill="#e4572e"/>
+<text transform="translate(944.0,557.8) rotate(-55)" text-anchor="start" font-family="Verdana, sans-serif" font-size="10" fill="#27333d">317</text>
+<rect x="163.5" y="590.0" width="27" height="30.0" rx="4" fill="#315c9b"/>
+<rect x="428.5" y="617.1" width="27" height="2.9" rx="4" fill="#315c9b"/>
+<rect x="698.5" y="589.4" width="27" height="30.6" rx="4" fill="#315c9b"/>
+<rect x="963.5" y="617.0" width="27" height="3.0" rx="4" fill="#315c9b"/>
+<rect x="196.5" y="610.8" width="27" height="9.2" rx="4" fill="#4d5259"/>
+<rect x="461.5" y="619.1" width="27" height="0.9" rx="4" fill="#4d5259"/>
+<rect x="731.5" y="614.3" width="27" height="5.7" rx="4" fill="#4d5259"/>
+<rect x="996.5" y="619.4" width="27" height="0.6" rx="4" fill="#4d5259"/>
+<rect x="229.5" y="223.9" width="27" height="396.1" rx="4" fill="#6f95ca"/>
+<text transform="translate(243.0,216.9) rotate(-55)" text-anchor="start" font-family="Verdana, sans-serif" font-size="10" fill="#27333d">2,277</text>
+<rect x="494.5" y="580.1" width="27" height="39.9" rx="4" fill="#6f95ca"/>
+<text transform="translate(508.0,573.1) rotate(-55)" text-anchor="start" font-family="Verdana, sans-serif" font-size="10" fill="#27333d">229</text>
+<rect x="764.5" y="230.7" width="27" height="389.3" rx="4" fill="#6f95ca"/>
+<text transform="translate(778.0,223.7) rotate(-55)" text-anchor="start" font-family="Verdana, sans-serif" font-size="10" fill="#27333d">2,237</text>
+<rect x="1029.5" y="579.6" width="27" height="40.4" rx="4" fill="#6f95ca"/>
+<text transform="translate(1043.0,572.6) rotate(-55)" text-anchor="start" font-family="Verdana, sans-serif" font-size="10" fill="#27333d">232</text>
+<rect x="262.5" y="411.0" width="27" height="209.0" rx="4" fill="#9a9fa6"/>
+<text transform="translate(276.0,404.0) rotate(-55)" text-anchor="start" font-family="Verdana, sans-serif" font-size="10" fill="#27333d">1,201</text>
+<rect x="527.5" y="599.8" width="27" height="20.2" rx="4" fill="#9a9fa6"/>
+<rect x="797.5" y="491.0" width="27" height="129.0" rx="4" fill="#9a9fa6"/>
+<text transform="translate(811.0,484.0) rotate(-55)" text-anchor="start" font-family="Verdana, sans-serif" font-size="10" fill="#27333d">741</text>
+<rect x="1062.5" y="606.2" width="27" height="13.8" rx="4" fill="#9a9fa6"/>
+<text x="210.0" y="650" text-anchor="middle" font-family="Verdana, sans-serif" font-size="14" font-weight="700" fill="#27333d">Diverse literals</text>
+<text x="210.0" y="671" text-anchor="middle" font-family="Verdana, sans-serif" font-size="13" fill="#687580">1,000 patterns</text>
+<text x="475.0" y="650" text-anchor="middle" font-family="Verdana, sans-serif" font-size="14" font-weight="700" fill="#27333d">Diverse literals</text>
+<text x="475.0" y="671" text-anchor="middle" font-family="Verdana, sans-serif" font-size="13" fill="#687580">10,000 patterns</text>
+<text x="745.0" y="650" text-anchor="middle" font-family="Verdana, sans-serif" font-size="14" font-weight="700" fill="#27333d">Mixed regex</text>
+<text x="745.0" y="671" text-anchor="middle" font-family="Verdana, sans-serif" font-size="13" fill="#687580">1,000 patterns</text>
+<text x="1010.0" y="650" text-anchor="middle" font-family="Verdana, sans-serif" font-size="14" font-weight="700" fill="#27333d">Mixed regex</text>
+<text x="1010.0" y="671" text-anchor="middle" font-family="Verdana, sans-serif" font-size="13" fill="#687580">10,000 patterns</text>
+<text x="23" y="410" transform="rotate(-90 23 410)" text-anchor="middle" font-family="Verdana, sans-serif" font-size="13" fill="#53606c">Whole-task throughput (Mbit/s)</text>
+</svg>
