@@ -3,6 +3,9 @@
 ## 1.9.5-SNAPSHOT - in development
 
 - Continue pre-2.0 cleanup after publishing `1.9.4`.
+- Added JaCoCo coverage behind a `-Pcoverage` Maven profile and a CI job that
+  uploads library-module coverage to Codacy (skipping gracefully until the
+  `CODACY_PROJECT_TOKEN` repository secret is configured).
 - Specified and enforced the matcher behavioral contracts for 2.0: action
   exceptions abort the scan and propagate out of `match()` (partitioned
   matchers finish the surviving partitions, then rethrow the first failure
