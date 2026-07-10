@@ -85,7 +85,7 @@ final class MatcherImpl implements Matcher {
       me = new MatchEngineImpl(ns);
     }
 
-    prefilterDirty = needsPrefilterConfiguration();
+    prefilterDirty = true;
   }
 
   /**
@@ -100,10 +100,7 @@ final class MatcherImpl implements Matcher {
     ensureOpen();
     synchronized (rs) {
       rs.add(r, a);
-
-      if (needsPrefilterConfiguration()) {
-        prefilterDirty = true;
-      }
+      prefilterDirty = true;
     }
   }
 
@@ -118,10 +115,7 @@ final class MatcherImpl implements Matcher {
     ensureOpen();
     synchronized (rs) {
       rs.remove(r, a);
-
-      if (needsPrefilterConfiguration()) {
-        prefilterDirty = true;
-      }
+      prefilterDirty = true;
     }
   }
 
@@ -216,7 +210,7 @@ final class MatcherImpl implements Matcher {
    * for every single addition/removal when callers batch pattern registration.
    */
   private void ensurePrefilterConfigured() {
-    if (!prefilterDirty || !needsPrefilterConfiguration()) {
+    if (!prefilterDirty) {
       return;
     }
 
@@ -236,10 +230,5 @@ final class MatcherImpl implements Matcher {
 
       prefilterDirty = false;
     }
-  }
-
-  /** Returns true if the current engine variant requires prefilter configuration. */
-  private boolean needsPrefilterConfiguration() {
-    return useFastPath || me instanceof MatchEngineImpl;
   }
 }

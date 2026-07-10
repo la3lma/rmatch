@@ -76,6 +76,9 @@ public final class FastCounters {
   private static final Logger LOG = Logger.getLogger(FastCounters.class.getName());
 
   private void privateDumpCounters() {
+    if (!LOG.isLoggable(java.util.logging.Level.INFO)) {
+      return;
+    }
     final StringBuilder sb = new StringBuilder("Counter dump:");
     for (final Map.Entry<CounterType, Long> entry : privateSnapshot().entrySet()) {
       final CounterType type = entry.getKey();
