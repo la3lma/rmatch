@@ -29,25 +29,29 @@ The public comparison model is:
   RE2J regex over the corpus.
 - rmatch: register the same pattern set in one matcher and scan the corpus once.
 
-Current release gates use byte-identical inputs and require match counts to
-agree before timing numbers are treated as public evidence. A fresh Docker run
-on a 32-logical-CPU AMD Ryzen 9 9950X3D machine on 2026-07-07 used deterministic
-literal-token patterns over an 8 MiB corpus. The 1k-pattern case still favors
-RE2J, which is expected for smaller literal workloads. At 5k and 10k patterns,
-the one-pass rmatch scan pulls ahead while the per-pattern loops continue to
-scale with the number of patterns.
+Current measurements use byte-identical inputs and require match counts to
+agree before a timing is retained. The charts below come from Docker runs on a
+16-core / 32-thread AMD Ryzen 9 9950X3D using deterministic 8 MiB fixtures with
+1,000 and 10,000 patterns. The logarithmic view keeps Hyperscan, rmatch, RE2/J,
+and Java regex legible on one scale.
 
-![rmatch README efficiency comparison](docs/benchmark-receipts/agogo-2026-07-07/readme-efficiency-large/readme-efficiency-scanning.svg)
+![Logarithmic comparison of Hyperscan, rmatch, RE2/J, and Java regex](docs/benchmark-plots/exploratory-2026-07-10/four-engine-overview-log.svg)
 
-| Patterns | Match count | rmatch (s) | RE2J (s) | Java regex loop (s) |
-|---:|---:|---:|---:|---:|
-| 1,000 | 11,000 | 1.885 | 1.143 | 3.091 |
-| 5,000 | 52,721 | 2.075 | 4.073 | 15.314 |
-| 10,000 | 102,721 | 2.316 | 7.914 | 30.740 |
+The linear view makes the JVM comparison easier to read. `1T` means one
+worker. The parallel RE2/J and Java lanes partition independent, precompiled
+patterns across workers; rmatch is represented by its public single-engine
+factory. Those are deliberately labeled as different execution models rather
+than collapsed into one supposedly universal ranking.
 
-The raw receipts, chart inputs, and earlier diagnostic runs are checked in
-under
-[docs/benchmark-receipts/agogo-2026-07-07](docs/benchmark-receipts/agogo-2026-07-07).
+![Linear comparison of rmatch, RE2/J, and Java regex](docs/benchmark-plots/exploratory-2026-07-10/jvm-engine-comparison-linear.svg)
+
+These are exploratory measurements from a benchmark project that is only just
+getting started, not a systematic testing campaign or a final verdict. The
+workloads are generated, the scenario set is still small, and wider syntax,
+corpora, machines, match densities, and resource controls remain to be tested.
+The harness, methodology, and auditable receipts live in the
+[rmatch performance measurements project](https://github.com/la3lma/rmatch-performance-measurements).
+Watch this space.
 
 Use rmatch when the workload looks like this:
 
