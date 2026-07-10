@@ -42,7 +42,7 @@ public class JavaRegexpMatcher implements Matcher {
    * A map that for all the actions we are managing, keeps track of all the regexps that are
    * triggered by that particular action.
    */
-  private final Map<Action, Set<String>> actionToRegexpMap = new HashMap<>();
+  private final Map<Action, Set<String>> actionToRegexpMap = new IdentityHashMap<>(1);
 
   /** A collector of worker processes that should be used when running the matches. */
   private final Collection<Callable<Object>> matchers = new LinkedList<>();
@@ -57,7 +57,7 @@ public class JavaRegexpMatcher implements Matcher {
    * A state parameter for the class. When in matching state it is illegal to add more regexp/action
    * pairs.
    */
-  private final boolean matching = false;
+  private boolean matching = false;
 
   public JavaRegexpMatcher() {
     // Don't know what an optimal number is.  The heuristic
@@ -103,6 +103,7 @@ public class JavaRegexpMatcher implements Matcher {
 
   @Override
   public void match(final Buffer b) {
+    matching = true;
     makeMatchers(b, collectText(b));
     try {
       es.invokeAll(matchers);
@@ -138,11 +139,6 @@ public class JavaRegexpMatcher implements Matcher {
     final Set<String> targetSet = getSetForAction(actionToRun);
 
     targetSet.add(rexpString);
-  }
-
-  @Override
-  public void remove(String r, Action a) {
-    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override

@@ -55,6 +55,9 @@ final class MultiMatcher implements Matcher {
   /** Set once {@link #close()} has been called; guards against use-after-close. */
   private volatile boolean closed = false;
 
+  /** Set by the first scan; no partition accepts later registrations. */
+  private volatile boolean registrationFrozen = false;
+
   /**
    * Create a partitioned matcher with an explicit partition count.
    *
@@ -107,19 +110,8 @@ final class MultiMatcher implements Matcher {
   @Override
   public void add(final String r, final Action a) throws RegexpParserException {
     ensureOpen();
+    ensureRegistrationOpen();
     getMatcher(r).add(r, a);
-  }
-
-  /**
-   * Remove an expression/action pair from its partition.
-   *
-   * @param r regular-expression text previously registered with this matcher
-   * @param a action previously associated with {@code r}
-   */
-  @Override
-  public void remove(final String r, final Action a) {
-    ensureOpen();
-    getMatcher(r).remove(r, a);
   }
 
   /**
@@ -133,6 +125,7 @@ final class MultiMatcher implements Matcher {
   @Override
   public void match(final Buffer b) {
     ensureOpen();
+    registrationFrozen = true;
     assert (matchers.length == noOfMatchers);
 
     final CountDownLatch counter = new CountDownLatch(matchers.length);
@@ -177,6 +170,12 @@ final class MultiMatcher implements Matcher {
   private void ensureOpen() {
     if (closed) {
       throw new IllegalStateException("Matcher is closed");
+    }
+  }
+
+  private void ensureRegistrationOpen() {
+    if (registrationFrozen) {
+      throw new IllegalStateException("Matcher registrations are frozen after the first match");
     }
   }
 

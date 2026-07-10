@@ -268,15 +268,18 @@ explicit type.</label></li>
 <li><label><input type="checkbox" />Document whether one throwing action
 aborts the scan immediately or after already-started partitions
 finish.</label></li>
-<li><label><input type="checkbox" />Document whether <code>add()</code>
-or <code>remove()</code> during an in-flight <code>match()</code> is
-legal.</label></li>
-<li><label><input type="checkbox" />Document whether calling
+<li><label><input type="checkbox" checked="" />Adopt and document a
+build-then-use matcher lifecycle: the first <code>match()</code> freezes
+registration and later <code>add()</code> calls fail.</label></li>
+<li><label><input type="checkbox" checked="" />Remove the experimental
+<code>remove()</code> API rather than promising mutation of compiled
+automata that retain stale graph and cache state.</label></li>
+<li><label><input type="checkbox" checked="" />Document that calling
 <code>match()</code> concurrently from several threads on the same
-matcher is legal.</label></li>
-<li><label><input type="checkbox" />Document whether
-<code>match()</code> after <code>shutdown()</code> or
-<code>close()</code> is defined.</label></li>
+matcher is not supported.</label></li>
+<li><label><input type="checkbox" checked="" />Document that
+<code>match()</code> and <code>add()</code> after <code>close()</code>
+fail, while <code>close()</code> remains idempotent.</label></li>
 <li><label><input type="checkbox" checked="" />Let applications control
 matcher parallelism through
 <code>RMatch.newMatcher(int parallelism)</code> instead of limiting them
@@ -291,10 +294,17 @@ platform-thread creation.</label></li>
 empirically on small, large, and containerized machines, and account for
 pattern count and memory bandwidth as well as processor
 count.</label></li>
-<li><label><input type="checkbox" />Freeze and document result
+<li><label><input type="checkbox" checked="" />Define callback
+registration by action object identity: duplicate registration of the
+same instance is idempotent, while distinct instances remain distinct
+regardless of <code>equals()</code>.</label></li>
+<li><label><input type="checkbox" checked="" />Specify that callback
+ordering is not guaranteed, including with a single-engine
+matcher.</label></li>
+<li><label><input type="checkbox" />Freeze and document remaining result
 semantics: longest-per-start behavior, overlapping matches, callback
-ordering, duplicate registrations, and the exact effect of
-<code>remove()</code>.</label></li>
+multiplicity across patterns, and duplicate pattern text with different
+flags.</label></li>
 <li><label><input type="checkbox" />Ensure parser failures identify the
 unsupported or malformed construct and its location well enough for a
 user to repair a large generated pattern.</label></li>
@@ -651,8 +661,9 @@ syntax-and-semantics reference separate from the README, including
 character/Unicode rules, match selection, exclusions, and
 examples.</label></li>
 <li><label><input type="checkbox" />Include package flattening, removed
-aliases, callback-offset decisions, lifecycle changes, and buffer helper
-changes in the migration guide.</label></li>
+aliases and <code>remove()</code>, callback-offset decisions,
+build-then-use lifecycle changes, and buffer helper changes in the
+migration guide.</label></li>
 <li><label><input type="checkbox" />Add or update
 <code>CONTRIBUTING.md</code> with build, test, benchmark, and PR
 expectations.</label></li>

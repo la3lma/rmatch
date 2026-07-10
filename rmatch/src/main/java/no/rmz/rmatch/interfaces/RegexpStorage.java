@@ -52,14 +52,6 @@ public interface RegexpStorage {
   void add(final String regexp, final Action a) throws RegexpParserException;
 
   /**
-   * Remove one association between a regular expression and an action.
-   *
-   * @param regexp regular-expression text
-   * @param a action to remove from the expression
-   */
-  void remove(final String regexp, final Action a);
-
-  /**
    * Return the pattern strings known to this storage.
    *
    * @return stored regular-expression strings

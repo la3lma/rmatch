@@ -9,6 +9,17 @@
   guard against accidental unbounded platform-thread creation. Parallelism 1
   uses the single-engine matcher without a worker pool; the automatic matcher
   keeps its hardware heuristic and now observes the same upper bound.
+- BREAKING (2.0 contract): matchers now have an explicit build-then-use
+  lifecycle. The first `match()` permanently freezes pattern registration;
+  later `add()` calls throw `IllegalStateException`. The experimental
+  `remove()` methods have been removed from the public and internal matcher
+  contracts. Applications with a changed rule set construct a replacement
+  matcher instead of mutating compiled automata.
+- Pattern/action registration now uses action object identity. Re-registering
+  the same action instance for one pattern is idempotent, while distinct action
+  instances remain distinct even when `equals()` considers them equal.
+  Callback order is explicitly unspecified for both single and partitioned
+  matchers.
 - Added JaCoCo coverage behind a `-Pcoverage` Maven profile and a CI job that
   uploads library-module coverage to Codacy without blocking the main release
   gate if Codacy-side coverage initialization is not ready.

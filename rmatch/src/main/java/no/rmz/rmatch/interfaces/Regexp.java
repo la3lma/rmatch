@@ -86,16 +86,6 @@ public interface Regexp extends Comparable<Regexp> {
   String getRexpString();
 
   /**
-   * Return whether this expression has any registered actions.
-   *
-   * <p>An expression without actions has no observable application effect and can often be ignored
-   * by the matcher.
-   *
-   * @return {@code true} if at least one action is registered
-   */
-  boolean hasActions();
-
-  /**
    * Return whether this expression currently has active match candidates.
    *
    * @return {@code true} if one or more candidates are associated with this expression
@@ -163,13 +153,6 @@ public interface Regexp extends Comparable<Regexp> {
    * @param m match candidate to associate with this expression
    */
   void registerMatch(final Match m);
-
-  /**
-   * Remove an action from this regexp.
-   *
-   * @param a action to remove
-   */
-  void remove(final Action a);
 
   /**
    * Store the start node produced when this expression is compiled.

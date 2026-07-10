@@ -82,14 +82,12 @@ public final class RegexpStorageTest {
     when(compiler.compile(any(), any())).thenReturn(compilationResult);
   }
 
-  /** Adding and removing regexps. */
+  /** Adding regexps. */
   @Test
-  public void testAddRemoveRegexp() throws RegexpParserException {
+  public void testAddRegexp() throws RegexpParserException {
     assertFalse(rs.hasRegexp(reString));
     rs.add(reString, a);
     assertTrue(rs.hasRegexp(reString));
-    rs.remove(reString, a);
-    assertFalse(rs.hasRegexp(reString));
   }
 
   /** Retrieving stuff that is stored. */
