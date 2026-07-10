@@ -102,7 +102,12 @@ jobs:
           clean verify
 
       - name: Upload coverage to Codacy
+        id: codacy-upload
         if: env.CODACY_PROJECT_TOKEN != ''
+        # Non-blocking: Codacy-side coverage initialization is outside this
+        # repo's control, so a failed upload warns loudly instead of turning
+        # the gate red. The outcome step below makes failures visible.
+        continue-on-error: true
         # v1 — pinned to a commit SHA per supply-chain hardening practice
         uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699
         env:
@@ -116,6 +121,16 @@ jobs:
         with:
           api-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: rmatch/target/site/jacoco/jacoco.xml
+
+      - name: Report upload outcome
+        if: env.CODACY_PROJECT_TOKEN != ''
+        run: |
+          if [ "${{ steps.codacy-upload.outcome }}" != "success" ]; then
+            echo "::warning title=Codacy coverage upload failed::Coverage was generated but not accepted by Codacy (gate not blocked). Check coverage initialization at app.codacy.com -> rmatch -> Coverage."
+            echo "### Codacy coverage upload FAILED (non-blocking)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Codacy coverage upload succeeded" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Note skipped upload
         if: env.CODACY_PROJECT_TOKEN == ''
