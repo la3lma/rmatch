@@ -1,6 +1,8 @@
 name: Main Gate
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main, master]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -101,7 +103,8 @@ jobs:
 
       - name: Upload coverage to Codacy
         if: env.CODACY_PROJECT_TOKEN != ''
-        uses: codacy/codacy-coverage-reporter-action@v1
+        # v1 — pinned to a commit SHA per supply-chain hardening practice
+        uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: rmatch/target/site/jacoco/jacoco.xml

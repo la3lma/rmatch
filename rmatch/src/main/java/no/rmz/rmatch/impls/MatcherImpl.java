@@ -48,9 +48,6 @@ final class MatcherImpl implements Matcher {
    */
   private final String engineType = System.getProperty("rmatch.engine", "fastpath");
 
-  /** Flag to enable Bloom filter optimization. */
-  private final boolean useBloomFilter = "bloom".equalsIgnoreCase(engineType);
-
   /** Flag to enable fast-path optimization. */
   private final boolean useFastPath = "fastpath".equalsIgnoreCase(engineType);
 
@@ -82,15 +79,13 @@ final class MatcherImpl implements Matcher {
     checkNotNull(regexpFactory);
     ns = new NodeStorageImpl();
     rs = new RegexpStorageImpl(ns, compiler, regexpFactory);
-    if (useBloomFilter) {
-      me = new BloomFilterMatchEngine(ns);
-    } else if (useFastPath) {
+    if (useFastPath) {
       me = new FastPathMatchEngine(ns);
     } else {
       me = new MatchEngineImpl(ns);
     }
 
-    prefilterDirty = needsPrefilterConfiguration();
+    prefilterDirty = true;
   }
 
   /**
@@ -105,10 +100,7 @@ final class MatcherImpl implements Matcher {
     ensureOpen();
     synchronized (rs) {
       rs.add(r, a);
-
-      if (needsPrefilterConfiguration()) {
-        prefilterDirty = true;
-      }
+      prefilterDirty = true;
     }
   }
 
@@ -123,10 +115,7 @@ final class MatcherImpl implements Matcher {
     ensureOpen();
     synchronized (rs) {
       rs.remove(r, a);
-
-      if (needsPrefilterConfiguration()) {
-        prefilterDirty = true;
-      }
+      prefilterDirty = true;
     }
   }
 
@@ -221,7 +210,7 @@ final class MatcherImpl implements Matcher {
    * for every single addition/removal when callers batch pattern registration.
    */
   private void ensurePrefilterConfigured() {
-    if (!prefilterDirty || !needsPrefilterConfiguration()) {
+    if (!prefilterDirty) {
       return;
     }
 
@@ -231,13 +220,7 @@ final class MatcherImpl implements Matcher {
       }
 
       // Initialize engine-specific optimizations
-      if (useBloomFilter && me instanceof BloomFilterMatchEngine bfEngine) {
-        final java.util.Set<Regexp> regexps = new java.util.HashSet<>();
-        for (final String regexpStr : rs.getRegexpSet()) {
-          regexps.add(rs.getRegexp(regexpStr));
-        }
-        bfEngine.initialize(regexps);
-      } else if (useFastPath && me instanceof FastPathMatchEngine fpEngine) {
+      if (useFastPath && me instanceof FastPathMatchEngine fpEngine) {
         // Configure prefilter for fast-path engine
         configurePrefilterForEngine(fpEngine);
       } else if (me instanceof MatchEngineImpl) {
@@ -247,10 +230,5 @@ final class MatcherImpl implements Matcher {
 
       prefilterDirty = false;
     }
-  }
-
-  /** Returns true if the current engine variant requires prefilter configuration. */
-  private boolean needsPrefilterConfiguration() {
-    return useBloomFilter || useFastPath || me instanceof MatchEngineImpl;
   }
 }

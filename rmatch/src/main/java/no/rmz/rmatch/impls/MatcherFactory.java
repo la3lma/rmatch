@@ -46,16 +46,8 @@ public final class MatcherFactory {
    * @return new matcher instance ready for pattern registration
    */
   public static Matcher newMatcher() {
-
-    final int noOfPartitions;
-    if (AVAILABLE_PROCESSORS > 2) {
-      noOfPartitions = (int) (AVAILABLE_PROCESSORS * 1.5);
-    } else {
-      noOfPartitions = 1;
-    }
-
     return new MultiMatcher(
-        noOfPartitions, new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
+        getDefaultPartitionCount(), new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
   }
 
   /**
