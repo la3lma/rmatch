@@ -96,7 +96,9 @@ final class MultiMatcher implements Matcher {
     /** The regular expression factory used by all the matchers. */
     RegexpFactory regexpFactory1 = checkNotNull(regexpFactory);
     checkArgument(noOfMatchers >= 1, "No of partitions must be positive");
-    checkArgument(noOfMatchers < MAX_NO_OF_MATCHERS, "No of partitions must be less than 100K");
+    checkArgument(
+        noOfMatchers < MAX_NO_OF_MATCHERS,
+        "No of partitions must be less than " + MAX_NO_OF_MATCHERS);
     this.noOfMatchers = noOfMatchers;
 
     executorService = Executors.newFixedThreadPool(noOfMatchers);

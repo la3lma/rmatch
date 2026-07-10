@@ -3,6 +3,12 @@
 ## 1.9.5-SNAPSHOT - in development
 
 - Continue pre-2.0 cleanup after publishing `1.9.4`.
+- Shipped-jar hygiene: removed the experimental Bloom-filter match engine and
+  its `SimpleBloomFilter` (reachable only via `rmatch.engine=bloom`, never
+  used in production); `FastCounters` diagnostics now go through
+  `java.util.logging` instead of stdout; the partition-count heuristic lives
+  in one place in `MatcherFactory`; and the `MultiMatcher` partition guard
+  message states the actual limit.
 - Specified and enforced the matcher behavioral contracts for 2.0: action
   exceptions abort the scan and propagate out of `match()` (partitioned
   matchers finish the surviving partitions, then rethrow the first failure

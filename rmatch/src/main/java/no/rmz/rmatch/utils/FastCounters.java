@@ -16,6 +16,7 @@ package no.rmz.rmatch.utils;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLongArray;
+import java.util.logging.Logger;
 
 /**
  * Registry of diagnostic counters indexed by {@link CounterType}.
@@ -72,11 +73,19 @@ public final class FastCounters {
     return result;
   }
 
+  private static final Logger LOG = Logger.getLogger(FastCounters.class.getName());
+
   private void privateDumpCounters() {
+    final StringBuilder sb = new StringBuilder("Counter dump:");
     for (final Map.Entry<CounterType, Long> entry : privateSnapshot().entrySet()) {
       final CounterType type = entry.getKey();
       final long value = entry.getValue();
-      System.out.println("#'" + type.getLegacyName() + "'=" + value);
+      sb.append(System.lineSeparator())
+          .append("#'")
+          .append(type.getLegacyName())
+          .append("'=")
+          .append(value);
     }
+    LOG.info(sb.toString());
   }
 }
