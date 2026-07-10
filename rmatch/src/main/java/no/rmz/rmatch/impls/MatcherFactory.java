@@ -13,6 +13,8 @@
  */
 package no.rmz.rmatch.impls;
 
+import static no.rmz.rmatch.internal.Checks.checkArgument;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import no.rmz.rmatch.Matcher;
@@ -28,6 +30,9 @@ import no.rmz.rmatch.interfaces.RegexpFactory;
  * preferred.
  */
 public final class MatcherFactory {
+
+  /** Largest supported explicit matcher parallelism. */
+  static final int MAX_PARALLELISM = 1024;
 
   /** A management bean that we use to probe the execution environment. */
   private static final OperatingSystemMXBean OS_MBEAN =
@@ -46,8 +51,24 @@ public final class MatcherFactory {
    * @return new matcher instance ready for pattern registration
    */
   public static Matcher newMatcher() {
+    return newMatcher(getDefaultPartitionCount());
+  }
+
+  /**
+   * Create a matcher with an explicit number of pattern partitions and concurrent workers.
+   *
+   * @param parallelism requested matcher parallelism
+   * @return new matcher instance ready for pattern registration
+   * @throws IllegalArgumentException if {@code parallelism} is outside the supported range
+   */
+  public static Matcher newMatcher(final int parallelism) {
+    checkArgument(parallelism >= 1, "Parallelism must be positive");
+    checkArgument(parallelism <= MAX_PARALLELISM, "Parallelism must not exceed " + MAX_PARALLELISM);
+    if (parallelism == 1) {
+      return newSingleMatcher();
+    }
     return new MultiMatcher(
-        getDefaultPartitionCount(), new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
+        parallelism, new NDFACompilerImpl(), RegexpFactory.DEFAULT_REGEXP_FACTORY);
   }
 
   /**
@@ -69,11 +90,16 @@ public final class MatcherFactory {
    * @return number of matcher partitions used by the default matcher
    */
   public static int getDefaultPartitionCount() {
-    if (AVAILABLE_PROCESSORS > 2) {
-      return (int) (AVAILABLE_PROCESSORS * 1.5);
-    } else {
+    return defaultParallelismFor(AVAILABLE_PROCESSORS);
+  }
+
+  static int defaultParallelismFor(final int availableProcessors) {
+    checkArgument(availableProcessors >= 1, "Available processor count must be positive");
+    if (availableProcessors <= 2) {
       return 1;
     }
+    final long suggestedParallelism = availableProcessors * 3L / 2L;
+    return (int) Math.min(suggestedParallelism, MAX_PARALLELISM);
   }
 
   /**

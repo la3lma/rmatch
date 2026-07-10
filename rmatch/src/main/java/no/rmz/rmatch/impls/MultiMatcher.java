@@ -43,22 +43,6 @@ import no.rmz.rmatch.interfaces.*;
  */
 final class MultiMatcher implements Matcher {
 
-  /**
-   * A simple guard against absolutely useless values of matchers. Now, 10K is probably way too high
-   * for present day architectures, but one has ambitions.
-   */
-  private static final int MAX_NO_OF_MATCHERS = 10000;
-
-  /**
-   * Look up the CPU/Cores/Memory configuration of the computer on which we are running, and then
-   * use some heuristic to figure out an optimal number of partitions to use.
-   *
-   * @return the number of partitions to use
-   */
-  private static int divineOptimalNumberOfMatchers() {
-    return Runtime.getRuntime().availableProcessors();
-  }
-
   /** An array of matchers that are used when matching. */
   private final Matcher[] matchers;
 
@@ -70,16 +54,6 @@ final class MultiMatcher implements Matcher {
 
   /** Set once {@link #close()} has been called; guards against use-after-close. */
   private volatile boolean closed = false;
-
-  /**
-   * Create a partitioned matcher using the runtime's default partition heuristic.
-   *
-   * @param compiler compiler used by all partitions
-   * @param regexpFactory regular-expression factory used by all partitions
-   */
-  MultiMatcher(final NDFACompiler compiler, final RegexpFactory regexpFactory) {
-    this(divineOptimalNumberOfMatchers(), compiler, regexpFactory);
-  }
 
   /**
    * Create a partitioned matcher with an explicit partition count.
@@ -95,8 +69,8 @@ final class MultiMatcher implements Matcher {
     checkNotNull(regexpFactory);
     checkArgument(noOfMatchers >= 1, "No of partitions must be positive");
     checkArgument(
-        noOfMatchers < MAX_NO_OF_MATCHERS,
-        "No of partitions must be less than " + MAX_NO_OF_MATCHERS);
+        noOfMatchers <= MatcherFactory.MAX_PARALLELISM,
+        "No of partitions must not exceed " + MatcherFactory.MAX_PARALLELISM);
     this.noOfMatchers = noOfMatchers;
 
     executorService = Executors.newFixedThreadPool(noOfMatchers);

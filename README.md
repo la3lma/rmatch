@@ -177,6 +177,25 @@ convention as `String.substring`, so the matched text is exactly
 reports the longest match for each start position; overlapping matches from
 different start positions may therefore be reported.
 
+The automatic matcher uses a hardware-based heuristic intended as a sensible
+starting point, not as the best setting for every workload. Applications that
+know their deployment can select the parallelism explicitly:
+
+```java
+try (Matcher matcher = RMatch.newMatcher(384)) {
+    // Register patterns and scan buffers as usual.
+}
+```
+
+The argument is the number of pattern partitions and the maximum number of
+concurrent workers. Supported values range from `1` through `1024`; `1` uses
+the single-engine matcher without a worker pool. The deliberately high ceiling
+leaves room for current high-end workstations and servers, including machines
+with hundreds of hardware threads. Each partition scans the same buffer with
+its share of the patterns, so more workers also consume more memory bandwidth
+and can make smaller workloads slower. Measure with representative patterns
+and corpora rather than assuming that the largest available value is best.
+
 `Matcher.add` throws `RegexpParserException` when a pattern is outside the
 supported syntax subset, so unsupported constructs fail loudly at
 registration time, never silently at match time.

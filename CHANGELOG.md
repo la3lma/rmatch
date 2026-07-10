@@ -3,6 +3,12 @@
 ## 1.9.6-SNAPSHOT - in development
 
 - Continue pre-2.0 cleanup after publishing `1.9.5`.
+- Added `RMatch.newMatcher(int parallelism)` so applications can choose the
+  number of pattern partitions and concurrent workers. The supported range is
+  1 through 1024, leaving room for current high-end servers while retaining a
+  guard against accidental unbounded platform-thread creation. Parallelism 1
+  uses the single-engine matcher without a worker pool; the automatic matcher
+  keeps its hardware heuristic and now observes the same upper bound.
 - Added JaCoCo coverage behind a `-Pcoverage` Maven profile and a CI job that
   uploads library-module coverage to Codacy without blocking the main release
   gate if Codacy-side coverage initialization is not ready.
