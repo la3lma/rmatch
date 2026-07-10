@@ -13,6 +13,7 @@
  */
 package no.rmz.rmatch;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -50,6 +51,7 @@ public enum PatternFlag {
    * @return pattern text with the flags expressed as inline prefixes
    */
   static String applyTo(final String regex, final Set<PatternFlag> flags) {
+    Objects.requireNonNull(regex, "regex");
     if (flags == null || flags.isEmpty()) {
       return regex;
     }

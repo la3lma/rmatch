@@ -3,6 +3,12 @@
 ## 1.9.5-SNAPSHOT - in development
 
 - Continue pre-2.0 cleanup after publishing `1.9.4`.
+- Shipped-jar hygiene: removed the experimental Bloom-filter match engine and
+  its `SimpleBloomFilter` (reachable only via `rmatch.engine=bloom`, never
+  used in production); `FastCounters` diagnostics now go through
+  `java.util.logging` instead of stdout; the partition-count heuristic lives
+  in one place in `MatcherFactory`; and the `MultiMatcher` partition guard
+  message states the actual limit.
 - Added the flags-capable registration API that fixes the 2.0 shape for
   per-pattern options: `Matcher.add(String, Set<PatternFlag>, Action)` and the
   matching `remove` overload, with `PatternFlag.CASE_INSENSITIVE` as the first
