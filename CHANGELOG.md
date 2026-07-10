@@ -3,6 +3,9 @@
 ## 1.9.5-SNAPSHOT - in development
 
 - Continue pre-2.0 cleanup after publishing `1.9.4`.
+- Added JaCoCo coverage behind a `-Pcoverage` Maven profile and a CI job that
+  uploads library-module coverage to Codacy (skipping gracefully until the
+  `CODACY_PROJECT_TOKEN` repository secret is configured).
 - Release polish: the dormant `EdgeInvisibilityEnsurance` bug-manifestation
   test now runs (renamed to match the test pattern; the historical bug it
   pins is confirmed fixed), published Javadocs build under strict doclint
