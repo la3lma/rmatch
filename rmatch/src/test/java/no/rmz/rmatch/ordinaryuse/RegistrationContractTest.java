@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
@@ -28,22 +29,41 @@ import org.junit.jupiter.api.Test;
 
 /** Contract tests for the register-then-match lifecycle and callback identity. */
 public class RegistrationContractTest {
+  private static final String REGISTRATION_FROZEN_MESSAGE =
+      "Matcher registrations are frozen after the first match";
 
   @Test
   void firstMatchFreezesSingleMatcherRegistrations() throws Exception {
-    assertRegistrationFreezes(RMatch::newSingleMatcher);
+    // Prepare
+    final Supplier<Matcher> matcherFactory = RMatch::newSingleMatcher;
+
+    // Test
+    final IllegalStateException failure = registrationFreezeFailure(matcherFactory);
+
+    // Assert
+    assertEquals(REGISTRATION_FROZEN_MESSAGE, failure.getMessage());
   }
 
   @Test
   void firstMatchFreezesPartitionedMatcherRegistrations() throws Exception {
-    assertRegistrationFreezes(() -> RMatch.newMatcher(4));
+    // Prepare
+    final Supplier<Matcher> matcherFactory = () -> RMatch.newMatcher(4);
+
+    // Test
+    final IllegalStateException failure = registrationFreezeFailure(matcherFactory);
+
+    // Assert
+    assertEquals(REGISTRATION_FROZEN_MESSAGE, failure.getMessage());
   }
 
   @Test
   void emptyFirstScanStillFreezesRegistration() throws Exception {
+    // Prepare
     try (Matcher matcher = RMatch.newSingleMatcher()) {
+      // Test
       matcher.match(RMatch.stringBuffer(""));
 
+      // Assert
       assertThrows(
           IllegalStateException.class, () -> matcher.add("abc", (buffer, start, end) -> {}));
     }
@@ -51,6 +71,7 @@ public class RegistrationContractTest {
 
   @Test
   void failedFirstScanStillFreezesRegistration() throws Exception {
+    // Prepare
     try (Matcher matcher = RMatch.newSingleMatcher()) {
       matcher.add(
           "boom",
@@ -58,7 +79,13 @@ public class RegistrationContractTest {
             throw new IllegalStateException("deliberate failure");
           });
 
-      assertThrows(IllegalStateException.class, () -> matcher.match(RMatch.stringBuffer("boom")));
+      // Test
+      final IllegalStateException scanFailure =
+          assertThrows(
+              IllegalStateException.class, () -> matcher.match(RMatch.stringBuffer("boom")));
+
+      // Assert
+      assertEquals("deliberate failure", scanFailure.getMessage());
       assertThrows(
           IllegalStateException.class, () -> matcher.add("abc", (buffer, start, end) -> {}));
     }
@@ -66,44 +93,61 @@ public class RegistrationContractTest {
 
   @Test
   void registeringTheSameActionInstanceTwiceIsIdempotent() throws Exception {
+    // Prepare
     final LongAdder calls = new LongAdder();
     final Action action = (buffer, start, end) -> calls.increment();
 
+    // Test
     try (Matcher matcher = RMatch.newSingleMatcher()) {
       matcher.add("abc", action);
       matcher.add("abc", action);
       matcher.match(RMatch.stringBuffer("abc"));
     }
 
+    // Assert
     assertEquals(1L, calls.sum());
   }
 
   @Test
   void distinctActionInstancesRemainDistinctEvenWhenTheyCompareEqual() throws Exception {
+    // Prepare
     final LongAdder calls = new LongAdder();
 
+    // Test
     try (Matcher matcher = RMatch.newSingleMatcher()) {
       matcher.add("abc", new EqualAction(calls));
       matcher.add("abc", new EqualAction(calls));
       matcher.match(RMatch.stringBuffer("abc"));
     }
 
+    // Assert
     assertEquals(2L, calls.sum());
   }
 
   @Test
   void publicMatcherSurfaceDoesNotOfferExperimentalRemoval() {
-    assertFalse(
-        Arrays.stream(Matcher.class.getMethods())
-            .anyMatch(method -> method.getName().equals("remove")));
+    // Prepare
+    final Method[] publicMethods = Matcher.class.getMethods();
+
+    // Test
+    final boolean offersRemoval =
+        Arrays.stream(publicMethods).anyMatch(method -> method.getName().equals("remove"));
+
+    // Assert
+    assertFalse(offersRemoval);
   }
 
-  private static void assertRegistrationFreezes(final Supplier<Matcher> factory) throws Exception {
+  private static IllegalStateException registrationFreezeFailure(final Supplier<Matcher> factory)
+      throws Exception {
+    // Prepare
     try (Matcher matcher = factory.get()) {
       matcher.add("abc", (buffer, start, end) -> {});
+
+      // Test
       matcher.match(RMatch.stringBuffer("abc"));
 
-      assertThrows(
+      // Assert
+      return assertThrows(
           IllegalStateException.class, () -> matcher.add("xyz", (buffer, start, end) -> {}));
     }
   }
