@@ -3,6 +3,18 @@
 ## 1.9.7-SNAPSHOT - in development
 
 - Continue pre-2.0 stabilization after publishing `1.9.6`.
+- Drafted the `2.0.0-RC1` release notes and a normative syntax-and-semantics
+  reference, including the Java 21 baseline, supported language, deliberate
+  exclusions, longest-per-start matching, overlapping matches, and callback
+  behavior.
+- Added a repeatable Docker consumer gate covering Maven, Gradle, direct class
+  path use, and JPMS. All four modes pass against the current snapshot on the
+  high-core test host.
+- Ran the final pre-RC Docker regression matrix against published `1.9.6` over
+  eight 8 MiB and 50 MiB scenarios. Exact match validation passed throughout;
+  the observed range was 2.92% slower to 9.58% faster, within the agreed 3%
+  regression limit. Raw receipts are under
+  `docs/benchmark-receipts/2.0-pre-rc-2026-07-12/`.
 
 ## 1.9.6 - pre-2.0 Maven Central release candidate
 

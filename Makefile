@@ -18,7 +18,7 @@ GATE_SKIP_REBUILD ?= 0
 .PHONY: help main main-local main-docker build test clean profile fmt spotless spotbugs javadocs release-central-javadoc-check
 .PHONY: perf-local-setup perf-local-smoke perf-local-baseline perf-local-candidate perf-docker-smoke
 .PHONY: gate-baseline gate-candidate
-.PHONY: release-central-preflight release-central-profile-check release-central-publish
+.PHONY: release-central-preflight release-central-profile-check release-central-publish release-consumer-smoke
 
 help: ## [core] Show available top-level targets
 	@echo "Top-level rmatch Make targets"
@@ -113,6 +113,9 @@ release-central-preflight: ## [core] Full non-performance regression check befor
 
 release-central-profile-check: ## [core] Verify Central release profile wiring without GPG signing
 	$(MVN) -q -B -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true -Dgpg.skip=true verify
+
+release-consumer-smoke: ## [core] Test Maven, Gradle, classpath, and JPMS consumers in Docker
+	bash scripts/verify-consumers-docker.sh
 
 release-central-publish: ## [core] Publish parent+rmatch to Maven Central (requires token+GPG setup and non-SNAPSHOT version)
 	$(MVN) -B -pl rmatch -am -Pcentral-release -DskipTests -Dspotbugs.skip=true -Dgpg.skip=false deploy

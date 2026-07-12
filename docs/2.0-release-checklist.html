@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>2.0-release-checklist</title>
+  <title>rmatch 2.0 release checklist</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -172,28 +172,32 @@
   </style>
 </head>
 <body>
+<header id="title-block-header">
+<h1 class="title">rmatch 2.0 release checklist</h1>
+</header>
 <h1 id="rmatch-2.0-release-checklist">rmatch 2.0 release checklist</h1>
 <p>This is the broad pre-2.0 checklist. It is intentionally
 over-inclusive: assume items here should be completed unless they are
 explicitly removed before the 2.0 release lane starts.</p>
 <h2 id="release-goal">Release Goal</h2>
 <ul class="task-list">
-<li><label><input type="checkbox" />State the 2.0 promise in one
-paragraph: what rmatch is for, what it is not for, and what
+<li><label><input type="checkbox" checked="" />State the 2.0 promise in
+one paragraph: what rmatch is for, what it is not for, and what
 compatibility promises start at 2.0.</label></li>
 <li><label><input type="checkbox" />Decide whether the last preview
 before 2.0 is <code>1.9.x</code>, <code>1.99.x</code>, or direct
 <code>2.0.0</code>.</label></li>
-<li><label><input type="checkbox" />Decide whether to cut
+<li><label><input type="checkbox" checked="" />Decide whether to cut
 <code>2.0.0-RC1</code> instead of using a <code>1.99.x</code> preview
 line.</label></li>
-<li><label><input type="checkbox" />Decide the exact Java baseline for
-2.0 and document it in README, Javadocs, POM metadata, and release
-notes.</label></li>
-<li><label><input type="checkbox" />State the 2.x compatibility promise
-explicitly: semantic versioning covers the exported root API plus
-documented matching behavior and syntax; unexported implementation
-packages are not compatibility contracts.</label></li>
+<li><label><input type="checkbox" checked="" />Decide the exact Java
+baseline for 2.0 and document it in README, Javadocs, POM metadata, and
+release notes.</label></li>
+<li><label><input type="checkbox" checked="" />State the 2.x
+compatibility promise explicitly: semantic versioning covers the
+exported root API plus documented matching behavior and syntax;
+unexported implementation packages are not compatibility
+contracts.</label></li>
 <li><label><input type="checkbox" />State the deprecation and removal
 policy for the 2.x line, including how much notice users receive before
 a public API is removed.</label></li>
@@ -408,14 +412,15 @@ leak into public Javadocs.</label></li>
 </ul>
 <h2 id="regex-syntax-contract">Regex Syntax Contract</h2>
 <ul class="task-list">
-<li><label><input type="checkbox" />Freeze and document the 2.0
-supported syntax list.</label></li>
-<li><label><input type="checkbox" />Freeze and document deliberate
-exclusions: backreferences, captures, lookaround, or other
+<li><label><input type="checkbox" checked="" />Freeze and document the
+2.0 supported syntax list.</label></li>
+<li><label><input type="checkbox" checked="" />Freeze and document
+deliberate exclusions: backreferences, captures, lookaround, or other
 non-goals.</label></li>
-<li><label><input type="checkbox" />Verify line anchors <code>^</code>
-and <code>$</code> behavior with tests and documentation.</label></li>
-<li><label><input type="checkbox" />Verify word boundaries
+<li><label><input type="checkbox" checked="" />Verify line anchors
+<code>^</code> and <code>$</code> behavior with tests and
+documentation.</label></li>
+<li><label><input type="checkbox" checked="" />Verify word boundaries
 <code>\b</code> and <code>\B</code> behavior with tests and
 documentation.</label></li>
 <li><label><input type="checkbox" />Decide whether input anchors
@@ -477,10 +482,10 @@ baseline, expected to be Java 21 unless changed
 deliberately.</label></li>
 <li><label><input type="checkbox" />Run CI on a current newer Java
 version as well, such as Java 25 or 26.</label></li>
-<li><label><input type="checkbox" />Test the packaged candidate from
-clean external Maven and Gradle consumer projects, both on the class
-path and as a named JPMS module; do not rely only on reactor
-tests.</label></li>
+<li><label><input type="checkbox" checked="" />Test the packaged
+candidate from clean external Maven and Gradle consumer projects, both
+on the class path and as a named JPMS module; do not rely only on
+reactor tests.</label></li>
 <li><label><input type="checkbox" />Pin GitHub Actions dependencies to
 reviewed immutable commit SHAs, or document why a moving tag is
 deliberately accepted.</label></li>
@@ -497,10 +502,11 @@ so accidental 2.0.x breaking changes fail before release.</label></li>
 </ul>
 <h2 id="performance-gate">Performance Gate</h2>
 <ul class="task-list">
-<li><label><input type="checkbox" />Run the standard Docker performance
-regression gate on the agreed high-core benchmark host.</label></li>
-<li><label><input type="checkbox" />Compare the 2.0 candidate against
-the latest published pre-2.0 release.</label></li>
+<li><label><input type="checkbox" checked="" />Run the standard Docker
+performance regression gate on the agreed high-core benchmark
+host.</label></li>
+<li><label><input type="checkbox" checked="" />Compare the 2.0 candidate
+against the latest published pre-2.0 release.</label></li>
 <li><label><input type="checkbox" />Compare rmatch against naive
 <code>java.util.regex</code> looping and RE2J looping using
 byte-identical corpora and pattern sets.</label></li>
@@ -515,18 +521,19 @@ parallel execution where each is material.</label></li>
 regex or RE2J wins as well as where rmatch wins, so the performance
 claim states a useful crossover rather than implying universal
 superiority.</label></li>
-<li><label><input type="checkbox" />Benchmark the packaged
+<li><label><input type="checkbox" checked="" />Benchmark the packaged
 release-candidate JAR through the public API, not only reactor classes
 or internal benchmark hooks.</label></li>
-<li><label><input type="checkbox" />Use deterministic benchmark inputs
-and record the generator settings.</label></li>
-<li><label><input type="checkbox" />Require equal match counts before
-comparing timings.</label></li>
-<li><label><input type="checkbox" />Fail the high-core regression gate
-on any slowdown above 3% unless the regression is explicitly understood,
-justified, and accepted before release.</label></li>
-<li><label><input type="checkbox" />Capture raw benchmark receipts,
-summaries, and charts in
+<li><label><input type="checkbox" checked="" />Use deterministic
+benchmark inputs and record the generator settings.</label></li>
+<li><label><input type="checkbox" checked="" />Require equal match
+counts before comparing timings.</label></li>
+<li><label><input type="checkbox" checked="" />Fail the high-core
+regression gate on any slowdown above 3% unless the regression is
+explicitly understood, justified, and accepted before
+release.</label></li>
+<li><label><input type="checkbox" checked="" />Capture raw benchmark
+receipts, summaries, and charts in
 <code>docs/benchmark-receipts/...</code>.</label></li>
 <li><label><input type="checkbox" />Update the README performance chart
 from a recent run of the current implementation.</label></li>
@@ -536,10 +543,10 @@ nickname.</label></li>
 <li><label><input type="checkbox" />Keep the developer performance
 regression protocol as a separate linked document, not a giant README
 section.</label></li>
-<li><label><input type="checkbox" />Investigate any material performance
-regression before release.</label></li>
-<li><label><input type="checkbox" />Record any material performance
-improvement in release notes, with receipts.</label></li>
+<li><label><input type="checkbox" checked="" />Investigate any material
+performance regression before release.</label></li>
+<li><label><input type="checkbox" checked="" />Record any material
+performance improvement in release notes, with receipts.</label></li>
 </ul>
 <h2 id="dependency-hygiene">Dependency Hygiene</h2>
 <ul class="task-list">
@@ -656,7 +663,7 @@ parse errors and pointing to
 <li><label><input type="checkbox" />Add a clear <code>1.x</code> to
 <code>2.0</code> migration section in
 <code>CHANGELOG.md</code>.</label></li>
-<li><label><input type="checkbox" />Publish a stable
+<li><label><input type="checkbox" checked="" />Publish a stable
 syntax-and-semantics reference separate from the README, including
 character/Unicode rules, match selection, exclusions, and
 examples.</label></li>
@@ -750,19 +757,20 @@ after the 2.0 release.</label></li>
 </ul>
 <h2 id="release-notes">Release Notes</h2>
 <ul class="task-list">
-<li><label><input type="checkbox" />Write user-facing 2.0 release notes
-before publishing.</label></li>
-<li><label><input type="checkbox" />State the stable public API
+<li><label><input type="checkbox" checked="" />Write user-facing 2.0
+release notes before publishing.</label></li>
+<li><label><input type="checkbox" checked="" />State the stable public
+API surface.</label></li>
+<li><label><input type="checkbox" checked="" />State supported syntax
+and deliberate exclusions.</label></li>
+<li><label><input type="checkbox" checked="" />State Java
+baseline.</label></li>
+<li><label><input type="checkbox" checked="" />State dependency
 surface.</label></li>
-<li><label><input type="checkbox" />State supported syntax and
-deliberate exclusions.</label></li>
-<li><label><input type="checkbox" />State Java baseline.</label></li>
-<li><label><input type="checkbox" />State dependency
-surface.</label></li>
-<li><label><input type="checkbox" />State performance evidence with
-links to receipts.</label></li>
-<li><label><input type="checkbox" />State any known limitations
-honestly.</label></li>
+<li><label><input type="checkbox" checked="" />State performance
+evidence with links to receipts.</label></li>
+<li><label><input type="checkbox" checked="" />State any known
+limitations honestly.</label></li>
 <li><label><input type="checkbox" />State migration notes from
 <code>1.9.x</code>, including removed aliases such as
 <code>RMatch.buffer(String)</code> if applicable.</label></li>
@@ -771,8 +779,8 @@ final 2.0 API.</label></li>
 </ul>
 <h2 id="github-and-issue-hygiene">GitHub and Issue Hygiene</h2>
 <ul class="task-list">
-<li><label><input type="checkbox" />Review open GitHub issues before
-release.</label></li>
+<li><label><input type="checkbox" checked="" />Review open GitHub issues
+before release.</label></li>
 <li><label><input type="checkbox" />Close issues that are fixed and
 verified.</label></li>
 <li><label><input type="checkbox" />Move non-blocking post-2.0 work to

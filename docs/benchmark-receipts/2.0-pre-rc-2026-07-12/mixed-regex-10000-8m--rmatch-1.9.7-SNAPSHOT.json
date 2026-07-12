@@ -1,0 +1,97 @@
+{
+  "command": [
+    "docker",
+    "run",
+    "--rm",
+    "--network=none",
+    "--volume",
+    "/home/rmz/git/rmatch-performance-measurements/work/mixed-regex-10000-8m:/data:ro",
+    "rmatch-bench-rmatch:1.9.7-SNAPSHOT",
+    "/data/patterns.tsv",
+    "/data/corpus.bin",
+    "9",
+    "3",
+    "4"
+  ],
+  "container_image_id": "sha256:166a9637b618531f551808f434814a37d922e524a4278fab23facf9aafa5067b",
+  "engine": {
+    "container_image": "rmatch-bench-rmatch:1.9.7-SNAPSHOT",
+    "name": "rmatch",
+    "threads": 4,
+    "variant": "parallel",
+    "version": "1.9.7-SNAPSHOT"
+  },
+  "exit_code": 0,
+  "host": {
+    "cpu_model": "AMD Ryzen 9 9950X3D 16-Core Processor",
+    "docker": "29.6.0",
+    "hostname": "agogo",
+    "logical_cpus": 32,
+    "machine": "x86_64",
+    "platform": "Linux-7.0.0-27-generic-x86_64-with-glibc2.43"
+  },
+  "inputs": {
+    "corpus.bin": {
+      "bytes": 8388608,
+      "sha256": "2a785beda877721b40f402dbf13eae1e5c9990fd6af89ee93632cfbb0f96ed78"
+    },
+    "corpus.db": {
+      "bytes": 8404992,
+      "sha256": "ef132e1b63598251bcfb7a11e55c503c01d658db69c6771562a10d1d9f91cea6"
+    },
+    "patterns.hs": {
+      "bytes": 298894,
+      "sha256": "5966f3e5ccfb457b927f284f4818d1a2604a95dd878cbf0fdc68ced492430a61"
+    },
+    "patterns.tsv": {
+      "bytes": 278894,
+      "sha256": "409d2d1718936d782d7548b8e13dc686b6a4e01d2c266287310c29fddf4e333d"
+    }
+  },
+  "metrics": {
+    "expression_count": 10000,
+    "matches_per_iteration": 10000,
+    "median_scan_ns": 157769757,
+    "mode": "4",
+    "prepare_ns": 95139259,
+    "scan_ns": [
+      260521179,
+      230502056,
+      154673078,
+      160072750,
+      146937733,
+      150887712,
+      157769757,
+      150004144,
+      162095090
+    ],
+    "throughput_mbit_per_second": 425.359494,
+    "warmup_ns": [
+      761885176,
+      249758325,
+      289301391
+    ]
+  },
+  "process_wall_seconds": 3.36365,
+  "repeats": 9,
+  "run_id": "59727770-0ad2-4880-97f6-144a43429e83",
+  "scenario": {
+    "corpus_size_bytes": 8388608,
+    "id": "mixed-regex-10000-8m",
+    "kind": "mixed_regex",
+    "matches_per_pattern": 1,
+    "pattern_count": 10000,
+    "schema_version": 1,
+    "seed": 20260710
+  },
+  "schema_version": 1,
+  "stderr": "",
+  "stdout": "{\"expression_count\":10000,\"prepare_ns\":95139259,\"warmup_ns\":[761885176, 249758325, 289301391],\"scan_ns\":[260521179, 230502056, 154673078, 160072750, 146937733, 150887712, 157769757, 150004144, 162095090],\"median_scan_ns\":157769757,\"throughput_mbit_per_second\":425.359494,\"matches_per_iteration\":10000,\"mode\":\"4\"}\n",
+  "timestamp_utc": "2026-07-12T21:01:58.399844+00:00",
+  "validation": {
+    "expected_matches_per_iteration": 10000,
+    "observed_matches_per_iteration": 10000,
+    "status": "pass"
+  },
+  "warmups": 3
+}

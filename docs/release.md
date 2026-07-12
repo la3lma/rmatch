@@ -1,6 +1,6 @@
 # rmatch release process
 
-This document describes the cautious release lane for the pre-2.0 series.
+This document describes the cautious release lane for rmatch.
 The detailed living checklist is in
 [maven-central-release-checklist.md](maven-central-release-checklist.md).
 
@@ -11,6 +11,12 @@ The detailed living checklist is in
 - `1.99.x`: optional final pre-2.0 preview line if the syntax/API contract needs
   one last public shakeout.
 - `2.0.0`: stable, fully documented release line.
+
+The proposed first candidate is `2.0.0-RC1`. It requires Java 21 or newer;
+artifacts compiled with `--release 21` cannot run on an older JVM. The draft
+release note is [release-notes-2.0.0-RC1.md](release-notes-2.0.0-RC1.md), and
+the proposed stable language contract is
+[regex-syntax-and-semantics.md](regex-syntax-and-semantics.md).
 
 ## Public artifact lane
 
@@ -63,8 +69,7 @@ Check that `rmatch` does not leak test dependencies:
 mvn -q -pl rmatch dependency:tree -Dscope=compile
 ```
 
-Expected compile/runtime dependencies for `no.rmz:rmatch` are limited to
-Aho-Corasick.
+Expected compile/runtime dependencies for `no.rmz:rmatch` are empty.
 
 ## Maven Central upload
 
