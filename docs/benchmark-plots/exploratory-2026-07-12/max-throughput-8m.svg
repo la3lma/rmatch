@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
-<title id="title">Maximum retained throughput by engine</title>
+<title id="title">Maximum retained throughput by engine - 8 MiB corpus</title>
 <desc id="desc">Exploratory 8 MiB fixtures on a 16-core / 32-thread AMD Ryzen 9 9950X3D; each JVM engine uses its calibrated thread count</desc>
 <rect width="1200" height="720" rx="22" fill="#f7f4ed"/>
-<text x="72" y="66" font-family="Georgia, serif" font-size="34" font-weight="700" fill="#17212b">Maximum retained throughput by engine</text>
+<text x="72" y="66" font-family="Georgia, serif" font-size="34" font-weight="700" fill="#17212b">Maximum retained throughput by engine - 8 MiB corpus</text>
 <text x="72" y="98" font-family="Verdana, sans-serif" font-size="15" fill="#53606c">Exploratory 8 MiB fixtures on a 16-core / 32-thread AMD Ryzen 9 9950X3D; each JVM engine uses its calibrated thread count</text>
 <line x1="72" y1="138" x2="90" y2="138" stroke="#087e8b" stroke-width="4" stroke-linecap="round"/>
 <circle cx="81" cy="138" r="4" fill="#f7f4ed" stroke="#087e8b" stroke-width="3"/>
