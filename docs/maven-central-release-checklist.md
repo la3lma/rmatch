@@ -240,14 +240,21 @@ the rest of the release work here as it becomes explicit.
   `1.9.6`.
 - [x] Run full release preflight and Central profile checks. Both succeeded on
   2026-07-12.
-- [ ] Build and verify signed release artifacts, module metadata, Java baseline,
+- [x] Build and verify signed release artifacts, module metadata, Java baseline,
   compile dependency tree, and public Javadocs.
-- [ ] Publish `1.9.6` through Central and confirm repository availability.
-- [ ] Run clean-repository Maven consumer smoke tests against Central.
-- [ ] Create and push the annotated `rmatch-1.9.6` tag.
+- [x] Publish `1.9.6` through Central deployment
+  `0156bf75-b742-4220-a846-2720281ceee0` and confirm the POM, main JAR,
+  Javadoc JAR, and parent POM return HTTP 200 from Maven Central.
+- [x] Run a clean-repository Maven consumer smoke test against Central,
+  including `RMatch.newMatcher(2)` and exact match-count validation.
+- [x] Create and push the annotated `rmatch-1.9.6` tag at release commit
+  `caf33fb9`.
 - [ ] Move `main` to `1.9.7-SNAPSHOT` after the release merge.
-- [ ] Rerun the throughput-winning parallelism lanes from the published
+- [x] Rerun the throughput-winning parallelism lanes from the published
   `no.rmz:rmatch:1.9.6` artifact before updating public benchmark charts.
+  Nine measured scans after three warm-ups passed exact validation for all four
+  scenarios; the retained winners use two workers at 1K patterns and four at
+  10K patterns.
 
 ## Identity and Access
 
