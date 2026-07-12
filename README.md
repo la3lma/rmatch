@@ -275,7 +275,7 @@ is three methods: character lookup by position, substring lookup by half-open
 range, and a positional end-of-input probe — plus tolerance for concurrent
 readers.
 
-## Supported Syntax in 1.9.x
+## Supported Syntax
 
 The parser intentionally supports a reduced regular-expression language. This
 is not a drop-in replacement for `java.util.regex` or PCRE.
@@ -301,7 +301,7 @@ is not a drop-in replacement for `java.util.regex` or PCRE.
 
 ## Important Limitations
 
-These constructs are not part of the supported `1.9.x` surface:
+These constructs are not part of the supported surface:
 
 - Pure zero-width patterns such as `^$` are not yet part of the public support
   contract; match reporting currently assumes consumed spans.
@@ -311,17 +311,22 @@ These constructs are not part of the supported `1.9.x` surface:
 - `MULTILINE` mode and a non-DOTALL `.` toggle
 
 Backreferences are intentionally out of scope because they are non-regular.
-Other limitations are candidates for the 2.0 work, especially explicit mode
-semantics and pure zero-width match reporting.
+The normative 2.0 syntax and match-reporting contract, including longest-match
+and overlap behavior, is in
+[docs/regex-syntax-and-semantics.md](docs/regex-syntax-and-semantics.md).
 
 ## Release Notes and Roadmap
 
 - [CHANGELOG.md](CHANGELOG.md) describes the `1.9.x` pre-release line.
+- [docs/release-notes-2.0.0-RC1.md](docs/release-notes-2.0.0-RC1.md) is the
+  draft user-facing release note for the first 2.0 candidate.
+- [docs/regex-syntax-and-semantics.md](docs/regex-syntax-and-semantics.md)
+  defines the proposed stable syntax and matching behavior.
 - [docs/release.md](docs/release.md) documents the Maven Central release lane.
 - [docs/maven-central-release-checklist.md](docs/maven-central-release-checklist.md)
   tracks the current release checklist.
-- [docs/regex-syntax-roadmap.md](docs/regex-syntax-roadmap.md) tracks syntax
-  coverage toward `2.0.0`.
+- [docs/regex-syntax-roadmap.md](docs/regex-syntax-roadmap.md) tracks possible
+  work beyond the stable 2.0 surface.
 
 ## Repository Layout
 

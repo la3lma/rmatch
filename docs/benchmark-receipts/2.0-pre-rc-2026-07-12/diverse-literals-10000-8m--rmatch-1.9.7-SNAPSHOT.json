@@ -1,0 +1,97 @@
+{
+  "command": [
+    "docker",
+    "run",
+    "--rm",
+    "--network=none",
+    "--volume",
+    "/home/rmz/git/rmatch-performance-measurements/work/diverse-literals-10000-8m:/data:ro",
+    "rmatch-bench-rmatch:1.9.7-SNAPSHOT",
+    "/data/patterns.tsv",
+    "/data/corpus.bin",
+    "9",
+    "3",
+    "4"
+  ],
+  "container_image_id": "sha256:166a9637b618531f551808f434814a37d922e524a4278fab23facf9aafa5067b",
+  "engine": {
+    "container_image": "rmatch-bench-rmatch:1.9.7-SNAPSHOT",
+    "name": "rmatch",
+    "threads": 4,
+    "variant": "parallel",
+    "version": "1.9.7-SNAPSHOT"
+  },
+  "exit_code": 0,
+  "host": {
+    "cpu_model": "AMD Ryzen 9 9950X3D 16-Core Processor",
+    "docker": "29.6.0",
+    "hostname": "agogo",
+    "logical_cpus": 32,
+    "machine": "x86_64",
+    "platform": "Linux-7.0.0-27-generic-x86_64-with-glibc2.43"
+  },
+  "inputs": {
+    "corpus.bin": {
+      "bytes": 8388608,
+      "sha256": "ced159da9fc8f8625fb3220570f27b54cf26ba93441dac59e3c39230063e10ae"
+    },
+    "corpus.db": {
+      "bytes": 8404992,
+      "sha256": "1c2b76e3dd65a14095b344fb2cac7ab47320abc8c6bbd86a1034f2f2079db6da"
+    },
+    "patterns.hs": {
+      "bytes": 308894,
+      "sha256": "b2d7ecde647cc16cb5de82a9f9a37573e48c84b7b360e157b9cf485af8c17c19"
+    },
+    "patterns.tsv": {
+      "bytes": 288894,
+      "sha256": "ce94f5d6809ee80a3ea6cfe0fa9b671ee9af2eac3b969d8480626233437d2ecb"
+    }
+  },
+  "metrics": {
+    "expression_count": 10000,
+    "matches_per_iteration": 20000,
+    "median_scan_ns": 251269074,
+    "mode": "4",
+    "prepare_ns": 83688569,
+    "scan_ns": [
+      388044301,
+      242264257,
+      251269074,
+      241452476,
+      257769875,
+      246484109,
+      273436139,
+      243361100,
+      259668210
+    ],
+    "throughput_mbit_per_second": 267.07968,
+    "warmup_ns": [
+      970575049,
+      383723247,
+      257800474
+    ]
+  },
+  "process_wall_seconds": 4.464202,
+  "repeats": 9,
+  "run_id": "9fd74ddc-773d-475f-a1f2-854f696c3dcb",
+  "scenario": {
+    "corpus_size_bytes": 8388608,
+    "id": "diverse-literals-10000-8m",
+    "kind": "diverse_literals",
+    "matches_per_pattern": 2,
+    "pattern_count": 10000,
+    "schema_version": 1,
+    "seed": 20260710
+  },
+  "schema_version": 1,
+  "stderr": "",
+  "stdout": "{\"expression_count\":10000,\"prepare_ns\":83688569,\"warmup_ns\":[970575049, 383723247, 257800474],\"scan_ns\":[388044301, 242264257, 251269074, 241452476, 257769875, 246484109, 273436139, 243361100, 259668210],\"median_scan_ns\":251269074,\"throughput_mbit_per_second\":267.079680,\"matches_per_iteration\":20000,\"mode\":\"4\"}\n",
+  "timestamp_utc": "2026-07-12T21:01:45.478633+00:00",
+  "validation": {
+    "expected_matches_per_iteration": 20000,
+    "observed_matches_per_iteration": 20000,
+    "status": "pass"
+  },
+  "warmups": 3
+}
