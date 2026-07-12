@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.7-SNAPSHOT - in development
+
+- Continue pre-2.0 stabilization after publishing `1.9.6`.
+
 ## 1.9.6 - pre-2.0 Maven Central release candidate
 
 - Continue pre-2.0 cleanup after publishing `1.9.5`.
