@@ -249,7 +249,7 @@ the rest of the release work here as it becomes explicit.
   including `RMatch.newMatcher(2)` and exact match-count validation.
 - [x] Create and push the annotated `rmatch-1.9.6` tag at release commit
   `caf33fb9`.
-- [ ] Move `main` to `1.9.7-SNAPSHOT` after the release merge.
+- [x] Move `main` to `1.9.7-SNAPSHOT` after the release merge.
 - [x] Rerun the throughput-winning parallelism lanes from the published
   `no.rmz:rmatch:1.9.6` artifact before updating public benchmark charts.
   Nine measured scans after three warm-ups passed exact validation for all four
