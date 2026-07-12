@@ -32,24 +32,27 @@ The public comparison model is:
 Current measurements use byte-identical inputs and require match counts to
 agree before a timing is retained. The chart below comes from Docker runs on a
 16-core / 32-thread AMD Ryzen 9 9950X3D using deterministic 8 MiB fixtures with
-1,000 and 10,000 patterns. Each JVM engine uses the highest-throughput worker
-count found in its calibration sweep: rmatch 1.9.6 uses two workers at 1K and
-four at 10K, RE2/J uses 128 and 256, and Java regex uses 128. Hyperscan is the
-explicitly labeled one-thread native reference, included to show the much
-higher native-performance ceiling rather than as an execution-model peer.
+1,000, 5,000, and 10,000 patterns. Each JVM engine uses the highest-throughput
+worker count found in its calibration sweep. rmatch 1.9.6 uses two workers at
+1K and four at 5K and 10K. The per-pattern engines use heavier task
+oversubscription: their exact retained settings are recorded with the receipts.
+Hyperscan is the explicitly labeled one-thread native reference, included to
+show the much higher native-performance ceiling rather than as an
+execution-model peer.
 
 ![Maximum retained throughput of Hyperscan, rmatch, RE2/J, and Java regex](docs/benchmark-plots/exploratory-2026-07-10/four-engine-overview-log.svg)
 
 This is deliberately a “push each engine” comparison, not an equal-CPU-budget
-comparison. At 1K patterns tuned RE2/J leads the JVM lanes. At 10K patterns
-rmatch leads both retained RE2/J and Java lanes. The logarithmic scale keeps
-Hyperscan and the JVM results legible in one chart.
+comparison. At 1K patterns tuned RE2/J leads the JVM lanes. At 5K the result is
+workload-dependent: RE2/J leads on diverse literals, while rmatch leads on the
+mixed-regex family. At 10K rmatch leads both retained RE2/J and Java lanes. The
+logarithmic scale keeps Hyperscan and the JVM results legible in one chart.
 
 These are exploratory measurements from a benchmark project that is only just
 getting started, not a systematic testing campaign or a final verdict. The
 workloads are generated, the scenario set is still small, and wider syntax,
 corpora, machines, match densities, and resource controls remain to be tested.
-The harness, calibration sweeps, methodology, and all 16 winner receipts live
+The harness, calibration sweeps, methodology, and all 24 winner receipts live
 in the [rmatch performance measurements project](https://github.com/la3lma/rmatch-performance-measurements/tree/main/receipts/agogo-2026-07-12-max-throughput).
 Watch this space.
 
