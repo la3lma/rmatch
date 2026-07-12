@@ -73,7 +73,7 @@ The branch-vs-`main` protocol lives in
 
 ## Use from Maven Central
 
-The examples below use the public API published with `1.9.5`.
+The examples below use the public API published with `1.9.6`.
 
 Add rmatch to an existing Maven project:
 
@@ -81,7 +81,7 @@ Add rmatch to an existing Maven project:
 <dependency>
   <groupId>no.rmz</groupId>
   <artifactId>rmatch</artifactId>
-  <version>1.9.5</version>
+  <version>1.9.6</version>
 </dependency>
 ```
 
@@ -93,7 +93,7 @@ For Gradle:
 
 ```kotlin
 dependencies {
-    implementation("no.rmz:rmatch:1.9.5")
+    implementation("no.rmz:rmatch:1.9.6")
 }
 ```
 
@@ -127,7 +127,7 @@ For a complete scratch project, use this full `pom.xml`:
     <dependency>
       <groupId>no.rmz</groupId>
       <artifactId>rmatch</artifactId>
-      <version>1.9.5</version>
+      <version>1.9.6</version>
     </dependency>
   </dependencies>
 </project>
