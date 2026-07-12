@@ -232,6 +232,23 @@ the rest of the release work here as it becomes explicit.
   `./mvnw -q -B -pl rmatch -am -DskipTests -Dspotbugs.skip=true verify`
   succeeded.
 
+## 1.9.6 Release Run
+
+- [x] Sync a clean release worktree from current `origin/main` at
+  `43aaae52382efdb774435f1dba39c442779aaa4f`.
+- [x] Set release POM versions, changelog heading, and README examples to
+  `1.9.6`.
+- [x] Run full release preflight and Central profile checks. Both succeeded on
+  2026-07-12.
+- [ ] Build and verify signed release artifacts, module metadata, Java baseline,
+  compile dependency tree, and public Javadocs.
+- [ ] Publish `1.9.6` through Central and confirm repository availability.
+- [ ] Run clean-repository Maven consumer smoke tests against Central.
+- [ ] Create and push the annotated `rmatch-1.9.6` tag.
+- [ ] Move `main` to `1.9.7-SNAPSHOT` after the release merge.
+- [ ] Rerun the throughput-winning parallelism lanes from the published
+  `no.rmz:rmatch:1.9.6` artifact before updating public benchmark charts.
+
 ## Identity and Access
 
 - [x] Create a current GPG release-signing key.

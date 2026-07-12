@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.9.6-SNAPSHOT - in development
+## 1.9.6 - pre-2.0 Maven Central release candidate
 
 - Continue pre-2.0 cleanup after publishing `1.9.5`.
 - Added `RMatch.newMatcher(int parallelism)` so applications can choose the
