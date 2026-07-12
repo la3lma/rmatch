@@ -30,30 +30,32 @@ The public comparison model is:
 - rmatch: register the same pattern set in one matcher and scan the corpus once.
 
 Current measurements use byte-identical inputs and require match counts to
-agree before a timing is retained. The chart below comes from Docker runs on a
-16-core / 32-thread AMD Ryzen 9 9950X3D using deterministic 8 MiB fixtures with
-1,000, 5,000, and 10,000 patterns. Each JVM engine uses the highest-throughput
-worker count found in its calibration sweep. rmatch 1.9.6 uses two workers at
-1K and four at 5K and 10K. The per-pattern engines use heavier task
-oversubscription: their exact retained settings are recorded with the receipts.
-Hyperscan is the explicitly labeled one-thread native reference, included to
-show the much higher native-performance ceiling rather than as an
-execution-model peer.
+agree before a timing is retained. The charts below come from Docker runs on a
+16-core / 32-thread AMD Ryzen 9 9950X3D using deterministic 8 MiB and 50 MiB
+fixtures with 1,000, 2,500, 5,000, 7,500, and 10,000 patterns. Every JVM data
+point uses the highest-throughput thread count found for that engine and
+scenario in its calibration sweep. The exact thread counts are recorded with
+the receipts in the benchmark project. Hyperscan is the explicitly labeled
+one-thread native reference, included to show the much higher
+native-performance ceiling rather than as an execution-model peer.
 
-![Maximum retained throughput of Hyperscan, rmatch, RE2/J, and Java regex](docs/benchmark-plots/exploratory-2026-07-10/four-engine-overview-log.svg)
+![Maximum retained throughput on 8 MiB fixtures](docs/benchmark-plots/exploratory-2026-07-12/max-throughput-8m.svg)
 
-This is deliberately a “push each engine” comparison, not an equal-CPU-budget
-comparison. At 1K patterns tuned RE2/J leads the JVM lanes. At 5K the result is
-workload-dependent: RE2/J leads on diverse literals, while rmatch leads on the
-mixed-regex family. At 10K rmatch leads both retained RE2/J and Java lanes. The
-logarithmic scale keeps Hyperscan and the JVM results legible in one chart.
+![Maximum retained throughput on 50 MiB fixtures](docs/benchmark-plots/exploratory-2026-07-12/max-throughput-50m.svg)
+
+This is deliberately a "push each engine" comparison, not an equal-CPU-budget
+comparison. At 1,000 patterns tuned RE2/J leads the JVM lanes. As the pattern
+set grows, rmatch overtakes RE2/J between 5,000 and 7,500 patterns, depending
+on fixture size and expression family. The logarithmic scale keeps Hyperscan
+and the JVM results legible in the same chart.
 
 These are exploratory measurements from a benchmark project that is only just
 getting started, not a systematic testing campaign or a final verdict. The
 workloads are generated, the scenario set is still small, and wider syntax,
 corpora, machines, match densities, and resource controls remain to be tested.
-The harness, calibration sweeps, methodology, and all 24 winner receipts live
-in the [rmatch performance measurements project](https://github.com/la3lma/rmatch-performance-measurements/tree/main/receipts/agogo-2026-07-12-max-throughput).
+The harness, calibration sweeps, methodology, exact thread counts, and all 80
+retained receipts live in the
+[rmatch performance measurements project](https://github.com/la3lma/rmatch-performance-measurements#current-exploratory-evidence).
 Watch this space.
 
 Use rmatch when the workload looks like this:
@@ -64,10 +66,6 @@ Use rmatch when the workload looks like this:
   breadth.
 - You can work within a regular-language subset and do not need captures,
   backreferences, or lookaround.
-
-Do not use rmatch just because the API is pleasant. A convenient API is there
-to remove adoption friction; the reason to reach for this library is the
-many-pattern scaling profile.
 
 When contributing to rmatch development, performance regression testing is part
 of the work: almost all plausible matcher improvements are not improvements
