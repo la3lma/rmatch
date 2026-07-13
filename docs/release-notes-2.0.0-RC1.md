@@ -1,4 +1,4 @@
-# rmatch 2.0.0-RC1 release notes (draft)
+# rmatch 2.0.0-RC1 release notes
 
 `2.0.0-RC1` is the first release intended for serious evaluation by potential
 users. rmatch is a Java library for applying many regular expressions to the
@@ -50,6 +50,12 @@ The published `no.rmz:rmatch` artifact has no third-party compile-time or
 runtime dependencies. Test and benchmark libraries remain project-local, and
 `rmatch-tester` is not part of the Maven Central release lane.
 
+The final dependency-freshness pass updated JUnit to 6.1.2, the SpotBugs Maven
+plugin to 4.10.3.0, and JaCoCo to 0.8.15. Milestone and beta Maven plugins were
+deliberately excluded from the release build. With no third-party runtime
+dependencies, there is no accepted downstream runtime dependency risk to
+record for this candidate.
+
 ## Syntax and matching behavior
 
 rmatch deliberately implements a regular-language subset rather than claiming
@@ -82,8 +88,34 @@ and the four-mode consumer verification are recorded in
 
 ## RC purpose
 
-RC1 freezes the proposed 2.0 API and documented semantics for external review.
+RC1 presents the proposed 2.0 API and documented semantics for external review.
 Feedback should focus on correctness, API friction, documentation gaps,
 packaging, and workloads where the performance profile differs from the
 published evidence. A final `2.0.0` follows only after the release candidate has
 been exercised as a clean Maven, Gradle, class-path, and JPMS dependency.
+
+The candidate is not yet the final compatibility baseline. Feedback may still
+lead to source- or binary-incompatible changes in a later release candidate.
+Once `2.0.0` is final, the exported API follows semantic versioning: removals or
+incompatible changes require a new major version. Obsolete 2.x API will normally
+be deprecated in at least one minor release before removal in the next major
+release; an immediate change is reserved for severe security or correctness
+failures that cannot be handled compatibly.
+
+## Small example
+
+```java
+import no.rmz.rmatch.RMatch;
+
+try (var matcher = RMatch.newMatcher()) {
+  matcher.add("WARN|ERROR", (buffer, start, end) ->
+      System.out.println(buffer.getString(start, end)));
+  matcher.match(RMatch.stringBuffer("INFO WARN ERROR"));
+}
+```
+
+Compared with the experimental 1.x API, application types now live in
+`no.rmz.rmatch`; callbacks use half-open `[start, end)` offsets; `Matcher` is
+`AutoCloseable` and build-then-use; the experimental `remove()` operation and
+`RMatch.buffer(...)` alias are gone; and materializing input helpers are named
+`RMatch.stringBuffer(...)`.

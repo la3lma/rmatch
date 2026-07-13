@@ -1,0 +1,39 @@
+Compiled from "Action.java"
+public interface no.rmz.rmatch.Action {
+  public abstract void performMatch(no.rmz.rmatch.Buffer, long, long);
+}
+Compiled from "Buffer.java"
+public interface no.rmz.rmatch.Buffer {
+  public abstract boolean hasCharAt(long);
+  public abstract char charAt(long);
+  public default java.lang.String getString(long, long);
+}
+Compiled from "Matcher.java"
+public interface no.rmz.rmatch.Matcher extends java.lang.AutoCloseable {
+  public abstract void add(java.lang.String, no.rmz.rmatch.Action) throws no.rmz.rmatch.RegexpParserException;
+  public default void add(java.lang.String, java.util.Set<no.rmz.rmatch.PatternFlag>, no.rmz.rmatch.Action) throws no.rmz.rmatch.RegexpParserException;
+  public abstract void match(no.rmz.rmatch.Buffer);
+  public abstract void close();
+}
+Compiled from "PatternFlag.java"
+public final class no.rmz.rmatch.PatternFlag extends java.lang.Enum<no.rmz.rmatch.PatternFlag> {
+  public static final no.rmz.rmatch.PatternFlag CASE_INSENSITIVE;
+  public static no.rmz.rmatch.PatternFlag[] values();
+  public static no.rmz.rmatch.PatternFlag valueOf(java.lang.String);
+}
+Compiled from "RMatch.java"
+public final class no.rmz.rmatch.RMatch {
+  public static no.rmz.rmatch.Matcher newMatcher();
+  public static no.rmz.rmatch.Matcher newMatcher(int);
+  public static no.rmz.rmatch.Matcher newSingleMatcher();
+  public static no.rmz.rmatch.Buffer stringBuffer(java.lang.String);
+  public static no.rmz.rmatch.Buffer stringBuffer(java.lang.CharSequence);
+  public static no.rmz.rmatch.Buffer stringBuffer(java.nio.file.Path, java.nio.charset.Charset) throws java.io.IOException;
+  public static no.rmz.rmatch.Buffer stringBuffer(java.io.Reader) throws java.io.IOException;
+  public static no.rmz.rmatch.Buffer stringBuffer(java.io.InputStream, java.nio.charset.Charset) throws java.io.IOException;
+}
+Compiled from "RegexpParserException.java"
+public final class no.rmz.rmatch.RegexpParserException extends java.lang.Exception {
+  public no.rmz.rmatch.RegexpParserException(java.lang.String);
+  public no.rmz.rmatch.RegexpParserException(java.lang.Exception);
+}

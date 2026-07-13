@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>no.rmz</groupId>
     <artifactId>rmatch-parent</artifactId>
-    <version>1.9.7-SNAPSHOT</version>
+    <version>2.0.0-RC1</version>
 
     <packaging>pom</packaging>
 
@@ -38,8 +38,8 @@
         <maven.plugin.validation>DEFAULT</maven.plugin.validation>
         <java.version>21</java.version>
         <jmh.version>1.37</jmh.version>
-        <junit-jupiter.version>6.1.1</junit-jupiter.version>
-        <junit-platform.version>6.1.1</junit-platform.version>
+        <junit-jupiter.version>6.1.2</junit-jupiter.version>
+        <junit-platform.version>6.1.2</junit-platform.version>
         <mavenCheckstylePlugin.version>3.6.0</mavenCheckstylePlugin.version>
         <mavenAssemblyPlugin.version>3.8.0</mavenAssemblyPlugin.version>
         <mavenCompilerPlugin.version>3.15.0</mavenCompilerPlugin.version>
@@ -52,14 +52,14 @@
 
         <!-- Code quality plugins -->
         <spotless.version>3.8.0</spotless.version>
-        <spotbugs.version>4.10.2.0</spotbugs.version>
+        <spotbugs.version>4.10.3.0</spotbugs.version>
 
         <mavenSourcePlugin.version>3.4.0</mavenSourcePlugin.version>
         <mavenJavadocPlugin.version>3.12.0</mavenJavadocPlugin.version>
         <mavenGpgPlugin.version>3.2.8</mavenGpgPlugin.version>
         <centralPublishingMavenPlugin.version>0.11.0</centralPublishingMavenPlugin.version>
         <mavenSurefire.version>3.5.4</mavenSurefire.version>
-        <jacoco.version>0.8.13</jacoco.version>
+        <jacoco.version>0.8.15</jacoco.version>
         <!-- Empty default so the @{argLine} hook in surefire configs resolves
              cleanly when the coverage profile (which sets it) is not active. -->
         <argLine></argLine>

@@ -75,7 +75,7 @@ The branch-vs-`main` protocol lives in
 
 ## Use from Maven Central
 
-The examples below use the public API published with `1.9.6`.
+The examples below use the public API in `2.0.0-RC1`.
 
 Add rmatch to an existing Maven project:
 
@@ -83,7 +83,7 @@ Add rmatch to an existing Maven project:
 <dependency>
   <groupId>no.rmz</groupId>
   <artifactId>rmatch</artifactId>
-  <version>1.9.6</version>
+  <version>2.0.0-RC1</version>
 </dependency>
 ```
 
@@ -95,7 +95,7 @@ For Gradle:
 
 ```kotlin
 dependencies {
-    implementation("no.rmz:rmatch:1.9.6")
+    implementation("no.rmz:rmatch:2.0.0-RC1")
 }
 ```
 
@@ -129,7 +129,7 @@ For a complete scratch project, use this full `pom.xml`:
     <dependency>
       <groupId>no.rmz</groupId>
       <artifactId>rmatch</artifactId>
-      <version>1.9.6</version>
+      <version>2.0.0-RC1</version>
     </dependency>
   </dependencies>
 </project>
@@ -318,8 +318,8 @@ and overlap behavior, is in
 ## Release Notes and Roadmap
 
 - [CHANGELOG.md](CHANGELOG.md) describes the `1.9.x` pre-release line.
-- [docs/release-notes-2.0.0-RC1.md](docs/release-notes-2.0.0-RC1.md) is the
-  draft user-facing release note for the first 2.0 candidate.
+- [docs/release-notes-2.0.0-RC1.md](docs/release-notes-2.0.0-RC1.md) contains
+  the user-facing release notes for the first 2.0 candidate.
 - [docs/regex-syntax-and-semantics.md](docs/regex-syntax-and-semantics.md)
   defines the proposed stable syntax and matching behavior.
 - [docs/release.md](docs/release.md) documents the Maven Central release lane.
