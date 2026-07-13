@@ -325,7 +325,8 @@ and overlap behavior, is in
 
 ## Release Notes and Roadmap
 
-- [CHANGELOG.md](CHANGELOG.md) describes the `1.9.x` pre-release line.
+- [CHANGELOG.md](CHANGELOG.md) records the `1.9.x` preparation line and the
+  published `2.0.0-RC1` release candidate.
 - [docs/release-notes-2.0.0-RC1.md](docs/release-notes-2.0.0-RC1.md) contains
   the user-facing release notes for the first 2.0 candidate.
 - [docs/regex-syntax-and-semantics.md](docs/regex-syntax-and-semantics.md)
