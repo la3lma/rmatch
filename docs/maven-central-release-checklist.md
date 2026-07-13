@@ -664,9 +664,15 @@ the rest of the release work here as it becomes explicit.
 - [x] Confirm Central validation. Deployment
   `7de1d87f-d4b5-4c25-bd35-f0119c1fc505` reached `VALIDATED` on 2026-07-13
   and explicitly requires manual publication.
-- [ ] Inspect and manually publish the validated Central deployment.
+- [x] Inspect and manually publish the validated Central deployment. Direct
+  Maven Central and javadoc.io checks confirmed `2.0.0-RC1` is public on
+  2026-07-13.
+- [x] Create and push annotated tag `rmatch-2.0.0-RC1`; its peeled target is
+  the Central artifact commit `d97df431`.
+- [x] Create the GitHub Release from that tag and mark it as a prerelease:
+  <https://github.com/la3lma/rmatch/releases/tag/rmatch-2.0.0-RC1>.
 - [ ] After publication, verify Central availability, javadoc.io, clean remote
-  consumers, release tag, GitHub Release, README badges, and next snapshot.
+  consumers, README badges, and next snapshot.
 
 ## Known Follow-Up Release Work
 
