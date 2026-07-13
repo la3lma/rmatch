@@ -650,6 +650,24 @@ the rest of the release work here as it becomes explicit.
   2026-07-07: `CHANGELOG.md` records Maven Central publication date, coordinate
   `no.rmz:rmatch:1.9.1`, tag `rmatch-1.9.1`, and release commit `5ee41857`.
 
+## 2.0.0-RC1 Release Run
+
+- [x] Merge release preparation PR #305 after all Java 21/25, security,
+  coverage, static-analysis, smoke, and performance-canary checks passed.
+  Release merge commit: `d97df431`.
+- [x] Verify the signed Central profile locally and validate all five detached
+  signatures.
+- [x] Verify Maven, Gradle, direct classpath, and named JPMS consumers against
+  the exact candidate commit on the high-core test host.
+- [x] Upload with Central plugin `autoPublish=false` and
+  `waitUntil=VALIDATED`.
+- [x] Confirm Central validation. Deployment
+  `7de1d87f-d4b5-4c25-bd35-f0119c1fc505` reached `VALIDATED` on 2026-07-13
+  and explicitly requires manual publication.
+- [ ] Inspect and manually publish the validated Central deployment.
+- [ ] After publication, verify Central availability, javadoc.io, clean remote
+  consumers, release tag, GitHub Release, README badges, and next snapshot.
+
 ## Known Follow-Up Release Work
 
 - [ ] Expand public API documentation for the callback coordinate convention.
