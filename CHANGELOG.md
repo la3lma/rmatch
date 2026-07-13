@@ -1,9 +1,9 @@
 # Changelog
 
-## 1.9.7-SNAPSHOT - in development
+## 2.0.0-RC1 - 2026-07-13
 
-- Continue pre-2.0 stabilization after publishing `1.9.6`.
-- Drafted the `2.0.0-RC1` release notes and a normative syntax-and-semantics
+- Cut the first public 2.0 release candidate after publishing `1.9.6`.
+- Added the `2.0.0-RC1` release notes and a normative syntax-and-semantics
   reference, including the Java 21 baseline, supported language, deliberate
   exclusions, longest-per-start matching, overlapping matches, and callback
   behavior.
@@ -15,6 +15,11 @@
   the observed range was 2.92% slower to 9.58% faster, within the agreed 3%
   regression limit. Raw receipts are under
   `docs/benchmark-receipts/2.0-pre-rc-2026-07-12/`.
+- Added a reviewed public-API signature baseline and an automated compatibility
+  check for changes between release candidates.
+- Refreshed stable test/build tooling to JUnit 6.1.2, SpotBugs Maven Plugin
+  4.10.3.0, and JaCoCo 0.8.15; milestone and beta plugin updates remain excluded
+  from the release lane.
 
 ## 1.9.6 - pre-2.0 Maven Central release candidate
 

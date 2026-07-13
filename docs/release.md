@@ -12,21 +12,35 @@ The detailed living checklist is in
   one last public shakeout.
 - `2.0.0`: stable, fully documented release line.
 
-The proposed first candidate is `2.0.0-RC1`. It requires Java 21 or newer;
-artifacts compiled with `--release 21` cannot run on an older JVM. The draft
-release note is [release-notes-2.0.0-RC1.md](release-notes-2.0.0-RC1.md), and
+The first candidate is `2.0.0-RC1`. It requires Java 21 or newer; artifacts
+compiled with `--release 21` cannot run on an older JVM. The release note is
+[release-notes-2.0.0-RC1.md](release-notes-2.0.0-RC1.md), and
 the proposed stable language contract is
 [regex-syntax-and-semantics.md](regex-syntax-and-semantics.md).
 
 ## Public artifact lane
 
-For the `1.9.x` line, publish only:
+For the 2.0 release-candidate line, publish only:
 
 - `no.rmz:rmatch-parent`
 - `no.rmz:rmatch`
 
 Do not publish `rmatch-tester`; it is project-local benchmark and experiment
 tooling.
+
+## Compatibility policy
+
+Release candidates expose the proposed 2.0 contract for feedback and may still
+change incompatibly before the final release. Starting with `2.0.0`, semantic
+versioning covers the exported `no.rmz.rmatch` API and documented syntax and
+matching behavior. Incompatible API removal requires the next major release.
+The normal path is deprecation in at least one 2.x minor release followed by
+removal in the next major release; severe security or correctness failures may
+require a faster, explicitly documented exception.
+
+Run `make api-compat-check` before an RC or final release. The checked-in RC1
+signature is the review baseline for later candidates; it becomes the stable
+2.0 baseline only when `2.0.0` is released.
 
 ## Signing identity
 
