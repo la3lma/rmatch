@@ -769,15 +769,19 @@ publication.</label></li>
 deployment.</label></li>
 <li><label><input type="checkbox" />Confirm Maven Central artifact
 availability by direct HTTP checks.</label></li>
-<li><label><input type="checkbox" />Create a GitHub Release for
-<code>2.0.0</code> from the verified tag, with concise release notes and
-direct links to Maven Central, Javadocs, migration notes, and benchmark
-receipts.</label></li>
+<li><label><input type="checkbox" />For every release candidate and
+final release, create and push an annotated
+<code>rmatch-&lt;version&gt;</code> tag pointing to the exact commit
+used to build the published Central artifacts.</label></li>
+<li><label><input type="checkbox" />For every release candidate and
+final release, create a GitHub Release from the verified tag, mark
+candidates as prereleases, and include concise notes with links to Maven
+Central, Javadocs, migration notes, and benchmark receipts.</label></li>
 <li><label><input type="checkbox" />Run a clean-repository consumer
 smoke test against the published Central artifact.</label></li>
-<li><label><input type="checkbox" />Create and push the annotated
-<code>rmatch-2.0.0</code> tag only after Central validation/publication
-is confirmed.</label></li>
+<li><label><input type="checkbox" />Verify the final
+<code>rmatch-2.0.0</code> annotated tag points to the exact Central
+artifact commit after publication is confirmed.</label></li>
 <li><label><input type="checkbox" />Bump mainline to the next snapshot
 after the 2.0 release.</label></li>
 </ul>
