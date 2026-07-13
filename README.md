@@ -10,9 +10,17 @@ where many patterns are registered once and then reused against large corpora,
 for example log scanning, rule matching, and other high-volume multi-pattern
 search tasks.
 
-`1.9.x` is a pre-2.0 Maven Central release-candidate line. The engine is useful
-and benchmark-positive, while the public syntax/API contract is still being
-polished toward a stable `2.0.0`.
+`2.0.0-RC1` is available from Maven Central for serious evaluation before the
+stable 2.0 release. The engine and proposed public contract are ready for use;
+feedback from real workloads will help expose any remaining friction.
+
+## Questions, Bugs, and Feedback
+
+Found a bug, an API problem, confusing syntax, or a result you cannot
+reproduce? Please open an issue in the
+[rmatch GitHub issue tracker](https://github.com/la3lma/rmatch/issues). Include
+the smallest pattern set and input that demonstrate the problem, plus your Java
+and rmatch versions. Questions and critical feedback are welcome too.
 
 ## Why Use rmatch?
 
@@ -87,7 +95,7 @@ Add rmatch to an existing Maven project:
 </dependency>
 ```
 
-`1.9.x` is compiled with `--release 21`, so consumers should use Java 21 or
+`2.0.0-RC1` is compiled with `--release 21`, so consumers should use Java 21 or
 newer. Maven Central also publishes source and Javadoc artifacts for IDEs and
 API browsers.
 
